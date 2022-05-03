@@ -1,0 +1,178 @@
+﻿@model System.Data.DataSet
+@using System.Data
+@{
+    DataTable dtNotMatchData = null, dtMatchData = null, dtNewData = null;
+    if (Model != null && Model.Tables.Count > 0)
+    {
+        dtNotMatchData = Model.Tables["NotMatchData"];
+        dtMatchData = Model.Tables["MatchData"];
+        dtNewData = Model.Tables["NewData"];
+
+        <div id="dvNotMatchData" class="panel-body">
+            <h3>Not Exists Record</h3>
+            @{ 
+                <div id="dvNotExistData">
+                    <table id="tblNotMatchData" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                @foreach (DataColumn col in dtNotMatchData.Columns)
+                                {
+                                    <th>@col.ColumnName</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (dtNotMatchData != null && dtNotMatchData.Rows.Count > 0)
+                            {
+                                foreach (DataRow dr in dtNotMatchData.Rows)
+                                {
+                                    <tr>
+                                        @foreach (DataColumn col in dtNotMatchData.Columns)
+                                        {
+                                            <td>@dr[col.ColumnName]</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+                <a id="btndownloadNotRecord" href="/Import/DownloadRecordInCSV">Download Not Existed Record</a>
+                if (dtNotMatchData != null && dtNotMatchData.Rows.Count > 0)
+                {
+                    <div class="alert alert-danger">
+                        <strong>Note!</strong> Data can not be modified <br />Asset Code, Device Number not to be blank and Asset Code should be existed.
+                    </div>
+                }
+            }
+        </div>
+        <div id="dvExistData" class="panel-body">
+            <h3>Exists Record</h3>
+            <div id="ExistData">
+                @{
+                    <table id="tblExistData" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                @foreach (DataColumn col in dtMatchData.Columns)
+                                {
+                                    <th>@col.ColumnName</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (dtMatchData != null && dtMatchData.Rows.Count > 0)
+                            {
+                                foreach (DataRow dr in dtMatchData.Rows)
+                                {
+                                    <tr>
+                                        @foreach (DataColumn col in dtMatchData.Columns)
+                                        {
+                                            <td>@dr[col.ColumnName]</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    if (dtMatchData != null && dtMatchData.Rows.Count > 0)
+                    {
+                        <div class="row">
+                            <button id="btnUpdateData" class="btn btn-primary">Update</button>
+                            <label id="lblmsg"></label>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div id="dvNewData" class="panel-body">
+            <h3>New Record</h3>
+            <div id="NewData">
+                @{
+                    <table id="tblNewData" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                @foreach (DataColumn col in dtNewData.Columns)
+                                {
+                                    <th>@col.ColumnName</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (dtNewData != null && dtNewData.Rows.Count > 0)
+                            {
+                                foreach (DataRow dr in dtNewData.Rows)
+                                {
+                                    <tr>
+                                        @foreach (DataColumn col in dtNewData.Columns)
+                                        {
+                                            <td>@dr[col.ColumnName]</td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    @*<button id="btnSavedData" class="btn btn-primary">Save</button>*@
+                }
+            </div>
+        </div>
+    }
+}
+
+<script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            $('#tblNotMatchData,#tblExistData,#tblNewData').DataTable({
+                "searching": true,
+                "lengthChange": false,
+                "aaSorting": [],
+                "bInfo": false,
+                "language": { "emptyTable": "No data available in table" },
+                "paging": false,
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true
+            });
+            CountTotalRecord('dvNotExistData,dvExistData,dvNewData');
+        }, 1000);
+    });
+
+    //this function use for count table row.
+    function CountTotalRecord(divids) {
+        var ids = divids.indexOf(',') > -1 ? divids.split(',') : divids;
+        if (ids.length > 1) {
+            for (var i = 0; i < ids.length; i++) {
+                var divid = ids[i];
+                if (!$('#' + divid + ' table tbody tr td').hasClass('dataTables_empty')) {
+                    var totalRecord1 = $('#' + divid + ' table tbody tr').length;
+                    var lblttl1 = '<label class="pull-left">Total record: ' + totalRecord1 + '</label>';
+                    $(lblttl1).insertBefore($('#' + divid + ' .dataTables_filter label'));
+                    $('#' + divid + ' .dataTables_filter').css('width', '100%');
+                }
+            }
+        }
+        else {
+            var divid = ids;
+            if (!$('#' + divid + ' table tbody tr td').hasClass('dataTables_empty')) {
+                var totalRecord2 = $('#' + divid + ' table tbody tr').length;
+                var lblttl2 = '<label class="pull-left">Total record: ' + totalRecord2 + '</label>';
+                $(lblttl2).insertBefore($('#' + divid + ' .dataTables_filter label'));
+                $('#' + divid + ' .dataTables_filter').css('width', '100%');
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        debugger;
+        const mField = '@ViewBag.MandatoryFieldMissing';
+        const importMessage = '@ViewBag.Message';
+        if (mField.toLowerCase() == "importfailed") {
+            if (importMessage.trim() == '') importMessage = "Please enter Mandatory Fields( AssetsCategory, AssetsSubCategory, Asset No., AssetName, Status to import data ";
+                AlertWarningMsg(importMessage);
+        } else if (mField.toLowerCase() == "importsuccess") {
+            if (importMessage.trim() == '') importMessage = "Data imported successfully.";
+            swalalert(importMessage);
+            }
+    });
+</script>

@@ -1,0 +1,24 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var userList = Model.userList;
+    var roundUserGroup = Model.Roundgrouplist;
+    var Roundcategory = Model.roundCategory;
+}
+@{
+    ViewBag.Title = "Round Report";
+    Layout = null;
+    string buildingIds = ViewBag.buildingIds != null ? ViewBag.buildingIds : "";
+
+}
+
+<h3 class="roundDefiHeading"> Binder <span>(Round Report)</span></h3>
+<div class="foldercrumbs">
+    <a class="binderMenu" url="@Url.RouteUrl("deficienciesBinder")">
+        <span class="folder-crumb">Binder</span>
+    </a>
+    <span class="folder-crumb-separator"></span>
+    <span class="folder-crumb">Round Report</span>
+</div>
+<br />
+<br />
+@await Html.PartialAsync("_RoundActivity","binder")

@@ -1,0 +1,85 @@
+﻿
+@model List<HCF.BDO.TExercises>
+<div class="firedrill_calender">
+
+    <table class="table table-bordered table-striped">
+
+        <thead>
+            <tr class="red">
+                <th>
+                    Date
+                </th>
+                <th>
+                    Time
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    NearBy
+                </th>
+                 <th>
+                    Action
+                </th>
+            </tr>
+        </thead>
+
+        @foreach (var item in Model.OrderBy(x=> x.Time))
+        {
+        <tr>
+            <td>@item.Date.Value.ToString("ddd, MMM d")</td>
+            <td>@commonModelFactory.ConvertToAMPM(item.Time)</td>
+            <td>
+                @if (item.Status == 0)
+                {
+                    <span>Plan</span>
+                }
+                else
+                {
+                    <span>Done</span>
+                }
+
+            </td>
+            <td>@item.NearBy</td>
+            <td>
+                <a href="@Url.RouteUrl("firedrill")"> Edit </a>
+            </td>
+        </tr>
+        }
+    </table>
+</div>
+<style>
+
+    .firedrill_calender table {
+        text-align: left;
+        position: relative;
+        border-collapse: collapse;
+    }
+
+    .firedrill_calender th {
+        background: white;
+        position: sticky;
+        top: -1px;
+        z-index: 999;
+    }
+
+
+    .yellow {
+        background: yellow;
+        width: 19px;
+        height: 18px;
+    }
+
+    .grey {
+        background: gray;
+        width: 19px;
+        height: 18px;
+    }
+
+    .firedrill_calender .grey {
+        background: gray;
+        width: 15px;
+        height: 14px;
+        margin-left: 6px;
+    }
+</style>

@@ -1,0 +1,60 @@
+﻿@using HCF.Utility
+<div>
+    @{
+        if (TempData[Constants.MessageViewBagSuccess] != null)
+        {
+            <text>
+                <script>
+                AlertSuccessMsg('@TempData[Constants.MessageViewBagSuccess]');
+                </script>
+            </text>
+            <div class="alert alert-success hide">
+                @TempData[Constants.MessageViewBagSuccess]<a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            </div>
+        }
+    }
+    @{
+        if (TempData[Constants.MessageViewBagWarning] != null)
+        {
+            <text>
+                <script>
+                AlertWarningMsg('@TempData[Constants.MessageViewBagWarning]');
+                </script>
+            </text>
+            <div class="alert alert-warning hide">
+                @TempData[Constants.MessageViewBagWarning] <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            </div>
+        }
+    }
+    @{
+        if (TempData[Constants.MessageViewBagError] != null)
+        {
+            <text>
+                <script>
+                    AlertWarningMsg('@TempData[Constants.MessageViewBagError]');
+                </script>
+            </text>
+
+            <div class="alert alert-danger hide">
+                @TempData[Constants.MessageViewBagError] <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            </div>
+        }
+    }
+    @{
+        if (TempData[Constants.MessageError] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData[Constants.MessageError] <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            </div>
+        }
+    }
+
+    @{
+        if (TempData[Constants.MessageSuccess] != null)
+        {
+            <div class="alert alert-success">
+                @TempData[Constants.MessageSuccess] <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+            </div>
+        }
+    }
+</div>

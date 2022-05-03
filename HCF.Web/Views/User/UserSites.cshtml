@@ -1,0 +1,235 @@
+﻿@model  HCF.Web.ViewModels.UserSiteViewModel
+@{
+    var usersList = Model.Users;
+    var sites = Model.Sites;
+    var siteMapping = Model.UserSites;
+    ViewBag.Title = "Campus Assignment";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Users
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+
+
+
+                    <div class="row tablelist-topform">
+                        <div class="col-md-9 col-xs-6">
+                            @await Html.PartialAsync("_userViewSelect")
+                        </div>
+                        <div class="col-md-3 col-xs-6 text-right">
+                            <div class="input-group" id="">
+                                <div class="input-sublist">
+                                    <input type="text" class="form-control" id="inputSuccess2" placeholder="Search">
+                                </div>
+                                <span class="input-group-addon">
+                                    <i class="fa fa-search" id="btntxtsearch"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+
+
+                            <div class="table-responsive usersite-table">
+                                <table id="userTable" class="display table table-bordered comman_checkbox1">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <button class="button1" id="filterUsers">Internal Users</button>
+                                            </th>
+                                            @foreach (var item in sites)
+                                            {
+                                                <th>
+                                                    @item.Name
+                                                </th>
+
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in usersList.Where(x => x.IsActive))
+                                        {
+                                            <tr class="users" id="@string.Format("user_{0}",item.UserId)" vendorid="@item.IsVendorUser.ToString()">
+                                                <th>@item.FullName</th>
+                                                @foreach (var site in sites)
+                                                {
+                                                    bool isCheckBoxVisible = true;
+
+
+                                                    int step = 0;
+                                                    var type = siteMapping.Where(x => x.SiteId == site.SiteId && x.UserId == item.UserId).FirstOrDefault();
+                                                    if (type != null)
+                                                    {
+                                                        step = type.AssignedType;
+                                                    }
+
+                                                    if (item.VendorId.HasValue && item.VendorId.Value > 0)
+                                                    {
+                                                        isCheckBoxVisible = Model.VendorSites.Any(x => x.VendorId == item.VendorId.Value && x.SiteId == site.SiteId && x.IsActive);
+                                                    }
+
+
+
+
+                                            <th class="usersCheckbg text-center">
+                                                @if (isCheckBoxVisible)
+                                                {
+                                                    <span userid="@item.UserId" class="@string.Format("checkbox step{0}",step)" siteId="@site.SiteId" assignedtype="@step">
+                                                    </span>
+                                                    <span class="label"></span>
+                                                }
+                                                else
+                                                {
+                                                <span userid="@item.UserId" class="@string.Format("checkbox step{0}",step)" siteId="@site.SiteId" assignedtype="@step">
+                                                </span>
+                                                <span class="label"></span>
+                                                }
+                                            </th>
+                                                }
+                                            </tr>
+
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+
+
+@section   scripts{
+
+    <link href="~/dist/css/userStyle.css" rel="stylesheet" />
+
+
+    <script>
+
+        $("#filterUsers").click(function () {
+            $(this).text($(this).text() == 'Internal Users' ? 'Vendor Users' : 'Internal Users');
+            $("tr.users").hide();
+            if ($(this).text() == 'Internal Users') {
+                $("tr[vendorid='False']").show();
+            } else {
+                $("tr[vendorid='True']").show();
+            }
+
+        });
+
+        $(document).ready(function () {
+            $("tr[vendorid='True']").hide();
+        });
+
+
+        var lists = [];
+
+        $('.checkbox').click(function () {
+            var ctr = $(this);
+            loadData(ctr);
+
+        });
+
+        $(document).ready(function () {
+
+        });
+
+        function loadData(ctr) {
+            debugger;
+            var userid = ctr.attr("userid");
+            var accessType = 0;
+
+            if (ctr.hasClass('step1')) {
+                ctr.removeClass('step1');
+                ctr.removeClass("step1").addClass('step2');
+                debugger;
+                ctr.closest(".usersCheckbg").addClass('stepActive');
+                accessType = 2;
+            } else if (ctr.hasClass('step2')) {
+                ctr.removeClass('step2');
+                debugger;
+                ctr.closest(".usersCheckbg").removeClass('stepActive');
+                ctr.html('');
+                accessType = 0;
+            } else {
+                ctr.addClass('step1');
+                accessType = 1;
+                debugger;
+                ctr.closest(".usersCheckbg").removeClass('stepActive');
+            }
+            //$("th").removeClass("usersCheckbg");
+            //$(".step2").parent("th").css("background", "#ddd");
+            ctr.attr("assignedtype", accessType);
+            SaveRecords(userid);
+        }
+
+        function SaveRecords(userid) {
+            debugger;
+            var userSiteData = [];
+            var trCtr = $("#user_" + userid);
+            trCtr.find(".checkbox").each(function (index) {
+              // debugger;
+                var siteId = $(this).attr("siteId");
+                var assignedtype = $(this).attr("assignedtype");
+                var userid = $(this).attr("userid");
+                let list = {
+                    SiteId: Number(siteId),
+                    AssignedType: Number(assignedtype),
+                    UserId: Number(userid)
+                };
+                userSiteData.push(list);
+            });
+            $.ajax({
+                url: '@Url.Action("SaveUserSites", "User")' + "?userId=" + userid,
+                type: "POST",
+                data: { userSiteData: userSiteData },
+                success: function (result) {
+
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $("#inputSuccess2").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#userTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        
+        
+        $(document).ready(function () {
+            debugger;
+            $(".step2").closest(".usersCheckbg").addClass("stepActive");
+        });
+
+        
+       
+    </script>
+    
+   <style>
+       .stepActive {
+        background-color:#ddd;
+       }
+    </style>
+}

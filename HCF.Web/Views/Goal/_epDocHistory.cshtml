@@ -1,0 +1,151 @@
+﻿@model List<HCF.BDO.InspectionEPDocs>
+
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Document</h4>
+        </div>
+        <div class="modal-body custom">
+            <div id="tbldochistory" class="doc_history">
+                @if (Model.Any())
+                {
+                <div id="demo">
+                    <div class="col-md-12">
+                        <table id="epDocHistory" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Doc Type
+                                    </th>
+                                    <th>
+                                        File Name
+                                    </th>
+                                    <th>
+                                        Uploaded By
+                                    </th>
+                                    <th>
+                                        Uploaded Date
+                                    </th>
+                                    <th>
+
+                                    </th>                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Where(x => x.IsDeleted == false && x.DocTypeId != (int)HCF.BDO.Enums.UploadDocTypes.MiscDocuments).GroupBy(x => x.FileId, (key, g) => g.OrderByDescending(e => e.CreatedDate).First()))
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (item.DocumentType != null)
+                                            {
+                                                <span>@item.DocumentType.Name.CastToNA()</span>
+                                            }
+                                            else
+                                            {
+                                                <span>NA</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="@commonModelFactory.FilePath(item.Path)" target="_blank">
+                                                <img src="@commonModelFactory.UploadDocTypeImagePath(item.UploadDocTypeId,item.DocTypeId)" alt="">
+                                            </a>
+                                            @($"{commonModelFactory.GetFileNameWithoutExtension(item.DocumentName)}")
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.UserProfile.FullName)
+                                        </td>
+                                        <td data-sort="@item.CreatedDate.Ticks">
+                                            @item.CreatedDate.ToClientTime().ToFormatDate()
+                                        </td>
+                                        <td>
+                                            @if (item.FileId.HasValue)
+                                            {
+                                                <a href="#">
+                                                    <img src="/dist/Images/Icons/addplus-btn.png"
+                                                         class="btnRecentSelect" tblName="TFiles"
+                                                         fileid="@item.FileId.Value" alt="" />
+                                                </a>
+                                            }
+                                        </td>                                       
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                }
+            </div>
+        </div>
+
+
+        <div class="modal-footer" style="padding-right:15px;">
+            <input type="button" id="btnAttachFiles" name="Submit" class="btnAttachFiles comm-button" value="Upload" />
+            <button name="submit" type="button" class="comm-Cancelbutton cancel-btn" data-dismiss="modal" value="Cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+
+
+    $(document).ready(function () {
+        //$(document).on('click', '.btnRecentSelect', function () {
+
+        $(".btnRecentSelect").click(function () {
+            debugger;
+            $(".btnRecentSelect").not($(this)).removeClass('active');
+            $(".btnRecentSelect").not($(this)).attr('src', '/dist/Images/Icons/addplus-btn.png');
+            $(this).toggleClass("active");
+            if ($(this).hasClass('active')) {
+                $(this).attr('src', '/dist/Images/Icons/remove-btn.png');
+            }
+            else {
+                $(this).attr('src', '/dist/Images/Icons/addplus-btn.png');
+            }
+        });
+
+        $(document).on('click', '.btnAttachFiles', function () {
+            var selectedFiles = [];
+            $(".btnRecentSelect.active").each(function () {
+                var fileId = $(this).attr('fileid');
+                var tblName = $(this).attr('tblName');
+                var files = fileId + '_' + tblName;
+                selectedFiles.push(files);
+            });
+
+            if (selectedFiles.length === 0)
+                swalalert('Select at least one file to upload.');
+            else {
+                $("#modal-container").modal("hide");
+                if (typeof (window.fileUploadSuccess) != "undefined") {
+                    window.fileUploadSuccess("",selectedFiles);
+                }
+            }
+        });
+
+       $('#epDocHistory').dataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 10,
+            "bPaginate": $('#epDocHistory tbody tr').length > 5,
+            "bInfo": false,
+            "order": [[3, "desc"]],
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'p f>>" +
+            //    "<'row'<'col-sm-12'<'table-responsive'tr>>>"
+
+           dom: "<'row'<'col-sm-12 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+
+        });
+
+    });
+</script>

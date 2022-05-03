@@ -1,0 +1,22 @@
+﻿@model IEnumerable<KeyValuePair<string, string>>
+@{
+    Layout = null;
+}
+<span>
+
+</span>
+<marquee onmouseover="this.stop();"
+         onmouseout="this.start();"
+         direction="left"
+         hspace="60"
+         scrollamount="5"
+         style="float: right;">
+    <b>
+        @foreach (var item in Model)
+        {
+            <span>
+                <a asp-action="NewsDescription" asp-area="News" asp-controller="NewsItem" asp-route-newsId="@item.Key" asp-route-type="0">@item.Value</a>
+            </span>
+        }
+    </b>
+</marquee>

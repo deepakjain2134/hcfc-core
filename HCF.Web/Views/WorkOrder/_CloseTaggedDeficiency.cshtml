@@ -1,0 +1,156 @@
+﻿@model HCF.BDO.WorkOrder
+@{
+    //HCF.BDO.WorkOrder workOrder = new HCF.BDO.WorkOrder();
+    //workOrder.WorkOrderFiles = new List<HCF.BDO.WorkOrderfiles>();
+}
+<div class="modal-content">
+    @using (Html.BeginForm("DeficiencySubmit", "WorkOrder"))
+    {
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span class="modelTitle">Close Deficiency</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" name="AttachFiles" value="" id="attachFiles" />
+            <input type="hidden" id="ActivitiesIds" name="ActivitiesIds" value="@ViewBag.ActivityId" />
+            <div class="defi-tagedUser-popup">
+                <div class="form-group">
+                    <label>Action Taken/Comments:</label>
+                    @if (Model.IssueId > 0)
+                    {
+                        @Html.TextAreaFor(model => model.CompletionComments, new { @class = "form-control", required = "required", @maxlength = "500" })
+                        @*<textarea class="form-control" cols="100" id="completioncomments" name="completioncomments" value="@Model.RequesterComments" rows="3"></textarea>*@
+                    }
+                    else
+                    {
+                        @Html.TextAreaFor(model => model.CompletionComments, new { @class = "form-control", required = "required", @maxlength = "500" })
+                        @*@Html.TextAreaFor(model => model.CompletionComments, new { @class = "form-control", required = "required", @maxlength = "500" })*@
+                    }
+
+                </div>
+                <div class="form-group">
+                    <label>By who</label>
+                    @if (Model.IssueId > 0)
+                    {
+                        @Html.TextBoxFor(model => model.RequesterName, new { @class = "form-control", required = "required", @maxlength = "100" })
+                        @*<input class="form-control" type="text" id="RequesterName" name="RequesterName" value="@Model.RequesterName" disabled />*@
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(model => model.RequesterName, new { @class = "form-control name ", required = "required", @maxlength = "100"  })
+                    }
+
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DateCompleted)
+                    @Html.TextBoxFor(x => Model.DateCompleted, $"{Model.DateCompleted:MMM d, yyyy}", new { @class = "datepicker form-control", @autocomplete = "off", required = "required" })
+                    @Html.ValidationMessageFor(model => model.DateCompleted, "", new { @class = "text-danger" })
+                    @*@Html.TextBoxFor(x => Model.DateCompleted, $"{Model.DateCompleted:MMM d, yyyy}", new { @class = "DateCompleted form-control readonly", required = "required", @autocomplete = "off" })
+                        @Html.TextBoxFor(model => model.DateCompleted, new { @class = "form-control", required = "required" })*@
+                    @*<input class="form-control" type="text" id="DateCompleted" name="DateCompleted" value="@Model.DateCompleted.ToFormatDate()" />*@
+
+                </div>
+
+                <div class="@(Model.IssueId > 0 ? "col-md-12 divattachment disable" : "col-md-12 divattachment")">
+                     
+                    Document Upload :
+                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnuploadfile" data-toggle="modal" data-target="#modal-container" />
+                    <sup id="attchFileCount" style="display:none;"></sup>
+                    <div id="file-upload-list">
+                        <div id="file-lists">
+                            <ul class="col-lg-12 attachfileitems">
+                                @if (Model.WorkOrderFiles != null)
+                                {
+                                    foreach (var item in Model.WorkOrderFiles)
+                                    {
+                                        <li class="list-group-item files disable" id="lidv_@item.WorkOrderFileId">
+                                            @if (!string.IsNullOrEmpty(item.FileName))
+                                            {
+                                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.FilePath, title = "Preview" })" title="@item.FileName" class="modal-link allowclick">
+                                                    @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FileName" />*@
+                                                    @item.FileName
+                                                </a>
+                                                <a data-id="@item.WorkOrderFileId" class="deletefile allowclick">
+                                                    <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                </a>
+                                            }
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            @if (Model.IssueId == 0)
+            {
+                <input name="btnSubmit" type="submit" id="closeDeficiency" value="Close Deficiency" class="comm-button" />
+            }
+            <button type="button" class="comm-Cancelbutton" id="btn_close" data-dismiss="modal">Cancel</button>
+        </div>
+    }
+</div>
+<script>
+    $(document).ready(function () {
+        //debugger
+        var username = '@HCF.Web.Base.UserSession.CurrentUser.FullName';
+        if (@Model.IssueId == 0) {
+            $('#RequesterName').val(username);
+        }
+
+            $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: $.CRx_DateFormat,
+            maxDate: new Date(),
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker('setDate', 'today');
+
+    });
+
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+    Array.prototype.Remove = function () {
+        var what, a = arguments, L = a.length, ax;
+        while (L && this.length) {
+            what = a[--L];
+            while ((ax = this.indexOf(what)) !== -1) {
+                this.splice(ax, 1);
+            }
+        }
+        return this;
+    };
+
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var attachedfiles = $('#attachFiles').val();
+        debugger;
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                swal("Deleted!", "Your file has been deleted.", "success");
+                $("#lidv_" + TFileId).remove();
+                var sitecodesArray = attachedfiles.split(',');
+                var val = TFileId + "_TFiles"
+                sitecodesArray.Remove(val);
+                $('#attachFiles').val(sitecodesArray);
+            });
+    });
+</script>

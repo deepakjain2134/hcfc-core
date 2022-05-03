@@ -1,0 +1,51 @@
+﻿@model HCF.Web.ViewModels.Common.CustomSelectPicker
+@{ var id = !string.IsNullOrEmpty(Model.ID) ? Model.ID : Model.Name;}
+
+@if (Model.IsMultiple)
+{
+    <select asp-for="@Model.SelectedIds"
+            id="@id"
+            name="@Model.Name"
+            class="@Model.ClassName"
+            multiple="multiple"
+            data-live-search="true"
+            data_selected_text_format="count > 1"
+            recvalue="@Model.RecValue"
+            minValue="@Model.minValue"
+            maxvalue="@Model.maxvalue"
+            asp-items="@Model.Items">
+    </select>
+}
+else
+{
+    <select @{ foreach (var item in Model.Attributes) { <text> @string.Format("{0}={1}", item.Key, item.Value) </text>  } }
+            name="@Model.Name"
+            class="@Model.ClassName"
+            id="@id"
+            recvalue="@Model.RecValue" minValue="@Model.minValue" maxvalue="@Model.maxvalue"
+            data-live-search="true">
+
+        @foreach (var data in Model.Items)
+        {
+            if (data.Selected)
+            {
+                <option selected="selected" value="@data.Value">@data.Text</option>
+            }
+            else
+            {
+                <option value="@data.Value">@data.Text</option>
+            }
+        }
+    </select>
+}
+
+@*<select asp-for="@Model.SelectedIds"
+            id="@id"
+            name="@Model.Name"
+            class="@Model.ClassName"
+            multiple="multiple"
+            data-live-search="true"
+            data_selected_text_format="count > 1",
+            asp-items="@Model.Items">
+    </select>*@
+

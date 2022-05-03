@@ -1,0 +1,131 @@
+﻿@model  List<HCF.BDO.ActivityData>
+@{
+
+}
+
+    <div class="confi-searchBoxNo">
+        <table id="notifyMailtable" class="table table-bordered table-striped dataTable no-footer comman_checkbox" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th width="10%">Notified?</th>
+                    <th>Notification Date</th>
+                    <th width="50%">Recent Changes</th>
+                    <th>Round Effective Date</th>
+                    <th>Date Modified</th>
+                    <th>Organized By</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="@item.Id" class="@((item.IsEnabled == false) ? "notify" : "notify disable")">
+                        <td>
+                            <input type="checkbox" value='@item.Id' userid="@item.user.UserId" class="notify_Mail" />
+                            <span></span>
+                        </td>
+                        <td class="text-center">
+                            @if (item.IsMailed)
+                            {
+                                <img style="cursor:pointer" src="@Url.Content("~/dist/Images/Icons/tick_mark.png")" title="Notified" />
+                            }
+                            else
+                            {
+                                <span></span>
+                            }
+                        </td>
+                        <td>@item.NotificationDate.ToFormatDate() </td>
+                        <td style="width: 200px">
+                            @Html.DisplayFor(modelItem => item.DataLine)
+                        </td>
+                        <td style="width: 200px">
+                            @item.EffectiveDate.ToFormatDate()
+                        </td>
+                        <td style="width: 200px">
+                            @item.CreatedDate.ToFormatDate()
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.user.FullName)<span></span>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="modal-footer">
+        @*<button type="button" class="comm-button" id="btn_close" data-dismiss="modal">Cancel</button>*@
+        <input name="btnSubmit" type="button" id="EmailDetails" value="Send email to selected user(s)" class="comm-button" />
+
+    </div>
+
+<script>
+    var valueArray = [];
+
+    Array.prototype.Remove = function () {
+        var what, a = arguments, L = a.length, ax;
+        while (L && this.length) {
+            what = a[--L];
+            while ((ax = this.indexOf(what)) !== -1) {
+                this.splice(ax, 1);
+            }
+        }
+        return this;
+    };
+    $(document).ready(function () {
+        var myTable = $('#notifyMailtable').DataTable({
+            "searching": false,
+            "pageLength": 15,
+            "lengthChange": false,
+            "bPaginate": $('#notifyMailtable tbody tr').length > 15,
+            "bInfo": false,
+            "aaSorting": [],
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_", //To remove Search Label
+                "searchPlaceholder": "Search..."
+            }
+        });
+    });
+    $(body).on("change", "input[type=checkbox][class=notify_Mail]", function (event) {
+        //debugger;
+        var ischecked = $(this).is(':checked');
+        var value = $(this).val();
+        var userid = $(this).attr("userid");
+        if (ischecked) {
+            valueArray.push(value);
+        }
+        else {
+            valueArray = $.grep(valueArray, function (e) {
+                return e != value;
+            });
+        }
+    });
+
+    $('#EmailDetails').on('click', function () {
+        //debugger;
+        var arr = valueArray;
+        if (valueArray.length > 0) {
+            $.get('@Url.Action("SendVolunteermails", "Round")' + '?id=' + arr, function (data) {
+                if (data == true) {
+                    valueArray = [];
+                    swalalert("Mail Send Successfully!");
+                    $('.notify_Mail').prop('checked', false);
+                }
+            });
+        } else {
+            swalalert('Please select at least one checkbox to send the mail!')
+        }
+    });
+
+</script>
+
+<style>
+    .dataTables_paginate.paging_simple_numbers {
+        float: right;
+    }
+</style>
+

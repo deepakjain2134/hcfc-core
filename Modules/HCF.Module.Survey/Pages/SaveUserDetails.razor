@@ -1,0 +1,49 @@
+﻿@page "/saveUserDetails/{loginCode:int}"
+
+@using HCF.Module.Survey.Model;
+
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <EditForm Model="@userCodeDetails" OnValidSubmit="@saveUserDetails">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            @loginCode
+        </div>
+
+        <div class="form-group">
+            First Name: <InputText id="code" @bind-Value="userCodeDetails.FirstName" class="form-control" />
+        </div>
+        <div class="form-group">
+            Last Name: <InputText id="code" @bind-Value="userCodeDetails.LastName" class="form-control" />
+        </div>
+        <div class="form-group">
+            Email: <InputText id="code" @bind-Value="userCodeDetails.Email" class="form-control" />
+        </div>
+        <br />
+        <button type="submit" class="btn btn-success">Submit</button>
+    </EditForm>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int? loginCode { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (loginCode == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private UserCodeDetails userCodeDetails = new UserCodeDetails();
+
+    private async Task saveUserDetails()
+    {
+        NavigationManager.NavigateTo("/files");
+    }
+}

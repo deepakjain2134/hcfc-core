@@ -1,0 +1,90 @@
+﻿@model IEnumerable<HCF.BDO.TInspectionReport>
+@{
+
+    Layout = null;
+}
+@if (Model.Any())
+{
+    <div class="container-fluid">
+        <div class="row">
+            
+            <div class="col-lg-3 col-xs-12">
+                <div class="Certificate_list">
+                    <div class="certi-ficate-box">
+                        <div class="searchReports">
+                            <input type="text" id="txtsearch" onkeyup="searchfilter()" style="width:100%;" placeholder="Search for report name..." title="Type in a name of report">
+                        </div>
+                            <div class="crx-scrollBar">
+                            <ul class="" id="ulSignedReport">
+                                @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                                {
+                                    <li onclick="Opendiv(@item.ReportId,'@commonModelFactory.FilePath(item.FilePath)',this);" id="@item.ReportId"
+                                        tempname="@commonModelFactory.FilePath(item.FilePath)">
+                                        <a>
+                                            @Html.DisplayFor(modelItem => item.ReportName)
+                                        </a>
+                                        <label class="leftilsmdate"><strong>Report Date : </strong>@item.CreatedDate.ToClientTime().ToFormatDate()</label>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <div class="col-lg-9 col-xs-9">
+                            <div id="divdocpreview">
+                                <table class="table">
+
+                                    @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                                    {
+                                        <tr id="div_@item.ReportId" style="display:none" class="tableRow">
+                                            <td>
+                                                <strong>Name : </strong>  @Html.DisplayFor(modelItem => item.ReportName)
+                                            </td>
+                                            <td>
+                                                <strong>Binder Name : </strong>@item.BinderName.CastToNA()
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </table>
+                                <iframe name="certificate" id="Crframe" style="width:100%;height:800px;"></iframe>
+                            </div>
+                            <div id="divnopreview" style="margin-top: 100px;text-align:center;">Choose a report from the list on the left for review.</div>
+                            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <div class="row" >
+        
+            <div class="tble_shadow text-center">No data available</div>
+       
+    </div>
+}
+
+
+<script>
+
+    function searchfilter() {
+        debugger;
+        var input, filter, ul, li, a, i, txtValue;
+        input = document.getElementById("txtsearch");
+        filter = input.value.toUpperCase();
+        ul = document.getElementById("ulSignedReport");
+        li = ul.getElementsByTagName("li");
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("a")[0];
+            txtValue = a.textContent.trim() || a.innerText.trim();
+            if (txtValue.trim().toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+    }
+
+
+</script>

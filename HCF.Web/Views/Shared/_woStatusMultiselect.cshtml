@@ -1,0 +1,46 @@
+﻿@model IEnumerable<HCF.BDO.WoStatus>
+@{
+    var woStatuses = Model;
+}
+
+<select id="ddlWoStatus" multiple class="form-control" title="Select Status" data-selected-text-format="count > 5">
+    @foreach (var woStatus in woStatuses)
+    {
+        <option value="@woStatus.Code">@woStatus.Code</option>
+    }
+</select>
+<script>
+    var ddlCtr = $('#ddlWoStatus');
+    $(document).ready(function () {
+
+        var selectedCode = [];
+        wostatusIds = '@string.Join(",", woStatuses.OrderBy(x => x.Code).Where(x => x.CRxCode == "ACTIV").Select(x => x.Code).ToArray())';
+        if (wostatusIds.length > 0) {
+            selectedCode = wostatusIds.split(',').map(function (item) {
+                return (item);
+            });
+        }
+        ddlCtr.selectpicker();
+        ddlCtr.selectpicker('val', selectedCode)
+        ddlCtr.selectpicker('refresh');
+        ddlCtr.trigger('change');
+    });
+
+    ddlCtr.on('change', function () {
+        var selected = [];
+        $(this).find("option:selected").each(function (key, ctr) {
+            selected.push(ctr.value);
+            //selected.push("'" + ctr.value + "'");
+        });
+      //  debugger;
+        var values = selected.toString(",")
+        //console.log(values);
+        $("#fltrstatuscode").val(values);
+        localStorage.setItem("WoPageIndex", 1);
+        localStorage.setItem("isScroll", false);
+        //debugger;
+        getWorkOrders(1);
+        $(document).click();
+
+    });
+</script>

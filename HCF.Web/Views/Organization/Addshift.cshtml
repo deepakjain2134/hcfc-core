@@ -1,0 +1,90 @@
+﻿@model HCF.BDO.Shift
+@{
+    ViewBag.Title = "Addshift";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Update Shift
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            @Html.HiddenFor(model => model.CreatedBy)
+
+                            @Html.HiddenFor(m => m.ShiftId)
+
+                            <div class="row">
+                                @Html.HiddenFor(x => x.ShiftId)
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                        @Html.ValidationMessageFor(model => model.Name)
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.StartTime)
+                                        @Html.TextBox("StartTimeString", Model.StartTime.ConvertToString(), new { @class = "form-control timepicker clockpicker", required = "required", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(model => model.StartTimeString)
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EndTime)
+                                        @Html.TextBox("EndTimeString", Model.EndTime.ConvertToString(), new { @class = "form-control timepicker clockpicker", required = "required", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(model => model.EndTimeString)
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group comman_checkbx">
+                                        <div>&nbsp;</div>
+                                        @Html.CheckBoxFor(m => m.IsActive, Model.IsActive)<span></span>
+                                        @Html.ValidationMessageFor(m => m.IsActive)
+                                        <label>Active</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 text-right button_Div">
+                                    <input type="submit" value='Save' class="comm-button" />
+                                    @*@Html.ActionLink("Cancel ", "Shift", "Organization", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "Shift", new { controller = "Organization" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+
+<script>
+    var input = $('.timepicker');
+    input.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+        }
+    });
+</script>

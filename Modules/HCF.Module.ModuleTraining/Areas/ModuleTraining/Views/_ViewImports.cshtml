@@ -1,0 +1,15 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using HCF.Utility
+@using HCF.Utility.AppConfig
+@using Microsoft.AspNetCore.Http;
+
+
+@addTagHelper "*, Microsoft.AspNetCore.Mvc.TagHelpers"
+
+@inject IHtmlLocalizer<Resource> Localizer
+
+@inject IViewLocalizer Localizer
+@inject IHCFSession session
+@inject IJsonHelper Json
+@inject IAppSetting AppSetting
+@inject IHttpContextAccessor HttpContextAccessor

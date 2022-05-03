@@ -1,0 +1,73 @@
+﻿
+@{
+
+    string icraId = this.ViewData.ContainsKey("icraId") ? this.ViewData["icraId"].ToString() : string.Empty;
+    string ProjectId = this.ViewData.ContainsKey("ProjectId") ? this.ViewData["ProjectId"].ToString() : string.Empty;
+    string TPCRAQuesId = this.ViewData.ContainsKey("TPCRAQuesId") ? this.ViewData["TPCRAQuesId"].ToString() : string.Empty;
+    string index= this.ViewData.ContainsKey("index") ? this.ViewData["index"].ToString() : string.Empty;
+    string permitno = this.ViewData.ContainsKey("permitno") ? this.ViewData["permitno"].ToString() : string.Empty;
+    string formname = "icrapermit_" + index;
+    string formname2 = "icrapermitworksheet_" + index;
+    string formname3 = "icrapermitworksheet3_" + index;
+    string permittype = this.ViewData.ContainsKey("permittype") ? this.ViewData["permittype"].ToString() : string.Empty;
+    string status = this.ViewData.ContainsKey("status") ? this.ViewData["status"].ToString() : "1";
+    string IsAllPermit = this.ViewData.ContainsKey("status") ? this.ViewData["IsAllPermit"].ToString() : string.Empty;
+}
+
+<ul class="dropdown-menu ctmenu" icraid="@icraId">
+    <li data-action="icrapermit" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")" style="@(!string.IsNullOrEmpty(IsAllPermit)?"display:none;":"display:block;")">
+        @using (Html.BeginForm("ICRAPermit", "Pdf", FormMethod.Post, new { id = formname }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="CRAPermit" />
+            <input type="hidden" name="tpcraquestid" value="@TPCRAQuesId" />
+            <input type="hidden" name="projectId" value="@ProjectId" />
+            <a href="javascript:document.getElementById('@formname').submit()" class="@(icraId=="0" ? "disable" :"notdisable")">Print CRA Permit</a>
+        }
+    </li>
+    <li data-action="icrapermitworksheet" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")">
+        @using (Html.BeginForm("PCRAPermitWorksheet", "Pdf", FormMethod.Post, new { id = formname2 }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="CRAPermitworksheet" />
+            <input type="hidden" name="tpcraquestid" value="@TPCRAQuesId" />
+            <input type="hidden" name="projectId" value="@ProjectId" />
+            <input type="hidden" name="hasattachment" value="0" />
+            <a href="javascript:document.getElementById('@formname2').submit()" class="@(icraId=="0" ? "disable" :"notdisable")">Print CRA Permit and worksheet</a>
+        }
+    </li>
+    <li data-action="icrapermitworksheet" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")">
+        @using (Html.BeginForm("DownloadCRAAttachments", "PCRA", FormMethod.Post, new { id = formname3 }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="CRAPermitworksheet" />
+            <input type="hidden" name="tpcraquestid" value="@TPCRAQuesId" />
+            <input type="hidden" name="projectId" value="@ProjectId" />
+            <input type="hidden" name="hasattachment" value="1" />
+            <a href="javascript:document.getElementById('@formname3').submit()" class="@(icraId=="0" ? "disable" :"notdisable")">Print CRA Permit, worksheet and attachments</a>
+        }
+    </li>
+    <li data-action="observationReport" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")">
+        <a class="@(icraId=="0" ? "disable" :"notdisable")" href="@Url.Action("ObservationReports","ICRA",new {modulename="cra",icraId=icraId, permittype =1, permitno = permitno})">Observation Reports</a>
+    </li>
+    <li data-action="manualsignedReport" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")">
+        <a class="@(icraId=="0" ? "disable" :"notdisable")" href="@Url.Action("TicraFiles","ICRA",new {modulename="CRAFiles",icraId=icraId, permittype =1, permitno = permitno})">Manual Signed Report <span class="reportCount"></span></a>
+    </li>
+    <li data-action="history" title="@(icraId=="0" ? "ICRA permit is not linked with this CRA" :"")">
+        <a class="@(icraId=="0" ? "disable" :"notdisable")" href="@Url.Action("IcraHistory","ICRA",new {modulename="CRAHistory",icraId=icraId, permittype =1, permitno = permitno})">History</a>
+    </li>
+
+
+    <li data-action="PrintPCRAPdf">
+        <a href="@Url.Action("PrintPCRAPdf","PDF",new {projectId=ProjectId, tPCRAQuesId = TPCRAQuesId,doctype=1,IsAttachmentIncluded=false})">CRA Question Pdf</a>
+    </li>
+
+    <li data-action="deletepermit" style="@(!string.IsNullOrEmpty(permittype)?"display:block;":"display:none;")">
+        <a data-id="@TPCRAQuesId" data-permittype="@permittype" class="@(status!="1"  ? "deletepermit" :"deletepermit disable")">
+            <span>Delete Permit</span>
+        </a>
+    </li>
+</ul>

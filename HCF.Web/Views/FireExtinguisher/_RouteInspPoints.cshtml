@@ -1,0 +1,543 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Inspect @Model.Assets.Name</h4>
+</div>
+@using (Html.BeginForm("SaveRouteInspection", "FireExtinguisher", FormMethod.Post, new { id = "assetStepsForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => Model.Assets.AssetId)
+    @Html.HiddenFor(m => Model.FloorAssetsId)
+    <input type="hidden" value="@ViewBag.isloaddata" id="isloaddata" name="isloaddata" />
+    <input type="hidden" name="inspType" value="@ViewBag.inspType" />
+
+    <input type="hidden" name="epDetailId" value="@ViewBag.RBIEPid" />
+    <input type="hidden" name="status" id="status" value="-1" />
+    <input type="hidden" name="substatus" id="substatus" value="" />
+    <input type="hidden" name="floorassestId" id="floorassestsid" value="@Model.FloorAssetsId" />
+    <input type="hidden" name="location" id="locationid" value="@ViewBag.LocationId" />
+    <input type="hidden" name="SerialNo" id="SerialNo" value="@Model.SerialNo" />
+    <div class="modal-body" style="background-color:#fff;">
+        <div class="row asset_table assettableRow tablelist-topform">
+            <div class="col-md-3 form-group">
+                <strong>@Localizer["Location"] : </strong>
+                @if (Model.Floor != null)
+                {<span> @Model.Floor.FloorLocation.CastToNA() </span>}
+            </div>
+            <div class="col-md-3 form-group">
+                <strong> @Localizer["StopName"] : </strong> @if (Model.Stop != null)
+                {<span> @Model.Stop.StopName.CastToNA() </span>}
+            </div>
+            <div class="col-md-3 form-group">
+                <strong> @Localizer["StopName"] : </strong> @if (Model.Stop != null)
+                {<span> @Model.Stop.StopCode.CastToNA() </span>}
+            </div>
+            <div class="col-md-3 form-group">
+                <strong>Extinguisher Type: </strong>
+                @if (Model.AssetSubCategory != null && Model.Assets.AssetId == 123)
+                {
+                    @*<strong class="asctype">Extinguisher Type: </strong>*@
+                    <span class="asctype" id="asctype_value"> @Model.AssetSubCategory.AscName </span>
+                    <a class="asctype" onclick="updatetype()">click to update type</a>
+                    <div id="ascType" style="display:none">
+                        <select id="AssetcatId" class="form-control" name="AssetcatId" style="float:left;width:54%"></select>
+                        <input type="button" style="float:right;" name="Update" class="comm-button" value="Update" id="updateAscType" />
+                    </div>
+                }
+            </div>
+            <div class="col-md-3 form-group"><strong>Asset: </strong> @Model.Assets.Name</div>
+            <div class="col-md-3 form-group">
+                @*<strong> @Resources.Resource.AssetNo :</strong> <span id="spanAssetNo">@Model.AssetNo</span>*@
+                <strong>Tag/BarCode:</strong> <span id="spanAssetNo">@Model.SerialNo</span>
+            </div>
+            <div class="col-md-3 form-group"><strong>Nearby: </strong> @Model.NearBy.CastToNA()</div>
+            <div class="col-md-3 form-group text-right">
+                <img src="@Url.Content("~/dist/img/message_icon.png")" alt=""
+                     id="activityComment"
+                     tempname='InspectionFiles[0].Comment' data-toggle="modal" data-target="#commentModal"
+                     class="tcomment commentInsp @(string.IsNullOrEmpty(Model.InspectionFiles[0].Comment) ? "" : "text ")" />
+
+                @for (int i = 0; i < Model.InspectionFiles.Count; i++)
+                {
+                    <div>
+                        @Html.HiddenFor(m => Model.InspectionFiles[i].Comment)
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div id="inspBox" class="@(Model.AssetId == 123 ? "row" :"row hide")">
+            <div class="col-lg-4">
+                <div class="form-group results-radioBox">
+                    <label>Inspection Result <em class="required-field"> *</em></label>
+                    <span class="inspection-results" data-toggle="buttons">
+                        @foreach (HCF.BDO.InspResult insres in (List<HCF.BDO.InspResult>)(ViewBag.InspResult))
+                        {
+                            <input type="radio" name="inspResult" value="@insres.Code" required disabled />@insres.ResultName
+                        }
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label>Status</label><em class="required-field"> *</em>
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                        @foreach (HCF.BDO.InspStatus insstatus in (List<HCF.BDO.InspStatus>)(ViewBag.InspStatus))
+                        {
+                            <input type="radio" name="inspStatusCode" value="@insstatus.Code" required />@insstatus.StatusName
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <button type="button" class="comm-button" id="manageAsset" style="float:right;">Manage Stop</button>
+                </div>
+            </div>
+
+        </div>
+
+
+        @if (Model.Assets.MainGoals.Count > 0)
+        {
+            <div class="toggle-btn" style="width:150px;">
+                <input type="checkbox" class="cb-value" />
+            </div>
+        }
+
+        @if (Model.Assets.MainGoals.Count > 0)
+        {
+            for (int i = 0; i < Model.Assets.MainGoals.Count(); i++)
+            {
+                if (Model.Assets.MainGoals[i].Steps.Count() > 0)
+                {
+                    int? floorAssetId = null;
+                    @Html.HiddenFor(m => Model.Assets.MainGoals[i].ActivityType)
+                    @Html.HiddenFor(m => Model.Assets.MainGoals[i].MainGoalId)
+                    if (Model != null)
+                    {
+                        floorAssetId = Model.FloorAssetsId;
+                    }
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table">
+                                <tr class="editor-field-No">
+                                    <td colspan="3">
+                                        <strong>@Model.Assets.MainGoals[i].Goal.ToString().Trim()</strong>
+                                    </td>
+                                </tr>
+                                @for (int j = 0; j < Model.Assets.MainGoals[i].Steps.Count(); j++)
+                                {
+                                    <tr class="editor-field-No @(Model.Assets.MainGoals[i].Steps[j].IsRA ? "rastep" : "")">
+                                        <td width="10%" class="td_btn_complaint">
+                                            <input id="InsStatus"
+                                                   class="ins_check3_btn"
+                                                   type="button"
+                                                   onclick="routeInspStatus(this)"
+                                                   value="@Model.Assets.MainGoals[i].Steps[j].Status"
+                                                   tempname='Assets.MainGoals[@i].Steps[@j].Status' />
+
+                                            @Html.HiddenFor(m => Model.Assets.MainGoals[i].Steps[j].Status)
+                                            @Html.HiddenFor(m => Model.Assets.MainGoals[i].Steps[j].Comments)
+                                            @Html.HiddenFor(m => Model.Assets.MainGoals[i].Steps[j].StepsId)
+                                            @Html.HiddenFor(m => Model.Assets.MainGoals[i].Steps[j].StepType)
+                                        </td>
+                                        <td width="80%">
+                                            @Html.DisplayFor(m => Model.Assets.MainGoals[i].Steps[j].Step)
+                                            <br />
+                                            @*<b>Comments:</b> @Html.TextBoxFor(m => Model.Assets.MainGoals[i].Steps[j].Comments, Model.Assets.MainGoals[i].Steps[j].Comments, new {
+                                                @class = "form-control",    @placeholder ="comments" })*@
+                                        </td>
+                                        <td width="10%" align="right">
+                                            @*<img src="@Url.Content("~/dist/img/message_icon.png")"
+                                                     alt="" tempname='MainGoal[@i].Steps[@j].Comments'
+                                                     data-toggle="modal"
+                                                     data-target="#commentModal"
+                                                     class="commentIcon @(string.IsNullOrEmpty(Model.Assets.MainGoals[i].Steps[j].Comments) ? "" : "text ")" />
+                                                <div class="img_file_upload">
+                                                    <input name="file_Uploader"
+                                                           type="file"
+                                                           onchange="InsUploadfile(this, @Model.Assets.MainGoals[i].Steps[j].StepsId,'C')"
+                                                           tempname='MainGoal[@i].Steps[@j].FileContent'
+                                                           filename="MainGoal[@i].Steps[@j].FileName"
+                                                           filepath="MainGoal[@i].Steps[@j].FilePath" />
+                                                </div>
+                                                <img class="@(Model.Assets.MainGoals[i].Steps[j].FilePath != string.Empty ? "img_prev_upload" : "img_prev")"
+                                                     id="imagePreview_@Model.Assets.MainGoals[i].Steps[j].StepsId"
+                                                     src="@HCF.Web.Base.Common.FilePath(Model.Assets.MainGoals[i].Steps[j].FilePath)">
+
+                                                <a href="@Url.Action("ImageUpload", "Common",new { fileContent="MainGoal["+@i+"].Steps["+@j+"].FileContent",imgPreviewCtr="imagePreview_"+Model.Assets.MainGoals[i].Steps[j].StepsId })"
+                                                   class="pull-right modal-link">
+                                                    <img src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" title="Image Upload" alt="Image Upload" />
+                                                </a>*@
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                }
+            }
+        }
+
+
+
+        <div class="row">
+            <div class="col-md-12 text-right button_Div">
+                @if (Model.Assets.MainGoals.Any(y => y.Steps.Count > 0))
+                {
+                    if (Model.OpenIlsmsCount > 0)
+                    {
+                        <span style="color:gray">You may only click "Save & Done" once all open Ilsm is closed</span>
+                        <input type="button" id="submitButton" name="btnSubmit" value="Save & Done" disabled class="comm-button disable" />
+                    }
+                    else if (Model.OpenWorkOrdersCount > 0)
+                    {
+                        <span style="color:gray">You may only click "Save & Done" once all open Work Order is closed</span>
+                        <input type="button" id="submitButton" name="btnSubmit" value="Save & Done" disabled class="comm-button disable" />
+                    }
+                    else
+                    {
+                        <input type="button" id="submitButton" name="btnSubmit" value="Save & Done" class="comm-button" />
+                    }
+                }
+                else
+                {
+                    <label style="color:red; display: block;">No Steps</label>
+                }
+                <a id="btnInspCancel" class="comm-Cancelbutton" style="cursor:pointer" data-dismiss="modal">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<div class="modal fade" id="commentModal" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Comment</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="" id="setpId" />
+                <textarea name="text" cols="40" rows="5" class="form-control" id="Commenttxt"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-button" id="saveComment">Save</button>
+                <button type="button" class="comm-Cancelbutton" id="closeComment">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="extinguisherInsPopUp" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    $(document).ready(function () {
+        debugger;
+        if ('@Model.AssetId' == "123") {
+            $("input:radio[name=inspStatus]:first").attr('checked', true);
+            $("input:radio[name=inspStatusCode]:first").attr('checked', true);
+            checkNonCompliant();
+            getradiobtnvalue();
+            $("#AssetcatId").empty();
+            $("#AssetcatId").append(
+               $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssetSubCategory", "Assets")';
+            floorOptions.type = "POST";
+            floorOptions.data = { assetId: @Model.Assets.AssetId };
+            floorOptions.datatype = "json";
+           /* floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    $("#AssetcatId").append(
+                    $('<option></option>').val(lists[i].AscId).html(lists[i].AscName));
+                }
+                $("#AssetcatId").prop("disabled", false);
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting data!!",""); };
+        $.ajax(floorOptions);
+        }
+
+
+    });
+
+
+    function getradiobtnvalue(){
+        var status = $('input[name=inspStatus]:checked').val();
+        var result = $('input[name=inspResult]:checked').val();
+        $("#status").val(result);
+        $("#substatus").val(status);
+    }
+
+    $('input[name=inspStatus]').change(function () {
+        getradiobtnvalue();
+    });
+
+    $('input[name=inspResult]').change(function () {
+        getradiobtnvalue();
+    });
+
+
+    $('#submitButton').click(function () {
+        var bval = $(this).val();
+        saveInspection(bval);
+    });
+
+    var saveInspection = function (bval) {
+        $.ajax({
+            url: CRxUrls.fireExtinguisher_SaveRouteInspection,
+            type: "POST",
+            dataType: "JSON",
+            data: $("#assetStepsForm").serialize(),
+            success: function (data) {
+                if (data.Result) {
+                    debugger;
+                    if (data.IsInspReady == 1) {
+                        swal({
+                            title: "For this EP All Assets/Doc Inspected",
+                            text: $.Constants.All_Assets_Inspected,
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Yes",
+                            cancelButtonText: "No",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        }, function (isConfirm) {
+                            if (isConfirm) {
+                                MarkEPCompliant(data);
+                            } else {
+                                CreateWOandloadpage(data);
+                            }
+                        });
+                    } else {
+                        CreateWOandloadpage(data);
+                    }
+                }
+            }
+        });
+    }
+
+    function MarkEPCompliant(data) {
+        $.ajax({
+            type: "GET",
+            url: CRxUrls.Goal_MarkEPCompliant + "?inspectionid=" + data.InspectionId + "&epdetaild=" + data.EPDetailId,
+            dataType: "json",
+            traditional: true,
+            success: function (result) {
+                $('.modal-backdrop').remove();
+                $("#smode").val(0);
+                $('#extinguisherInsPopUp').modal('hide');
+                if ($("#isloaddata").val() == 1) {
+                   // loadData(1);
+                    loadSelectedData(1);
+                }
+                if (data.TInsActivityId > 0) {
+                    if (data.Status == 0) {
+                        ShowCreateWOPopUp(data.ActivityId);
+                    }
+                }
+            }
+        });
+    }
+
+
+    function CreateWOandloadpage(data) {
+        if (data.TInsActivityId > 0) {
+            if (data.Status == 0) {
+                ShowCreateWOPopUp(data.ActivityId);
+            } else {
+                $('.modal-backdrop').remove();
+                $("#smode").val(0);
+                $('#extinguisherInsPopUp').modal('hide');
+                if ($("#isloaddata").val() == 1) {
+                   // loadData(1);
+                    loadSelectedData(1);
+                }
+            }
+        }
+    }
+
+
+    var routeInspStatus = function (control) {
+        setBtnStatus(control, '1', '0');
+    }
+
+    var setBtnStatus = function (control, value1, value2) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value1;
+                break;
+        }
+        var controlId = $(control).attr("tempName");
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+        checkNonCompliant();
+        setMarkAllBtn();
+    }
+
+
+    $('.cb-value').click(function () {
+        var value = 0;
+        var mainParent = $(this).parent('.toggle-btn');
+        if ($(mainParent).find('input.cb-value').is(':checked')) {
+            $(mainParent).addClass('active');
+            value = 1;
+        } else {
+            $(mainParent).removeClass('active');
+        }
+
+        $(".ins_check3_btn").each(function () {
+            var control = $(this);
+            $(this).val(value);
+            var controlId = $(this).attr("tempName");
+            $("input[name='" + controlId + "'][type=hidden]").val(value);
+        });
+        if (value == "0") {
+            $(".MarkDeficiency").addClass("hide").removeClass("show");
+        }
+        checkNonCompliant();
+    });
+
+    function checkNonCompliant() {
+        var count = 0;
+
+        $(".ins_check3_btn").each(function () {
+            var control = $(this);
+            var value = control.val();
+            if (value == 0) {
+                count++;
+            }
+        });
+        if (count > 0) {
+            $("input[name=inspResult][value=" + 0 + "]").prop('checked', true);
+        } else {
+            $("input[name=inspResult][value=" + 1 + "]").prop('checked', true);
+        }
+    }
+
+
+
+    var markAllbtn = $('.cb-value');
+
+    var setMarkAllBtn = function () {
+        var total = $(".ins_check3_btn").length;
+
+        var passSteps = $(".ins_check3_btn[value='1']").length;
+        // var pendingSteps = $(".ins_check3_btn[value='-1']").length;
+        if (total == passSteps) {
+            markAllbtn.parent().addClass('active');
+        } else {
+            markAllbtn.parent().removeClass('active');
+        }
+    }
+
+
+    $("#btnInspCancel").click(function () {
+        $("#smode").val(0);
+       // loadData(1);
+        loadSelectedData(1);
+    });
+
+    function ShowCreateWOPopUp(activityId) {
+        //debugger;
+        var activityType = 2;
+        var tilsmId = "";
+        var serialNo = $("#SerialNo").val();
+        swal({
+            title: "Create Work Order",
+            text: $.Constants.Create_Work_Order,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                var urlAction = CRxUrls.WorkOrder_WorkOrderFailSteps;//'@Url.Action("WorkOrderFailSteps", "WorkOrder")';
+                window.location.href = urlAction + "?activityId=" + activityId + '&tilsmId=' + tilsmId + '&activityType=' + activityType;
+            } else {
+                $('.modal-backdrop').remove();
+                $("#smode").val(0);
+                $('#extinguisherInsPopUp').modal('hide');
+                if ($("#isloaddata").val() == 1) {
+                    //loadData(1);
+                    loadSelectedData(1);
+                }
+            }
+        });
+    }
+
+
+
+    $("#manageAsset").button().click(function (event) {
+        debugger;
+        event.preventDefault();
+        var floorAssetId = $("#floorassestsid").val();
+        var locationId = $("#locationid").val();
+        var assetId = $("#sassetId").val();
+        var inspType = $('input[name=drpInspTypes]:checked').val();
+        var isloaddata = 1;
+        var insMode = "addassets";
+        var epId = $('input[name=drpInspTypes]:checked').attr("epid");
+        $("#sdnpopup").val("1");
+        loadInspectionData(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId);
+    });
+
+    function loadInspectionData(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId) {
+        //console.log(CRxUrls.fireExtinguisher_ExtinguisherInspetion + '?mode=' + insMode + '&floorAssetId=' + floorAssetId + "&inspType=" + inspType + "&locationid=" + locationId + "&isloaddata=" + isloaddata + "&assetId=" + assetId + "&epId=" + epId);
+        $.get(CRxUrls.fireExtinguisher_ExtinguisherInspetion + '?mode=' + insMode + '&floorAssetId=' + floorAssetId + "&inspType=" + inspType + "&locationid=" + locationId + "&isloaddata=" + isloaddata + "&assetId=" + assetId + "&epId=" + epId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#extinguisherInsPopUp').modal('show');
+        });
+    }
+    function updatetype() {
+        debugger
+        $("#ascType").css("display", "block")
+        $(".asctype").hide();
+        $("#updateAscType").click(function () {
+            debugger
+            var asctext = $("#AssetcatId").find(":selected").text();
+            var ascid = parseInt($("#AssetcatId").val());
+            var FloorAssetsId = (@Model.FloorAssetsId);
+            var assettype = {};
+
+            if (asctext != "Select" && !isNaN(ascid)) {
+                assettype.url = '@Url.Action("UpdateAssetType", "Assets", new { area=""})';
+                assettype.type = "POST";
+                assettype.data = { FloorAssetsId: FloorAssetsId, ascid: ascid };
+
+                /*assettype.contentType = "application/json";*/
+                assettype.success = function (data) {
+
+                    if (data == 200) {
+                        $("#ascType").css("display", "none")
+                        $(".asctype").show();
+                        $("#asctype_value").val(asctext)
+                        $("#asctype_value").text(asctext)
+                    }
+                };
+                assettype.error = function () { AlertWarningMsg("Please select extinguisher type", ""); };
+                $.ajax(assettype);
+            } else {
+                AlertWarningMsg("Please select extinguisher type", "");
+            }
+        });
+    }
+
+</script>

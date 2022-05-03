@@ -1,0 +1,96 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Extensions\**" />
+    <EmbeddedResource Remove="Extensions\**" />
+    <None Remove="Extensions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Akron\TmsConnector.cs" />
+    <Compile Remove="Assets.cs" />
+    <Compile Remove="AssetTypeRepository.cs" />
+    <Compile Remove="BuildingsRepository.cs" />
+    <Compile Remove="BuildVersionRepository.cs" />
+    <Compile Remove="CategoryRepository.cs" />
+    <Compile Remove="ChartRepository.cs" />
+    <Compile Remove="CommonRepository.cs" />
+    <Compile Remove="CSVRepository.cs" />
+    <Compile Remove="DepartmentRepository.cs" />
+    <Compile Remove="DigitalSignRepository.cs" />
+    <Compile Remove="Documents.cs" />
+    <Compile Remove="DocumentTypeRepository.cs" />
+    <Compile Remove="Email.cs" />
+    <Compile Remove="EpDocumentRepository.cs" />
+    <Compile Remove="EpRepository.cs" />
+    <Compile Remove="EPSchedulerRepository.cs" />
+    <Compile Remove="ExercisesRepository.cs" />
+    <Compile Remove="FireWatchRepository.cs" />
+    <Compile Remove="FloorAssetRepository.cs" />
+    <Compile Remove="FloorRepository.cs" />
+    <Compile Remove="FloorShapesRepository.cs" />
+    <Compile Remove="FloorTypeRepository.cs" />
+    <Compile Remove="FrequencyRepository.cs" />
+    <Compile Remove="GoalMaster.cs" />
+    <Compile Remove="IlsmRepository.cs" />
+    <Compile Remove="InspectionActivityRepository.cs" />
+    <Compile Remove="InspectionRepository.cs" />
+    <Compile Remove="InsStepsRepository.cs" />
+    <Compile Remove="InsStepsTaskRepository.cs" />
+    <Compile Remove="IssueRepository.cs" />
+    <Compile Remove="LocationRepository.cs" />
+    <Compile Remove="MainGoalRepository.cs" />
+    <Compile Remove="ManufactureRepository.cs" />
+    <Compile Remove="MenuRepository.cs" />
+    <Compile Remove="NewsRepository.cs" />
+    <Compile Remove="NotificationRepository.cs" />
+    <Compile Remove="Organization.cs" />
+    <Compile Remove="PdfRepository.cs" />
+    <Compile Remove="PriorityRepository.cs" />
+    <Compile Remove="ReportsRepository.cs" />
+    <Compile Remove="Roles.cs" />
+    <Compile Remove="RoundInspectionsRepository.cs" />
+    <Compile Remove="Rounds.cs" />
+    <Compile Remove="SearchRepository.cs" />
+    <Compile Remove="ServicesRepository.cs" />
+    <Compile Remove="Services\FireDrillService.cs" />
+    <Compile Remove="SiteRepository.cs" />
+    <Compile Remove="SkillsRepository.cs" />
+    <Compile Remove="StandardRepository.cs" />
+    <Compile Remove="StatusRepository.cs" />
+    <Compile Remove="StepsRepository.cs" />
+    <Compile Remove="SubCategoryRepository.cs" />
+    <Compile Remove="SubStatusRepository.cs" />
+    <Compile Remove="TEPInspectionRepository.cs" />
+    <Compile Remove="TipsRespository.cs" />
+    <Compile Remove="Transaction.cs" />
+    <Compile Remove="TypeRepository.cs" />
+    <Compile Remove="Users.cs" />
+    <Compile Remove="WingRepository.cs" />
+    <Compile Remove="WorkOrder.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ClassDiagram1.cd" />
+    <None Remove="ClassDiagram2.cd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iTextSharp" Version="5.5.13.2" />
+    <PackageReference Include="itextsharp.xmlworker" Version="5.5.13.2" />
+    <PackageReference Include="Lucene.Net" Version="3.0.3" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HCF.BDO\HCF.BDO.csproj" />
+    <ProjectReference Include="..\HCF.DAL\HCF.DAL.csproj" />
+    <ProjectReference Include="..\HCF.Utility\HCF.Utility.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+﻿@model string
+
+    <form asp-controller="Auth" asp-area="" asp-action="LogOff" method="post" id="logoutForm">
+        <input type="hidden" name="currentpage" id="currentpage" value="-1"/>
+        <a href="javascript:document.getElementById('logoutForm').submit()" id="_linkLogout">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>Redirect to login
+        </a>
+    </form>
+
+    <script>
+    document.getElementById('logoutForm').submit();
+   // window.location.href = '@Url.Action("LogOff", "Auth",new { returnUrl = Model })';
+    </script>

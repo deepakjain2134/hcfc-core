@@ -1,0 +1,258 @@
+﻿@model List<HCF.BDO.TFloorAssets>
+@{
+    Layout = null;
+    List<Guid> activities = new List<Guid>();
+}
+
+<div class="table-res">
+    <table class="table table-bordered table-striped dataTable no-footer" id="floorAssetsforReports">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    Asset
+                </th>
+                <th>
+                    @Localizer["AssetNo"]
+                </th>
+                <th>
+                    Location
+                </th>
+                <th>
+                    @Localizer["NearBy"]
+                </th>
+                <th>
+                    Description
+                </th>
+                @*<th>
+                    EP
+                </th>*@
+
+                <th>
+                    @Localizer["LastInspectionDate"]
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    @Localizer["InspectorName"]
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @using (Html.BeginForm("PreviewReports", "Reports", FormMethod.Post, new { id = "signReportform" }))
+            {
+                @Html.AntiForgeryToken()
+                if (Model != null && Model.Count > 0)
+                {
+                    for (var i = 0; i < Model.Count(); i++)
+                    {
+                        for (var j = 0; j < Model[i].EPDetails.Count(); j++)
+                        {
+                            if (Model[i].EPDetails[j].TInspectionActivity.Any(x => x.FloorAssetId == Model[i].FloorAssetsId && x.IsSubmit == false))
+                            {
+
+                                var activity = Model[i].EPDetails[j].TInspectionActivity.FirstOrDefault(x => x.FloorAssetId == Model[i].FloorAssetsId && x.IsCurrent);
+                                if (activity != null)
+                                {
+                                    var status = activity.Status;
+                                    var list = activities.Contains(activity.ActivityId);
+                                    if (!list && status != 2)
+                                    {
+                                        activities.Add(activity.ActivityId);
+                                        <tr id='@activity.ActivityId.ToString()'>
+                                            <td class="comman_checkbox1">
+                                                <input type="hidden" name="TInsActivityId" id="TInsActivityId" value="">
+                                                <input type="checkbox" class="checkBox signAssetsChk" value="@activity.TInsActivityId" id="tInsActivityId" rel="@activity.ActivityId.ToString()"/><span></span>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => Model[i].Name)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => Model[i].AssetNo)
+                                            </td>
+                                            <td>
+                                                @commonModelFactory.GetFloorAssetLocation(Model[i])
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => Model[i].NearBy)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => Model[i].Description)
+                                            </td>
+                                            @*<td>
+                                                @Html.DisplayFor(modelItem => Model[i].EPDetails.FirstOrDefault().StandardEp)
+                                            </td>*@
+                                            <td>
+                                                @activity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                                            </td>
+                                            <td>
+
+                                                @if (status == 1)
+                                                {
+                                                    <span class="complaint">Compliant</span>
+                                                }
+                                                else
+                                                {
+                                                    if (status == 2)
+                                                    {
+                                                        <input id="chkbtn" class="ins_check3_Ins_btn" type="button" value="-1" onclick="tristateForIns1(this)" data-orgvalue="-1"
+                                                               data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                               tempname='@Model[i].EPDetails[j].EPDetailId' title="Inspection In Progress" />
+                                                    }
+                                                    else if (status == 0)
+                                                    {
+                                                        <span class="noncomplaint">
+                                                            Non Compliant
+                                                        </span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                @activity.UserProfile.FullName
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    <tr>
+                        <td colspan="9" class="text-right">
+                            <input type="submit" value="Sign & Save" class="comm-button" id="btnsignSubmit" />
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="nodataFound" style="text-align:center;display:none;">
+    No assets available for generate report
+</div>
+<input type="hidden" name="insactiId" id="insactiId" />
+<input type="hidden" name="activity_ID" id="activity_ID" />
+<script>
+    $("#btnsignSubmit").click(function () {
+        var count = 0;
+        var Ids;
+        var valueArray = [];
+        var valueAID = [];
+        $('input:checkbox[id^="tInsActivityId"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    valueArray.push($(this).val());
+                    count++;
+                }
+            }
+        });
+        $('input:checkbox[id^="tInsActivityId"]').each(function () {
+            var val = $(this).attr("rel");
+            if ($(this).is(":checked")) {
+                valueAID.push(val);
+                    count++;
+            }
+        });
+        $("#activity_ID").val(valueAID);
+        if (count > 0) {
+            debugger;
+            $("#insactiId").val(valueArray);
+            loadSignBox();
+            
+        } else {
+            AlertWarningMsg("Please select at least one asset!", "Message");
+           
+        }
+        
+    });
+
+
+    $(".signAssetsChk").click(function () {
+        debugger
+        var checkCount = $('input:checkbox[id^="tInsActivityId"]:checked').length;
+        var totalAssets = $('input:checkbox[id^="tInsActivityId"]').length;
+        console.log(totalAssets, checkCount);
+        if (checkCount == totalAssets) {
+            $("#selectAll").prop('checked', true);
+        } else {
+            $("#selectAll").prop('checked', false);
+        }
+    });
+
+    var loadSignBox = function () {
+        var C_fileName = "SignImageName";
+        var fileContent = "SignContent";
+        var imgPreview = "imgSignPreview0";
+        $('#signAndSave').empty();
+        var url = CRxUrls.common_digitalsignature;
+        $.ajax({
+            url: url + "?fileName=" + C_fileName + "&fileContent=" + fileContent + "&imgPreviewClass=" + imgPreview,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('#signAndSave').append(data);
+                $('#signAndSave').fadeIn('fast');
+            }
+        });
+        $('#signAndSave').modal('show');
+    };
+
+
+    var saveSignDone = function (digitalSign) {
+        $(".loadingModal").show();
+        var valueArray = [];
+        var data = $("#insactiId").val();
+        var arr = data.split(",");
+        for (var i = 0; i < arr.length; i++) {
+            valueArray.push(arr[i]);
+        }
+        var postData = { _tinsActivityId: valueArray };
+        $.ajax({
+            type: "GET",
+            url: CRxUrls.reports_previewreports,
+            data: postData,
+            success: function (data) {
+                $(".loadingModal").show();
+                $('#loadpartial').html(data);
+                $('#previewReports').modal('show');
+                $('#new_image').attr('src', digitalSign.Image).fadeIn(200);
+                $("input[name='SignImageName'][type=hidden]").val(digitalSign.FileName);
+                debugger;
+                $(".signaturebyName").html($("#hdnSignDoneBy").val());      
+                $(".signaturelocaltime").html($("#hdnLocalSignDateTime").val());      
+            },
+            traditional: true
+        });
+    }
+
+    var GetSignDone = function (digitalSign, Signdata) {
+        debugger;
+        $(".loadingModal").show();
+        var valueArray = [];
+        var data = $("#insactiId").val();
+        var arr = data.split(",");
+        for (var i = 0; i < arr.length; i++) {
+            valueArray.push(arr[i]);
+        }
+        var postData = { _tinsActivityId: valueArray };
+        $.ajax({
+            type: "GET",
+            url: CRxUrls.reports_previewreports,
+            data: postData,
+            success: function (data) {
+                debugger
+                $(".loadingModal").show();
+                $('#loadpartial').html(data);
+                $('#previewReports').modal('show');
+                $('#new_image').attr('src', digitalSign).fadeIn(200);
+                $("input[name='SignImageName'][type=hidden]").val(Signdata.Result[0].FileName);
+                $("input[name='SignContent'][type=hidden]").val(Signdata.Result[0].FileContent);   
+                
+            },
+            traditional: true
+        });
+    }
+</script>

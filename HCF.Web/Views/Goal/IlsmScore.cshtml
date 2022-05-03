@@ -1,0 +1,94 @@
+﻿@model List<HCF.BDO.Assets>
+@{
+    ViewBag.Title = " RA Score";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            RA Score
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary col-lg-12" id="Setting_Content">
+                        <div class="crx-raScore">
+                            <p class="bg-success">@commonModelFactory.GetCommonMessage()</p>
+                        </div>
+                        <table class="table table-hover table-expandable table-striped" id="assets_viewTable">
+                            <thead style="display:none;">
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var assetType in Model.Where(x => x.IsActive).OrderBy(x => x.Name))
+                                {
+                                    <tr>
+                                        <td class="details-control" rel='@assetType.AssetId'></td>
+                                        <td class="asset_title" style="text-align:left">
+                                            @assetType.Name
+                                        </td>
+                                        <td>
+                                            <img onclick="location.href ='@Url.Action("AddMainGoal", "Goal",new { assetId=assetType.AssetId})'"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)"
+                                                 title="Add Main Goal"
+                                                 class="projectedit" />
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+<script src="@Url.Content("~/dist/js/numericInput.min.js")"></script>
+<script>
+    $(".score_input").numericInput();
+
+    $(document).ready(function () {
+        var assettable = $('#assets_viewTable').DataTable({
+            "lengthChange": false,
+            "bPaginate": $('#assets_viewTable tbody tr').length > 50,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+        $('#assets_viewTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var assetTypeId = $(this).attr("rel");
+                var Url = '@Url.Action("GetAssetsSteps", "Goal")';
+                $.get(Url + "?assetId=" + assetTypeId, function (assets) {
+                    row.child(assets, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    });
+</script>

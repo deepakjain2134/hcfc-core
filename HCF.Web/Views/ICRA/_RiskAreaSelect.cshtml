@@ -1,0 +1,70 @@
+﻿@model HCF.BDO.ConstructionRisk
+@{
+    var riksarea = (List<HCF.BDO.ICRARiskArea>)TempData["ICRARiskArea"];
+}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title"><span class="popupTitle">@Model.RiskName</span> </h4>
+        </div>
+        <div class="modal-body asset_list_view">
+            <ul class="ulriskarea">
+                @if (Model.RiskArea.Count > 0 || riksarea.Where(x => x.IsActive == true && x.ApprovalStatus == 1).ToList().Count > 0)
+                {
+                    foreach (var item in Model.RiskArea.Where(x => x.IsActive == true && x.ApprovalStatus == 1).OrderBy(x=>x.Name))
+                    {
+                        <li>
+                            <input class="riskArea" type="checkbox" name="riskAreaName" value='@item.RiskAreaId' checked="checked" />
+                            <span></span> @item.Name
+                        </li>
+                    }
+                    foreach (var item in riksarea.Where(x => x.IsActive == true && x.ApprovalStatus == 1).OrderBy(x => x.Name))
+                    {
+                        <li>
+                            <input class="riskArea" type="checkbox" name="riskAreaName" value='@item.RiskAreaId' />
+                            <span></span> @item.Name
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>There is no risk area to assign!</li>
+                }
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <input type="hidden" value="@Model.ConstructionRiskId" id="hidden_constructionRiskId" />
+            @if (Model.RiskArea.Count > 0 || riksarea.Count > 0)
+            {
+                <button type="button" class="comm-button" data-dismiss="modal" id="saveRiskArea">Save</button>
+            }
+            <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).on("click", "#saveRiskArea", function () {
+        var constructionRiskId = $("#hidden_constructionRiskId").val();
+        if (constructionRiskId > 0) {
+            var riskAreas = [];
+            $("input:checkbox.riskArea:checked").each(function () {
+
+                riskAreas.push($(this).val());
+            });
+            $.ajax({
+                url: '@Url.Action("AddRiskAreaToArea", "ICRA")',
+                type: "POST",
+                data: { constructionRiskId: constructionRiskId, riskAreaIds: riskAreas.join(',')},
+                dataType: 'json',
+                success: function (result) {
+                    swalalert('updated successfully');                    
+                    var url = "@Url.Action("ConstructionRisk", "ICRA")";
+                    window.location.href = url;
+                }
+            });
+        }
+    });
+</script>

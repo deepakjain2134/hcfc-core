@@ -1,0 +1,377 @@
+﻿@model List<HCF.BDO.EPSteps>
+@{
+    ViewBag.Title = "Policy Binders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //HCF.Web.Base.Common docs = new HCF.Web.Base.Common();
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Policy Binders
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+                        <div class="row tablelist-topform">
+                            <div class="col-lg-8">
+                                <label>You are attaching &nbsp;&nbsp;</label>
+                                <div class="btn-group btn-group-vertical" data-toggle="buttons" style="width:50% !important">
+                                    <label class="btn active">
+                                        @Html.RadioButton("doctypefilter", 106, true)@Html.Label("Policy")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn hide">
+                                        @Html.RadioButton("doctypefilter", -1)@Html.Label("Sample Document")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-right">
+                                <input type="button" name="button" class="button1" value="Go To Inbox " onclick="location.href = '@Url.Action("Inbox", "Documents")'" />
+                                <input type="button" name="button" class="button1" value="Go To Policy Binder " onclick="location.href = '@Url.Action("Policies", "Repository")'" />
+                            </div>
+                        </div>
+
+
+                        <div class="row bs-example addpolicy-binder">
+                            <div class="col-md-12" id="accordion">
+                                <div class="card">
+                                    <div class="card-header" id="headingOne">
+                                        <h2 class="mb-0">
+                                            <button type="button" id="SelectDocs" class="btn btn-link" data-toggle="collapse" data-target="#collapseOne">Step 1: [Select document that you want to attach]</button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                                        <div class="card-body">
+                                            <div class="col-lg-12 col-xs-12">
+                                                <div id="dropfileList">
+                                                    <a class="comm-button" id="btnAddDoc">Add Document</a>
+                                                    
+                                                    <div id="dropfileItems">
+                                                        <ul class="fileList"></ul>
+                                                    </div>
+                                                </div>
+                                                <div id="loadpartial">
+                                                  
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" id="headingTwo">
+                                        <h2 class="mb-0">
+                                            <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo">Step 2: [Choose the policy to which this document relates]</button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                                        <div class="card-body">
+                                            <div class="col-lg-12 col-xs-12">
+                                                @*@Html.Action("GetDocumentEP", "Repository",
+        new { epdetailId = ViewBag.EPdetailId, mode = "add", selectedUser = 0 })*@
+                                                @await Component.InvokeAsync("RepositoryGetDocumentEP",
+                                   new { epdetailId = ViewBag.EPdetailId, mode = "add", selectedUser = 0 }
+                                  )
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card" id="part3">
+                                    <div class="card-header" id="headingThree">
+                                        <h2 class="mb-0">
+                                            <button type="button" id="verifydata" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree">Step 3: [Verify checkpoints and inspect]</button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div id="dialog-confirm-document" style="display: none">
+    <label id="msg"></label>
+</div>
+
+<input type="hidden" id="dropFilePath" />
+
+@section Scripts{
+    <script>
+
+        // 24 july 2020
+        var btnAddDoc = $("#btnAddDoc");
+        $("#dropfileItems").hide();
+
+        btnAddDoc.click(function() {
+            LoadRecentFiles();
+        });
+
+        var selectedFiles = "";
+
+        function fileUploadSuccess(tFiles, selectedFileString) {
+            if (tFiles != undefined && tFiles.length > 0) {
+                if (selectedFiles.length > 1) {
+                    swalalert("Select only one file to attach.");
+                    return false;
+                }
+                selectedFiles = selectedFileString;
+                //selectFile(tFiles[0]);
+                bindFileToList(tFiles);
+            }
+        }
+
+
+        function bindFileToList(tFiles) {
+            selectFile(tFiles[0]);
+            //.log(tFiles);
+            $("#dropfileItems ul").empty();
+            $("#dropfileItems").show();
+            $.each(tFiles,
+                function(index, item) {
+                    console.log(item);
+                    $("#dropfileItems ul").append('<li id="fileli' +
+                        item.TFileId +
+                        '"><div class="dropfileName"><span>File Name: </span>' +
+                        item.FileName +
+                        ' </div>' +
+                        '<a id="filePath" href="' +
+                        item.FilePath +
+                        '" target="_blank"><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)">' +
+                        '<div class="removedropfiles"><a class="removedropfile" id=' +
+                        item.TFileId +
+                        '>Remove</a></div></li>');
+                });
+        }
+
+
+        function selectFile(file) {
+            fileObject.fileId = file.TFileId;
+            fileObject.fileType = $.Constants.Policy;
+            fileObject.filename = file.FileName.concat(".", file.Extension);
+            fileObject.filePath = file.FilePath;
+            fileObject.documentId = file.TFileId;
+            fileView.collapse("hide");
+            policyView.collapse("show");
+            openDetailsView();
+        }
+
+        // end
+
+        var accordion = $('#accordion');
+        var fileView = $("#collapseOne");
+        var policyView = $("#collapseTwo");
+        var detailsView = $("#collapseThree");
+
+        var btnRemoveFile = $(".btnRemoveFile");
+        var btnSelectFile = $(".btnSelectFile");
+
+        var btnSelectPolicy = $(".btnAddPolicy");
+        var btnRemovePolicy = $(".btnRemovePolicy");
+
+        accordion.collapse();
+
+        var fileObject = { fileId: 0, filePath: "", fileType: 0, filename: "", documentId: 0 };
+        var policyObject = { docTypeId: 0, epDetailId: [], fileName: "", reviewDate: "", backpage: "policyupload" };
+
+
+        $("#documentep").on("click", ".btnRemovePolicy", function() {
+                policyObject = { docTypeId: 0, epDetailId: 0 };
+                policyTable.columns(0).search("").draw();
+                $(this).addClass("hide").removeClass("show");
+                $(this).closest("tr").find(".btnAddPolicy").removeClass("hide").addClass("show");
+                clearDetails();
+            });
+
+        $("#documentep").on("click", ".btnAddPolicy", function() {
+                // debugger;
+            if (selectedFiles) {
+                var docTypeId = $(this).attr("doctypeid");
+                var epid = $(this).attr("epid").split(",");
+                policyObject.docTypeId = docTypeId;
+                policyObject.epDetailId = epid;
+                policyTable.columns(0).search("^" + docTypeId + "$", true, false, true).draw();
+                $(this).closest("tr").find(".btnRemovePolicy").removeClass("hide");
+                $(this).removeClass("show").addClass("hide");
+                openDetailsView();
+            } else {
+                AlertWarningMsg("First select file to attach.")
+            }
+        });
+
+
+        $(document).on("click", ".removedropfiles", function () {
+            $(".fileList").empty();           
+            selectedFiles = "";
+        });
+
+        var openDetailsView = function() {
+            if ($("input[name='doctypefilter']:checked").val() === "-1") {
+                uploadSampleFile();
+            } else {
+                showEpCheckPoints();
+            }
+        }
+
+        var callFinalsteps = function() {
+          
+
+            localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedFiles));
+            localStorage.setItem('epDocEpsLists', JSON.stringify(policyObject));
+            window.location.href = CRxUrls.Goal_EPDocs + "?epId=" + policyObject.epDetailId[0];
+
+
+        }
+
+       
+        var resetView = function() {
+            detailsView.collapse("hide");
+            policyView.collapse("hide");
+            fileView.collapse("hide");
+            $("#epDocSteps").empty();
+        }
+
+        var clearDetails = function() {
+            detailsView.collapse("hide");
+        }
+
+      
+
+        $("input[name=doctypefilter]:radio").change(function() {
+            filterpolicy();
+        });
+
+        function filterpolicy() {
+            var typeId = $("input[name='doctypefilter']:checked").val();
+            if (typeId == -1) {
+                $("#part3").hide();
+            } else {
+                $("#part3").show();
+            }
+            fileTable.columns(0).search("").columns(2).search("").draw();
+            fileTable.columns(1).search("^" + typeId + "$", true, false, true).draw();
+        }
+
+        var uploadSampleFile = function() {
+            //var fileId = fileObject.fileId;
+            var fileContent = "";
+            //  var fileContent = fileObject.filename;
+            if (policyObject.docTypeId > 0 && (fileObject.fileId != null && fileObject.fileId != undefined)) {
+                $.ajax({
+                    url: CRxUrls.Documents_AddDocumentType,
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                        fileId: fileObject.fileId,
+                        fileContent: fileContent,
+                        fileName: fileObject.filename,
+                        doctypeId: policyObject.docTypeId,
+                        documentId: fileObject.documentId
+                    },
+                    success: function(data) {
+                        if (data.Result) {
+                            infoAlert("Saved sample doc successfully!", "message");
+                            window.location.href = CRxUrls.Repository_Policies;
+                            //window.location.reload(true);
+                        }
+
+                    }
+                });
+            }
+        }
+
+        var showEpCheckPoints = function() {
+            if (fileObject.fileId == 0) {
+                //WarningAlert("please first select step 1.");
+            } else if (policyObject.docTypeId == 0 && policyObject.epDetailId[0] != undefined && '@ViewBag.EPDetailId' > 0) {
+                callFinalsteps();
+            } else if (policyObject.docTypeId == 0) {
+                //WarningAlert("please first select step 2.");
+            } else if (fileObject.fileId == 0 && policyObject.docTypeId == 0) {
+                AlertWarningMsg("please first select step 1 and step 2.");
+            } else {
+                callFinalsteps();
+            }
+        }
+
+
+        $(".part2").hide();
+
+        var dropFiles = [];
+
+        var dropEps = [];
+
+       
+
+
+       
+    </script>
+
+
+    <style>
+       
+
+        .btn-group > .btn:first-child {
+            margin-left: 0;
+            padding-left: 0;
+        }
+
+        .choose_file {
+            border-radius: 8px;
+            padding: 4px 6px 4px 8px;
+            font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+            color: #7f7f7f;
+            margin-top: 2px;
+            background: url(/Images/Icons/upload_icon.png) 10px center no-repeat;
+            width: 50px;
+            display: inline-block;
+        }
+
+        .choose_file input[type="file"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 30px;
+        }
+
+
+        #dropfileList {
+            min-height: 50px !important;
+            border: 1px solid #ccc !important;
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 3px;
+            clear: both;
+        }
+
+        .fileList {
+            margin: 0px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .fileList li {
+            padding: 10px;
+            background: #fff;
+            margin-bottom: 3px;
+        }
+
+        .fileList li .removedropfiles {
+            float: right;
+        }
+
+        .fileList li .dropfileName {
+            float: left;
+            margin-right: 15px;
+        }
+    </style>
+}

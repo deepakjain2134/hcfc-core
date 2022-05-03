@@ -1,0 +1,48 @@
+﻿@model IEnumerable<HCF.BDO.TInsStepsTask>
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Step Activity</h4>
+    </div>
+    <div class="modal-body">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DeficiencyCode)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DeficiencyStatus)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CreatedDate)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@Url.Content("~/dist/Images/Icons/" + item.DeficiencyCode + ".png")" class="deficiencyIcons" title="@item.DeficiencyCode" />
+                            @*@item.DeficiencyCode*@
+                        </td>
+                        <td>
+                            @item.DeficiencyCode
+                        </td>
+                        <td>
+                            @item.DeficiencyStatus
+                        </td>
+                        <td>
+                            @item.CreatedDate.ToFormatDate()
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

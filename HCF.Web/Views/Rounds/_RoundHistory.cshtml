@@ -1,0 +1,27 @@
+﻿@model  List<HCF.BDO.TRounds>
+@if (Model.Count > 0)
+{
+
+    @*<ul class="rounds_list">*@
+    foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+    {
+        <li>
+            <div class="tble_shadow">
+                <span><strong>Date: </strong> @item.StartDate.Value.ToClientTime().ToFormatDate()</span>
+                <span><strong>Inspector Name: </strong> @item.UserProfile.FullName</span>
+                <span><strong>Location: </strong> @($"{item.Floors.FloorName}, {item.Floors.Building.BuildingName}")</span>
+                <span><strong>Wing: </strong>@($"{(item.Floors.Wing != null ? item.Floors.Wing.WingName.CastToNA() : "NA")}")</span>
+                <span><strong>Category: </strong> @item.CategoryName</span>
+                <span style="vertical-align:middle;">
+                    <strong>Detail:</strong>
+                    <img onclick="location.href='@Url.Action("RoundHistoryDetails", "Rounds", new { roundId = item.RoundCatId, floorId = item.FloorId, troundId = item.TRoundId })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" class="hyper_link" title="Detail" alt=""/>
+                </span>
+            </div>
+        </li>
+    }
+    @*</ul>*@
+}
+else
+{
+    <div class="tble_shadow text-center">No round history available in table</div>
+}

@@ -1,0 +1,168 @@
+﻿@model List<HCF.BDO.ICRARiskArea>
+@{
+    ViewBag.Title = "Department Risk Types";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+            <h1>
+                Department Risk Types
+            </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href='@(Url.Action("MngICRARiskArea", "ICRA"))' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add RiskArea" alt="3d_add_button" />
+                            </a>
+                        </div>
+                       
+                            <table id="RiskAreaTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Name
+                                        </th>
+                                        <th>
+                                            ICRA Risk Type
+                                        </th>
+                                        <th>
+                                            Fire Risk Type
+                                        </th>
+                                        <th style="display:none">Approval Status</th>
+                                        <th>
+                                            Active
+                                        </th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderBy(x => x.Name))
+                                    {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            @if (item.RiskType != null)
+                                            {
+                                                <span>@item.RiskType</span>
+                                            }
+                                            else
+                                            {
+                                                <span>NA</span>
+                                            }
+                                        </td>
+                                        <td>
+                                        
+
+                                            @{
+                                                HCF.BDO.Enums.FireRiskType enums = (HCF.BDO.Enums.FireRiskType)item.FireRiskType;
+                                            }
+                                            <p>@(item.FireRiskType>0?  enums.GetDescription():"N/A")</p>
+                                        </td>
+                                        <td class="comman_checkbox1 approvetd" style="display:none">
+                                            <input id="chkapprovalstatus" class="riskarea_check_btn" type="button" value="@item.ApprovalStatus" tempname="ApprovalStatus" />
+
+                                            @*@Enum.GetName(typeof(HCF.Utility.Enums.ApprovalStatus), item.ApprovalStatus)*@
+                                        </td>
+                                        <td class="comman_checkbox1">
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+                                        <td>
+                                            <img onclick="location.href ='@Url.Action("MngICRARiskArea", "ICRA", new { riskAreaId = item.RiskAreaId })'"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" />
+                                            @*@if (item.ApprovalStatus != 1 && HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+            {
+                <img id="@($"btn_{item.RiskAreaId}")" riskAreaId="@item.RiskAreaId" src="@Url.Content("~/dist/Images/Icons/approve_icon.png")" title="Approve" class="approveBtn" alt=""/>
+            }*@
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+    var myriskTable = $('#RiskAreaTable').DataTable({
+        searching: true,
+        pageLength: 20,
+        lengthChange: false,
+        bPaginate: $('#certification_myTable tbody tr').length > 20,
+        bInfo: false,
+        aaSorting: [],
+        language: {
+            emptyTable: "No data available in table",
+            search: "_INPUT_", //To remove Search Label
+            searchPlaceholder: "Search..."
+        },
+
+        aoColumnDefs: [
+            {
+                orderSequence: ["desc", "asc"],
+                aTargets: ['_all']
+            }
+        ],
+        dom: "Blftip",
+        buttons: [
+
+        ]
+    });
+
+    HideTableSorting();
+    $('#RiskAreaTable thead').click(function () {
+        HideTableSorting();
+    });
+    function HideTableSorting() {
+        const el = $('#RiskAreaTable th[aria-label]')[2];
+        const el3 = $('#RiskAreaTable th[aria-label]')[3];
+        $(el).removeClass("sorting");
+        $(el3).removeClass("sorting");
+    }  
+
+
+
+
+    $(".approveBtn").click(function () {
+        var control = $(this);
+        var riskAreaId = $(this).attr("riskAreaId");
+        console.log(riskAreaId);
+        var url = '@Url.Action("ApproveRisk","ICRA")';
+        $.get(url + "?riskAreaId=" + riskAreaId, function (data) {
+            if (data.ApprovalStatus == 1) {
+                swalalert("Area approved successfully!!");
+                control.hide();
+                debugger;
+                control.parent("td").parent("tr").find("td.approvetd").find("#chkapprovalstatus").val(1);
+            }
+        });
+    });
+</script>
+
+@*<style>
+    div#RiskAreaTable_filter {
+        padding-right: 45px;
+    }
+    .add_button_comman {
+        position: absolute;
+        right: 10px;
+        top: 17px;
+    }
+
+</style>*@

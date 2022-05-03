@@ -1,0 +1,193 @@
+﻿
+@model List<HCF.BDO.TDeviceTesting>
+<div class="dash-actvity-box dash-tabMenu">
+    <div class="text-right" style="width: 100%; display: inline-block; float: left;">
+        <button type="button" id="create_wo" class="@("button1 " + (Model.Count == 0 ? "disabled" : ""))">Create work order</button>
+    </div>
+</div>
+<div class="text-right">
+    <div id="rfilter" class="dashboard_filter">
+        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+            <label class="btn">
+                @Html.RadioButton("simensefliter", "ACTIV", false)@Html.Label("Active")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("simensefliter", "CMPLT", false)@Html.Label("Complete")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("simensefliter", "PENDG", false)@Html.Label("Pending")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn active">
+                @Html.RadioButton("simensefliter", "-1", true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+        </div>
+    </div>
+</div>
+<table id="deviceTestingTable" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" style="width:100% !important;">
+    <thead>
+        <tr>
+            <th style="display: none"></th>
+            <th></th>
+            <th>
+                Address
+            </th>
+            <th>Make/Model</th>
+            <th>
+                Test Date
+            </th>
+            <th>
+                Location
+            </th>
+            <th>
+                Comment
+            </th>
+            <th>@Localizer["WorkOrder"] </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var deviceTesting in Model.OrderByDescending(x => x.TestDate))
+        {
+            <tr>
+                @if (deviceTesting.IssueId == null)
+                {
+                    <td style="display: none"></td>
+                }
+                else
+                {
+                    <td style="display: none">
+                        @deviceTesting.WorkOrder.StatusCode
+                    </td>
+                }
+                <td class="@(deviceTesting.IssueId == null ? "woSimense" : "woSimense disable")">
+                    <input type="checkbox" value="@deviceTesting.Id" class="woSimense" id="wodevicesimense" />
+                    <input type="hidden">
+                    <span></span>
+                </td>
+
+                <td>
+                    @deviceTesting.Address
+                </td>
+                <td id="device_@deviceTesting.Id" rel="@deviceTesting.MakeModel">
+                    @deviceTesting.MakeModel
+                </td>
+                <td>
+                    @deviceTesting.TestDate.ToFormatDate()
+                </td>
+                <td>
+                    @deviceTesting.Location
+                </td>
+                <td id="devicecmnt_@deviceTesting.Id" rel="@deviceTesting.Comment">
+                    @deviceTesting.Comment
+                </td>
+                <td class="cwo">
+                    @if (deviceTesting.IssueId == null)
+                    {
+                        <a href="#" onclick="RedirecttoCreateWorkOrder('@deviceTesting.Id','@deviceTesting.MakeModel','@deviceTesting.Comment')">
+                            <span>Create work order</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href='#' onclick="RedirecttoWorkOrder('@deviceTesting.IssueId','UpdateWorkOrder')">
+                            WO #@deviceTesting.WorkOrder.WorkOrderId (@deviceTesting.WorkOrder.StatusCode)
+                        </a>
+                    }
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+
+    var simensetable = $('#deviceTestingTable').DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('#deviceTestingTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+        }, dom: "<'row'<'col-sm-3'l><'col-sm-9'><'col-sm-12 deficienciesshorting'p f>>" +
+            "<'row'<'col-sm-12'<'table-res'tr>>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+    });
+
+    $("input[name=simensefliter]:radio").change(function () {
+        debugger;
+        var val = $("input[name='simensefliter']:checked").val();
+        if (val != "-1")
+            simensetable.columns(0).search(val).draw();
+        else
+            simensetable.columns(0).search("").draw();
+    });
+
+    var failsimenselist = [];
+    var description, value;
+    var comment;
+    $("input[type=checkbox][class=woSimense]").change(function () {
+        debugger;
+        var ischecked = $(this).is(':checked');
+        value = $(this).val();
+        description = $('#device_' + value).attr("rel");
+        comment = $('#devicecmnt_' + value).attr("rel");
+        if (ischecked) {
+            failsimenselist.push({ 'value': value });
+            var uniqueNames = GetuniqueTypes();
+            if (uniqueNames.length > 1) {
+                $(this).attr('checked', false);
+                infoAlert('Select only same type of simense to create work order', "");
+                failsimenselist = $.grep(failsimenselist, function (e) {
+                    return e.value != value;
+                });
+                return false;
+            }
+        }
+        else {
+            failsimenselist = $.grep(failsimenselist, function (e) {
+                return e.value != value;
+            });
+        }
+    });
+
+
+    function GetuniqueTypes() {
+        debugger;
+        var uniqueNames = [];
+        for (i = 0; i < failsimenselist.length; i++) {
+            if (uniqueNames.indexOf(failsimenselist[i].value) === -1) {
+                uniqueNames.push(failsimenselist[i].value);
+            }
+        }
+        return uniqueNames;
+    }
+
+    $("#create_wo").click(function () {
+        debugger;
+        if (failsimenselist.length == 0) {
+            debugger;
+            swalalert($.Constants.Select_Atleast_One_Siemens_To_Create_WO);
+        } else {
+            debugger;
+            RedirecttoCreateWorkOrder(value, description, comment)
+        }
+    });
+
+    function RedirecttoCreateWorkOrder(value, description, comment) {
+        debugger;
+        var urlAction = "";
+        urlAction = CRxUrls.WorkOrder_CreateDeviceWorkOrder;
+        window.location.href = urlAction + "?id=" + value + "&description=" + description + "&comment=" + comment;
+    }
+</script>
+<style>
+    .deficienciesshorting {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+</style>

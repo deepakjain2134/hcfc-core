@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "SurveyHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        Adhoc Survey History
+    </h1>
+</section>
+ }
+
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform form-inline">
+                    <div class="col-lg-4">
+                        <label>Building:</label>
+                        <buildingdropdownList name="drpBuildings" selectedvalue="@ViewBag.buildingId" firsttext="All" firstvalue="0" class="form-control selectyear">
+
+                        </buildingdropdownList>
+                    </div>
+                    <div class="col-lg-4">
+                        <label>Floor:</label>
+                        <select id="floors" class="form-control">
+                            <option value="0">All</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12" id="content">
+                        <ul class="rounds_list" id="survey_list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+
+<script>
+    var buildingCtr = $("#drpBuildings");
+    var floorCtr = $("#floors");
+
+    $(document).ready(function () {
+        bindFloorddl(buildingCtr, floorCtr, '@ViewBag.floorId');
+        loadSurveyHistory();
+    });
+
+    buildingCtr.change(function () {
+        bindFloorddl(buildingCtr, floorCtr, 0, "", $.Constants.Floor_ddl_text_All);
+        loadSurveyHistory();
+    });
+
+    floorCtr.change(function () {
+        loadSurveyHistory();
+    });
+
+    var loadSurveyHistory = function () {
+        var floorId = '@ViewBag.floorId';
+        //debugger;
+        //if (floorCtr.val() > 0) {
+            floorId = floorCtr.val();
+        //}
+        var buildingId = 0;
+        if (buildingCtr.val() > 0) {
+            buildingId = buildingCtr.val();
+        }
+
+        var filterrounds = CRxUrls.Rounds_FloorSurveyHistory;
+        $.ajax({
+            url: filterrounds + "?floorId=" + floorId + "&buildingId=" + buildingId,
+            method: "GET",
+            contentType: 'application/json',
+            success: function (data) {
+                $("#survey_list").html(data);
+            },
+            error: function (error) {
+               // console.log(error);
+            }
+        });
+    }
+
+</script>
+
+}

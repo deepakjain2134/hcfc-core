@@ -1,0 +1,386 @@
+﻿@{
+    ViewBag.Title = "Route Based Inspection Report";
+
+    var currentMonth = DateTime.Now.Month;
+    var months = Enumerable.Range(1, 12).Select(i => new KeyValuePair<int, string>(i, System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(i))).ToDictionary(x => x.Key, x => x.Value);
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Route Based Inspection Reports
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div style="display:none">
+                        <label>Asset<em class="required-field"> *</em></label>
+                        @Html.DropDownList("assetsTypes", (SelectList)ViewBag.AssetsTypes,
+                       new { required = "required", @class = "form-control" })
+                    </div>
+                    <div class="col-md-6 col-xs-6 form-group">
+                        <label>Asset <span style="color:black;font-weight:bold;font-size:11px">(Select the asset for which you want the Inspection Reports)</span> <em class="required-field"> *</em></label>
+                        <select id="AssetId" class="form-control" required="required" name="AssetId"></select>
+                    </div>
+                    <div class="col-md-6 col-xs-6 form-group">
+                        <label>Standard,EP<span style="color:black;font-weight:bold;font-size:11px">(Select the EP for which you want the Inspection Reports)</span> <em class="required-field"> *</em></label>
+                        <select id="epdetailId" class="form-control" required="required" name="EPDetailId"></select>
+                    </div>
+                    <div class="col-md-4 col-xs-6 form-group">
+                        <label>Route # <em class="required-field"> *</em></label>
+                        @Html.DropDownList("drpRoutes", (SelectList)ViewBag.Routes, "All Routes (Including Inventory)", new { required = "required", @class = "form-control" })
+                    </div>
+                    @*<div class="col-lg-4">
+                            <ul class="legand">
+                                <li>F - Failed</li>
+                                <li>P - Passed</li>
+                                <li>R - Replaced</li>
+                            </ul>
+                        </div>*@
+
+                    <div class="col-md-2 col-xs-6 form-group">
+                        <label>Report Type<em class="required-field"> *</em></label>
+                        <select id="reportType" class="form-control" required="required" name="AssetId">
+                            <option value="M">Monthly</option>
+                            <option value="Q">Quarterly</option>
+                            <option value="W">Weekly</option>
+                            <option value="SM">Single Month</option>
+                            <option value="SA">Single Annual</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-xs-6 form-group">
+                        <label>Report Year<em class="required-field"> *</em></label>
+                        <select name="yearpicker" id="yearpicker" class="form-control"></select>
+                    </div>
+                    <div class="col-md-2 col-xs-6 form-group" id="monthDiv">
+                        <label>Select Month</label>
+                        <select id="monthName" class="form-control" name="monthName">
+                            <option value=''>Select</option>
+                            @foreach (var item in months)
+                            {
+                                <option value="@item.Key" selected="@((currentMonth==item.Key)? "true":"false")"> @item.Value</option>
+                            }
+                        </select>
+                    </div>
+                    @*<div class="col-lg-3">
+                            <label></label>
+                            <button type="button" id="submitButton" class="comm-button" name="submitButton" style="margin: 26px 0 0;">Generate Report</button>
+                        </div>*@
+                    <div class="col-md-4 col-xs-6">
+                        <div>&nbsp;</div>
+                        <div class="button_Div">
+                            <button class="comm-button" id="submitButton">Run Report</button>
+                            <button class="comm-button" id="btnrefresh">Refresh</button>
+                            <span style="display: inline-block;">
+                                @using (Html.BeginForm("RBIReports", "Pdf", FormMethod.Post, new { id = "FERouteReports" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="submit" value='Download Report' class="comm-button" id="btndownloadreprort" style="display:none" />
+                                    <input type="hidden" name="selAssetId" id="selAssetId" value="" />
+                                    <input type="hidden" name="selEpdetailId" id="selEpdetailId" value="" />
+                                    <input type="hidden" name="selReportType" id="selReportType" value="" />
+                                    <input type="hidden" name="selYear" id="selYear" value="" />
+                                    <input type="hidden" name="selMonth" id="selMonth" value="" />
+                                }
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="legand text-right form-inline">
+                            <span><label>F -</label> Failed</span>
+                            <span><label>P -</label> Passed</span>
+                            <span><label>R -</label> Replaced</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="fireextinguisherView">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var reportcntrl = $("#reportType");
+    var assetcntrl = $("#AssetId");
+    var epcntrl = $("#epdetailId");
+
+    debugger;
+
+    $('#fireextinguisherView').hide();
+    reportcntrl.change(function () {
+        var reportype = reportcntrl.val();
+        $("#monthDiv").hide();
+        if (reportcntrl.val() == "W" || reportcntrl.val() == "SM") {
+            $("#monthDiv").show();
+        }
+        $("#selReportType").val(reportype);
+    });
+
+
+    $(document).ready(function () {
+        $("#monthDiv").hide();
+        $("#AssetId").empty();
+        $("#AssetId").append(
+            $('<option></option>').val("").html("select"));
+
+        $("#epdetailId").empty();
+        $("#epdetailId").append(
+            $('<option></option>').val(0).html("Select"));
+        getAssetsbyType();
+        //loadReportData('Empty');
+        for (var i = new Date().getFullYear(); i > 2010; i--) {
+            $('#yearpicker').append($('<option />').val(i).html(i));
+        }
+        var routeId = parseInt('@ViewBag.routeId');
+        if (routeId > 0) { $("#drpRoutes").val(routeId); }
+        debugger;
+        var yearpicker = localStorage.getItem("yearpicker");
+
+        var assetId = $("#AssetId").val();//localStorage.getItem("assetId");
+        BindEPDetails(assetId);
+
+        var epdetailId = localStorage.getItem("epDetailId");
+        if (epdetailId > 0) {
+            epcntrl.val(epdetailId);
+        }
+
+        var monthName = localStorage.getItem("monthName");
+        var reportType = localStorage.getItem("reportType");
+        var data = localStorage.getItem("FEReportsData");
+
+        debugger;
+        var id = assetId;
+        if ((monthName != "" && monthName != undefined) && assetId != null) {
+            $("#reportType").val(reportType);
+            $("#yearpicker").val(yearpicker);
+            $("#AssetId").val(id);
+            $("#monthName").val(monthName);
+            if (data != null) {
+                $('#fireextinguisherView').html(data);
+                $('#fireextinguisherView').fadeIn('fast');
+                //loadReportData();
+            }
+        }
+
+    });
+
+    $("#submitButton").unbind().click(function () {
+        if ($("#AssetId").val() != "") {
+            loadReportData();
+        } else {
+            swal("Please select the asset first!!");
+        }
+    });
+
+
+    function BindEPDetails(AssestId) {
+        $("#epdetailId").empty();
+        $("#epdetailId").append(
+            $('<option></option>').val(0).html("Select"));
+        var epcount = 0;
+        if (AssestId != "") {
+            $.ajax({
+                url: '@Url.Action("GetAssetsEPs", "FireExtinguisher")',
+                type: "GET",
+                dataType: "JSON",
+                data: { assetId: AssestId },
+                success: function (lists) {
+                    $.each(lists, function (i, list) {
+                        if (list.StandardEp != "") {
+                            epcount++;
+                            debugger;
+                            $("#epdetailId").append($("<option></option>").attr({ "value": list.EPDetailId, "freq-id": list.EPFrequency[0].FrequencyId }).text(list.StandardEp));
+                            //$("#epdetailId").append($("<option></option>").attr("value", list.EPDetailId).attr("freq-id", list.EPFrequency.FrequencyId).text(list.StandardEp));
+                            //$("#epdetailId").append($('<option></option>').val(list.EPDetailId).html(list.StandardEp)).attr('freqid', list.EPFrequency.FrequencyId);
+                        }
+                    });
+                    if (epcount > 0) {
+                        epcntrl.val($("#epdetailId option:eq(1)").val());
+                        $("#selEpdetailId").val($("#epdetailId option:eq(1)").val());
+                    }
+                    CheckReportType();
+                }
+            });
+        }
+    }
+
+    function CheckReportType() {
+        debugger;
+        $("#reportType").val($("#reportType option:eq(0)").val());
+        var freqid = parseInt(epcntrl.find(':selected').attr('freq-id'));
+        if (freqid == 1) { // For Annually
+            $('#reportType option[value="SA"]').show();
+            $('#reportType option[value="SM"]').hide();
+        } else if (freqid == 7) { // For Monthly
+            $('#reportType option[value="SA"]').hide();
+            $('#reportType option[value="SM"]').show();
+        } else {
+            $('#reportType option[value="SM"]').hide();
+            $('#reportType option[value="SA"]').hide();
+        }
+    }
+
+
+    function loadReportData(data) {
+        debugger;
+        var yearpicker = $("#yearpicker").val();
+        $("#selYear").val(yearpicker);
+        var routNo = "0";
+        var assetId = assetcntrl.val();
+        var epdetailId = epcntrl.val();
+
+        localStorage.setItem("yearpicker", yearpicker);
+        localStorage.setItem("routNo", 0);
+        localStorage.setItem("assetId", assetId);
+        localStorage.setItem("monthName", monthName);
+        localStorage.setItem("epDetailId", epdetailId);
+
+        var reportType = reportcntrl.val();
+        if (reportType == 'W' || 'SM') {
+            var monthName = $("#monthName").val();
+        } else {
+            var monthName = "12";
+        }
+        $("#selMonth").val(monthName);
+        localStorage.setItem("reportType", reportType);
+        $("#selReportType").val(reportType);
+        if ($("#drpRoutes").val() != "") {
+            routNo = $("#drpRoutes").val();
+        }
+        debugger;
+
+        var url = '@Url.Action("FireExReports", "FireExtinguisher")';
+        if (assetId != "") {
+            if ($("#AssetId").val() != "" && data != "Empty") {
+                if (routNo) {
+                    $.get(url + "?year=" + yearpicker + "&routNo=" + routNo + "&assetId=" + assetId + "&epDetailId=" + epdetailId + "&reportType=" + reportType + "&monthNo=" + monthName, function (data) {
+                        localStorage.setItem("FEReportsData", data);
+                        $('#fireextinguisherView').html('');
+                        $('#fireextinguisherView').html(data);
+                        $('#fireextinguisherView').fadeIn('fast');
+                        $("#btndownloadreprort").show();
+                    });
+                }
+            } else {
+                $('#fireextinguisherView').hide();
+            }
+        } else {
+            AlertInfoMsg("Please select assets");
+        }
+    }
+
+
+    //$("#submitButton").click(function () {
+    //    loadReportData();
+    //});
+
+    $("#btnrefresh").click(function () {
+        ClearAllFields();
+        ClearData();
+    });
+
+    assetcntrl.change(function () {
+        var assetId = assetcntrl.val();
+        $("#selAssetId").val(assetId);
+        BindEPDetails(assetId);
+    });
+
+    epcntrl.change(function () {
+        var epdetailId = epcntrl.val();
+        $("#selEpdetailId").val(epdetailId);
+        CheckReportType();
+    });
+
+    function ClearAllFields() {
+        $("#AssetId").val('')
+        debugger;
+        //$("#reportType").val("M");
+        //$("#yearpicker").val("2020");
+        $("#reportType").val($("#reportType option:first").val());
+        $("#yearpicker").val($("#yearpicker option:first").val());
+        $("#monthDiv").hide();
+        $("#drpRoutes").val('');
+        epcntrl.val(0);
+        $("#btndownloadreprort").hide();
+        $('#fireextinguisherView').empty();
+        ClearData();
+        //$("#monthName").val('');
+        //$('.mutliSelect input[type="checkbox"]').each(function () {
+        //    $(this).removeClass("mulSelect");
+        //    $(this).prop("checked", false);
+        //});
+        //$(".selectAll:checkbox").prop("checked", false);
+        //$(".multiSelStaus").empty().text("Select");
+        //SetDefaultDate();
+        //loadReportData('Empty');
+    }
+
+    $("#yearpicker").change(function () {
+        ClearData();
+    });
+
+    $("#drpRoutes").change(function () {
+        ClearData();
+    });
+
+
+    function ClearData() {
+        $('#fireextinguisherView').empty();
+    }
+
+
+    function getAssetsbyType() {
+        debugger;
+        console.log($("#assetsTypes").val());
+        //if ($("#assetsTypes").val() != "") {
+            //$("#AssetId").empty();
+            //$("#AssetId").append(
+            //    $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssets", "Assets")';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = { assetTypeId: $("#assetsTypes").val() };
+            floorOptions.datatype = "json";
+            /*floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    if (lists[i].AssetId == parseInt('@ViewBag.AssetId')) {
+                        $("#AssetId").append(
+                            $('<option selected="selected"></option>').val(lists[i].AssetId).html(lists[i].Name));
+                        $('#AssetId').trigger('change');
+                    }
+                    else {
+                        $("#AssetId").append(
+                            $('<option></option>').val(lists[i].AssetId).html(lists[i].Name));
+                    }
+                }
+                //debugger;
+                var assetId = parseInt('@ViewBag.assetId');
+                if (assetId > 0) { $("#AssetId").val(assetId); }
+                $("#AssetId").prop("disabled", false);
+                //BindEPDetails(assetId);
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting Asset!!", ""); };
+            $.ajax(floorOptions);
+        //}
+        //else {
+        //    $("#AssetId").empty();
+        //    $("#AssetId").append(
+        //        $('<option></option>').val("").html("Select"));
+        //}
+    }
+
+</script>

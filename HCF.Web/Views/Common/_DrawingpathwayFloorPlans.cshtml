@@ -1,0 +1,277 @@
+﻿@model IEnumerable<HCF.BDO.FloorTypes>
+@{
+    Layout = null;
+    var buildings = Model.FirstOrDefault().Floors.Select(x => x.Building).ToList().GroupBy(x => x.BuildingId).Select(x => x.FirstOrDefault()).ToList();
+
+}
+<div class="row">
+    <div class="col-md-4 col-sm-12 selbulding-bottom">
+        <select id="selbuildings" class="form-control">
+            <option value="">All</option>
+            @foreach (var item in buildings.OrderBy(x => x.BuildingName))
+            {
+                <option value="@item.BuildingId">@item.BuildingName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4 col-sm-12 selbulding-bottom">
+        <input type="button" value="Attach Drawings" class="comm-button" id="SaveDrawings" />
+    </div>
+</div>
+
+<table id="floorDataTable" class="table table-bordered table-striped no-footer">
+    <thead>
+        <tr>
+            <th style="display:none;"></th>
+            <th>
+
+            </th>
+            <th>@Localizer["BuildingName"] </th>
+            <th> @Localizer["FloorName"]  </th>
+            @*<th> @Resources.Resource.History </th>*@
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var floorType in Model)
+        {
+            foreach (var item in floorType.Floors)
+            {
+                foreach (var floorPlans in item.FloorPlans.Where(x => x.FloorPlanTypeId == ViewBag.floorTypID))
+                {
+                    if (!string.IsNullOrEmpty(floorPlans.FloorPlanId.ToString()) && !string.IsNullOrEmpty(floorPlans.FileName) && !string.IsNullOrEmpty(floorPlans.ImagePath) && floorPlans.IsCurrent == true)
+                    {
+                        <tr id="@floorPlans.FloorPlanTypeId">
+                            <td style="display:none;">
+                                @item.BuildingId
+                            </td>
+                            <td class="comman_checkbox1 comman_checkbox">
+                                <input name="drawingcheck" type="checkbox" id="chkdraw_@floorPlans.FloorPlanId" data-FloorPlanId="@floorPlans.FloorPlanId" class="chBox drawingcheck" />
+                                <span></span>
+                            </td>
+
+                            <td>
+                                @if (!string.IsNullOrEmpty(floorPlans.ImagePath))
+                                {
+                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = floorPlans.ImagePath, title = item.FloorName + " , " + item.Building.BuildingName })"
+                                       class="modal-link" rel="popover" data-img="@commonModelFactory.FilePath(floorPlans.ImagePath)">
+                                        @($"{item.Building.BuildingName} ({item.Building.BuildingCode})")
+                                    </a>
+
+
+                                }
+
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FloorName)
+                            </td>
+
+                            @*<td title="History">
+                                    <img onclick="location.href ='@Url.RouteUrl("floorplanhistory", new { floorId = item.FloorId })'" src="~/dist/img/icon3.png" title="History" alt="History" />
+                                </td>*@
+                        </tr>
+                    }
+
+                }
+            }
+
+        }
+    </tbody>
+</table>
+
+<script>
+        $('#modal-container').on('hide.bs.modal', function () {
+
+           if( $('#modal-container1').hasClass('in'))
+            {
+                debugger;
+                setTimeout(function () {
+                    $('body').addClass('modal-open');
+                }, 1000)
+            }
+
+
+        });
+        $(document).ready(function () {
+            var floorDataTable = $('#floorDataTable').DataTable({
+                searching: true,
+                pageLength: 20,
+                lengthChange: false,
+                bPaginate: $('#floorDataTable tbody tr').length > 20,
+                bInfo: false,
+                aaSorting: [],
+                language: {
+                    emptyTable: "No data available in table",
+                    search: "_INPUT_", //To remove Search Label
+                    searchPlaceholder: "Search..."
+                },
+
+                aoColumnDefs: [
+                    {
+                        orderSequence: ["desc", "asc"],
+                        aTargets: ['_all'],
+                        orderable: false, targets: 1
+                    }
+                ],
+                //dom: "<'row'<'col-sm-12'l p f>>" +
+                //    "<'row'<'col-sm-12'<'cus-responsive'tr>>>" +
+                //    "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+                dom: "<'row'<'col-sm-2'><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+            });
+
+            $('#selbuildings').on('change', function () {
+                debugger;
+                var buildingId = $(this).val();
+                if (buildingId > 0) {
+                    floorDataTable.column(0).search("^" + buildingId + "$", true, true, false).draw();
+                }
+                else
+                    floorDataTable.columns(0).search("").draw();
+
+                var str = $("#attachdrawingFiles").val();
+                var str_array = str.split(',');
+                debugger;
+                for (var i = 0; i < str_array.length; i++) {
+                    debugger;
+                    $("#chkdraw_" + str_array[i]).attr("checked", true);
+                    // Trim the excess whitespace.
+                    // str_array[i] = str_array[i].replace(/^\s*/, "").replace(/\s*$/, "");
+                    // Add additional code here, such as:
+                    // alert(str_array[i]);
+
+                }
+            });
+
+
+        });
+
+        $(document).off("change", ".drawingcheck").on("change", ".drawingcheck", function () {
+            debugger;
+            if ($(this).prop("checked")) {
+                if (arrchecked.length >= 5) {
+                    swalalert("Please select upto five drawings only");
+                    $(this).attr("checked", false);
+
+                }
+                else {
+                    arrchecked.push($(this).attr("data-FloorPlanId"));
+                    arrchecked = getUnique(arrchecked);
+                }
+            } else {
+                for (var i = 0; i < arrchecked.length; i++) {
+                    if (arrchecked[i] === $(this).attr("data-FloorPlanId")) {
+                        arrchecked.splice(i, 1);
+                        break;
+                    }
+                }
+
+            }
+
+        });
+
+        function getUnique(array) {
+            var uniqueArray = [];
+
+            // Loop through array values
+            for (i = 0; i < array.length; i++) {
+                if (uniqueArray.indexOf(array[i]) === -1) {
+                    uniqueArray.push(array[i]);
+                }
+            }
+            return uniqueArray;
+        }
+
+
+       // i = 0;
+        $("#SaveDrawings").click(function () {
+            debugger;
+            if (arrchecked.length > 0) {
+                var fileid = "";
+                //$('.drawingcheck:checked').each(function () {
+
+                //    fileid +=$(this).attr("data-FloorPlanId") + ",";
+
+                //    console.log($(this).attr("data-FloorPlanId"));
+                //});
+                for (i = 0; i < arrchecked.length; i++) {
+                    //fileid += $("#chkdraw_" + arrchecked[i]).attr("data-FloorPlanId") + ",";
+                    fileid += arrchecked[i] + ",";
+                }
+                $("#attachdrawingFiles").val(fileid);
+                $("#modal-container1").modal("hide");
+                //$("#modal-container1").hide();
+                //$("#modal-container1").modal('toggle');
+                $("#modal-container .close").click();
+                $("#modal-container1 .close").click();
+                $(".modal-backdrop.in").hide();
+                BindDrawingsFile();
+            }
+            else {
+                swalalert("Please select atleast one drawing");
+            }
+
+
+        });
+
+        function BindDrawingsFile() {
+    debugger;
+            var attachmentsId = $("#attachdrawingFiles").val();
+    if (attachmentsId != undefined) {
+        $.ajax({
+            //url: '@Url.Action("GetUploadedFile", "Common")' + "?attachment=" + $("#attachFiles").val(),
+            url: CRxUrls.Common_GetUploadedDrawings + "?attachment=" + $("#attachdrawingFiles").val(),
+            cache: false,
+            type: "GET",
+            success: function(data) {
+                var filelst = "";
+                if (data != null) {
+                    //filelst += '<ul class="col-lg-12 attachfileitems">';
+                    for (var i = 0; i < data.length; i++) {
+                        filelst += '<li class="list-group-item files" id = "lidrawingdv_' + data[i].FloorPlanId + '" > ';
+
+                        if (typeof $("#TempPermitNumber").val() === "undefined") {
+                            filelst += '<a href="/Common/ImagePreview?imgSrc=' +
+                            encodeURI(data[i].ImagePath) +
+                            '&title=' + encodeURI(data[i].FloorName + " , " + data[i].BuildingName) + '"  title = ' + data[i].FileName + ' class="modal-link allowclick" > ' + data[i].FullFileName + '</a > ';
+                        }
+                        else {
+                            filelst += '<a href="/Common/DrawingPreview?floorPlanId=' + data[i].FloorPlanId + '&mode=drawing&permitId=' + $("#TempPermitNumber").val() + '" title = ' + data[i].FileName + ' class="modal-link allowclick" > ' + data[i].FullFileName + '</a > ';
+                        }
+
+                        //filelst += '<a href="/Common/ImagePreview?imgSrc=' +
+                        //    encodeURI(data[i].ImagePath) +
+                        //    '&title=' + encodeURI(data[i].FloorName + " , " + data[i].BuildingName) + '"  title = ' + data[i].FileName + ' class="modal-link allowclick" > ' + data[i].FullFileName + '</a > ';
+                            filelst += ' <a data-id=' +
+                                data[i].FloorPlanId +
+                                ' class="deletedrawing allowclick"> <img id="deletedrawing" alt="Delete" title="Delete file" src="/dist/Images/Icons/red_cross.png" /> </a></li>';
+
+                            if ($("#drawing-upload-list").find("#drawing-lists").find("ul").length > 0 ||
+                                typeof $("#drawing-upload-list").find("#drawing-lists").find("ul") !== 'undefined') {
+                                $('#lidrawingdv_' + data[i].FloorPlanId).remove();
+                            } else {
+
+                            }
+
+
+                    }
+                    //filelst += '</ul>';
+                   if ($("#drawing-upload-list").find("#drawing-lists").find("ul").length > 0 ||
+                        typeof $("#drawing-upload-list").find("#drawing-lists").find("ul") !== 'undefined') {
+                        $("#drawing-upload-list").find("#drawing-lists").find("ul").html(filelst);
+                    } else {
+                        $("#drawing-upload-list").find("#drawing-lists").find("ul").html(
+                            '<div id="drawing-lists"><ul class="col-lg-12 attachdrawingfiles">' + filelst + '</ul></div>');
+                    }
+
+                    $(".selectList").show();
+                }
+
+            }
+
+        });
+    }
+
+}
+
+</script>

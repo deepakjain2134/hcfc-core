@@ -1,0 +1,68 @@
+﻿@model HCF.Web.ViewModels.UserDrawingViewModel
+@{   
+    var isExits = false;
+    if (!Model.UserId.HasValue || Model.UserId.Value == 0)
+    {
+        isExits = true;
+    }
+    if (Model.VendorId > 0)
+    {
+        isExits = false;
+    }
+}
+<div class="table-responsive userlist-table" style="margin:6px;">
+    <table class="table table-bordered">
+        <tr>
+            @foreach (var item in Model.Drawings)
+            {
+                <th>
+                    @item.FloorType
+                </th>
+            }
+        </tr>
+        <tr>
+            @foreach (var item in Model.Drawings)
+            {
+                if (Model.SelectedItems != null)
+                {
+                    isExits = Model.SelectedItems.Contains(item.FloorTypeId);
+                }
+                <td>
+                    <input class="drawingTypeChk" type="checkbox"
+                           @(isExits == true ? "checked='checked'" : string.Empty)
+                           value="@item.FloorTypeId" /><span></span>
+
+                </td>
+            }
+        </tr>
+    </table>
+    <input type="hidden" name="drawingsIds" id="drawingsIds" />
+</div>
+
+<style>
+    .comman_checkbox1 input[type="checkbox"] + span {
+        background: url(/dist/Images/User/checkbox-step0.svg);
+        background-color: #fff;
+        border: solid 1px #d7d7d7;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        height: 24px;
+        width: 24px;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .comman_checkbox1 input[type="checkbox"]:checked + span {
+        background: url(/dist/Images/User/checkbox-step1.svg);
+        background-color: #fff;
+        border: solid 1px #d7d7d7;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        height: 24px;
+        width: 24px;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+</style>

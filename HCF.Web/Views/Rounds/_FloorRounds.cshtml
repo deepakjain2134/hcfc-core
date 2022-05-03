@@ -1,0 +1,181 @@
+﻿@model HCF.BDO.TRounds
+<div>
+    @if (Model.DigitalSignature != null)
+    {
+        @Html.HiddenFor(m => Model.DigitalSignature.FileContent)
+        @Html.HiddenFor(m => Model.DigitalSignature.FileName)
+    }
+    <input type="hidden" id="hdnfileName" />
+    <input type="hidden" id="hdnsubmitButton" name="submitButton" />
+</div>
+
+@if (Model.Floors != null)
+{
+    <div class="tble_shadow round-formcont">
+        
+             
+        <div class="form-group"><strong>Category: </strong>@Model.CategoryName</div>
+        <div class="form-group"><strong>Inspector Name: </strong> @HCF.Web.Base.UserSession.CurrentUser.FullName</div>
+        <div class="form-group"><strong>Date: </strong> @DateTime.Now.Date.ToFormatDate()</div>
+        <div class="form-group">
+            <span><strong>Location: </strong> @($"{Model.Floors.FloorName}, {Model.Floors.Building.BuildingName}")</span>
+        </div>
+        <div class="form-group">
+            <strong>Wing: </strong> @Html.DropDownListFor(m => m.WingId, new SelectList(ViewBag.Wings, "WingId", "WingName"),
+                "Not Applicable", new { @class = "form-control wingddl" })
+        </div>
+        <div class="form-group">
+            <strong>History: </strong> <img onclick="location.href ='@Url.Action("RoundHistory", "Rounds", new { floorId = Model.FloorId, roundId = Model.RoundCatId, rId = Model.RoundCatId, buildingId = Model.Floors.BuildingId })'"
+            src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="History" />
+        </div>
+              
+            
+    </div>
+}
+
+<table class="table floorRoundtbl">
+    @for (int j = 0; j < Model.TRoundsQuestionnaires.Count(); j++)
+    {
+        <tr id=@($"tr{Model.TRoundsQuestionnaires[j].RoundsQuestionnaires.RouQuesId}") class="details @(@Model.TRoundsQuestionnaires[j].RoundsQuestionnaires.IsShared ? "shareQuestr" : "Questr")">
+
+            <td width="10%">
+                <input id="InsStatus"
+                       class="round_check_btn" type="button" onclick="tristate1(this)"
+                       value="@Model.TRoundsQuestionnaires[j].Status"
+                       tempname='TRoundsQuestionnaires[@j].Status' oninput="validate(this)" />
+
+                @Html.HiddenFor(x => Model.TRoundsQuestionnaires[j].Status)
+            </td>
+            <td width="55%" style="vertical-align: middle;">
+                @Html.HiddenFor(x => Model.TRoundsQuestionnaires[j].RouQuesId)
+                @Model.TRoundsQuestionnaires[j].RoundsQuestionnaires.RoundStep
+            </td>
+            <td style="vertical-align: middle;" width="30%">
+                @Html.TextBoxFor(x => Model.TRoundsQuestionnaires[j].Comment, null, new { @class = "form-control", oninput = "validate(this)" })
+            </td>
+
+        </tr>
+    }
+    @if (Model.TRoundsQuestionnaires.Count > 0)
+    {
+        <tr>
+            <td colspan="3">Comment</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                @Html.TextAreaFor(x => x.Comment)
+            </td>
+        </tr>
+    }
+</table>
+@if (Model.TRoundsQuestionnaires.Any())
+{
+    <a class="imgSignPreview0" id="imgSignPreview0">
+        <img class="SignBy" height="50px"
+             imgPreview="imgSignPreview0"
+             src="@(@Model.DigitalSignature !=null ? @commonModelFactory.FilePath(Model.DigitalSignature.FilePath) : @Url.Content(HCF.Web.Models.ImagePathModel.SignIcon))" />
+        <br />
+        <span class="imgSignName">
+            @(@Model.DigitalSignature != null && Model.DigitalSignature.FileName != null ? Model.DigitalSignature.FileName.Split('.')[0] : "")
+        </span>
+    </a>
+
+    <div class="button_Div">
+        <input name="submitButton" type="button" class="comm-button" value="Save & Done" id="btnSavedone" />
+        <input name="submitButton" type="button" class="comm-bluebutton" value="Save Incomplete" id="btnRoundIncomplete" />
+        @Html.ActionLink("Cancel", "rounds", "", new { @class = "comm-Cancelbutton" })
+    </div>
+}
+else
+{
+    <div class="norecord">
+        No Questionnaire found for @Model.CategoryName
+    </div>
+}
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+<script>
+
+    var form_original_data = $("#Roundsform").serialize();
+
+    $(document).on('click', '.SignBy', function () {
+        loadSignBox();
+    });
+
+  
+
+   $('#Share').change(function () {
+        if (this.checked) {
+            $("tr.shareQuestr").show();
+        } else {
+            $("tr.shareQuestr").hide();
+        }
+    });
+
+   $("#btnSavedone").click(function () {
+        if ($("#Roundsform").serialize() != form_original_data || '@Model.Status' == 2) {
+            if ($("#DigitalSignature_FileName").val().length == 0) {
+                loadSignBox();
+            } else {
+                $("#hdnsubmitButton").val($(this).val());
+                $("#Roundsform").submit();
+            }
+        } else {
+            //swal("please change any status of inspections.");
+            infoAlert("please change any status of inspections.", "Message");
+            return false;
+        }
+    });
+
+    $("#btnRoundIncomplete").click(function () {
+         if ($("#Roundsform").serialize() != form_original_data || '@Model.Status' == 2) {
+             var value = $("#btnRoundIncomplete").val();
+            $("#hdnsubmitButton").val(value);
+            $("#Roundsform").submit();
+         } else {
+             infoAlert("please change any status of inspections.", "Message");
+             //swal("please change any status of inspections.");
+            return false;
+        }
+    });
+
+    var loadSignBox = function () {
+        var C_fileName = "DigitalSignature.FileName";
+        var fileContent = "DigitalSignature.FileContent";
+        var imgPreview = "imgSignPreview0";
+        $('#signAndSave').empty();
+        var url = CRxUrls.common_digitalsignature;
+        $.ajax({
+            url: url + "?fileName=" + C_fileName + "&fileContent=" + fileContent + "&imgPreviewClass=" + imgPreview,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('#signAndSave').append(data);
+                $('#signAndSave').fadeIn('fast');
+            }
+        });
+        $('#signAndSave').modal('show');
+    };
+
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+
+    $('#Roundsform').submit(function () {
+        debugger
+        $("#btnSavedone", this)
+            .attr('disabled', 'disabled');
+
+        return true;
+    });
+
+</script>
+<style>
+    .wingddl {
+        width: 32%;      
+        border: 0;
+        margin: -26px 120px 0 35px;
+    }
+</style>

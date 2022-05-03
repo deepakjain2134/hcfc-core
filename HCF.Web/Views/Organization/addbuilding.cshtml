@@ -1,0 +1,145 @@
+﻿@model HCF.BDO.Buildings
+
+@{
+    ViewBag.Title = Localizer["AddBuilding"].Value;
+    string stateId = Convert.ToString(ViewBag.StateId);
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["AddBuilding"] 
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+
+                        <div class="row">
+
+                            <div class="col-md-6 form-group">
+                                <label> Site <em class="required-field"> *</em></label>
+                                <sitedropdownlist name="SiteCode"
+                                                  selectedvalue="@((!string.IsNullOrEmpty(Model.SiteCode) ? Model.SiteCode : string.Empty))"
+                                                  firsttext="Select Site"
+                                                  class="form-control"
+                                                  required="required">
+                                </sitedropdownlist>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.BuildingName)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(model => model.BuildingName, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                @Html.ValidationMessageFor(model => model.BuildingName)
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.BuildingAssignUserId)
+                                <userdropdownlist name="BuildingAssignUserId" selectedvalue="@((Model.BuildingAssignUserId > 0) ? Model.BuildingAssignUserId : 0)"
+                                                  firsttext="Select Building User" class="form-control"></userdropdownlist>
+
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>State<em class="required-field"> *</em></label>
+                                <statedropdownlist name="State"
+                                                   selectedvalue="@Convert.ToInt32(Model.StateId)"
+                                                   firsttext="Select State"
+                                                   class="form-control"
+                                                   required="required">
+                                </statedropdownlist>
+                                @*@Html.StateDropDownList("State", Convert.ToInt32(Model.StateId), "Select State", new { @class = "form-control", required = "required", @onchange = "loadCities()" })*@
+                                @Html.ValidationMessageFor(model => model.StateId)
+                            </div>
+
+
+                            <div class="col-md-6 form-group">
+                                <label>Building Type<em class="required-field"> *</em></label>
+                                <select id="BuildingTypeId" name="BuildingTypeId" required="required" class="form-control">
+                                    <option value="">Select Building Type</option>
+                                    <option value="2">Business Occupancy</option>
+                                    <option value="1">Healthcare Occupancy</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.BuildingCode)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(model => model.BuildingCode, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                @Html.ValidationMessageFor(model => model.BuildingCode)
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.Address)
+                                @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @maxlength = "150" })
+                                @Html.ValidationMessageFor(model => model.Address)
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>City<em class="required-field"> *</em></label>
+                                <citydropdownlist name="CityId"
+                                                  selectedvalue="@Model.CityId"
+                                                  stateId="@Convert.ToInt32(Model.StateId)"
+                                                  firsttext="Select City"
+                                                  class="form-control"
+                                                  required="required"></citydropdownlist>
+                                @Html.ValidationMessageFor(model => model.CityId)
+                            </div>
+                            <div class="col-md-6 form-group">
+
+                                @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                @Html.ValidationMessageFor(m => m.IsActive)
+                                <label>Active</label>
+                            </div>
+                        </div>
+                            <div class="row">
+                                <div class="col-md-12 text-right button_Div">
+                                    <input type="submit"id="btnSubmit" value='@Localizer["Save"]' class="comm-button" />
+                                    @*@Html.ActionLink("Cancel ", "Buildings", "Organization", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "Buildings", new { controller = "Organization" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#SiteCode").attr("required", true)
+        $("#State").attr("required", true)
+        $("#CityId").attr("required", true)
+
+        var buildingTypeId = '@Model.BuildingTypeId';
+        if (buildingTypeId > 0) {
+            $("#BuildingTypeId").val(buildingTypeId);
+        }
+        $('#BuildingAssignUserId option:first-child').attr('value', '0');
+    });
+
+    $("#State").on("change", function () {
+        debugger;
+        loadCities();
+    });
+
+   function loadCities() {
+       let stateId = $('#State').val();
+       stateId = stateId != null ? parseInt(stateId) : 0;
+       let url = CRxUrls.Common_GetCities;
+       let htmlData = '<option value="">Select City</option>';
+        $.get(url + "?stateId=" + stateId, function (data) {
+            for (var item of data) {
+                htmlData += '<option value="' + item.CityId + '">' + item.CityName + '</option>';
+            }
+            $('#CityId').html(htmlData);
+        });
+    }
+</script>

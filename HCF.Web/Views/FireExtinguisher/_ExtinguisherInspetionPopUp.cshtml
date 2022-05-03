@@ -1,0 +1,317 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Manage Asset</h4>
+</div>
+<div class="modal-body">
+    <div class="" id="inspectionView">
+
+        <div class="manage-popgorup">
+            <p><b>Stop (Stop Code): </b><span class="ascName">@ViewBag.StopInfo</span></p>
+            <div class="form-group manage-searchPopup">
+                @Html.HiddenFor(x => x.FloorAssetsId)
+                <h4>if you have Tag/BarCode then please enter <em class="required-field">*</em></h4>
+                <div class="codeSearch clearable">
+                    @Html.TextBoxFor(model => model.SerialNo, null, new { @class = "form-control barcode-control asset12", required = "required", maxlength = 50 })
+                    <span class="barcodebtn">
+                        <a href="#"></a>
+                        <a href="#" id="txtSearch"><i class="fa fa-search" id=""></i></a>
+                    </span>
+                </div>
+                @Html.ValidationMessageFor(model => model.SerialNo)
+            </div>
+
+            @*<div class="form-group">
+                    <label>Location</label>
+                    <div class="ascName">
+                        @if (Model.FloorAssetsId > 0)
+                        {
+                            <div id="AssetsCurrentlocation">@string.Format("{0}-{1}", HCF.Web.Base.Common.GetFloorAssetLocation(Model), ViewBag.LocationName)</div>
+                        }
+                        else
+                        {
+                            <div id="AssetsCurrentlocation">@string.Format("{0}", HCF.Web.Base.Common.GetFloorAssetLocation(Model))</div>
+                        }
+                    </div>
+                </div>*@
+
+            @*<div class="form-group">
+                    <label>Type</label>
+                    <div class="ascName">
+                        @if (Model.AssetSubCategory != null)
+                        {
+                            @Html.DisplayFor(model => model.AssetSubCategory.AscName)
+                            <input type="hidden" value="@Model.AssetSubCategory.AscName" name="orgAscName" id="orgAscName" />
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Make</label>
+                    <div class="manufName">
+                        @if (Model.Make != null)
+                        {
+                            @Model.Make.ManufactureName
+                        }
+                    </div>
+                </div>*@
+        </div>
+        @*@if (Model.FloorAssetsId > 0)
+            {
+                <div class="" id="markEmptyBox">
+                    <div class="form-group comman_checkbox">
+                        <label>Mark this stop empty</label>
+                        @Html.CheckBox("IsMarkLocationEmpty")<span></span>
+                    </div>
+                </div>
+            }*@
+        <div class="modal-footer common-btnBox">
+            <button type="button" class="btn comm-Cancelbutton" id="btncancel">Cancel</button>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="form-horizontal" id="addNewView">
+            add new Fire Extinguisher view
+        </div>
+    </div>
+</div>
+
+
+<input type="hidden" value="@ViewBag.RBIEPid" id="epDetailId" name="epDetailId" />
+
+<input type="hidden" value="@Model.FloorAssetsId" id="orgFloorAssetsId" name="orgFloorAssetsId" />
+<input type="hidden" value="@Model.SerialNo" id="orgTagNo" name="orgTagNo" />
+<input type="hidden" value="@ViewBag.locationId" id="locationId" name="locationId" />
+<input type="hidden" value="@ViewBag.isloaddata" id="isloaddata" name="isloaddata" />
+<input type="hidden" name="selassetId" id="selassetId" value="@ViewBag.AssetId" />
+<input type="hidden" name="location" id="locationid" value="@ViewBag.LocationId" />
+
+
+@*@await Html.PartialAsync("_assetNotExistpopup")*@
+
+
+<script>
+    var orgFloorId = $("#orgFloorAssetsId").val();
+    var commentBox = $("#commentBox");
+    var inspBox = $("#inspBox");
+    var markEmptyBox = $("#markEmptyBox");
+    var isMarkLocationEmpty = $('#IsMarkLocationEmpty');
+    var locationId = $("#locationId").val();
+
+    $(document).ready(function () {
+        $("#addNewView").hide();
+        if (orgFloorId == 0) {
+            commentBox.hide();
+            inspBox.hide();
+            markEmptyBox.hide();
+        }
+    });
+
+
+    $("#emptyBtn").click(function () {
+        var orgFloorAssetsId = $("#orgFloorAssetsId").val();
+        RemoveFloorAssetsFromCurrentLocation(orgFloorAssetsId);
+    });
+
+    var showAssetInsp = function () {
+        commentBox.show();
+        inspBox.show();
+        markEmptyBox.show();
+    };
+
+    var hideAssetInsp = function () {
+        commentBox.hide();
+        inspBox.hide();
+        markEmptyBox.hide();
+    }
+
+
+    isMarkLocationEmpty.change(function () {
+        //debugger;
+        var floorAssetId = $("#FloorAssetsId").val();
+        var serialNo = $("#SerialNo").val();
+        //var locationId = $("#locationId").val();
+        var assetId = $("#sassetId").val();
+        var orgFloorAssetsId = $("#orgFloorAssetsId").val();
+        var inspType = $('input[name=drpInspTypes]:checked').val();
+        var isloaddata = 1;
+        var insMode = 'inspection';
+        var isMarkLocationEmpty = $('#IsMarkLocationEmpty').is(':checked');
+        var epId = $('input[name=drpInspTypes]:checked').attr("epid");
+        var locationId = $("#locationid").val();
+        var popupvalue = $("#sdnpopup").val();
+        var markEmptyBox = $("#markEmptyBox").val();
+        $(".asset12").val(serialNo);
+        if (isMarkLocationEmpty == true) {
+            if (serialNo != undefined && floorAssetId != undefined) {
+                swal({
+                    html: true,
+                    title: "Are you sure?",
+                    text: "<label>You want to this location empty?</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, Mark Empty",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm ) {
+                    if (isConfirm) {
+                        if (popupvalue == "2" || popupvalue == "1" && markEmptyBox == "") {
+                            RemoveFloorAssetsFromCurrentLocation(orgFloorAssetsId);
+                        } else {
+                            ReplaceFloorAssetName(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+
+    function ReplaceFloorAssetName(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId) {
+        //debugger;
+        var serialno = $("#SerialNo").val();
+        $.get(CRxUrls.fireExtinguisher_ExtinguisherInspetion + '?mode=' + insMode + '&floorAssetId=' + floorAssetId + "&inspType=" + inspType + "&locationid=" + locationId + "&isloaddata=" + isloaddata + "&assetId=" + assetId + "&epId=" + epId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#extinguisherInsPopUp').modal('show');
+            $("#spanAssetNo").html(serialno);
+        });
+    }
+
+
+    function RemoveFloorAssetsFromCurrentLocation(orgFloorAssetsId) {
+        //debugger;
+        var url = '@Url.Action("RemoveFloorAssetsFromCurrentLocation", "FireExtinguisher")';
+        $.ajax({
+            url: url + '?orgFloorAssetsId=' + orgFloorAssetsId,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                if (data.isClosedPopUp == 1) {
+                    swal(data.msg);
+                    $('#extinguisherInsPopUp').modal('hide');
+                    if ($("#isloaddata").val() == 1) {
+                        loadData();
+                    }
+                } else {
+                    swal(data.msg);
+                }
+            }
+        });
+    }
+
+
+    $("#popupCancel").click(function () {
+        $("#smode").val(0);
+    });
+
+
+    //$("#closeBtn").click(function () { $('#extinguisherPopUpMsg').modal('hide'); });
+
+        $("#txtSearch").click(function () {
+            var tagNo = $("#SerialNo").val();
+            var orgTageNo = $("#orgTagNo").val();
+            if (tagNo.length == 0) {
+                //ideAssetInsp();
+                return false;
+            } else if (orgTageNo == tagNo) {
+                swal( "Bar code # " + orgTageNo + " is already added to this location.");
+                return false;
+            }
+        var assetId = $("#selassetId").val();
+        var orgFloorAssetsId = $("#orgFloorAssetsId").val();
+        var stopno = "";
+        var orgTagno = $("#orgTagNo").val();
+        if (tagNo) {
+            var url = '@Url.Action("GetTfloorAssetsByTagNo", "FireExtinguisher")';
+            $.get(url + '?tagNo=' + tagNo + "&stopcode=" + stopno + "&assetId=" + assetId, function (data) {
+                console.log(data.success);
+                console.log(data.Result);
+                if (data.success == false) {
+
+                    swal({
+                        html: true,
+                        title: "Message",
+                        text: "<label> Tag/BarCode # you entered does not exist.</label>",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "ADD NEW",
+                        cancelButtonText: "CANCEL",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            var assetId = $("#sassetId").val();
+                            var locationId = $("#locationId").val();
+                            var serialNo = $("#SerialNo").val();
+                            openNewAsset(locationId, assetId, serialNo);
+                        }
+                    });
+                    //$('#extinguisherPopUpMsg').modal('show');
+                } else {
+                    var floorAssetId = data.Result.FloorAssetsId;
+                    var make = data.Result.Make.ManufactureName;
+                    var assetlocationId = data.Result.StopId;
+                    if (tagNo != orgTagno) {
+                        var textmsg = "";
+                        if (data.Result.Floor.Building.BuildingName != null && data.Result.Floor.FloorName != null) {
+                            textmsg = (assetlocationId != undefined && assetlocationId != "")
+                                ? "Tag/BarCode you entered belong to another location (" +
+                                data.Result.Floor.Building.BuildingName +
+                                "-" +
+                                data.Result.Floor.FloorName +
+                                ") do you want to replace"
+                                : "Tag/BarCode you entered belong to inventory do you want to replace";
+                        } else {
+                            textmsg = (assetlocationId != undefined && assetlocationId != "")
+                                ? "Tag/BarCode you entered belong to another location do you want to replace"
+                                : "Tag/BarCode you entered belong to inventory do you want to replace";
+                        }                        
+
+                        swal({
+                            html: true,
+                            title: "Message",
+                            text: "<label>"+textmsg+"</label>",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "REPLACE",
+                            cancelButtonText: "CANCEL",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        }, function (isConfirm) {
+                            if (isConfirm) {
+                                //showAssetInsp();
+                                var currentlocation = data.Result.Floor.Building.BuildingName + "-" + data.Result.Floor.FloorName;
+                                $("#AssetsCurrentlocation").html(currentlocation);
+                                $("#FloorAssetsId").val(data.Result.FloorAssetsId);
+                                $(".ascName").html(data.Result.AssetSubCategory.AscName);
+                                //console.log(data.Result.AssetSubCategory.AscName);
+                                $(".manufName").html(data.Result.Make.ManufactureName);
+                                AddAssetTlocation(floorAssetId, locationId, orgFloorAssetsId,assetId);
+                            } else {
+                                var orgAscName = $("#orgAscName").val();
+                                $("#SerialNo").val(orgTagno);
+                                $("#FloorAssetsId").val(orgFloorAssetsId);
+                                $(".ascName").html(orgAscName);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        });
+
+        $("#btncancel").click(function () {
+            $('#extinguisherInsPopUp').modal('hide');
+        });
+
+
+</script>
+<style>
+    .modal-dialog {
+        max-width: 50%;
+    }
+</style>

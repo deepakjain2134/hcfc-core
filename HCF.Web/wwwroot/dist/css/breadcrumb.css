@@ -1,0 +1,134 @@
+﻿.home_brud a {
+    padding-left: 10px !important;
+}
+
+.breadcrumb-arrow {
+    height: 20px;
+    list-style: none;
+    float: none;
+    display: inline-block;
+}
+
+.help_icon {
+    display: inline-block;
+    padding-left: 6px;
+    vertical-align: middle;
+}
+
+.breadcrumb {
+    padding-right: 0;
+}
+
+.floorplan_redirect {
+    display: none;
+}
+
+.breadcrumb-arrow li:first-child a {
+    border-radius: 4px 0 0 4px;
+    -webkit-border-radius: 4px 0 0 4px;
+    -moz-border-radius: 4px 0 0 4px;
+}
+
+.breadcrumb-arrow li, .breadcrumb-arrow li a, .breadcrumb-arrow li span {
+    display: inline-block;
+}
+
+    .breadcrumb-arrow li:not(:first-child) {
+        margin-left: -5px;
+    }
+
+    .breadcrumb-arrow li + li:before {
+        padding: 0;
+        content: "";
+    }
+
+    .breadcrumb-arrow li span {
+        padding: 0 10px;
+    }
+
+    .breadcrumb-arrow li a, .breadcrumb-arrow li:not(:first-child) span {
+        height: 20px;
+        padding: 0 0px 0 20px;
+        line-height: 17px;
+    }
+
+    .breadcrumb-arrow li:first-child a {
+        padding: 0 10px;
+    }
+
+    .breadcrumb-arrow li a {
+        position: relative;
+        color: #2494be;
+        text-decoration: none;
+    }
+
+    .breadcrumb-arrow li:first-child a {
+        padding-left: 10px;
+        padding-right: 0;
+    }
+
+    .breadcrumb-arrow li a:after, .breadcrumb-arrow li a:before {
+        position: absolute;
+        top: 4px;
+        width: 0;
+        height: 0;
+        content: '';
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+    }
+
+    .breadcrumb-arrow li:last-child {
+        pointer-events: none;
+    }
+
+    .breadcrumb-arrow li a:before {
+        right: -10px;
+        z-index: 3;
+        border-left-color: #f5f5f5;
+        border-left-style: solid;
+        border-left-width: 4px;
+    }
+
+    .breadcrumb-arrow li a:after {
+        right: -11px;
+        z-index: 2;
+        border-left: 4px solid #949494;
+    }
+
+    .breadcrumb-arrow li a:focus, .breadcrumb-arrow li a:hover {
+        /*background-color: #4fc1e9;
+        border: 1px solid #4fc1e9*/
+        text-decoration: underline;
+    }
+
+        .breadcrumb-arrow li a:focus:before, .breadcrumb-arrow li a:hover:before {
+           
+        }
+  
+    .breadcrumb-arrow li span {
+        color: #434a54;
+    }
+
+.backbtn a {
+    color: #2494be !important;
+    list-style-type: none;
+}
+
+.breadcrumb-arrow li.backbtn a:before, .breadcrumb-arrow li.backbtn a:after {
+    display: none;
+}
+
+.breadcrumb-arrow li:last-child a:before, .breadcrumb-arrow li:last-child a:after {
+    display: none;
+}
+
+.breadcrumb-arrow li:last-child a {
+    padding-right: 0;
+    color: #000;
+    font-weight: normal;
+}
+
+.leftpadding {
+    float: left;
+    padding: 0;
+}

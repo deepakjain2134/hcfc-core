@@ -1,0 +1,521 @@
+﻿@model IEnumerable<HCF.BDO.TInspectionActivity>
+@{
+    ViewBag.Title = "ComplianceIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedValues = "0";
+    if (@ViewBag.SelectedAssetIDs != null) { selectedValues = @ViewBag.SelectedAssetIDs; }
+    //var lists = AssetsRepository.Get().Where(x => x.IsActive).ToList();
+    //int[] values = lists.Select(x => x.AssetId).ToArray();
+    //string concat = String.Join(",", values.ToArray());
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Compliance Report
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-12 form-group text-right">
+                        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn active">
+                                @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xs-6  form-group">
+                        <div class="search_options">
+                            <label>Assets (<strong>Select the assets for which you want the compliance report</strong>)</label>
+                            @*@Html.AssetsDownList("AssetId", selectedValues, "All", new { @class = "form-control ddlbox", multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })*@
+                            <assetsdownlist name="AssetId" selectedvalue="@selectedValues" firsttext="All" class="form-control ddlbox" multiple="multiple"></assetsdownlist>
+                        </div>
+                        <input type="hidden" value="@ViewBag.AssetsId" id="assetids" />
+                    </div>
+                    <div class="col-md-6 col-xs-6 form-group">
+
+                        <label>Building</label>
+                        @*@Html.BuildingDropDownList("drpBuildings", 0, "All", new { @class = "form-control selectyear" })*@
+                        <buildingdropdownList name="drpBuildings" selectedvalue="0" firsttext="All" class="form-control selectyear"></buildingdropdownList>
+
+                    </div>
+                    <div class="col-md-3 col-xs-4 form-group">
+
+                        <label>Floor</label>
+                        <select id="floorId" class="form-control"></select>
+
+                    </div>
+                    <div class="col-md-3 col-xs-4 form-group">
+
+                        <label>From</label>
+                        <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+
+                    </div>
+                    <div class="col-md-3 col-xs-4 form-group">
+
+                        <label>To</label>
+                        <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+
+                    </div>
+                    <div class="col-md-3 col-xs-4 form-group">
+
+                        <label>Status</label>
+                        <select id="drpStatus" name="drpStatus" class="form-control">
+                            <option value="">All</option>
+                            <option value="1">Compliant</option>
+                            <option value="2">Non-compliant</option>
+                        </select>
+                        @*@Html.AssetStatusDropDown("drpStatus", "ACTIV", "All Assets", new { @class = "form-control ddlbox" })*@
+
+                    </div>
+                    <div class="col-md-3 col-xs-4 form-group">
+                        <div>&nbsp;</div>
+                        <button class="comm-button" id="btnrunreport">Run Report</button>
+                        <button class="comm-button" id="btnrefresh">Refresh</button>
+                    </div>
+
+                </div>
+                @*<div>
+                        <input type="submit" name="button" class="button1 btn_complience complience" id="btn_compliance" value="Compliant " />
+                        <input type="submit" name="button" class="button1 btn_noncompliance noncomplience" id="btn_noncompliance" value="Non-compliant" />
+                        <input type="submit" name="button" class="button1 active" id="btn_all" value="All " />
+                    </div>*@
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="report_compliance" id="partialContents">
+                            @*@await Html.PartialAsync("~/Views/Reports/_complianceIndex.cshtml", Model)*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    div#c_myTable_paginate {
+        position: absolute;
+        right: 15px;
+        top: 0;
+    }
+</style>
+<script>
+    var assetIdindex = 0;
+    $(document).ready(function () {
+
+        $("#floorId").empty();
+        $("#floorId").append(
+            $('<option></option>').val("").html("All"));
+        var assetids = null;//localStorage.getItem("assetids");
+        var IDS = null;//localStorage.getItem("assetids");
+        var drpBuildings = null;//localStorage.getItem("drpBuildings");
+        var floorId = null;//localStorage.getItem("floorId");
+        var from = null;//localStorage.getItem("from");
+        var todate = null;//localStorage.getItem("todate");
+        var drpStatus = null;//localStorage.getItem("drpStatus");
+        var data = null;//localStorage.getItem("ComplianceData");
+
+
+        if (from != "" && todate != "" && assetids != null) {
+
+            ids = IDS.split(',').length
+
+
+            if (ids > 0) {
+                $(".multiSelStaus").empty().text(ids + " assets selected");
+            } else {
+                $(".multiSelStaus").empty().text("Select");
+            }
+
+            $("#assetids").val(assetids);
+            $("#drpBuildings").val(drpBuildings);
+            $("#floorId").val(floorId);
+            $("#from").val(from);
+            $("#todate").val(todate);
+            $("#drpStatus").val(drpStatus);
+            if (data != null) {
+                $('#partialContents').html(data);
+                $('#partialContents').fadeIn('fast');
+            }
+            //loadData();
+        } else { SetDefaultDate(); }
+
+
+
+        @*var selectedvalue = '@ViewBag.SelectedAssetIDs';
+        var str2 = "-1";
+        if (selectedvalue.indexOf(str2) != -1) {
+            //$('.dropdown-menu').find('.selectpicker').find('li').addClass("selected");
+            $('.ddlboxLive').addClass('open');
+        } else {
+            $.get("@Url.Action("ComplianceIndex", "Reports")" + '?assetids=' + selectedvalue, function (data) {
+
+                $('.ddlboxLive').addClass('open');
+            })
+        }*@
+    });
+
+    $(document).on("change", "#AssetId", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (assetIdindex == 0) {
+            var lastAllSelected = false;
+            assetIdindex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+        @*Array.prototype.Remove = function () {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+        var previousvalue = localStorage.getItem("values");
+        var value = $(this).val();
+        var str2 = "-1"
+        if (value != null) {
+            if (value.indexOf(str2) == -1 && value.length == @concat.Split(',').Length ) {
+                getSelectedAsset("0")
+                localStorage.clear()
+                return;
+            }
+            if (value == "-1") {
+                getSelectedAsset(value)
+                localStorage.setItem("values", value);
+                return
+            }
+            if (value.length <= @values.Length && value[0] == "-1") {
+                value.Remove("-1")
+                if (previousvalue.split(',').length == value.length) {
+                    getSelectedAsset("-1")
+                } else {
+                    getSelectedAsset(value)
+                }
+                localStorage.setItem("values", value);
+                return
+            }
+            if (value.length <= @values.Length && value[0] != "-1") {
+                getSelectedAsset(value)
+                localStorage.setItem("values", value);
+                return
+            }
+        }*@
+    });
+
+    function getSelectedAsset(value) {
+
+        @*var url = "@Url.Action("ComplianceIndex", "Reports")";
+        window.location.href = url + '?assetids=' + value;*@
+        //window.location.href = "reports_Compliance";
+    }
+
+
+    //$(function () {
+
+    //});
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+    $("#drpBuildings").change(function () {
+        getfloors();
+    });
+
+    function getfloors(floorId) {
+        if ($("#drpBuildings").val() != "") {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization")';
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ buildingId: $("#drpBuildings").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (floorList) {
+                for (var i = 0; i < floorList.length; i++) {
+                    $("#floorId").append(
+                        $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                }
+
+                $("#floorId").val(floorId);
+                @*if (parseInt(@ViewBag.FloorId) > 0) {
+                    $("#floorId").val(@ViewBag.FloorId);
+                }*@
+                //LoadData();
+
+            };
+            floorOptions.error = function () { alert("Error in Getting States!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            //LoadData();
+        }
+    }
+
+    $("#btnrunreport").click(function () {
+        loadData();
+    });
+
+    $("#btnrefresh").click(function () {
+
+        var url = "@Url.Action("ComplianceIndex", "Reports")";
+        window.location.href = url;
+        //ClearAllFields();
+    });
+
+    //$('.mutliSelect input[type="checkbox"]').on('click', function () {
+    //    //var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+    //    //    title = $(this).val() + ",";
+
+    //    //console.log();
+    //    if ($(this).val() === "0") {
+    //        console.log($(this).is(':checked'))
+    //        var status = $(this).is(':checked');
+    //        $('input:checkbox[class=assetChekcBox]').each(function () {
+    //            $(this).prop("checked", status);
+    //            //.prop('checked', false)
+    //        });
+    //    } else {
+    //        if ($(this).is(':checked')) {
+    //            $(this).addClass("mulSelect");
+    //        } else {
+    //            $(this).removeClass("mulSelect");
+    //        }
+    //    }
+
+    //    if ($('.assetChekcBox:checkbox:checked').length == $('.assetChekcBox:checkbox').length) {
+    //        $(".selectAll:checkbox").prop("checked", true);
+    //    } else {
+    //        $(".selectAll:checkbox").prop("checked", false);
+
+    //    }
+    //    //return false;
+    //    //$(".dropdown dd ul").hide();
+
+    //    var assets = [];
+    //    $('.assetChekcBox:checkbox:checked').each(function () {
+    //        assets.push($(this).attr("id"));
+    //    });
+
+
+    //    if (assets.length > 0) {
+    //        $(".multiSelStaus").empty().text(assets.length + " assets selected");
+    //    } else {
+    //        $(".multiSelStaus").empty().text("Select");
+    //    }
+
+    //    //$("#assetids").val(assets.join(","))
+    //    //LoadData();
+    //    //LoadData(assets.join(","));
+    //});
+
+
+    function loadData() {
+
+        var assetids = $("#AssetId").val();
+        var assetidslist = [];
+        var buildingId = $("#drpBuildings").val();
+        var floorId = $("#floorId").val();
+        var from = $("#from").val();
+        var todate = $("#todate").val();
+        var status = $("#drpStatus").val();
+        //localStorage.setItem("assetids", assetids);
+        localStorage.setItem("drpBuildings", buildingId);
+        localStorage.setItem("floorId", floorId);
+        localStorage.setItem("from", from);
+        localStorage.setItem("todate", todate);
+        localStorage.setItem("drpStatus", status);
+        if (assetids != null && assetids != "") {
+            assetidslist.push(assetids);
+            assetids = assetidslist.join(',')
+
+
+            var url = '@Url.Action("ComplianceReport", "Reports")';
+            $.ajax({
+                url: url + '?assetIds=' + assetids + "&buildingId=" + buildingId + "&floorId=" + floorId + "&fromdate=" + from + "&todate=" + todate + "&status=" + status,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    //localStorage.setItem("ComplianceData", data);
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                }
+            });
+        } else {
+            AlertWarningMsg("Please select assets")
+        }
+    }
+
+    function ClearAllFields() {
+        $("#AssetId").val('');
+        $("#drpBuildings").val('');
+        $("#floorId").val('');
+        $('#drpStatus').val('');
+        $("#assetids").val('');
+        $('#partialContents').empty();
+        $(".ddlbox").selectpicker('val', 0);
+        $('.mutliSelect input[type="checkbox"]').each(function () {
+            $(this).removeClass("mulSelect");
+            $(this).prop("checked", false);
+        });
+        $(".selectAll:checkbox").prop("checked", false);
+        $(".multiSelStaus").empty().text("Select");
+        SetDefaultDate();
+        LoadData();
+    }
+
+    $('.ddlbox').selectpicker().on('loaded.bs.select', enableBoostrapSelectOptgroup);
+
+    function enableBoostrapSelectOptgroup() {
+
+        let that = $(this).data('selectpicker'),
+            inner = that.$menu.children('.inner');
+
+        // remove default event
+        inner.off('click', '.divider, .dropdown-header');
+        // add new event
+        inner.on('click', '.divider, .dropdown-header', function (e) {
+            // original functionality
+            e.preventDefault();
+            e.stopPropagation();
+            if (that.options.liveSearch) {
+                that.$searchbox.trigger('focus');
+            } else {
+                that.$button.trigger('focus');
+            }
+
+            // extended functionality
+            let position0 = that.isVirtual() ? that.selectpicker.view.position0 : 0,
+                clickedData = that.selectpicker.current.data[$(this).index() + position0];
+
+            // copied parts from changeAll function
+            let selected = null;
+            for (let i = 0, data = that.selectpicker.current.data, len = data.length; i < len; i++) {
+                let element = data[i];
+                if (element.type === 'option' && element.optID === clickedData.optID) {
+                    if (selected === null) {
+                        selected = !element.selected;
+                    }
+                    element.option.selected = selected;
+                }
+            }
+            that.setOptionStatus();
+            that.$element.triggerNative('change');
+        });
+    }
+
+</script>
+<style>
+    div#c_myTable_filter {
+        position: absolute;
+        right: 15px;
+    }
+
+    div#c_myTable_paginate {
+        right: 212px !important;
+    }
+
+    div.dt-buttons {
+        margin-bottom: 10px;
+    }
+
+    .workOrder-search .searchItem1 {
+        min-height: 80px;
+        padding: 0 8px;
+    }
+
+    .workOrder-search .col-lg-3.searchItem2 {
+        padding-top: 21px;
+    }
+
+    div#c_myTable_paginate {
+        /*position: absolute;
+        top: 38px;*/
+        right: 285px;
+    }
+</style>

@@ -1,0 +1,103 @@
+﻿@model HCF.BDO.UserProfile
+
+@{
+    ViewBag.Title = Localizer["UpdateEditProfile"];
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["UpdateEditProfile"]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("EditProfile", "User", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.UserId)
+                        @*@Html.HiddenFor(model => model.UserTypeId)*@
+                        
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.FirstName)
+                                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.FirstName)
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.UserName)
+                                        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(model => model.UserName)
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.LastName)
+                                        @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.LastName)
+                                    </div>
+
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(model => model.UserGroupIds)
+                                            @Html.DropDownListFor(m => m.UserGroupIds, new List<SelectListItem>
+                                            {
+                                                new SelectListItem{ Text="Select user group", Value = " " },
+                                                new SelectListItem{ Text="SystemAdmin", Value = "1" },
+                                                new SelectListItem{ Text="Admin", Value = "2" },
+                                                new SelectListItem{ Text="Vendor", Value = "3" },
+                                                new SelectListItem{ Text="Manager", Value = "4" },
+                                                new SelectListItem{ Text="Inspector", Value = "5" },
+                                             }, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.UserGroupIds)
+                                        </div>*@
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+
+                                        @Html.CheckBoxFor(model => model.IsActive, new { @checked = "checked" })
+                                        @Html.LabelFor(model => model.IsActive)
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <div>
+                                            <input type="file" title="search image" name="file" onchange="bindImage(this)" accept=".png,.jpg,.jpeg,.gif,.tif" />
+                                        </div>
+                                        <div> <img id="user_img" src="@Url.Content(Model.FilePath)" height="100" width="90" style="border:solid" />  </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div>
+                                        <div style="visibility:collapse">
+                                            @Html.TextBoxFor(model => model.FileName, new { @class = "form-control" })
+                                            @Html.TextBoxFor(model => model.FilePath, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="submit" value='@Localizer["Update"]' class="btn btn-primary" />
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+    function bindImage(input) {
+        if (input.files && input.files[0]) {
+            var filerdr = new FileReader();
+            filerdr.onload = function (e) {
+                $('#user_img').attr('src', e.target.result);
+            }
+            filerdr.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

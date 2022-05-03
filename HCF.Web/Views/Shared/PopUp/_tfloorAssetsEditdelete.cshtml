@@ -1,0 +1,342 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <b>@((Model.FloorAssetsId > 0) ? "Edit Asset" : "Add Asset")</b>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <script>
+        function OnSuccess(data) {
+            debugger
+            if (JSON.parse(data.Result).Success) {
+                infoAlert(JSON.parse(data.Result).Message, "Message");
+                $("#viewRefresh").val("1");
+                $('#EditAssetsPopup').modal('hide');
+            } else {
+                infoAlert(JSON.parse(data.Result).Message, "Message");
+            }
+        }
+    </script>
+    @*@using (Ajax.BeginForm("tfloorAssetEdit", "Assets", new AjaxOptions { OnSuccess = "OnSuccess" }))
+        {*@
+
+    <form asp-controller="Assets" asp-action="tfloorAssetEdit"
+          data-ajax-success="OnSuccess"
+          data-ajax="true" data-ajax-method="POST">
+
+        <div class="modal-body">
+            @Html.AntiForgeryToken()
+            <div class="forward2Col">
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(modelItem => modelItem.FloorAssetsId)
+                <div class="forward_form">
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Assets.AssetType.Name):
+                            @Html.HiddenFor(x => x.AssetId)
+                            @*@Html.HiddenFor(x => x.FloorId)*@
+                            @Html.Hidden("Xcoordinate", 0)
+                            @Html.Hidden("Ycoordinate", 0)
+                        </div>
+                        <div class="forward-9">
+                            @Html.DisplayFor(modelItem => Model.Assets.AssetType.Name)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Assets.Name):
+                        </div>
+                        <div class="forward-9">
+                            @Html.DisplayFor(modelItem => Model.Assets.Name)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Name):<em class="required-field"> *</em>
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.Name, new { required = "required" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.BarCodeNo):
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.SerialNo)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.AssetNo):<em class="required-field"> *</em>
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.DeviceNo, new { required = "required" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Description):
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.Description)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Rating):
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.Rating)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.NearBy):
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.NearBy)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Model):
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(modelItem => Model.Model)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            Building:
+                        </div>
+                        <div class="forward-9">
+                            @*@Html.BuildingDropDownList("BuildingID", 0, "Select Building", new { @class = "form-control" })*@
+                            <buildingdropdownList name="BuildingID" selectedvalue="0" firsttext="Select Building" class="form-control"></buildingdropdownList>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            Floor:
+                        </div>
+                        <div class="forward-9">
+                            <select id="FloorId" name="FloorId" class="form-control">
+                                <option value="0">Select</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">Stop:</div>
+                        <div class="forward-9">
+                            <select id="StopId" name="StopId" class="form-control">
+                                <option value="0">Select</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">Status:<em class="required-field"> *</em></div>
+                        <div class="forward-9">
+                            <assetstatusdropDown name="StatusCode" selectedvalue="@Model.StatusCode" firsttext="Select Status" required="required"
+                                                 class="form-control">
+
+                            </assetstatusdropDown>
+                            @*@Html.AssetStatusDropDown("StatusCode", Model.StatusCode, "Select Status", new
+                                { @class = "form-control", required = "required" })*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(modelItem => Model.Make):
+                        </div>
+                        <div class="forward-9">
+                            @*@Html.ManufacturerDropDown("ManufactureId", Model.ManufactureId, "Select Make", new { @class = "form-control" })*@
+                            <manufacturerdropdown name="ManufactureId" class="form-control" selectevalue="@Model.ManufactureId" firsttext="Select Make"></manufacturerdropdown>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(model => model.WallRating)
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(model => model.WallRating, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.WallRating)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(model => model.DoorRating)
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(model => model.DoorRating, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.DoorRating)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="forward-3">
+                            @Html.LabelFor(model => model.FrameRating)
+                        </div>
+                        <div class="forward-9">
+                            @Html.TextBoxFor(model => model.FrameRating, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.FrameRating)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            @if (Model.FloorAssetsId > 0)
+            {
+                if (Model.OnFloorPlan)
+                {
+                    <input type="button" name="button" class="button1" value="Remove From Floor Plan" id="btndeleteAssets" />
+                }
+                <input type="submit" name="submitButton" value="Update" class="button1" />
+                <input type="button" id="btnhistory" class="@("button1 " + (Model.EPDetails.Count == 0 ? "disabled" : ""))" name="button" value="History" onclick="InspectionRedirect('hist');" />
+                <input type="button" id="btnInspection" name="button" class="@("button1 " + (Model.EPDetails.Count == 0 ? "disabled" : ""))" value="Inspect" onclick="InspectionRedirect('insp');" />
+            }
+            else
+            {
+                <input type="submit" name="submitButton" value="Save" class="button1" />
+            }
+        </div>
+        @*}*@
+        </form>
+</div>
+
+<div class="modal fade" id="InspectionPopup" role="dialog">
+    @*@Html.Partial("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+    new ViewDataDictionary { { "floorAssetId", Model.FloorAssetsId }, { "viewmode", "insp" } })*@
+
+    @await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "floorAssetId", Model.FloorAssetsId }, { "viewmode", "insp" }}
+                              )
+
+
+</div>
+<div class="modal fade" id="HistoryPopup" role="dialog">
+    @*@Html.Partial("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+    new ViewDataDictionary { { "floorAssetId", Model.FloorAssetsId }, { "viewmode", "hist" } })*@
+
+
+    @await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+                              new ViewDataDictionary(
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                              {{ "floorAssetId", Model.FloorAssetsId }, { "viewmode", "hist" }}
+                             )
+
+</div>
+
+<script type="text/javascript">
+    function InspectionRedirect(mode) {
+        var urlAction = "";
+        var epCount = '@Model.EPCount';
+        if (epCount == 1) {
+            if (mode === "hist") {
+                var url = CRxUrls.assets_history;
+                urlAction = url + "?epId=" + 0 + "&floorassetId=" + @Model.FloorAssetsId;
+            } else {
+                urlAction = '@Url.Action("AssetEps", "Assets", new { epId = 0, floorassetId = Model.FloorAssetsId })';
+            }
+            location.href = urlAction;
+
+        } else {
+            if (mode == "hist") {
+                $('#HistoryPopup').modal('show')
+            } else {
+                $('#InspectionPopup').modal('show');
+            }
+        }
+    }
+
+    $(".comment").shorten({
+        "showChars": 150,
+        "seeMore": false,
+        "moreText": "See More",
+    });
+
+    $('.date').datepicker();
+
+    $("#btndeleteAssets").click(function () {
+        swal({
+            title: "Are you sure?",
+            text: $.Constants.Remove_Assets_From_FloorPlan_Warning ,//"You want to remove this asset from floor!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, remove it!",
+            closeOnConfirm: false
+        },
+            function () {
+                var floorAssetsId = '@Model.FloorAssetsId';
+                var urlAction = CRxUrls.common_tfloorAssetdelete; //'@Url.Action("tfloorAssetdelete", "Common")';
+                $.ajax({
+                    type: "GET",
+                    url: urlAction + "?tfloorAssetId=" + parseInt(floorAssetsId),
+                    success: function (data) {
+                        if (data.Result) {
+                            successAlert($.Constants.Remove_Assets_From_FloorPlan_Success, "Removed!");
+                            /// swal("Removed!", $.Constants.Remove_Assets_From_FloorPlan_Success, "success");
+                            window.location.reload();
+                        }
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+
+
+    var buildingdddlCtr = $("#BuildingID");
+    var floorsddlCtr = $("#FloorId");
+    var stopddlCtr = $("#StopId");
+
+    $(document).ready(function () {
+        debugger
+         var selectedFloorID = parseInt('@Model.FloorId');
+         bindFloorddl(buildingdddlCtr, floorsddlCtr, selectedFloorID);
+         var selectedStopId = parseInt('@Model.StopId');
+         bindStopddl(stopddlCtr, selectedFloorID, selectedStopId, "", 'Select Stop');
+    });
+
+    buildingdddlCtr.change(function () {
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+        stopddlCtr.html("");
+        stopddlCtr.append($('<option></option>').val("").html("Select Stop"));
+    });
+    floorsddlCtr.change(function () {
+        stopddlCtr.empty();
+        var selectedStopId = parseInt('@Model.StopId');
+        var assetval = $("#AssetId").val();
+        if (assetval == 123) {
+            BindStopNotInFE(stopddlCtr, assetval, $(this).val());
+        }
+        else {
+            bindStopddl(stopddlCtr, $(this).val(), selectedStopId, "", 'Select Stop');
+        }
+    });
+
+
+
+</script>
+<style>
+    
+    #HistoryPopup .inspclose-hide,
+    #InspectionPopup .hisclose-hide {
+        display: none;
+    }
+</style>

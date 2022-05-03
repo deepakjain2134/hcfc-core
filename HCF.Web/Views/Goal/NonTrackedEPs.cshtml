@@ -1,0 +1,343 @@
+﻿@model List<HCF.BDO.StandardEps>
+@{
+    ViewBag.Title = "Non-Tracked EP Report";
+    List<HCF.BDO.Category> categories = Model.GroupBy(x => x.CategoryId).Select(x => new HCF.BDO.Category { CategoryId = x.FirstOrDefault().CategoryId, Name = x.FirstOrDefault().CategoryName }).ToList();
+    //int totalEPs = Model.Count();
+    //int totalEcEPs = Model.Count(x => x.CategoryId == 1);
+    //int totalLsEPs = Model.Count(x => x.CategoryId == 2);
+    //int totalEmEPs = Model.Count(x => x.CategoryId == 3);
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Non-Tracked EP Report
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="content">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-8 eps-document">
+
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <label>Annual Review Date: &nbsp;</label><input type="text" name="annualreviewDate" class="datepicker form-control" id="annualreviewDate" readonly="readonly" placeholder="Select a Date" value="@(UserSession.CurrentOrg.NonTrackedEPReportDate.HasValue ? UserSession.CurrentOrg.NonTrackedEPReportDate.Value.ToString("MMM d, yyyy") : "")" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 eps-shorting text-right">
+                                <div class="nonfilter">
+                                    <div id="catfilter" class="dashboard_filter">
+                                        <div class="btn-group btn-group-vertical" data-toggle="buttons" style="padding-top: 5px;">
+                                            <label class="btn active">
+                                                @Html.RadioButton("EPCat", 1)<label for="EC">EC <span class="countec" id="txtEpEcCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                            <label class="btn">
+                                                @Html.RadioButton("EPCat", 2)<label for="LS">LS <span class="countec" id="txtEpLsCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                            <label class="btn">
+                                                @Html.RadioButton("EPCat", 3)<label for="EM">EM <span class="countec" id="txtEpEmCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                            <label class="btn">
+                                                @Html.RadioButton("EPCat", 0, true)<label for="ALL">All <span class="countec" id="txtEpAllCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                        </div>
+                                        @*<div class="noneps-search">
+                                                <input type="search" name="txtsearch" id="txtsearch" placeholder="Search" />
+                                            </div>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dt-buttons">
+                            @*<button class="dt-button buttons-pdf buttons-html5" tabindex="0" aria-controls="c_myTable" title="Download PDF"><span>PDF</span></button>*@
+                            <a href="@Url.Action("PrintPDFNonTrack", "PDF", new { CategoryId = "0" })" id="printpdf" class="@(Model.Count > 0 ? "bbi-pdf" : "hide")" title="Download Pdf">
+                                <span>
+                                    <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                </span>
+                            </a>
+                            <a href="@Url.Action("PrintCSVNonTrack", "Common", new { CategoryId = "0" })" class="@(Model.Count > 0 ? "bbi-pdf" : "hide")" id="printcsv" title="Download CSV">
+                                <span>
+                                    <img src="~/dist/Images/Icons/excel_icon.png" title="Download CSV" alt="" />
+                                </span>
+                            </a>
+                            @*<button class="dt-button buttons-excel buttons-html5" tabindex="0" aria-controls="c_myTable" title="Download Excel"><span>Excel</span></button>*@
+                        </div>
+                        <table class="table table-bordered table-striped" id="nontracked-eps">
+                            <thead>
+                                <tr>
+                                    <th style="display:none"></th>
+                                    <th>EP#</th>
+                                    <th>Description</th>
+                                    <th>
+                                        Track?
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td style="display:none">
+                                            @item.CategoryId
+                                        </td>
+                                        <td>@item.StandardEP</td>
+                                        <td>
+                                            @*@item.Description*@
+
+                                            @await Html.PartialAsync("_EpDescription", item.Description,
+                                            new ViewDataDictionary(
+                                            new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                            new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                            {{ "minLength", "100" }, { "standardEp", "" }}
+                                           )
+                                            @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", "" } })*@
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" id="@item.EPDetailId" ep="@item.StandardEP"
+                                                   class="check_eps" title="This EP is currently not tracked. If you wish to track this EP, checkmark the box" />
+                                            <span></span>
+                                        </td>
+                                    </tr>
+                                }
+
+
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+        var loggedInUser = '@HCF.Web.Base.UserSession.CurrentUser.UserId';
+        var selectedUserIds = [];
+        var uniqueselecteduserids = [];
+        $(document).ready(function () {
+            function openEPUserEditPopUp(epdetId) {
+                var modelContainer = $("#modal-container");
+                modelContainer.empty();
+                modelContainer.attr('data-EpDetailID', '');
+                $.ajax({
+                    url: "/Organization/GetEpAssignee?userids=0&epId=" + epdetId,
+                    method: "GET",
+                    success: function (data) {
+                        modelContainer.attr('data-EpDetailID', epdetId);
+                        modelContainer.html($(data));
+                        $("#non-tracked-info").removeClass("hide");
+                        modelContainer.fadeIn('fast');
+                        modelContainer.modal('show');
+                    }
+                })
+            };
+
+            var pdfurl = '@Url.Action("PrintPDFNonTrack", "PDF")';
+            var excelurl = '@Url.Action("PrintCSVNonTrack", "Common")';
+            var epsTable = $('#nontracked-eps').DataTable({
+                searching: true,
+                pageLength: 20,
+                lengthChange: false,
+                bPaginate: $('#nontracked-eps tbody tr').length > 20,
+                bInfo: false,
+                aaSorting: [],
+                language: {
+                    emptyTable: "There are 0 Non-Tracked EPs",
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search..."
+                },
+                dom: "<'row'<'col-sm-12 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+            });
+
+            function countShow() {
+                //debugger;
+                var jsonData = getJsonData();
+
+                console.log(jsonData);
+                var ecCount = jsonData.filter(function (el) {
+                    return el.catid == 1;
+                });
+
+                var lsCount = jsonData.filter(function (el) {
+                    return el.catid == 2;
+                });
+
+                var emCount = jsonData.filter(function (el) {
+                    return el.catid == 3;
+                });
+                console.log(ecCount.length, lsCount.length, emCount.length);
+                $("#txtEpEcCount").text(ecCount.length); $("#txtEpLsCount").text(lsCount.length); $("#txtEpEmCount").text(emCount.length);
+
+                $("#txtEpAllCount").text(ecCount.length + lsCount.length + emCount.length);
+            }
+
+            countShow();
+
+            $(".check_eps").change(function () {
+
+
+
+                var ctx = $(this);
+                var ep = $(this).attr("ep");
+                var epId = $(this).attr("id");
+                $("#selectedEp").val(epId);
+               // openEPUserEditPopUp(epId);
+                swal({
+                    html: true,
+                    title: "Confirm Tracked EP",
+                    text: 'By checking EPs and saving, these EPs will be tracked and appear on the Compliance Dashboard.Do you want to continue?',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            markEpApplicable(epId);
+                            $(".modelTitle").text(ep);
+                            openEPUserEditPopUp(epId);
+                            ///$('#addEpAssigneeModel').modal('show');
+                            epsTable.row(ctx.parents('tr')).remove()
+                                .draw();
+                            countShow();
+                        } else {
+                            ctx.prop('checked', false);
+                        }
+                    });
+            });
+
+            function getJsonData() {
+                debugger;
+                //var table = $('#nontracked-eps').DataTable();
+                var dataTable = $('#nontracked-eps').dataTable()
+                var eps = [];
+                $(dataTable.fnGetNodes()).each(function () {
+                    //$("#nontracked-eps tbody tr").each(function () {
+                    var self = $(this);
+                    var col_1_value = self.find("td:eq(0)").text().trim();
+                    if (col_1_value) {
+                        var folder = {
+                            catid: col_1_value
+                        }
+                        eps.push(folder);
+                    }
+                });
+
+                return eps;
+            }
+
+            $("input[name=EPCat]:radio").off('change').change(function () {
+                $(".category").hide();
+                var catId = $(this).val();
+                if (catId > 0) {
+                    $("#cate_" + catId).show();
+                } else {
+                    $(".category").show();
+                }
+
+                if (catId > 0) {
+                    epsTable.columns(0).search("^" + catId + "$", true, false, true).draw();
+                } else {
+                    epsTable.columns(0).search("").draw();
+                }
+
+
+                $("#printpdf").attr("href", pdfurl + '?CategoryId=' + catId);
+                $("#printcsv").attr("href", excelurl + '?CategoryId=' + catId);
+            });
+
+            function markEpApplicable(epdetailId) {
+                $.ajax({
+                    url: '@Url.Action("UpdateEPApplicablestatus", "Goal")',
+                    type: "POST",
+                    global: false,
+                    data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), newValue: true, epdetailId: epdetailId },
+                    dataType: 'json',
+                    success: function (result) {
+                        $("#ep_" + epdetailId).remove();
+                        $('table').each(function () {
+                            if ($(this).find('tr').length == 1) {
+                                $(this).hide();
+                                $(this).closest(".category").empty();
+                            }
+                        });
+                    }
+                });
+            }
+
+            function getUnique(array) {
+                var uniqueArray = [];
+                for (i = 0; i < array.length; i++) {
+                    if (uniqueArray.indexOf(array[i]) === -1) {
+                        uniqueArray.push(array[i]);
+                    }
+                }
+                return uniqueArray;
+            }
+
+            $('body').off('click', '#saveEpAssignee').on('click', '#saveEpAssignee', function () {
+                var modelContainer = $("#modal-container");
+                $("#IsCompleted").val("0");
+                var EpDetailID = modelContainer.attr('data-EpDetailID');
+                var checkboxes = $('#modal-container ul>li>input:checked');
+                var assetId = modelContainer.attr('data-assetId');
+                var AssignType = "U";
+                var status = true;
+                var EpDetAssignee = [];
+                var UserIds = [];
+                uniqueselecteduserids = getUnique(selectedUserIds);
+                for (var i = 0; i < checkboxes.length; i++) {
+                    UserIds.push(parseInt($(checkboxes).eq(i).val()));
+                }
+
+                EpDetAssignee = {
+                    EPDetailId: parseInt(EpDetailID),
+                    AssetId: parseInt(assetId),
+                    Type: AssignType,
+                    UserIds: UserIds,
+                    CreatedBy: parseInt(loggedInUser),
+                    Status: status
+                }
+                $.ajax({
+                    url: "/Organization/AddEPAssignees?catId=-2",
+                    method: "POST",
+                    data: JSON.stringify({ EpAssignee: EpDetAssignee }),
+                    contentType: 'application/json',
+                    success: function (data) {
+                        modelContainer.modal('hide');
+                       // successAlert('Saved Successfully.');
+                    }
+                })
+            });
+
+            $("#annualreviewDate").change(function () {
+                var annualReportDate = $(this).val();
+                //alert(annualReportDate);
+                $.ajax({
+                    type: "POST",
+                    url: CRxUrls.Organization_UpdateNonTrackEPReportDate + "?annualReportDate=" + annualReportDate,
+                    success: function (data) {
+                        console.log(data);
+                        swal("", "successfully updated", "success");
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+
+        });
+    </script>
+}

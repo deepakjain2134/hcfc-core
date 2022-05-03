@@ -1,0 +1,48 @@
+﻿@model string
+@{
+
+    string minLength = this.ViewData.ContainsKey("minLength") ? this.ViewData["minLength"].ToString() : "0";
+    string title = this.ViewData.ContainsKey("standardEp") ? this.ViewData["standardEp"].ToString() : "Message";
+    string description = $"{Model} {""}";
+    string _description = $"{"<span>" + Model } {"<small style='font-size:10px'>©" + DateTime.Now.Year + " The Joint Commission. All rights reserved. Used with permission.</small></span>"}";
+}
+@if (minLength == "0")
+{
+
+<span class="ePDescriptions">@Html.Raw(_description)</span>
+
+}
+else
+{
+    @description.Substring(0, Math.Min(description.Length, Convert.ToInt32(minLength)))
+    if (description.Length > Convert.ToInt32(minLength))
+    {
+        <a href="javascript:void(0);"
+           tabindex="0"
+           @*data-trigger="focus"*@
+           class="descriptions" rel='popover'
+           data-placement='bottom'
+           data-html="true"
+           data-original-title='@title'
+           data-content='@_description'>...See More</a>
+    }
+    else
+    {
+        <small style='font-size:10px'>©@DateTime.Now.Year The Joint Commission. All rights reserved. Used with permission.</small>
+    }
+}
+
+<script>
+
+    $(document).ready(function () {
+      
+
+        $(".ePDescriptions").shorten({
+            moreText: 'read more',
+            showChars: 120,
+            lessText: 'read less'
+        });
+    });
+
+    
+</script>

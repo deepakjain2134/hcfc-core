@@ -1,0 +1,57 @@
+﻿<div>
+    <h4 class="iwant-name">I want to..</h4>
+    <ul>
+        <div class="crx-scrollBar">
+            @if (HCF.Web.Base.UserSession.IsInRole("assets_inspection"))
+            {
+                <li>
+                    <a id="Assets-Inspection" href="@Url.Action("Inspection", "Assets")">Upload an inspection report </a>
+                 
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("inspection_DocumentDashBoard"))
+            {
+                <li>
+                    <a href="@Url.Action("DocumentDashBoard", "Goal")">Upload a report/policy unrelated to an asset </a>
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("dash_inspection"))
+            {
+                <li>
+                    <a id="Inspection-InspectionQuestion" href="@Url.Action("InspectionQuestion", "Inspection")">Inspect an asset   </a>
+                  
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("home_activitydashboard"))
+            {
+                <li>
+                    <a href="@Url.Action("ActivityDashboard", "Home")">Review an EP  </a>
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("round_index"))
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Round")">Start a round assigned to me  </a>
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("goal_ilsmview"))
+            {
+                <li>
+                    <a href="@Url.Action("AddILSM", "ILSM")">Create a CRx Assisted ILSM  </a>
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.IsInRole("inspection_DocumentDashBoard"))
+            {
+                <li>
+                    <a href="@Url.Action("DocumentDashBoard", "Goal")">View Missing Documents</a>
+                </li>
+            }
+            @if (HCF.Web.Base.UserSession.HasRoleForMenu("permit_getallpermits") &&  HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra"))
+            {
+                <li>
+                    <a href="@Url.RouteUrl("all_permits", new { FilterBy = -1 })">View Today's Permits</a>
+                </li>
+            }
+            </div>
+    </ul>
+</div>

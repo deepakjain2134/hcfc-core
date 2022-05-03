@@ -1,0 +1,146 @@
+﻿@model HCF.BDO.ICRARiskArea
+@{
+    ViewBag.Title = "Manage Department Risk Types";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Manage Department Risk Types
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm("MngICRARiskArea", "ICRA", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                           
+                                @Html.HiddenFor(m => Model.ApprovalStatus)
+                                @*@Html.HiddenFor(m => Model.IsSendEmail)*@
+                                @Html.HiddenFor(m => Model.RiskTypeID)
+
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-6">
+                                        @Html.HiddenFor(x => x.RiskAreaId)
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required", maxlength = 50 })
+                                            @Html.ValidationMessageFor(model => model.Name)
+                                        </div>
+
+
+
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        @if (HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+                                        {
+
+                                        }
+
+                                        <div class="form-group">
+                                            <label>ICRA Risk Type</label><em class="required-field"> *</em>
+                                            <select id="drpRiskType" name="drpRiskType" class="form-control" required>
+                                                <option value="">Select</option>
+                                                @foreach (var item in Model.lstconstructionrisk)
+                                                {
+                                                    <option value="@item.ConstructionRiskId"> @item.RiskName </option>
+                                                }
+                                            </select>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Fire Risk Type<em class="required-field"> *</em></label>
+                                            <firerisktypedropdownlist name="FireRiskType" selectevalue="@(Model.FireRiskType > 0 ? Model.FireRiskType : 0)" firsttext="Select" class="form-control" required="required"></firerisktypedropdownlist>
+                                            @*@Html.FireRiskTypeDropDownList("FireRiskType", (Model.FireRiskType > 0 ? Model.FireRiskType : 0), "Select", true, new { @class = "form-control", required = "required" })*@
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group comman_checkbox" style="padding-top:32px;">
+                                            Active
+                                            @*@Html.LabelFor(m => m.IsActive)*@
+                                            @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                            @Html.ValidationMessageFor(m => m.IsActive)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button_Div">
+                                    <input type="submit" value='@Localizer["Save"]' class="comm-button" />
+                                    @*@Html.ActionLink("Cancel ", "ICRARiskArea", "ICRA", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "ICRARiskArea", new { controller = "ICRA" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        var id = $('#RiskTypeID').val();
+        debugger;
+        if (id != "" && id != undefined) {
+            $('#drpRiskType').val(id);
+        } else {
+            $('#drpRiskType').val("");
+        }
+
+        if (id == "0" && id != undefined) {
+            $('#drpRiskType').val("");
+        }
+        if (id == "0" && $("#IsActive").val() == "true") {
+            debugger;
+            $("#IsActive").prop("checked", true)
+        }
+        $('#drpRiskType').on('change', function () {
+            debugger;
+            var val = $(this).val();
+            if (val != "")
+                $('#RiskTypeID').val(val);
+            else
+                $('#RiskTypeID').val("");
+        });
+
+    });
+
+    function tristate1(control) {
+        tristate(control, '2', '1', '0');
+    }
+
+    function tristate(control, value1, value2, value3) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value3;
+                break;
+            case value3:
+                control.value = value1;
+                break;
+        }
+        SetCheckValue(control);
+    }
+
+    function SetCheckValue(control) {
+        var controlId = $(control).attr("tempName");
+        debugger;
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+    }
+</script>
+

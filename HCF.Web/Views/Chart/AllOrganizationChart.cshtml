@@ -1,0 +1,46 @@
+﻿<div id="allorgChart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<input type="hidden" id="hdn_allorgChart" value="@ViewBag.AllOrgChart" />
+<script>
+
+    $(document).ready(function () {
+        var chartorgvalue = JSON.parse($("#hdn_allorgChart").val());
+
+        var allChart = new Highcharts.chart({
+            chart: {
+                type: 'column',
+                renderTo: 'allorgChart'
+            },
+            title: {
+                text: 'System Wide Analytics'
+            },
+            xAxis: {
+                categories: chartorgvalue.ChartX.categories,
+                crosshair: true
+            },
+            yAxis: {
+               // min: 0,
+                title: {
+                    text: 'Count'
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    //pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: getSeries(chartorgvalue.Series)
+        });
+    });
+</script>

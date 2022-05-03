@@ -1,0 +1,95 @@
+﻿@*@model  List<HCF.BDO.TRounds>*@
+@{
+    ViewBag.Title = "RoundHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Rounds History
+        </h1>
+    </section>
+        }
+  
+    <div class="container-fluid">
+        <div class="row">           
+            @Html.AntiForgeryToken()
+            <div class="col-lg-12 col-xs-9">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-lg-3 col-xs-4">Building @Html.DropDownList("drpBuildings", (SelectList)ViewBag.Buildings, "All", new { @class = "form-control" })</div>
+                        <div class="col-lg-4 col-xs-4">
+                            Floor <select id="floors" class="form-control" style="width: auto;">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-12" id="content">
+
+                            <ul class="rounds_list" id="roundList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+   
+
+<script>
+
+    var buildingdddlCtr = $("#drpBuildings");
+    var floorsddlCtr = $("#floors");
+
+    $(document).ready(function () {       
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, '@ViewBag.FloorId', "", $.Constants.Floor_ddl_text_All);
+        loadRoundHistory();
+    });
+
+
+
+    $("#floors").change(function () {
+        loadRoundHistory();
+    });
+
+  
+    buildingdddlCtr.change(function () {
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, 0, "", $.Constants.Floor_ddl_text_All);
+        loadRoundHistory();
+    });
+   
+
+
+   
+
+
+    function loadRoundHistory() {
+
+        var floorId = 0;
+        if ($("#floors").val().length > 0) {
+            floorId = $("#floors").val();
+        }
+        var buildingId = 0;
+        if ($("#drpBuildings").val().length > 0) {
+            buildingId = $("#drpBuildings").val();
+        }
+
+       
+
+        var filterrounds = CRxUrls.rounds_filterrounds;//'@Url.Action("filterrounds", "Rounds")';
+        var categoryId = 14;
+        $.ajax({
+            url: filterrounds + "?floorId=" + floorId + "&buildingId=" + buildingId + "&category=" + categoryId,
+            method: "GET",
+            contentType: 'application/json',
+            success: function (data) {
+                $("#roundList").html(data);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+</script>

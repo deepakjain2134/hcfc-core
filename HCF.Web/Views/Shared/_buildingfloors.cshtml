@@ -1,0 +1,29 @@
+﻿@model List<HCF.BDO.Buildings>
+@{Layout = null; }
+@foreach (var building in Model.Where(x => x.IsActive && x.Floor.Where(f => f.IsActive).Any()))
+{
+    <div class="asset_list">
+        <label style="width: 45%;">@building.BuildingName</label>
+        <div class="buildingFloors" style="float:right;width:55%">
+            @foreach (var floor in building.Floor)
+            {
+                <ul class="floor_no droppable">
+                    @{
+                        var isFLoorPlan = "noplan";
+                        if (!string.IsNullOrEmpty(floor.ImagePath))
+                        {
+                            isFLoorPlan = "plan";
+                        }
+                    }
+                    <li id="@floor.FloorId" title="@floor.FloorName"
+                        class="@($"{isFLoorPlan} {""}")" ondragover="dragOver(event);" ondrop="drop(event);" ondragleave="dragLeave(event);">
+                        <a onclick="goToPage('@floor.FloorId',this)" title="@floor.FloorName">@floor.Alias.ToUpper() </a>
+                    </li>
+                </ul>
+            }
+
+
+        </div>
+
+    </div>
+}

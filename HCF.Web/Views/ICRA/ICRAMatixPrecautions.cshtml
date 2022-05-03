@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewBag.Title = "ICRA Matix Precautions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                ICRA Matix Precautions
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="settingnewBox">
+                    @await Html.PartialAsync("_MoreConfig")
+                    <div class="rightcol-setting">
+                        <div class="box box-primary">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @await Component.InvokeAsync("ICRAICRAMatrix",Convert.ToString(ViewBag.Version))
+                                    @*@{Html.RenderAction("ICRAMatrix", "ICRA"); }*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-body" id="modelContent">
+    </div>
+</div>
+<script>
+
+    $('body').on('click', '.open-AddMatrix', function () {
+        var url = '@Url.Action("addICRAMatrixPrecaution", "ICRA")';
+        var constructionRiskId = $(this).attr('riskid');
+        var constructiontypeId = $(this).attr('typeid');
+        var version = @Convert.ToInt32(ViewBag.Version);
+        $.ajax({
+            url: url,
+            type: "GET",
+            data: { constructionRiskId: constructionRiskId, constructiontypeId: constructiontypeId, version: version },
+            //dataType: 'json',
+            success: function (result) {
+                $('#modelContent').html(result);
+            }
+        });
+    });
+</script>
+

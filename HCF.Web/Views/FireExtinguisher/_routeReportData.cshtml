@@ -1,0 +1,58 @@
+﻿@model List<HCF.BDO.TInspectionActivity>
+@{
+    var mode = ViewData.ContainsKey("Mode") ? ViewData["Mode"].ToString() : "M";
+    var year = ViewData.ContainsKey("year") ? Convert.ToInt32(ViewData["year"].ToString()) : DateTime.Now.Year;
+    var month = ViewData.ContainsKey("MonthNo") ? Convert.ToInt32(ViewData["MonthNo"].ToString()) : DateTime.Now.Month;
+    //HCF.Web.Controllers.CommonController obj = new HCF.Web.Controllers.CommonController();
+    var weeks = commonModelFactory.GetWeeks(year, month);
+    var count = mode == "M" ? 12 : mode == "Q" ? 4 : weeks.Count;
+    var quarterCount = 1;
+
+
+}
+@for (int i = 1; i <= count; i++)
+{
+    var activity = new HCF.BDO.TInspectionActivity();
+    string inspDateInfo = string.Empty;
+    <td>
+        @if (mode == "M")
+        {
+            activity = Model.Where(x => x.ActivityInspectionDate.Value.Month == i).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+            if (activity != null)
+            {
+                inspDateInfo = string.Format("{0}{1} ({2})- {3}", activity.UserProfile.FirstName[0], string.IsNullOrEmpty(activity.UserProfile.LastName) ? (char?)null : activity.UserProfile.LastName[0], activity.ActivityInspectionDate.Value.Date.Day, Enum.GetName(typeof(HCF.BDO.Enums.Status), activity.Status).ToUpper()[0]);
+            }
+        }
+        else if (mode == "Q")
+        {
+            var startdate = new DateTime(year, quarterCount, 1);
+            var endDate = startdate.AddMonths(3).AddMinutes(-1); //new DateTime(year, i * 3, 1);
+            quarterCount += 3;
+            activity = Model.Where(x => x.ActivityInspectionDate.Value.Date >= startdate && x.ActivityInspectionDate.Value.Date <= endDate).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+            if (activity != null)
+            {
+                inspDateInfo = string.Format("{0}{1} ({2})- {3}", activity.UserProfile.FirstName[0], string.IsNullOrEmpty(activity.UserProfile.LastName) ? (char?)null : activity.UserProfile.LastName[0], activity.ActivityInspectionDate.Value.ToString("MMM d"), Enum.GetName(typeof(HCF.BDO.Enums.Status), activity.Status).ToUpper()[0]);
+            }
+        }
+        else
+        {
+            var week = weeks.FirstOrDefault(x => x.weekNum == i);
+            if (week != null)
+            {
+                var startdate = week.weekStart;
+                var endDate = week.weekFinish;
+                activity = Model.Where(x => x.ActivityInspectionDate.Value.Date >= startdate && x.ActivityInspectionDate.Value.Date <= endDate).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+                if (activity != null)
+                {
+                    inspDateInfo = string.Format("{0}{1} ({2})- {3}", activity.UserProfile.FirstName[0], string.IsNullOrEmpty(activity.UserProfile.LastName) ? (char?)null : activity.UserProfile.LastName[0], activity.ActivityInspectionDate.Value.Day, Enum.GetName(typeof(HCF.BDO.Enums.Status), activity.Status).ToUpper()[0]);
+                }
+            }
+        }
+        @if (!string.IsNullOrEmpty(inspDateInfo))
+        {
+            <span>
+                @inspDateInfo
+            </span>
+        }
+    </td>
+}

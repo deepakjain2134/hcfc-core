@@ -1,0 +1,48 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    //var epMappings = EpRepository.GetCmsEpMapping().GroupBy(x => x.EPDetailId).Select(y => y.FirstOrDefault()).ToList();
+}
+
+<div class="cmsCol1">
+
+    @foreach (var item in Model)
+    {
+        <div class="search-searchicon">
+            <input type="text" id="@item.EPDetailId" value="@item.StandardEp" />
+            <i class="closesearcheps" rel="@item.EPDetailId" id="close_search_@item.EPDetailId">X</i>
+        </div>
+    }
+
+
+</div>
+<script>
+    $(document).ready(function () {
+        Array.prototype.Remove = function () {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+
+        $(".closesearcheps").off().on('click', function () {
+            debugger;
+            var value = $(this).attr("rel");
+            if (value != "") {
+                valueArray.Remove(value);
+                $("#UncheckStandardEps").val(valueArray);
+                $('.cmsCol1').find("[id=" + value + "]").remove();
+                $('.cmsCol1').find("[id=" + "close_search_" + value + "]").remove();
+                $('.ullistitem').find("[value=" + value + "]").attr('checked', false); 
+               $.get('@Url.Action("DeleteCMSEpMapping","Goal")' + '?id=' + value + '&view=' + 'standardEps', function () {
+                });
+            }
+        })
+
+
+    });
+
+</script>

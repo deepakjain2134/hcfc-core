@@ -1,0 +1,322 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@{
+    ViewBag.Title = "AssetsIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Assets Report
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row">
+                    <div class="btn-group btn-group-vertical right_setting btneoc" data-toggle="buttons">
+                        <label class="btn active">
+                            @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                    </div>
+                    <div class="col-lg-12 workOrder-search" style="overflow: inherit;">
+                        <div class="col-lg-6 searchItem1">
+                            <div class="search_options">
+                                Assets (<strong>Select the assets for which you want the report</strong>)
+                                @*@{
+                                        Html.RenderAction("AssetsMultiSelectDropDown", "Common");
+                                    }*@
+
+                                @await Component.InvokeAsync("CommonAssetsMultiSelectDropDown")
+                            </div>
+                            <input type="hidden" value="@ViewBag.AssetsId" id="assetids" />
+                        </div>
+                        <div class="col-lg-3 searchItem1">
+                            <div>
+                                Building
+                                <buildingdropdownList name="drpBuildings" selectedvalue="0" firstvalue="All" class="form-control selectyear"></buildingdropdownList>
+                                @*@Html.BuildingDropDownList("drpBuildings", 0, "All", new { @class = "form-control selectyear" })*@
+                            </div>
+                        </div>
+                        <div class="col-lg-3 searchItem1">
+                            <div>
+                                Floor
+                                <select id="floorId" class="form-control"></select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 searchItem1">
+                            <div>
+                                From
+                                <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="col-lg-3 searchItem1">
+                            <div>
+                                To
+                                <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="col-lg-3 searchItem2">
+                            <button class="comm-button" id="btnrunreport">Run Report</button>
+                            <button class="comm-button" id="btnrefresh">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="report_compliance" id="partialContents">
+                        @*@await Html.PartialAsync("~/Views/Reports/_assetReports.cshtml", Model)*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        $("#floorId").empty();
+        $("#floorId").append(
+            $('<option></option>').val("").html("All"));
+        debugger;
+        var assetIndexids = localStorage.getItem("assetIndexids");
+        var assetIDS = localStorage.getItem("assetIndexids");
+        var drpBuildings = localStorage.getItem("drpBuildings");
+        var floorId = localStorage.getItem("floorId");
+        var from = localStorage.getItem("from");
+        var todate = localStorage.getItem("todate");
+        var data = localStorage.getItem("AssetsData");
+
+        if (from != null && todate != null && assetIndexids != null) {
+
+            ids = assetIDS.split(',').length
+
+
+            if (ids > 0) {
+                $(".multiSelStaus").empty().text(ids + " assets selected");
+            } else {
+                $(".multiSelStaus").empty().text("Select");
+            }
+
+
+            $("#assetids").val(assetIndexids);
+            $("#drpBuildings").val(drpBuildings);
+            $("#floorId").val(floorId);
+            $("#from").val(from);
+            $("#todate").val(todate);
+            if (data != "") {
+                $('#partialContents').html(data);
+                $('#partialContents').fadeIn('fast');
+            }
+            //loadData();
+        } else {
+            SetDefaultDate();
+        }
+    });
+
+    //$(function () {
+
+    //});
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        debugger;
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+    $("#drpBuildings").change(function () {
+        getfloors();
+    });
+
+    function getfloors(floorId) {
+        if ($("#drpBuildings").val() != "") {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization")';
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ buildingId: $("#drpBuildings").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (floorList) {
+                for (var i = 0; i < floorList.length; i++) {
+                    $("#floorId").append(
+                        $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                }
+                debugger;
+                $("#floorId").val(floorId);
+            @*if (parseInt(@ViewBag.FloorId) > 0) {
+                    $("#floorId").val(@ViewBag.FloorId);
+                }*@
+                //LoadData();
+
+            };
+            floorOptions.error = function () { alert("Error in Getting States!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            //LoadData();
+        }
+    }
+
+    $("#btnrunreport").click(function () {
+        loadData();
+    });
+
+    $("#btnrefresh").click(function () {
+        ClearAllFields();
+    });
+
+    $('.mutliSelect input[type="checkbox"]').on('click', function () {
+        //var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+        //    title = $(this).val() + ",";
+
+        //console.log();
+        if ($(this).val() === "0") {
+            console.log($(this).is(':checked'))
+            var status = $(this).is(':checked');
+            $('input:checkbox[class=assetChekcBox]').each(function () {
+                $(this).prop("checked", status);
+                //.prop('checked', false)
+            });
+        } else {
+            if ($(this).is(':checked')) {
+                $(this).addClass("mulSelect");
+            } else {
+                $(this).removeClass("mulSelect");
+            }
+        }
+
+        if ($('.assetChekcBox:checkbox:checked').length == $('.assetChekcBox:checkbox').length) {
+            $(".selectAll:checkbox").prop("checked", true);
+        } else {
+            $(".selectAll:checkbox").prop("checked", false);
+
+        }
+        //return false;
+        //$(".dropdown dd ul").hide();
+
+        var assets = [];
+        $('.assetChekcBox:checkbox:checked').each(function () {
+            assets.push($(this).attr("id"));
+        });
+
+
+        if (assets.length > 0) {
+            $(".multiSelStaus").empty().text(assets.length + " assets selected");
+        } else {
+            $(".multiSelStaus").empty().text("Select");
+        }
+
+        $("#assetids").val(assets.join(","))
+        //LoadData();
+        //LoadData(assets.join(","));
+    });
+
+
+    function loadData() {
+        var assetIndexids = $("#assetids").val();
+        debugger;
+        var buildingId = $("#drpBuildings").val();
+        var floorId = $("#floorId").val();
+        var from = $("#from").val();
+        var todate = $("#todate").val();
+
+        localStorage.setItem("assetIndexids", assetIndexids);
+        localStorage.setItem("drpBuildings", buildingId);
+        localStorage.setItem("floorId", floorId);
+        localStorage.setItem("from", from);
+        localStorage.setItem("todate", todate);
+
+        if (assetIndexids != "") {
+            var url = '@Url.Action("AssetsReports", "Reports")';
+            $.ajax({
+                url: url + '?assetIds=' + assetIndexids + "&buildingId=" + buildingId + "&floorId=" + floorId + "&fromdate=" + from + "&todate=" + todate,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    localStorage.setItem("AssetsData", data);
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                }
+            });
+        } else {
+            swalalert("Please select assets")
+        }
+    }
+
+    function ClearAllFields() {
+        $("#drpBuildings").val('')
+        $("#floorId").val('');
+        $('#drpStatus').val('');
+        $("#assetids").val('');
+        $('#partialContents').empty();
+        $('.mutliSelect input[type="checkbox"]').each(function () {
+            $(this).removeClass("mulSelect");
+            $(this).prop("checked", false);
+        });
+        $(".selectAll:checkbox").prop("checked", false);
+        $(".multiSelStaus").empty().text("Select");
+        SetDefaultDate();
+        LoadData();
+    }
+
+</script>
+<style>
+    .workOrder-search .searchItem1 {
+        min-height: 80px;
+        padding: 0 8px;
+    }
+
+    .workOrder-search .col-lg-3.searchItem2 {
+        padding-top: 21px;
+    }
+</style>

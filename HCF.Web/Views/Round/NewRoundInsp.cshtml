@@ -1,0 +1,229 @@
+﻿@model HCF.BDO.TRounds
+@{
+    ViewBag.Title = "Create Readiness Round";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+@section pageHeader{
+   <section class="content-header">
+       <h1>
+           @*Create Readiness Round*@Start Individual Round
+       </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-left">
+            <div class="box box-primary asset_list_view">
+                <div class="adduserlistBox">
+                    <div id="round_locations">
+                        @await Html.PartialAsync("_RoundLocations", Model.Locations)
+                    </div>
+                    <div id="round_users">
+                        @await Html.PartialAsync("_RoundInspectors", Model.TRoundUsers)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-9">
+            <div class="box box-primary">
+                <div class="row workOrder-search">
+                    <div class="col-md-12 addrounduser">
+                        @using (Html.BeginForm("SaveRound", "Round"))
+                        {
+                            @Html.HiddenFor(x => x.TRoundId)
+                            @Html.HiddenFor(x=>x.RoundScheduleId)
+                            <input type="hidden" name="users" value="@string.Join(",",Model.TRoundUsers.Select(x=>x.RoundUserId))">
+                            <input type="hidden" name="floorIds" value="@string.Join(",",Model.Locations.SelectMany(x=>x.Floor.Select(y=>y.FloorId)))">
+                            <div class="form-group">
+                                <label>Round Type:</label>
+                                <round-category-drop-down class="form-control disable" required="required"
+                                                      name="RoundCatId" firsttext="Select" selectedvalue="@Model.RoundCatId"></round-category-drop-down>                                
+                            </div>
+
+                            <div class="form-group">
+                                <label>Name this round (Optional):</label>
+                                @Html.TextBoxFor(x => x.RoundName, Model.RoundName, new { @class = "form-control", maxlength = "50" })
+
+                            </div>
+                            <div class="form-group">
+                                <label>Date:</label>
+                                @Html.TextBoxFor(x => x.RoundDate, Model.RoundDate.ToFormatDate(), new { @class = "form-control readonly", required = "required", @readonly = "readonly" })
+                            </div>
+                            <div class="form-btnCon text-right">
+                                <label>&nbsp;</label><br>
+                                <button type="submit" class="comm-button" title="Inspect" id="btnSave"
+                                    data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                                    Inspect
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 roundsHistory-container @(@Model.TRoundId > 0 ? "" : "hide")" id="user_location">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    var roundCatddl = $("#RoundCatId");
+    $(document).ready(function () {
+        $(".roundsPanel li .locationsshow").click(function () {
+            $(".floorscolor").addClass('floorboxshow');
+        });
+
+        $(".roundsPanel li .userhide").click(function () {
+            $(".floorscolor").removeClass('floorboxshow');
+        });
+        var rCatId = '@Model.RoundCatId';
+        //var roundCatddl = $("#RoundCatId");
+        if (rCatId > 0) {
+            roundCatddl.val(rCatId);
+            $(".floorscolor").addClass('floorboxshow');
+            roundCatddl.addClass('disable');
+        }
+        enableInspection();
+
+    });
+
+    function enableInspection() {
+        //debugger;
+        if ($("#TRoundId").val() > 0) {
+            $("#dvinspect").show();
+        }
+    }
+
+    var id = 0;
+
+
+    $('#RoundCatId').change(function () {
+        //debugger;
+        id = $(this).val();
+        if (id != 0) {
+            $('#groupname').show();
+            $.get('@Url.Action("GetGroups", "Round")' + '?id=' + id, function (data) {
+                $('#groupname').html(data);
+                $('#groupname').fadeIn('fast');
+                $('#Defaultuserdetails').hide();
+                loadGroupUserDetails();
+                //debugger;
+            });
+        } else { $('#groupname').hide(); }
+    });
+
+    function loadGroupUserDetails() {
+        $.get('@Url.Action("GetGroupUserDetails","Round")' + '?id=' + id, function (data) {
+           // debugger;
+            $('#Groupuserdetails').html(data);
+            $('#Groupuserdetails').fadeIn('fast');
+        });
+    }
+
+    var loadLocationDiv = function (roundId, ctrId) {
+        $.get(CRxUrls.Round_RoundLocations + '?roundId=' + roundId, function (data) {
+            $('#' + ctrId).html(data);
+            $('#' + ctrId).fadeIn('fast');
+            enableInspection();
+        });
+    }
+
+    var loadUserDiv = function (roundId, ctrId) {
+        $.get(CRxUrls.Round_RoundInspectors + '?roundId=' + roundId, function (data) {
+            $('#' + ctrId).html(data);
+            $('#' + ctrId).fadeIn('fast');
+        });
+    }
+
+    $(".roundUser").click(function () {
+        //debugger;
+        var cntrol = $(this);
+        var userId = cntrol.attr("userid");
+        var roundId = $("#TRoundId").val();
+        var status = cntrol.html().trim() == "Add" ? true : false;
+        //debugger;
+        console.log(userId, roundId);
+        //debugger;
+        swal({
+            title: "Are you sure? ",
+            text: "Do you want to " + cntrol.html().trim().toLowerCase() + " this user from this round!",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                cntrol.html(cntrol.html().trim() == "Add" ? 'Remove' : 'Add');
+                saveAndLoadUser(roundId, userId, status);
+            }
+        });
+
+    });
+
+    function saveAndLoadUser(roundId, userId, status) {
+       // debugger;
+        $.get(CRxUrls.Round_SaveInspector + '?roundId=' + roundId + "&userId=" + userId + "&status=" + status, function (data) {
+            loadUserDiv(roundId, 'round_users');
+        });
+    }
+
+    $(".roundfloor").click(function () {
+        var cntrol = $(this);
+        var floorId = cntrol.attr("floorid");
+        var roundId = $("#TRoundId").val();
+        var status = true;
+        if (cntrol.hasClass("selected")) {
+            swal({
+                title: "Are you sure? ",
+                text: "Do you want to remove this floor from this round!",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    status = false;
+                    cntrol.removeClass("selected")
+                    saveAndLocationFloor(roundId, floorId, status);
+                }
+            });
+        } else {
+            cntrol.addClass("selected");
+            saveAndLocationFloor(roundId, floorId, status);
+
+        }
+
+    });
+
+
+    function saveAndLocationFloor(roundId, floorId, status) {
+        $.get(CRxUrls.Round_SaveLocation + '?roundId=' + roundId + "&floorId=" + floorId + "&status=" + status, function (data) {
+            loadLocationDiv(roundId, 'round_locations');
+        });
+    }
+
+
+    function GotoInspection() {
+        if ($("#TRoundId").val() > 0 && $(".rLocationsul li").length > 0) {
+            var roundId = $("#TRoundId").val();
+            var url = CRxUrls.Round_RoundInspection + "?rid=" + roundId;
+            window.location.href = url;
+        } else {
+            swalalert("Please select at least one floor to start inspection!");
+        }
+    }
+</script>

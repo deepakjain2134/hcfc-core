@@ -1,0 +1,14 @@
+﻿@model HCF.Web.ViewModels.Common.LogoModel
+
+<a href='@(Url.RouteUrl("dashboard"))' class="logo">
+    <div class="logo">
+        <span class="logo-mini">
+            <img src="@Url.Content(Model.LogoPath)"
+                 alt="CRx" title="@($"CRx : {Model.OrganizationName}")" />
+        </span>
+        <span class="logo-lg">
+            <img src="@Url.Content("~/dist/img/small-Logo.png")"
+                 alt="CRx" title="@($"CRx : {Model.OrganizationName}")" />
+        </span>
+    </div>
+</a>

@@ -1,0 +1,219 @@
+﻿@model HCF.BDO.RouteMaster
+@using HCF.Web.Helpers
+@{
+    ViewBag.Title = "Manage Route";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Manage Route Master
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm("mngRoute", "Location", FormMethod.Post, new { enctype = "multipart/form-data", id = "mngRouteform" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                           
+                        <div class="row">
+                            <input type="hidden" id="locationsId" name="locationsId" />
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    @Html.HiddenFor(x => x.RouteId)
+                                    @Html.LabelFor(model => model.RouteNo)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.RouteNo, new { @class = "form-control", maxlength = 50, required = "required" })
+                                    @Html.ValidationMessageFor(model => model.RouteNo)
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="LocationName">Buildings</label>
+                                    @*@Html.BuildingDropDownList("BuildingID", 0, "Select Building",
+                new { @class = "form-control", required = "required" })*@
+                                    <buildingdropdownList name="BuildingID"
+                                                          selectedvalue="0" firsttext="Select Building" class="form-control" required="required"></buildingdropdownList>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="Floors">Floors</label>
+                                    <select id="floors" name="FloorId" class="form-control"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    @*@Html.LabelFor(m => m.IsActive)*@
+
+                                    @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                    @Html.ValidationMessageFor(m => m.IsActive)
+                                    <label>Active</label>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <div style="display:none" id="dvstops">
+                                    <p><label>Stops (To rearrange drag &amp; drop)</label></p>
+                                    <div class="crx-scrollBar Stopsdrag">
+                                        <ul id="sortable"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            
+                            <div class="col-md-12 text-right button_Div">
+                                <input type="button" value='Save' class="comm-button" id="btnSubmit" />
+                                @Html.ActionLink("Cancel ", "Routes", new { controller = "Location" }, new { @class = "comm-Cancelbutton" })
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(function () {
+        $("#sortable").sortable();
+        $("#sortable").disableSelection();
+    });
+
+
+    var buildingdddlCtr = $("#BuildingID");
+    var floorsddlCtr = $("#floors");
+
+     $(document).ready(function () {
+         var selectedFloorID = parseInt('@Model.FloorId');
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, selectedFloorID);
+    });
+
+    buildingdddlCtr.change(function () {
+        debugger
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+    });
+
+
+    floorsddlCtr.change(function () {
+        var val = floorsddlCtr.val();
+        debugger
+        if ($("#floors").val() != "") {
+            $('.ui-state-default').hide();
+            $('.ui-state-default[floorid="' + val + '"]').show();
+        } else { $('.ui-state-default').show(); }
+
+    });
+
+
+
+    $(document).ready(function () {
+        debugger;
+        fillLocations();
+    });
+
+
+    function fillLocations() {
+        debugger;
+            $("#sortable").empty();
+            var locations = {};
+            locations.url = '@Url.Action("GetLocationRoute", "Location", new { area = "RoundInsp" })';
+            locations.type = "POST";
+            locations.data = { routeId: $("#RouteId").val() };
+            locations.datatype = "json";
+            /*locations.contentType = "application/json";*/
+            locations.success = function (locationList) {
+                if (locationList.length > 0) {
+                    $("#dvstops").show();
+                    debugger;
+                    for (var i = 0; i < locationList.length; i++) {
+                        console.log(locationList[i]);
+                        if (locationList[i].IsActive)
+                            $("#sortable").append("<li floorid='" + locationList[i].Stops.FloorId + "' class='ui-state-default' id='" + locationList[i].StopId + "'><input type='checkbox' stopId='" + locationList[i].StopId + "' stopname='" + locationList[i].Stops.StopName + "' checked='checked' class='radioDrag' id='check_" + locationList[i].StopId + "'/><span></span> " + locationList[i].Stops.StopName + "(" + locationList[i].Stops.StopCode+")<span class='ui-icon ui-icon-arrowthick-2-n-s' style='float:right'></span></li>");
+                        else
+                            $("#sortable").append("<li floorid='" + locationList[i].Stops.FloorId + "' class='ui-state-default' id='" + locationList[i].StopId + "'><input type='checkbox' stopId='" + locationList[i].StopId + "' stopname='" + locationList[i].Stops.StopName + "' class='radioDrag' id='check_" + locationList[i].StopId + "'/><span></span> " + locationList[i].Stops.StopName + "(" + locationList[i].Stops.StopCode +")<span class='ui-icon ui-icon-arrowthick-2-n-s' style='float:right'></span></li>");
+
+
+                    }
+                } else { $("#dvstops").hide();}
+            };
+            locations.error = function () { alert("Error in Getting locations!!"); };
+            $.ajax(locations);
+    }
+
+    $(document).on("click", ".radioDrag", function () {
+        var stopId = $(this).attr("stopId");
+        var stopname = $(this).attr("stopname");
+        if ($(this).is(':checked')) {
+            var count = $("ul#sortable li  input[type=checkbox]:checked").length - 1;
+            console.log(count);
+            if (count > 0) {
+                $("#sortable > li:nth-child(" + (count) + ")").after("<li  class='ui-state-default' id='" + stopId + "'><input type='checkbox' stopId='" + stopId + "' stopname='" + stopname + "'  class='radioDrag' checked='checked' id='check_" + stopId + "'/><span></span> " + stopname + "<span class='ui-icon ui-icon-arrowthick-2-n-s' style='float:right'></span></li>");
+
+            } else {
+                $("#sortable").first().prepend("<li class='ui-state-default' id='" + stopId + "'><input type='checkbox' stopId='" + stopId + "' stopname='" + stopname + "'  checked='checked'  class='radioDrag' id='check_" + stopId + "'/><span></span> " + stopname + "<span class='ui-icon ui-icon-arrowthick-2-n-s' style='float:right'></span></li>");
+            }
+        } else {
+            $("#sortable").last().append("<li class='ui-state-default' id='" + stopId + "'><input type='checkbox' stopId='" + stopId + "' stopname='" + stopname + "'  class='radioDrag' id='check_" + stopId + "'/><span></span> " + stopname + "<span class='ui-icon ui-icon-arrowthick-2-n-s' style='float:right'></span></li>");
+        }
+        $(this).parent("li").remove();
+    });
+
+    $("#btnSubmit").click(function () {
+        debugger;
+        var locationIds = "";
+        var locationIds2 = "";
+        var data = "";
+        var count = 0;
+
+        $('input:checkbox.radioDrag').each(function () {
+            if (this.checked) {
+                locationIds = locationIds + $(this).attr('stopId') + ",";
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            $("#locationsId").val(locationIds);
+            $("#mngRouteform").submit();
+        } else {
+            $("#locationsId").val(locationIds);
+            $("#mngRouteform").submit();
+            //swal({
+            //    title: "Message",
+            //    text: "First add stops to add route!!",
+            //    type: "warning",
+            //    confirmButtonColor: "#DD6B55",
+            //    confirmButtonText: "OK",
+            //    closeOnConfirm: true,
+            //});
+        }
+    });
+
+
+
+
+</script>
+<style>
+    .ui-sortable {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    div#dvstops {
+        margin-bottom: 44px;
+    }
+        .ui-sortable li {
+            padding: 7px;
+            margin-bottom: 5px;
+            cursor: move;
+        }
+</style>

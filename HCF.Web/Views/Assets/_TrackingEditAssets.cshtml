@@ -1,0 +1,158 @@
+﻿@model dynamic
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <b>Edit Asset</b>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @{
+            int[] arr = new int[Model.Tfloorassetslst.Count];
+            int count = 0;
+            int AssetID = 0;
+            foreach (var data in Model.Tfloorassetslst)
+            {
+                arr[count] = data.FloorAssetsId;
+                count++;
+            }
+
+            string[] deviceidarr = new string[Model.Tfloorassetsdetaillst.Count];
+            string[] Statusarr = new string[Model.Tfloorassetsdetaillst.Count];
+            int deviceidcount = 0;
+            foreach (var Ddata in Model.Tfloorassetsdetaillst)
+            {
+                deviceidarr[deviceidcount] = Ddata.DeviceNo;
+                Statusarr[deviceidcount] = Ddata.StatusCode;
+                deviceidcount++;
+            }
+            foreach (var asset in Model.Assets)
+            {
+                AssetID = asset.AssetId;
+            }
+            <a href="#" class="pull-right">
+                <img src="/dist/Images/Icons/3d_add_button.png" name="addButton" floorassetidvalue="@arr[0]" asset_id="@AssetID" building_id="@Model.Floors[0].Building.BuildingId" value="Add" title="Add Assets" class="addsubmit">
+            </a>
+            <br /><br />
+        }
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="EdittrackingAssetTbl">
+                        <thead>
+                            <tr>
+                                <th style="width:62px;">S.No.</th>
+                                <th>Asset #</th>
+                                <th>Location</th>
+                                @*<th>Floor Name</th>*@
+                                <th>Status</th>
+                                <th style="width:100px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="EdittrackingAssetbody">
+                            @{
+                                int index = 1;
+                                for (var i = 0; i < Model.Floors.Count; i++)
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        @foreach (var asset in Model.Assets)
+                                        {
+                                            <td>@deviceidarr[i]</td>
+                                            <td><span>@Model.Floors[i].FloorName</span>, <span>@Model.Floors[i].Building.BuildingName</span></td>
+                                            @*<td Building_id="@Model.Floors[i].Building.BuildingId">@Model.Floors[i].Building.BuildingName</td>*@
+                                            @*<td floor_id="@Model.Floors[i].FloorId">@Model.Floors[i].FloorName</td>*@
+                                            <td>
+                                                @if (Statusarr[i] == "ACTIV")
+                                                {
+                                                    <span>@Statusarr[i]</span>
+                                                    @*@Html.CheckBox("Status", true, htmlAttributes: new { @class = "form-control", status_attr = Statusarr[i], floor_id = Model.Floors[i].FloorId, asset_id = asset.AssetId, @style = "width:15px;" })<span></span>*@
+                                                }
+                                                else
+                                                {
+                                                    <span>@Statusarr[i]</span>
+                                                    @*@Html.CheckBox("Status", false, htmlAttributes: new { @class = "form-control", status_attr = Statusarr[i], floor_id = Model.Floors[i].FloorId, asset_id = asset.AssetId, @style = "width:15px;" })<span></span>*@
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="#">
+                                                    <img src="/dist/Images/Icons/edit_button2.png" name="editButton" floorassetidvalue="@arr[i]" asset_id="@asset.AssetId" building_id="@Model.Floors[i].Building.BuildingId" value="Edit" title="Edit Assets" class="editsubmit">
+                                                </a>
+                                                @*<input type="button" name="editButton" floorassetidvalue="@arr[i]" asset_id="@asset.AssetId" building_id="@Model.Floors[i].Building.BuildingId" value="Edit" title="Edit Assets" class="button1 editsubmit" style="margin:2px;" />*@@*<input type="button" name="editButton" floorassetidvalue="@arr[i]" asset_id="@asset.AssetId" building_id="@Model.Floors[i].Building.BuildingId" value="Add" title="Add Assets" class="button1 addsubmit" style="margin:2px;"/>*@
+                                            </td>
+                                        }
+                                    </tr>
+                                    index++;
+                                }
+                                @*foreach (var floor in Model.Floors)
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        @foreach (var asset in Model.Assets)
+                                    {
+                                            <td asset_id="@asset.AssetId">@asset.Name</td>
+                                        }
+                                        <td>@floor.Building.BuildingName</td>
+                                        <td floor_id="@floor.FloorName">@floor.FloorName</td>
+                                        <td><input type="button" name="editButton" value="Edit" title="Edit Floor Assets" class="button1" /></td>
+                                    </tr>
+                                    index++;
+                                }*@
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $(document).on('click', '.close', function () {
+        //window.location.reload();
+    });
+
+    $(document).on('click', '.editsubmit', function () {
+        var buidingId = $(this).attr("building_id");
+        var assetId = $(this).attr("asset_id");
+        var edit = 1;
+        var floorassetid = $(this).attr("floorassetidvalue");
+        $.ajax({
+            url: '@Url.Action("trackingassetmodel", "Assets")',//"Assets/trackingassetmodel",
+            method: "GET",
+            data: { buildingId: buidingId, assetId: assetId, edit: edit, floorassetID: floorassetid },
+            dataType: "html",
+            success: function (data) {
+                $("#loadpartial").empty();
+                $("#loadpartial").append(data);
+                $("#AddAssetsPopup").modal('show');
+
+            },
+            error: function (e) {
+                console.warn(e);
+            }
+        });
+    });
+    $(document).on('click', '.addsubmit', function () {
+        var buidingId = $(this).attr("building_id");
+        var assetId = $(this).attr("asset_id");
+        var edit = 0;
+        var floorassetid = $(this).attr("floorassetidvalue");
+        $.ajax({
+            url: '@Url.Action("trackingassetmodel", "Assets")',//"Assets/trackingassetmodel",
+            method: "GET",
+            data: { buildingId: buidingId, assetId: assetId, edit: edit, floorassetID: floorassetid },
+            dataType: "html",
+            success: function (data) {
+                $("#loadpartial").empty();
+                $("#loadpartial").append(data);
+                $("#AddAssetsPopup").modal('show');
+
+            },
+            error: function (e) {
+                console.warn(e);
+            }
+        });
+    });
+   
+</script>

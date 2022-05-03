@@ -1,0 +1,81 @@
+﻿
+@model IEnumerable<HCF.BDO.DocumentMaster>
+
+<table id="inboxTable" class="table table-bordered table-striped no-footer">
+    <thead>
+        <tr>
+
+            <th>
+                Doc
+            </th>
+            <th>
+                File Name
+            </th>
+            <th>
+                Type
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Where(x => !x.IsDeleted).OrderBy(x => x.DocumentType.Name).ThenBy(y => y.FileName))
+        {
+            <tr id=@($"tr{item.DocumentId.ToString()}")>
+                <td>
+                    <div fileId="@item.AttachmentId"
+                         ondragstart="docDragStart(event);"
+                         class="inbox_file"
+                         draggable="true"
+                         filePath="@item.FilePath"
+                         alt="@item.FileName" href="@commonModelFactory.FilePath(item.FilePath)"
+                         id='@($"file{item.AttachmentId}")'>
+                    </div>
+                </td>
+                <td>
+                    @item.FileName
+                </td>
+                <td>
+                    @item.DocumentType.Name
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+
+    var datatable = $('#inboxTable').dataTable({
+        "searching": false,
+        "lengthChange": false,
+        "bPaginate": $('#inboxTable tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+    });
+
+    $(document).on('click', 'div.inbox_file', function () {
+        var href = $(this).attr("href");
+        window.open(href, "_blank");
+    });
+
+
+    function docDragStart(e) {
+        e.dataTransfer.effectAllowed = "move";
+        var json = {
+            id: e.target.getAttribute("id"),
+            fileName: e.target.getAttribute("alt"),
+            filePath: e.target.getAttribute("href"),
+            path: e.target.getAttribute("filePath"),
+            fileId: e.target.getAttribute("fileId"),
+            dtype: 'documents'
+        };
+        ///console.log(json);
+        e.dataTransfer.setData("text", JSON.stringify(json));
+    }
+
+</script>

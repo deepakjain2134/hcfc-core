@@ -1,0 +1,192 @@
+﻿@{
+    ViewBag.Title = "Assets Generate Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Review & Finalize Reports
+            </h1>
+            <input type="hidden" id="hdnLocalSignDateTime" name="LocalSignDateTime" />
+            <input type="hidden" id="hdnSignDoneBy" name="SignDoneBy" />
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-left">
+                <div class="box box-primary finalizeleft_view" id="finalizeleft_view">
+                    @await Component.InvokeAsync("AssetsAsset") 
+                </div>
+            </div>
+            <div class="col-lg-9 col-xs-9">
+                <div class="box box-primary">
+                    <div class="comman_checkbox1 checkBoxShadow">
+                        <ul class="finalize-shorting">
+                            <li>
+                                <div class="selectAllbox">
+                                    <input type="checkbox" id="selectAll" class="checkBox" /><span></span>Select All &nbsp;&nbsp;
+                                </div>
+                            </li>
+                            <li>
+                                Building
+                                @*@Html.BuildingDropDownList("drpBuildings", 0, "All", new { @class = "form-control selectyear" })*@
+
+                                <buildingdropdownList name="drpBuildings" selectedvalue="0" firsttext="All" class="form-control selectyear"></buildingdropdownList>
+                                Floor
+                                <select id="floors" class="form-control selectyear"></select>
+                            </li>
+                        </ul>
+                    </div>
+                  
+
+                    <div id="assets_view">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+
+<div class="modal fade" id="previewReports" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="loadpartial">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $("#floors").append(
+                $('<option></option>').val("").html("All"));
+           // loadData();
+
+            $('input:checkbox[id^="cb"]').change(function() {
+                loadData();
+            });
+            $(".selectAllbox").hide();
+
+        });
+
+        $("#drpBuildings").change(function() {
+            if ($("#drpBuildings").val() != "") {
+                $("#floors").empty();
+                $("#floors").append(
+                    $('<option></option>').val("").html("All"));
+                var floorOptions = {};
+                floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization")';
+                floorOptions.type = "POST";
+                floorOptions.data = JSON.stringify({ buildingId: $("#drpBuildings").val() });
+                floorOptions.datatype = "json";
+                floorOptions.contentType = "application/json";
+                floorOptions.success = function(floorList) {
+                    for (var i = 0; i < floorList.length; i++) {
+                        $("#floors").append(
+                            $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                    }
+                    $("#floors").prop("disabled", false);
+                };
+                floorOptions.error = function() { alert("Error in Getting States!!"); };
+                $.ajax(floorOptions);
+            } else {
+                $("#floors").empty();
+                $("#floors").append(
+                    $('<option></option>').val("").html("All"));
+            }
+            loadData();
+        });
+
+        $(".assetsListLi").click(function () {
+            console.log("data");
+
+        });
+        $("#floors").change(function() {
+            loadData();
+        });
+
+        $("#checkAll").click(function() {
+            $('input:checkbox').not(this).prop('checked', this.checked);
+            $('#selectAll').attr('checked', false);
+            $(this).parent().find('ul.list').each(function(i) {
+                $(this).find('ul').toggle();
+            });
+            loadData();
+        });
+
+
+        $("#selectAll").click(function() {
+            var isChecked = $(this).prop('checked');
+            $('.checkBox').each(function(index) {
+                $(this).prop("checked", isChecked);
+            });
+        });
+
+
+        var loadData = function() {
+            $(".selectAllbox").hide();
+            var buildingId = "";
+            buildingId = $("#drpBuildings").val();
+            var floorId = "";
+            floorId = $("#floors").val();
+            var Ids = "";
+            var assetsSubCategoryId = "";
+            $('input:checkbox[id^="cb2"]').each(function() {
+                var $this = $(this);
+                if ($this.is(":checked")) {
+                    if ($(this).val() != "on") {
+                        Ids = Ids + $(this).val() + ",";
+                    }
+                }
+            });
+            $('input:checkbox[id^="cb3"]').each(function() {
+                var $this = $(this);
+                if ($this.is(":checked")) {
+                    if ($(this).val() != "on") {
+                        assetsSubCategoryId = assetsSubCategoryId + $(this).val() + ",";
+                    }
+                }
+            });
+
+            console.log(Ids);
+            var url = CRxUrls.reports_getfloorassetsforreports;
+            $.get(url +
+                '?buildingId=' +
+                buildingId +
+                '&floorId=' +
+                floorId +
+                '&assetId=' +
+                Ids +
+                '&ascIds=' +
+                assetsSubCategoryId,
+                function(data) {
+                    $('#assets_view').html(data);
+                    $('#assets_view').fadeIn('fast');
+                    debugger
+                    if ($('#floorAssetsforReports tr').length == 2) {
+                        $("#btnsignSubmit").hide();
+                        $(".nodataFound").show();
+                        $(".selectAllbox").hide();
+
+                    } else if ($('#floorAssetsforReports tr').length == 1) {
+                        $(".selectAllbox").hide();
+                        $(".nodataFound").show()
+                    } else {
+                        $(".nodataFound").hide()
+                        $(".selectAllbox").show();
+                    };
+                });
+        }
+
+
+    </script>
+
+   
+}

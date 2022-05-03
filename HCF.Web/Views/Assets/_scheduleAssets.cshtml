@@ -1,0 +1,240 @@
+﻿@model HCF.BDO.Assets
+@if (Model != null && Model.TFloorAssets.Count > 0)
+{
+    <div class="align-right" style="padding: 14px 0 10px 0;">
+        <input type="submit" value="Assign Schedule to Assets" class="button1" id="btnSubmit" />
+    </div>
+}
+<table class="table table-bordered table-striped inpetion_table" id="inpetion_table">
+    <thead>
+        <tr>
+            <th style="display:none">
+                EPDetailId
+            </th>
+            <th style="display:none">BuildingId</th>
+            <th style="display:none">FloorId</th>
+            <th style="display:none">ScheduleId</th>
+            <th align="center">
+                <input name="select_all" value="0" id="select-all-floorAssets" type="checkbox" class="checkEpDetails" /><span></span>
+            </th>
+            <th>
+                Asset #
+            </th>
+
+            <th>
+                Asset
+            </th>
+
+            <th>
+                Location
+            </th>
+            <th> @Localizer["NearBy"] </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var floorasset in Model.TFloorAssets)
+        {
+            <tr>
+                <td style="display:none">
+                    @foreach (var fep in Model.StandardEps)
+                    {
+                        <div class="@($"epsection eps{fep.EPDetailId}")">
+                            @fep.EPDetailId
+                        </div>
+                    }
+                </td>
+                <td style="display:none">@($"{(floorasset.Floor != null ? floorasset.Floor.BuildingId : 0)}")</td>
+                <td style="display:none">@floorasset.FloorId</td>
+                <td style="display:none" class="scheduletd">
+                    @if (floorasset.Schedules.Count > 0)
+                    {
+                        @floorasset.Schedules.FirstOrDefault().ScheduleId
+                    }
+                </td>
+                <td align="center" class="@((floorasset.Schedules.GroupBy(x => x.ScheduleId).Select(x => x.First()).ToList().Count) > 0 ? "disable" :"")">
+                    <input type="checkbox" class="checkEpDetails" value="@floorasset.FloorAssetsId" /><span></span>
+                </td>
+                <td>
+                    @floorasset.AssetNo
+                </td>
+
+                <td>
+                    @floorasset.Assets.Name
+                </td>
+                <td>
+                    @commonModelFactory.GetFloorAssetLocation(floorasset)
+                </td>
+                <td>
+                    @floorasset.NearBy
+                </td>
+                <td>
+                    @foreach (var schedules in floorasset.Schedules.GroupBy(x => x.ScheduleId).Select(x => x.First()).ToList())
+                    {
+                        <span>@schedules.ReferenceName</span>
+                    }
+                </td>
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+
+<script>
+
+    var table = $('#inpetion_table').DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('#inpetion_table tbody tr').length > 20,
+        "bSort": false,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+    });
+
+
+    $('#select-all-floorAssets').on('click', function () {
+        var status = $(this).is(":checked");
+        // alert('select All');
+        var rows = table.rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+
+        saveAssetsSchedule(0, status, $(this));
+    });
+
+    function filterdatabybuildingfloor() {
+        var buildingid = drpBuildings.val();
+        var floorid = drpFloors.val();
+        table.columns(1).search("").columns(2).search("").draw();
+        if (buildingid > 0 && floorid > 0) {
+            table.columns(1).search(buildingid).columns(2).search(floorid).draw();
+        } else if (buildingid > 0) { table.columns(1).search(buildingid).columns(2).search("").draw(); }
+    }
+
+
+    $('#inpetion_table').on('change', 'input[type="checkbox"]', function () {
+
+        var status = this.checked;
+        var floorAssetId = $(this).val();
+        //alert('select');
+        if (!this.checked) {
+            var el = $('#select-all-floorAssets').get(0);
+            if (el && el.checked && ('indeterminate' in el)) {
+                el.indeterminate = true;
+            }
+        }
+        debugger;
+        saveAssetsSchedule(floorAssetId, status, $(this));
+    });
+
+
+    var saveAssetsSchedule = function (floorAssetId, status, ctr) {
+
+        var epId = $("input[name='epdetail']:checked").val();
+        var scheduleId = drpSchedule.val();
+        var scheduleEPAssets = {
+            ScheduleId: scheduleId,
+            ActiviityType: 2,
+            EPDetailId: parseInt(epId),
+            FloorAssetId: parseInt(floorAssetId),
+            IsActive: status
+        };
+
+        var scheduleEPAssetslist = [];
+        scheduleEPAssetslist.push(scheduleEPAssets);
+
+        if (epId > 0 && scheduleId > 0) {
+            var UrlAction ='@Url.Action("SaveAssetsSchedule", "Schedule")';
+            $.ajax({
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'POST',
+                url: UrlAction,
+                data: JSON.stringify(scheduleEPAssetslist),
+                success: function (resultData) {
+                }
+            });
+        }
+    }
+
+
+    var ShowActiveEpDetails = function (epId) {
+        $(".epsection").hide();
+        $(".eps" + epId).show();
+    }
+
+    function enablecheckbox() {
+        var scheduleId = drpSchedule.val();
+        //alert(scheduleId);
+        var trs = $('[id*=inpetion_table]').find('tr');
+        $(trs).each(function () {
+            var tr = $(this);
+            var td = $(tr).find('td');
+            debugger;
+            $(td).each(function () {
+                var tdtes = $(this);
+                if (tdtes.hasClass("scheduletd")) {
+                    //console.log(tdtes.html());
+                    if (tdtes.html().trim() == scheduleId) {
+                        debugger;
+                        //alert("cAll msg");
+                        $(tr).find('td').eq(4).removeClass('disable');
+                        $(tr).find('td').eq(4).find('input[type="checkbox"]').attr("checked", "checked");
+                    }
+                }
+            });          
+        });
+    }
+
+
+    $(document).ready(function (e) {
+        //$(".epsection").hide();
+        $("input:radio[name=epdetail]:first").attr('checked', true);
+        var value = $("input[name=epdetail]:radio:checked").val();
+        ShowActiveEpDetails(value);
+        //$(".epDescription").hide();
+        $("#divEp" + value).show()
+
+        //$(document).on("click", ".open-FailStepsPopup", function () {
+
+        //});
+        activeTab(value + "a");
+
+
+        function activeTab(tab) {
+            $('.nav-pills a[href="#' + tab + '"]').tab('show');
+        };
+
+        enablecheckbox();
+        //$("input[name=epdetail]:radio").change(function () {
+
+        //    var value = $("input[name=epdetail]:radio:checked").val();
+        //    $(".epDescription").hide();
+        //    $("#divEp" + value).show();
+
+        //    filterAssetbyEP();
+        //    //var values = $(this).val();
+        //    //table.columns(1).search($(this).val()).draw();
+        //});
+
+        $('.nav-pills li').click(function () {
+            var value = $(this).attr("id");
+            $(this).focusout();
+            //e.preventDefault();
+            activeTab(value + "a");
+            $("input[name=epdetail][value=" + value + "]").prop('checked', true);
+            $(".epDescription").hide();
+            $("#divEp" + value).show();
+            ShowActiveEpDetails(value);
+            //filterAssetbyEP();
+        });
+
+       
+    });
+
+</script>
+

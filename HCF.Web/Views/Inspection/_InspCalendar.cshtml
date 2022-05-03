@@ -1,0 +1,278 @@
+﻿<div class="row cal-activityBox">
+    <div class="col-lg-6 col-md-6">
+        <div id='calendar' class="calender"></div>
+    </div>
+    <div class="col-lg-6 col-md-6 boardlegand">
+        <div class="@(HCF.Web.Base.UserSession.CurrentUser.IsPowerUser ||commonModelFactory.IsSystemAdminUser() ?"":"hide")">
+            @*@Html.UserDropDownList("filterbyUser", HCF.Web.Base.UserSession.CurrentUser.UserId, "--Select--", new { @class = "form-control" })*@
+
+            <userdropdownlist name="filterbyUser"
+                              firsttext="--Select--"
+                              class="form-control"
+                              selectedvalue="@HCF.Web.Base.UserSession.CurrentUser.UserId" ></userdropdownlist>
+        </div>
+        <br />
+        <div class="trackingAssets-lenged text-right">
+            <ul class="legand">
+                @*<li class="grey"></li>
+            <li>Inspection Done</li>
+            <li><img src="/dist/Images/Icons/past_due_status_icon.png" /></li>
+            <li>Past Due</li>
+            <li class="yellow"></li>
+            <li>Due</li>
+            <li><img src="/dist/Images/Icons/inprogress_icon.png" /></li>
+            <li>@Localizer["InProgress"]  </li>
+            <li><img src="/dist/Images/Icons/CompletedEp.png" /></li>
+            <li>Completed</li>*@
+
+
+                <li><span class="processType-Sprite notdone-btn"></span>Not Done</li>
+                <li><span class="processType-Sprite deficiency-btn"></span>Deficiency</li>
+                <li><span class="processType-Sprite due-btn"></span>Due</li>
+                <li><span class="processType-Sprite inProgress-btn"></span>@Localizer["InProgress"] </li>
+                <li><span class="processType-Sprite completed-btn"></span> Completed</li>
+
+            </ul>
+        </div>
+        <div id="historyTab" style="margin:34px 0 0 0">
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+   // debugger;
+    var filterbyUser = $("#filterbyUser");
+
+    $(document).ready(function () {
+        debugger;
+        refreshCalender();
+        var isback = getParameter('Isback');
+        var ts = 0;
+        if (isback == 1) {
+            ts = localStorage.getItem("timespan");
+        }
+        else {
+            ts = $('#calendar').fullCalendar('getDate');
+            $('.fc-today').addClass('activeDate');
+        }
+        //openHistoryPage(ts, 'dayClick');
+
+    });
+
+   // refreshCalender();
+    function getEventDate(timestamp) {
+        debugger
+        var dateobj = new Date(timestamp);
+        var month = Number(dateobj.getMonth() + 1);
+        var newmonth = month < 10 ? '0' + month : '' + month;
+        date = dateobj.getFullYear() + '-' + newmonth + '-' + dateobj.getDate();
+        return date;
+    }
+
+    function openHistoryPage(timeSpan, mode) {
+        debugger;
+        //console.log(mode);
+        //console.log("openHistoryPage", timeSpan);
+        var userId = filterbyUser.val();
+        if (userId == "") {
+            swalalert("Please select user first!");
+            return false;
+        }
+        $.ajax({
+            url: CRxUrls.Inspection_GetInspectionCalDetails + "?userId=" + userId + "&timeSpan=" + timeSpan,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $(this).addClass("activeDate");
+                $('#historyTab').empty();
+                $('#historyTab').html(data);
+                $('#historyTab').fadeIn('fast');
+            }
+        });
+    }
+
+    function getParameter(paramName) {
+        debugger
+        var searchString = window.location.search.substring(1),
+            i, val, params = searchString.split("&");
+
+        for (i = 0; i < params.length; i++) {
+            val = params[i].split("=");
+            if (val[0] == paramName) {
+                return val[1];
+            }
+        }
+        return null;
+    }
+
+    filterbyUser.change(function () {
+        refreshCalender();
+        debugger;
+        ts = $('#calendar').fullCalendar('getDate');
+        $('.fc-today').addClass('activeDate');
+        openHistoryPage(ts, 'dayClick');
+    })
+
+    function refreshCalender() {
+        debugger;
+        $('#calendar').fullCalendar('destroy');
+        $('#calendar').fullCalendar({
+            header: {
+                left: '',
+                center: 'prevYear,prev,title,next,nextYear',
+                right: 'today'
+            },
+            firstDay: 0,
+            slotMinutes: 0,
+            events: getdata(),
+            dayClick: function (date, jsEvent, view) {
+                debugger;
+                openHistoryPage(date, 'dayClick');
+                $("td").removeClass("activeDate");
+                $(this).addClass("activeDate");
+            },
+        });
+    }
+
+    function getdata() {
+        debugger;
+        var userId = filterbyUser.val();
+        var url = '@Url.Action("GetInspections", "Inspection")' + "?userId=" + userId;
+        debugger;
+        return url;
+    }
+
+</script>
+
+<style>
+  
+    .calender {
+        border: #ddd solid 1px;
+        width: 100%;
+    }
+
+    .activeDate {
+        background-color: #90EE90 !important;
+    }
+
+    .fc-toolbar .fc-center {
+        font-size: 10px;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 20px;
+        display: inline-block;
+        margin: 0 12px;
+        vertical-align: middle;
+    }
+
+    .fc-today-button {
+        height: 23px !important;
+        font-size: 12px !important;
+    }
+
+    .fc td, .fc th {
+        font-size: 15px;
+    }
+
+    .fc-basic-view .fc-day-number, .fc-basic-view .fc-week-number {
+        padding: 8px !important;
+        font-weight: 500;
+    }
+
+    .fc-day-number {
+        font-size: 15px;
+    }
+
+    .fc th {
+        padding: 5px 0 !important;
+        font-size: 14px;
+    }
+
+    .fc-today {
+        border: none !important;
+        border-top: 1px solid #ddd !important;
+        font-weight: bold;
+    }
+
+    ul.legand li img {
+        max-width: 21px;
+    }
+
+    tr:first-child > td > .fc-day-grid-event {
+        margin-top: -4px;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-widget-content {
+        padding: 0px !important;
+    }
+
+    .fc-time {
+        display: none;
+    }
+
+    .fc-event {
+        width: 24px !important;
+        text-align: center !important;
+    }
+
+    .legand {
+        margin: 0;
+        padding: 0;
+        float: right;
+        list-style: none;
+    }
+
+        .legand li {
+            float: left;
+            margin-right: 5px;
+        }
+
+            .legand li.yellow {
+                background: yellow;
+                width: 19px;
+                height: 18px;
+                border-radius: 50%;
+            }
+
+            .legand li.blue {
+                background: #33479e;
+                width: 19px;
+                height: 18px;
+            }
+
+            .legand li.green {
+                background: green;
+                width: 19px;
+                height: 18px;
+            }
+
+            .legand li.grey {
+                background: gray;
+                width: 19px;
+                height: 18px;
+            }
+
+            .legand li.fail {
+                background: red;
+                width: 19px;
+                height: 18px;
+            }
+
+
+    .box.box-primary table tr td {
+        padding: 0 0px;
+    }
+
+    .fc-day-header span {
+        color: #171717;
+    }
+</style>

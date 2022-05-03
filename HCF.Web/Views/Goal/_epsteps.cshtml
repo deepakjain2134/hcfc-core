@@ -1,0 +1,11 @@
+﻿@model List<HCF.BDO.EPSteps>
+
+@await Component.InvokeAsync("GoalAssetsSteps", new
+{
+    epId = Model.SingleOrDefault().EPDetailId,
+    inspectionId = Model.SingleOrDefault().InspectionId,
+    floorAssetId = Model.SingleOrDefault().FloorAssetId,
+    showEp = true
+})
+@*@Html.Action("AssetsSteps", "Goal", new { epId = Model.SingleOrDefault().EPDetailId, inspectionId = Model.SingleOrDefault().InspectionId, 
+    floorAssetId = Model.SingleOrDefault().FloorAssetId, showEp = true })*@

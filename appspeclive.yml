@@ -1,0 +1,6 @@
+version: 0.0
+os: windows
+files:
+  - source: \
+    destination: C:\HCF\crxweb.com
+file_exists_behavior: OVERWRITE

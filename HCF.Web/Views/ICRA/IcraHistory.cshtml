@@ -1,0 +1,83 @@
+﻿@model HCF.BDO.TIcraLog
+@{
+
+    if(ViewBag.PermitType!=null && ViewBag.PermitType == 1 )
+    {
+        ViewBag.Title = "CRA History";
+    }
+    else
+    {
+        ViewBag.Title = "ICRA History";
+    }
+
+    }
+
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @(ViewBag.PermitType != null && ViewBag.PermitType == 1 ? "CRA History" : "ICRA History")
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary ">
+                   
+                        <div>
+                            <p>Permit Details:</p>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <td> @(ViewBag.PermitType != null && ViewBag.PermitType == 1 ? "CRA #:" : "Permit #:") @(ViewBag.permitno != null ? ViewBag.permitno : Model.PermitNo )</td>
+                                    <td>Location: @Model.Location</td>
+                                    <td>Scope: @Model.Scope</td>
+                                    <td>Estimated Duration: @Model.EstimatedDuration</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <p>Permit have the following history:</p>
+                        <table id="icrahistoryTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    @*<th>Date</th>*@
+                                    <th>Description</th>
+                                    @*<th>Updated by</th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.IcraHistory)
+                                {
+                                    <tr>
+                                        @*<td>@item.UpdateDate</td>*@
+                                        <td>@item.Description</td>
+                                        @*<td>@item.UserName</td>*@
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var docsTable = $('#icrahistoryTable').dataTable({
+        "searching": false,
+        "ordering": false,
+        "pageLength": 20,
+        "lengthChange": false,
+        "bPaginate": $('#icrahistoryTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i>>"
+       
+    });
+</script>

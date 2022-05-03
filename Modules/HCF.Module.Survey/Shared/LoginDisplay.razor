@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using HCF.Module.Survey.Services;
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+@inject IAccountService _accountService;
+
+@if (currentUser.Id > 0)
+{
+    <p>Hello, @string.Format("{0} {1}",currentUser.FirstName,currentUser.LastName) </p>
+    <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+}
+else
+{
+    <a href="/">Log in</a>
+}
+
+@*<AuthorizeView>
+    <Authorized>
+    Hello, @context.User.Identity.Name!
+    <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+    <a href="/">Log in</a>
+    </NotAuthorized>
+    </AuthorizeView>*@
+
+@code {
+    private HCF.Module.Survey.Model.User currentUser = new HCF.Module.Survey.Model.User();
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        //await SignOutManager.SetSignOutState();
+        await _accountService.LogoutAsync();
+        Navigation.NavigateTo("/", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await _accountService.GetCurrentUser();
+        if (currentUser == null)
+        {
+            currentUser = new Model.User();
+        }
+    }
+}

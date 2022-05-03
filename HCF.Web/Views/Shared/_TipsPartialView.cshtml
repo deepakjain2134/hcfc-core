@@ -1,0 +1,93 @@
+﻿@{
+    Layout = null;
+}
+
+@if (ViewContext.RouteData.Values["Action"].ToString().ToLower() == "FireDrill".ToLower())
+{
+    <div id="float" class='closed'>
+        @{
+            var screenName = $"{ViewContext.RouteData.Values["Controller"].ToString().ToLower()}_{ViewContext.RouteData.Values["Action"].ToString().ToLower()}";
+            //Html.RenderAction("ViewTips", "Tips", new { pageUrl = screenName });
+            @await Component.InvokeAsync("TipsViewTips", new { pageUrl = screenName })
+        }
+        <a class="img" href="#">
+            <img src="https://s3.amazonaws.com/crximages/images/icons/crowdsourced_tips_icons_02.png" width="60px" title="Crowdsourced Tips" />
+        </a>
+        <a href="#" class="img link-close-btn">
+            close
+        </a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var container = $("#float");
+            $("#float a.img").click(function (a) {
+                a.preventDefault();
+                if (container.hasClass("closed")) {
+                    container.animate({
+                        right: -1
+                    }, 500, function () {
+                        $(this).removeClass("closed").addClass("open");
+                        $('.link-close-btn').show()
+                    });
+                }
+                else {
+                    container.animate({
+                        right: -503
+                    }, 500, function () {
+                        $(this).removeClass("open").addClass("closed");
+                        $('.link-close-btn').hide()
+                    });
+                }
+            });
+
+            $(document).on('click', function (e) {
+                if (!container.is(e.target) && container.has(e.target).length === 0) {
+                    if (container.hasClass("open")) {
+                        container.animate({
+                            right: -503
+                        }, 500, function () {
+                            $(this).removeClass("open").addClass("closed");
+                            $('.link-close-btn').hide()
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        #floatcontent {
+            width: 500px;
+            height: 100%;
+            background: #808080;
+        }
+
+        #float {
+            position: fixed;
+            bottom: 100px;
+            right: -1px;
+            width: 500px;
+            height: 300px;
+        }
+
+            #float.closed {
+                right: -503px;
+            }
+
+            #float img {
+                position: absolute;
+                top: 75px;
+                right: 503px;
+            }
+
+        .link-close-btn {
+            position: absolute;
+            top: 137px;
+            right: 516px;
+            text-decoration: none;
+            color: red;
+            display: none;
+        }
+    </style>
+}

@@ -1,0 +1,24 @@
+﻿@model HCF.BDO.InspectionSteps
+
+@if (!string.IsNullOrEmpty(Model.Comments))
+{
+    <a href="@Url.Action("CommentPopUp", "Common", new {Title = "Comment", description = Model.Comments})" class="modal-link">
+        <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" tempname='@Model.Comments' class="commentIcon text" style="float: right" />
+    </a>
+
+}
+else
+{
+    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />
+}
+@if (!string.IsNullOrEmpty(Model.FilePath))
+{
+    <a href="@Url.Action("ImagePreview", "Common", new {imgSrc = Model.FilePath, title = "Image Preview"})" class="modal-link">
+        <img class="@(Model.FilePath != string.Empty ? "img_prev_upload" : "img_prev")" id="imagePreview_@Model.StepsId"
+             src="@commonModelFactory.FilePath(Model.FilePath)" style="float: right; margin-right: 5px;">
+    </a>
+}
+else
+{
+    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float: right; margin-right: 5px;" class="commentIcon disable" />
+}

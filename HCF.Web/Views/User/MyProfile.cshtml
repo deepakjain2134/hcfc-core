@@ -1,0 +1,235 @@
+﻿@model HCF.BDO.UserProfile
+
+@{
+    ViewBag.Title = Localizer["TitleMyProfile"].Value;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["TitleMyProfile"]
+        </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_profilemenu")
+        </div>
+
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <form id="myProfileform" asp-action="Register" asp-controller="User" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div id="hdn_div">
+                        <input type="hidden" name="FileName" value="@Model.FileName" />
+                        <input type="hidden" name="FileContent" />
+                        <input type="hidden" name="FilePath" value="@Model.FilePath" />
+                        <input type="hidden" name="IsActive" value="@Model.IsActive.ToString().ToLower()" />
+                        <input type="hidden" name="UserGroupIds" value="@Model.UserGroupIds" />
+                        <input type="hidden" name="Email" value="@Model.Email" />
+                        @Html.HiddenFor(m => m.IsVerified)
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="user-profilebanner">
+                                <div class="banner-setting">
+                                    <image class="img" title="@HCF.Web.Base.UserSession.CurrentOrg.Name"
+                                           src="@HCF.Web.Base.UserSession.CurrentOrg.DashBoadImagePath"></image>
+                                </div>
+                                <div class="update_banner myprofile_photo">
+                                    <image class="img myprofile" title="@Model.FullName" src="@Model.FilePath"></image>
+                                    <div class="upload_image">Upload Image</div>
+                                    <input type="file" style="display:none" name="file" id="file"
+                                           tempfileName="FileName"
+                                           tempfilecontent="FileContent"
+                                           class="fileUpload certificate" onchange="Uploadfile(this,'image')" disabled />
+                                </div>
+                            </div>
+                            <div class="user-detail-box">
+                                <div class="user-detail-innerbox">
+                                    <div class="display-label">
+                                        @Html.HiddenFor(model => model.UserId)
+                                        <label>First Name :<em class="required-field" style="display:none"> *</em></label>
+                                        <span class="text">@Html.DisplayFor(model => model.FirstName)</span>
+                                        <div><div class="editMode">  @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control alphaonly", maxlength = 50, required = "required" })</div></div>
+                                    </div>
+                                    <div class="display-label">
+                                        <label>Last Name :<em class="required-field" style="display:none"> *</em></label>
+                                        <span class="text">@Html.DisplayFor(model => model.LastName)</span>
+                                        <div class="editMode">
+                                            @Html.TextBoxFor(model => model.LastName, new { @class = "form-control alphaonly", maxlength = 50, required = "required" })
+                                        </div>
+                                    </div>
+                                    <div class="display-label">
+                                        <label>Phone # :</label>
+                                        <span class="text @(!string.IsNullOrEmpty(Model.PhoneNumber)? "phone" : "")">
+                                            @Html.DisplayFor(model => model.PhoneNumber)
+                                        </span>
+
+                                        <div class="editMode">
+                                            @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control phone", required = "required", maxlength = 15 })
+                                        </div>
+
+                                    </div>
+                                    <div class="display-label">
+                                        <label>Cell # :</label>
+                                        <span class="text @(String.IsNullOrEmpty(Model.CellNo)?"":"phone")">
+                                            @Html.DisplayFor(model => model.CellNo)
+                                        </span>
+
+                                        <div class="editMode">
+                                            <input name="CellNumber" id="CellNumber" value="@Model.CellNo" class="form-control phone" />
+
+                                        </div>
+                                    </div>
+                                    <div class="display-label">
+                                        <label>Email :</label>
+                                        <span> @Html.DisplayFor(model => model.Email)</span>
+                                    </div>
+                                    <div class="display-label">
+                                        <label>User Group :</label>
+
+                                        @if (Model.UserGroups.Count > 0)
+                                        {<span>
+                                                @string.Join(", ", Model.UserGroups.Select(x => x.Name))
+                                            </span>}
+
+                                    </div>
+                                    <div class="display-label">
+                                        <label>User Since :</label>
+                                        <span>
+                                            @if (Model.CreatedDate.HasValue)
+                                            {
+                                                @Model.CreatedDate.Value.ToClientTime().ToFormatDate()
+                                            }
+                                        </span>
+                                    </div>
+                                    @*<div class="display-label">
+                                            <label>Certificates :</label>
+                                            @if (Model.UserCertificates != null && Model.UserCertificates.Count > 0)
+                                            {
+                                                <span>
+                                                    <a href="@Url.Action("UserCertificates", "User")">
+                                                        <img src="@Url.Content("~/dist/Images/Icons/internal_user_certificate_icon.png")" alt="internal_user_certificate_icon" />
+                                                    </a>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <img src="@Url.Content("~/dist/Images/Icons/internal_user_certificate_icon.png")" alt="internal_user_certificate_icon" class="image disable" />
+                                            }
+                                        </div>*@
+                                    <div class="button_Div text-right">
+                                        <button class="edit comm-button" type="button">Edit</button>
+                                        <input class="update comm-button submit_form" type="button" name="submitType" value="Update" />
+                                        <button class="update comm-Cancelbutton" type="button" id="profileCancel">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    $("div.editMode").hide(); $(".update").hide();
+    $('button').on('click', function (e) {
+        e.preventDefault();
+        if ($("div.editMode").is(":visible")) {
+            //$("span").show();
+            //$("input").hide();
+            //$("span").text(
+            //    $("input").val()
+            //).show();
+            $(".required-field").hide();
+            $('.upload_image').hide();
+            $('#file').hide();
+            $("span.text").show();
+            //$(".display-label label").not('.no-hide').show()
+            $("div.editMode").hide();
+            $("button.edit").show();
+            $(".update").hide();
+
+        } else {
+            $('.upload_image').css({ "display": "flex" });
+            $('#file').removeAttr('disabled').attr('title', 'Update Profile Pic')
+            $('#file').show();
+            $("span.text").hide();
+            //$(".display-label label").not('.no-hide').hide()
+            $(".required-field").show();
+            $("div.editMode").show();
+            // $("button").text("Update");
+            $("button.edit").hide();
+            $(".update").show();
+        }
+    });
+
+    $('.img').click(function () { $('#file').trigger('click'); });
+
+
+
+    $("#file").change(function () {
+        debugger;
+        var file = document.getElementById("file").files[0];
+        var readImg = new FileReader();
+        readImg.readAsDataURL(file);
+        readImg.onload = function (e) {
+            $('.myprofile').attr('src', e.target.result).fadeIn();
+        }
+    });
+
+    $('.submit_form').click(function () {
+        var firstname = $("#FirstName").val();
+        var lastname = $("#LastName").val();
+        var phoneno = $('#PhoneNumber').val();
+        var cellno = $('#CellNumber').val();
+        var phonelen = $('#PhoneNumber').val().length;
+        var celllen = $('#CellNumber').val().length;
+
+        if (firstname == '') {
+            swalalert("Error", "Please enter your First Name", "error");
+            return false;
+        } else if (lastname == '') {
+            swalalert("Error", "Please enter your Last Name", "error");
+            return false;
+        }
+        else if (phoneno != "" && cellno == "") {
+            //debugger;
+            if (phoneno == cellno) {
+                swalalert("Error", "Phone Number and Cell Number cannot be same", "error");
+                return false;
+            } else if (phonelen < 7) {
+                swalalert("Error", "Phone Number Length should be in between 7 to 15.", "error");
+                return false;
+            }
+        }
+        var form = $('form');
+        var url = CRxUrls.user_Register;//"/User/Register";
+        var formData = {};
+        $(form).find("input[name]").each(function (index, node) {
+            formData[node.name] = node.value;
+        });
+        $.post(url, formData).done(function (data) {
+            //var isconfirm = swalalert("Success", "Profile updated successfully", "success")
+            swal({
+                title: "Success",
+                text: "Profile updated successfully",
+                type: "success",
+                confirmButtonText: "OK"
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        window.location.reload();
+                    }
+                })
+        });
+    });
+
+</script>

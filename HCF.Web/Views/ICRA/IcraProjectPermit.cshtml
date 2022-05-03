@@ -1,0 +1,124 @@
+﻿@model IEnumerable<HCF.BDO.TICRAReports>
+@{
+    ViewBag.Title = "Icra Permit";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Observation Reports
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="observationReportTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Project Name
+                                        </th>
+                                        <th>
+                                            Project #
+                                        </th>
+                                        <th>Report Name</th>
+                                        <th style="width: 106px;">
+                                            Report Date
+                                        </th>
+                                        <th>
+                                            Comment
+                                        </th>
+                                        <th>
+                                            Contractor
+                                        </th>
+                                        <th>
+                                            Observer
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var reports in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @reports.ProjectNames
+                                            </td>
+                                            <td>
+                                                @reports.ProjectNos
+                                            </td>
+                                            <td>
+                                                @reports.ReportName
+                                            </td>
+                                            <td data-sort="@reports.ReportDate.Ticks">
+                                                @reports.ReportDate.ToFormatDate()
+                                            </td>
+                                            <td>
+                                                @reports.Comment
+                                            </td>
+                                            <td>
+                                                @if (reports.ContractorUser != null)
+                                                {
+
+                                                    @($"Sign: {reports.ContractorUser.Name} {reports.ContractorSignDate.CastLocaleDate()} {reports.ContractorSignTime}");
+
+
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (reports.ObserverUser != null)
+                                                {
+                                                    @($"Sign: {reports.ObserverUser.Name} {reports.ObserverSignDate.CastLocaleDate()} {reports.ObserverSignTime}");
+
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <img onclick="location.href ='@Url.Action("ProjectObservationReports", "ICRA", new { projectIds = reports.ProjectIds })'"
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="Observation Report Details" alt="Observation Report Details" />
+
+                                                @*<img onclick="location.href ='@Url.Action("TICRAProjectObservationReport", "ICRA", new { projectId = reports.ProjectIds , reportId = reports.TICRAReportId  })'"
+                                    src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Observation Report" alt="Edit Observation Report" /><br />*@
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var dtable = $('#observationReportTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [[3, 'desc']],
+        "bPaginate": $('#observationReportTable tbody tr').length > 20,
+        "bInfo": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+       
+
+        initComplete: function () {
+            $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("TICRAProjectObservationReport", "ICRA"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Assets" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-sm-12 '<'table-responsive'tr> > >" + "<'row'<'col-sm-12'p>>",
+
+
+
+        "searching": true
+    });
+</script>
+

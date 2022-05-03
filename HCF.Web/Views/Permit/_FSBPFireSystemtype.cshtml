@@ -1,0 +1,35 @@
+﻿@model HCF.BDO.TFSBPBuildingDetails
+
+
+@{
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+    //string firesytem = string.Empty;
+}
+
+
+@if (Model.BuildingId.HasValue && Model.BuildingId.Value > 0 && !string.IsNullOrEmpty(sequence))
+{
+    <tr id="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" sequence="@(Convert.ToInt32(sequence) + 1)" value="@(Convert.ToInt32(Model.BuildingId))">
+        <td>
+            <input type="hidden" value="@Model.BuildingId" class="fSBbuilding" />
+            <input type="hidden" value="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" class="fSBbuilding_@Model.BuildingId" />
+            <span style="display:none" class="rowNo">@string.Format("{0}", Convert.ToInt32(sequence) + 1)</span>
+            <input name="TFSBPBuildingDetails[@sequence].TFSBPBuildingDetailId" value="@Model.TFSBPBuildingDetailId" type="hidden" />
+            <input name="TFSBPBuildingDetails[@sequence].BuildingId" value="@Model.BuildingId" type="hidden" />
+            @*@Html.HiddenFor(x => x[item].TFSBPBuildingDetailId)*@
+            <span>@Model.BuildingName </span>
+        </td>
+        <td>
+            @for (int i = 0; i < Model.fireSystemTypes.Count; i++)
+            {
+                <span>@Model.fireSystemTypes[i].Name</span>
+                <input name="TFSBPBuildingDetails[@sequence].fireSystemTypes[@i].ID" value="@Model.fireSystemTypes[i].ID" checkrow="@(Convert.ToInt32(sequence))" type="hidden" />
+                <input name="TFSBPBuildingDetails[@sequence].fireSystemTypes[@i].CheckVal" value="@(Model.fireSystemTypes[i].CheckVal.HasValue && Model.fireSystemTypes[i].CheckVal == 1 ? 1 : 0)" checkrow="@(Convert.ToInt32(sequence))" type="hidden" />
+                <input class="chkfiresystem" id="TFSBPBuildingDetails[@sequence].fireSystemTypes[@i].CheckVal" onchange="chkfiresystemforbuilding(this)" checkrow="@(Convert.ToInt32(sequence))" type="checkbox" @(Model.fireSystemTypes[i].CheckVal.HasValue && Model.fireSystemTypes[i].CheckVal == 1 ? "checked" : string.Empty) /><span></span>
+            }
+        </td>
+
+    </tr>
+
+
+}

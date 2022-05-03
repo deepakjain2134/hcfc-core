@@ -1,0 +1,319 @@
+﻿@model List<HCF.BDO.TFireSystemByPassPermit>
+@{
+    ViewBag.Title = "Fire System Bypass Permit [FSBP]";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Fire System Bypass Permit [FSBP]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    
+                        <div class="row tablelist-topform">
+                            <div class="col-md-4">
+                                <icraprojectdropdown name="SelProjectId" selectedvalue="0"
+                                                     class="form-control" firsttext="-- All Project --"></icraprojectdropdown>
+                                @*@Html.ICRAProjectDropDown("SelProjectId", 0, "-- All Project --", new { @class = "form-control" })*@
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <table id="fsbpTable" class="table table-bordered table-striped" style="width:100% !important;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 110px;">Permit #</th>
+                                            <th>Project Name</th>
+                                            <th style="width: 120px;">Start Date</th>
+                                            <th>Contractor</th>
+                                            <th style="width: 126px;">Date [of Request]</th>
+                                            <th>Requestor</th>
+                                            @*<th>Phone #</th>
+                                                <th>Email</th>*@
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                            <th style="display:none"></th>
+                                            <th style="display:none"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Where(x => x.IsActive).OrderByDescending(x => x.StartDate).ThenByDescending(x => x.CreatedDate))
+                                        {
+                                            <tr>
+                                                <td>@item.PermitNo</td>
+                                                <td>@item.ProjectName</td>
+                                                <td data-sort="@item.StartDate.DateSort()">@item.StartDate.ToFormatDate()</td>
+                                                <td>@item.Company</td>
+                                                <td data-sort="@item.RequestedDate.DateSort()">@item.RequestedDate.ToFormatDate()</td>
+                                                <td>@(item.RequestorByUser!=null && !string.IsNullOrEmpty(item.RequestorByUser.Name)? item.RequestorByUser.Name:string.Empty)</td>
+                                                <td>
+                                                    <input type="hidden" value="@item.ApprovalStatus" />
+                                                    @{
+                                                        HCF.BDO.Enums.ApprovalStatus enums = (HCF.BDO.Enums.ApprovalStatus)item.ApprovalStatus;
+                                                    }
+                                                    <p>@enums.GetDescription()</p>
+                                                </td>
+                                                <td class="mopmoredot">
+                                                    <a href="@Url.Action("AddFSBPermit", "Permit", new { tfsbPermitId = item.TFSBPermitId})">
+                                                        <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" /></span>
+                                                    </a>
+                                                    <a data-id="@item.TFSBPermitId" class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "deletepermit" :"deletepermit hide")">
+                                                        <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete Permit" alt="3d_add_button" /></span>
+                                                    </a>
+
+                                                    <div class="dropdown icratable-drop icondpwnload">
+                                                        <button class="dropdown-toggle" type="button" data-toggle="dropdown">
+                                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                            <span>
+                                                                <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                                            </span>
+                                                        </button>
+                                                        <ul class="dropdown-menu ctmenu">
+
+                                                            <li data-action="icrapermit">
+                                                                <a href="@Url.Action("FireSystemByPassPermitReports", "Pdf", new { tfsbPermitId = item.TFSBPermitId,IsAttachmentIncluded=false})">
+                                                                    <span>
+                                                                        Export permit as PDF
+                                                                    </span>
+                                                                </a>
+
+                                                            </li>
+
+                                                            <li data-action="icrapermit">
+                                                                <a href="@Url.Action("DownloadFSBPAttachments", "Permit", new { tfsbPermitId = item.TFSBPermitId,IsAttachmentIncluded=true})">
+                                                                    <span>
+                                                                        Export permit as PDF w/ attachments
+                                                                    </span>
+                                                                </a>
+
+                                                            </li>
+
+
+                                                        </ul>
+
+                                                    </div>
+
+                                             
+                                                </td>
+                                                <td style="display:none">@item.ApprovalStatus</td>
+                                                <td style="display:none">@item.ProjectId</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var selprojectId = $("#SelProjectId");
+    var dataTables = $('#fsbpTable').DataTable({
+                                            "lengthChange": false,
+        "aaSorting": [],
+        "pageLength": 20,
+        "bPaginate": $('#fsbpTable tbody tr').length > 20,
+        "bInfo": false,
+        "order": [[2, "desc"]],
+        "oSearch": { "bSmart": false },
+        "language": {
+                                                "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+         },
+         initComplete: function () {
+             $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("addfsbpermit", "permit"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Fire System Bypass Permit [FSBP]" alt="3d_add_button"></a></div >');
+                                            },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive tableHeight'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        buttons: [
+            {
+                                                extend: 'pdfHtml5',
+                orientation: 'portrait',
+                //pageSize:'LEGAL',
+                title: 'Fire System Bypass Permit [FSBP] Report',
+                exportOptions: {
+                                                    columns: [0, 1, 2, 3, 4, 5]
+                },
+                messageBottom: function () {
+                                                    return $("#dvgeneratedby").text();
+                                                },
+                customize: function (doc) {
+                                                    //genereateRpeort(doc)
+                                                    //Remove the title created by datatTables
+                                                    doc.content.splice(0, 1);
+                                                    //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                                                    var now = new Date();
+                                                    var jsDate = setDateFormat(now);
+                                                    //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                                                    // Logo converted to base64
+                                                    //var logo = $("#logoimgbase64").val();
+                                                    debugger;
+                                                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                                                                                                     //console.log(logo);
+                                                                                                     // The above call should work, but not when called from codepen.io
+                                                                                                     // So we use a online converter and paste the string in.
+                                                                                                     // Done on http://codebeautify.org/image-to-base64-converter
+                                                                                                     // It's a LONG string scroll down to see the rest of the code !!!
+                                                                                                     //var logo = '';
+                                                                                                     // A documentation reference can be found at
+                                                                                                     // https://github.com/bpampuch/pdfmake#getting-started
+                                                                                                     // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                                                                                                     // or one number for equal spread
+                                                                                                     // It's important to create enough space at the top for a header !!!
+                                                    doc.pageMargins = [20, 60, 20, 30];
+                                                    // Set the font size fot the entire document
+                                                    doc.defaultStyle.fontSize = 8;
+                                                    // Set the fontsize for the table header
+                                                    doc.styles.tableHeader.fontSize = 7;
+                                                    // Create a header object with 3 columns
+                                                    // Left side: Logo
+                                                    // Middle: brandname
+                                                    // Right side: A document title
+                                                    doc['header'] = (function () {
+                                                        return {
+                                                            columns: [
+                                                                { image: logo, width: 40 },
+                                {
+                                                                alignment: 'left',
+                                    italics: true,
+                                    text:('@HCF.Web.Base.UserSession.CurrentOrg'!=null ?getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'):""), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: 'Fire System Bypass Permit [FSBP] Report',
+                                    margin: [0, 6, 0, 0]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Create a footer object with 2 columns
+                    // Left side: report creation date
+                    // Right side: current page and total pages
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Created on: ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated from: ', { text: 'CRx' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated by: ', { text: ('@HCF.Web.Base.UserSession.CurrentOrg'!=null ?getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'):"") }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Change dataTable layout (Table styling)
+                    // To use predefined layouts uncomment the line below and comment the custom lines below
+                    // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+            {
+                extend: 'excel',
+                title: 'Fire System Bypass Permit [FSBP] Report',
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5],
+                    orthogonal: 'export'
+                }
+            }
+        ]
+    });
+
+    $(document).ready(function () {
+        var projectId = parseInt(getParameterByName('ProjectId'));
+        var status = getParameterByName('Status');
+        debugger;
+        if (projectId != undefined && projectId > 0) {
+            selprojectId.val(projectId);
+            filterRecords(projectId);
+        }
+        if (status != undefined) {
+            filterRecordsbyStatus(status);
+        }
+    });
+
+
+    selprojectId.change(function () {
+        var projectId = selprojectId.val();
+        filterRecords(projectId);
+    })
+
+    function filterRecords(projectId) {
+        if (projectId > 0) {
+            //alert("Call " + projectId);
+            dataTables.column(-1).search("^" + projectId + "$", true, true, false).draw();
+        } else {
+            dataTables.columns(-1).search("").columns(-2).search("").draw();
+        }
+    }
+
+
+    function filterRecordsbyStatus(status) {
+        if (status != undefined) {
+            dataTables.column(-2).search("^" + status + "$", true, true, false).draw();
+        }
+    }
+    $(document).on('click', 'a.deletepermit', function (e) {
+        debugger;
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to delete this permit?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Permit_Delete + "?id=" + Id + "&permittype=4",
+                    success: function (data) {
+                        swal("Deleted!", "Your permit has been deleted.", "success");
+                        location.reload();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+    </script>

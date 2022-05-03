@@ -1,0 +1,100 @@
+﻿@model HCF.BDO.PopEmails
+@{
+    ViewBag.Title = "InboxAdd";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        @if (Model.Id == 0)
+        {<h1>Add Email</h1> }
+        else
+        { <h1>Update Email</h1>}
+
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm("InboxAdd", "Organization", FormMethod.Post, new { id = "inboxform" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="row" style="padding:15px 30px 25px 0px">
+
+                                @Html.HiddenFor(model => model.Id)
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EmailId)<em class="required-field"> *</em>
+                                        @Html.EditorFor(model => model.EmailId, new { htmlAttributes = new { @class = "form-control", required = "required", @type = "email" } })
+                                        @Html.ValidationMessageFor(model => model.EmailId, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Password)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Password, new { @class = "form-control password-strength", maxlength = 50, autocomplete = "off", required = "required", minlength = 6 })
+                                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.PopServer)<em class="required-field"> *</em>
+                                        @Html.EditorFor(model => model.PopServer, new { htmlAttributes = new { @class = "form-control", required = "required" } })
+                                        @Html.ValidationMessageFor(model => model.PopServer, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Port)<em class="required-field"> *</em>
+                                        <select id="Port" name="Port" required="required" class="form-control">
+                                            <option value="">Select </option>
+                                            <option value="110">110</option>
+                                            <option value="995">995</option>
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.Port, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.UseSSL)<em class="required-field"> *</em>
+                                        <select id="UseSSL" name="UseSSL" required="required" class="form-control">
+                                            <option value="false">False</option>
+                                            <option value="true">True</option>
+                                        </select>
+                                        @Html.ValidationMessageFor(model => model.UseSSL, "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.IsActive)
+                                        @Html.EditorFor(model => model.IsActive)
+                                        @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="common-btnBox">
+                                        <button type="submit" class="btn comm-button" title="Save" id="btnSave"
+                                                data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                                            Save
+                                        </button>
+                                        @Html.ActionLink("Cancel", "InboxSetup", "Organization", new { @class = "btn comm-Cancelbutton" })
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+    </div>
+
+
+
+    <script>
+    $(document).ready(function () {
+        var portId = '@Model.Port';
+        if (portId > 0) {
+            $("#Port").val('@Model.Port');
+        }
+    });
+    </script>

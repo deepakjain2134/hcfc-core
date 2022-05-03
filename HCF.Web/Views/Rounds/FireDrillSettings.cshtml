@@ -1,0 +1,165 @@
+﻿@model HCF.BDO.Organization
+@{
+    ViewBag.Title = "Fire Drill Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Fire Drill Settings
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="Setting_Content">
+                        
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="col-md-12" style="padding: 0px;">
+                                        <p class="epFreq-alert">Checking the below box will enable "Plan Fire Drills for Me" feature in the Fire Drills module. Unchecking the box will remove the "Plan Fire Drills for Me" button and feature.</p>
+                                    </div>
+                                    @*<div class="form-group">
+                                        @Html.CheckBoxFor(model => model.PlanFireDrillsForMe, new { @class = "form-control" })<span></span> Plan Fire Drills For Me
+                                    </div>*@
+                                    <div class="toggleBox">
+                                        <div class="toggle-crxbtn">
+                                            <input type="checkbox" id="PlanFireDrillsForMe" name="PlanFireDrillsForMe" class="crx-value" />
+                                            <p class="round-white"></p>
+                                        </div>
+                                        <label>Plan Fire Drills For Me</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        var mainParent = $('.crx-value').parent('.toggle-crxbtn');
+        var isActive = '@Model.PlanFireDrillsForMe';
+        if (isActive == 'True') {
+            $(mainParent).addClass('active');
+            $('#PlanFireDrillsForMe').addClass('active');
+        } else {
+            $(mainParent).removeClass('active');
+            $('#PlanFireDrillsForMe').removeClass('active');
+        }
+
+    });
+
+
+
+    $('input[name="PlanFireDrillsForMe"]').click(function () {
+        debugger;
+        var mainParent = $('.crx-value').parent('.toggle-crxbtn');
+        var status = false;
+
+        if ($('.crx-value').hasClass('active')) {
+            status = false;
+        } else {
+            status = true;
+        }
+
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to change the status?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: CRxUrls.Rounds_FireDrillSettings + "?status=" + status,
+                    success: function (data) {
+                        console.log(data);
+                        swal("", "successfully updated", "success");
+                        //location.reload();
+
+                        if (status == true) {
+                            $(mainParent).addClass('active');
+                            $('#PlanFireDrillsForMe').addClass('active');
+                        } else {
+                            $(mainParent).removeClass('active');
+                            $('#PlanFireDrillsForMe').removeClass('active');
+                        }
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+
+
+       
+</script>
+
+<style>
+    .toggleBox {
+        clear: both;
+        display: inline-flex;
+    }
+    .toggle-crxbtn {
+        width: 42px;
+        height: 20px;
+        border-radius: 50px;
+        display: inline-block;
+        position: relative;
+        background: url('/dist/Images/Icons/close-toggle.png') no-repeat 26px center #e74c3c;
+        cursor: pointer;
+        -webkit-transition: background-color .40s ease-in-out;
+        -moz-transition: background-color .40s ease-in-out;
+        -o-transition: background-color .40s ease-in-out;
+        transition: background-color .40s ease-in-out;
+        cursor: pointer;
+        background-size: 9px !important;
+        margin-right: 4px;
+    }
+    .toggle-crxbtn .round-white {
+        width: 14px;
+        height: 14px;
+        background-color: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        position: absolute;
+        left: 5px;
+        top: 15%;
+        -webkit-transition: all .30s ease-in-out;
+        -moz-transition: all .30s ease-in-out;
+        -o-transition: all .30s ease-in-out;
+        transition: all .30s ease-in-out;
+    }
+    .crx-value {
+        margin: 0px 0 0 !important;
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        z-index: 9;
+        cursor: pointer;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    }
+    .toggle-crxbtn.active .round-white {
+        left: 22px;
+    }
+    .toggle-crxbtn.active {
+        background: url('/dist/Images/Icons/open-toggle.png') no-repeat 6px center #2ecc71;
+        background-size: 12px !important;
+    }
+</style>

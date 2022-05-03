@@ -1,0 +1,339 @@
+﻿@model IEnumerable<HCF.BDO.TIlsm>
+
+@{
+    ViewBag.Title = "ILSM";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    TempData["IcraItem"] = null;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                ILSM
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12 form-inline">
+                                <div class="form-group" style="margin-right:15px;">
+                                    <label>Campus:</label>
+                                    <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status:</label>
+                                    <select id="filterStatus" name="filterStatus" class="form-control" title="Filter Data By Status">
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12">
+                                @*<div class="add_button_comman">
+                                    <a href='@Url.RouteUrl("newilsm")' class="pull-right">
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Create an ILSM manually" alt="Create an ILSM manually" />
+                                    </a>
+                                </div>*@
+                                <table class="table table-bordered table-striped" id="ilsmTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <th>
+                                                @Localizer["IncidentNo"]
+                                            </th>
+                                            <th>
+                                                @Localizer["ILSMDate"]
+                                            </th>
+                                            <th>
+                                                ILSM Name
+                                            </th>
+                                            <th>
+                                                Reason for ILSM
+                                            </th>
+                                            <th>
+                                                @Localizer["Asset"]
+
+                                            </th>
+                                            <th>
+                                                @Localizer["Location"]
+
+                                            </th>
+                                            <th style="display:none"></th>
+                                            <th>
+                                                @Localizer["CreatedBy"]
+
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Status)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.CompletedDate)
+                                            </th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model != null)
+                                        {
+                                            foreach (var item in Model.Where(x => x.IsDeleted == false).OrderByDescending(x => x.CreatedDate))
+                                            {
+                                                <tr id="@item.TIlsmId">
+                                                    <td style="display:none">
+                                                        @Html.Encode(item.Status)
+                                                    </td>
+                                                    <td class="@((HCF.BDO.Enums.ILSMStatus)item.Status)">
+                                                        <span>
+                                                            <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = item.TIlsmId })">
+                                                                <span>@item.IncidentId</span>
+                                                            </a>
+                                                        </span>
+                                                    </td>
+                                                    <td data-sort="@item.llsmDate.Ticks">
+                                                        @item.llsmDate.ToClientTime().ToFormatDate() <br />
+                                                        @item.llsmStartTime
+                                                    </td>
+                                                    <td>
+                                                        @item.Name.CastToNA()
+                                                    </td>
+
+                                                    <td>
+                                                        @item.Notes.CastToNA()
+                                                    </td>
+                                                    <td>
+                                                        @if (item.Assets.Count > 0)
+                                                        {
+                                                            <span>
+                                                                @string.Join(",", item.Assets.Select(x => x.Name))
+                                                            </span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (item.Buildings != null)
+                                                        {
+                                                            <span>@string.Join(",", item.Buildings.Select(x => x.BuildingName))</span>
+                                                        }
+                                                    </td>
+                                                    <td style="display:none">
+                                                        @if (item.Buildings != null)
+                                                        {
+                                                            <span>@string.Join(",", item.Buildings.Select(x => x.SiteCode))</span>
+                                                        }
+                                                    </td>
+                                                    <td>@item.Inspector.FullName</td>
+                                                    <td>
+                                                        @item.Status.GetDescription()
+                                                    </td>
+
+                                                    <td data-sort="@item.CompletedDate.DateSort()">
+                                                        @if ((int)item.Status == 1 && item.CompletedDate.HasValue)
+                                                        {
+                                                            <span>@item.CompletedDate.Value.ToClientTime().ToFormatDate() </span>
+                                                        }
+                                                        else
+                                                        { <span></span>}
+                                                    </td>
+                                                    <td class="ilsmactions" style="display:flex">
+                                                        @if ((int)item.Status != 1)
+                                                        {
+                                                            <a href="@Url.Action("AddIlsmShow", "ILSM", new { tilsmId = item.TIlsmId })" class="@((int)item.Status != 1 ? "" : "disable")">
+                                                                <span>
+                                                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" class="actionEdit" alt="" />
+                                                                </span>
+                                                            </a> 
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="button" name="button" class="btnReopen button1"
+                                                                   value="Reopen" id="@item.TIlsmId" />
+
+                                                        }
+
+
+                                                        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                                        {
+                                                            <a data-id="@item.TIlsmId" data-assetcount="@item?.Assets?.Count" class="btnDelete" style="margin-left:4px;">
+                                                                <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete ILSM" alt="3d_add_button" /></span>
+                                                            </a>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+    <script>
+
+        $(document).ready(function() {
+            $(".btnReopen").click(function() {
+                var tilsId = $(this).attr("id");
+
+                swal({
+                        title: "Reopen ILSM",
+                        text: "Are you sure you want to reopen this ILSM?",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: '#DD6B55',
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: "No",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            reopenILSM(tilsId, false);
+                        }
+                    });
+            });
+
+            var reopenILSM = function(tilsmId, IsDeleted) {
+                var tilsm = {
+                    TIlsmId: tilsmId,
+                    Status: 0,
+                    IsDeleted: IsDeleted,
+                    ReopenBy: '@HCF.Web.Base.UserSession.CurrentUser.UserId'
+                };
+                console.log(tilsm);
+                debugger;
+                $.ajax({
+                    url: CRxUrls.ILSM_ReopenILSM,
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { tilsm: tilsm },
+                    success: function(resuslt) {
+                        if (IsDeleted) {
+                            swal("ILSM deleted successfully");
+                            window.location.reload();
+                        } else {
+                            window.location.href = CRxUrls.Goal_GetIlsmInspection + "?tilsmId=" + tilsmId;
+                        }
+                    }
+                });
+            }
+
+
+            $(".btnDelete").click(function () {
+                debugger;
+                var tilsId = $(this).data("id");
+                var assetcount = $(this).data("assetcount");
+                if (parseInt(assetcount) > 0) {
+                    swalalert('message', "You Can not delete this ILSM ,Please close this ILSM", 'warning');
+                }
+                else {
+                    swal({
+                        title: "Delete ILSM",
+                        text: "Are you sure you want to delete this ILSM?",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: '#DD6B55',
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: "No",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    },
+                        function (isConfirm) {
+                            if (isConfirm) {
+                                reopenILSM(tilsId, true);
+                            }
+                        });
+                }
+
+            });
+
+            $('#SiteCode').on('change',
+                function() {
+                    dt.draw();
+                });
+
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+
+                    var sitecodes = data[7];
+                    var sitecode = $('#SiteCode').val();
+                    if (sitecode === "") {
+                        return true;
+                    } else if (sitecode != "") {
+                        if (sitecodes) {
+                            var sitecodesArray = sitecodes.split(',');
+                            if (sitecodesArray.indexOf(sitecode) > -1) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            );
+
+
+            var dt = $('#ilsmTable').DataTable({
+                "lengthChange": false,
+                "pageLength": 15,
+                "aaSorting": [[2, 'desc']],
+                "bPaginate": $('#ilsmTable tbody tr').length > 15,
+                "bInfo": false,
+                "language": {
+                    "emptyTable": "No data available in table"
+                },
+
+                initComplete: function () {
+                    $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("new", "ilsm"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Create an ILSM manually" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-12 tableactions'fl <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+
+                'columnDefs': [
+                    {
+                        targets: -1,
+                        searchable: false,
+                        orderable: false
+                    }
+                ],
+                "searching": true
+            });
+
+            /*$("#ilsmTable_filter").css({ "display": "block", "margin-top": "-20px" });*/
+            $('#filterStatus').val('Open');
+
+            filterdt('Open');
+
+            $("#filterStatus").change(function() {
+                let searchTerm = $(this).val();
+                filterdt(searchTerm)
+            });
+
+            function filterdt(searchTerm) {
+                if (searchTerm == 'Open') {
+                    searchTerm = searchTerm + "|In-progress";  // to get filter Inprogress records also on the basia on Open records
+                    dt.column(9).search(searchTerm, true, false).draw();
+                } else {
+                    dt.column(9).search(searchTerm).draw();
+                }
+                $('input[type="search"]').val('');
+            }
+        });
+
+
+    </script>
+    
+}
+

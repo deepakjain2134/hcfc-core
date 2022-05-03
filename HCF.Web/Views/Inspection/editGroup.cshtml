@@ -1,0 +1,67 @@
+﻿@model HCF.BDO.InspectionGroup
+
+@{
+    ViewBag.Title = "Edit Inspection Schedule";
+}
+
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Edit Inspection Schedule
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary general_menu">
+                    @await Html.PartialAsync("_MoreConfig")
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("AddGroup", "Inspection", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.InspectionGroupId)
+                        
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.GroupName)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.GroupName, new { @class = "form-control", required = "required", maxlength = 50 })
+                                        @Html.ValidationMessageFor(model => model.GroupName)
+                                    </div>
+                                    <div class="form-group comman_checkbox">
+                                        @Html.LabelFor(m => m.IsActive)
+                                        @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                        @Html.ValidationMessageFor(m => m.IsActive)
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.InspectionDate)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(m => Model.InspectionDate, $"{Model.InspectionDate:MM/dd/yyyy}", new { @class = "form-control date", required = "required" })
+                                        @Html.ValidationMessageFor(model => Model.InspectionDate)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button_Div">
+                                <input type="submit" value='@Localizer["Update"] ' class="button1" />
+                                <a href='@HCF.Web.Base.UISession.GetBackPage("Inspection_editGroup")' class="comm-Cancelbutton">Cancel</a>
+                                @*@Html.ActionLink("Cancel ", "InspectionGroups", "Inspection", new { @class = "button1" })*@
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $('.date').datepicker();
+</script>
+

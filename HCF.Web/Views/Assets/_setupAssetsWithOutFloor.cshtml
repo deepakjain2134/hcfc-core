@@ -1,0 +1,199 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+
+@{
+    Layout = null;
+}
+<div>
+    <table id="myTable3" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="display: none">FloorId</th>
+
+                <th style="display: none">BuildingId</th>
+                <th>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Assets.Name)
+                </th>
+                <th> @Localizer["AssetNo"]</th>
+                <th>
+                    Barcode #
+                </th>
+                <th>@Localizer["NearBy"] </th>
+                <th>
+                    Model
+                </th>
+                <th>
+                    Make
+                </th>
+                <th>Inspect</th>
+                <th style="display: none">AssetId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+            {
+                <tr class="withoutfloor_assets assetsPopUp" id="@item.FloorAssetsId">
+                    <td style="display: none">
+                        @item.FloorId
+                    </td>
+                    <td style="display: none">
+                        @item.Floor.BuildingId
+                    </td>
+                    <td>
+                        <img height="24px" width="24px"
+                             src="@commonModelFactory.CommonFilePath(item.Assets.IconPath)"
+                             alt="@item.Assets.Name"> <br />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Assets.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AssetNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BarCodeNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NearBy)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Model)
+                    </td>
+                    <td>
+                        @item.GetMake()
+                    </td>
+                    <td>
+                        <img style="cursor:pointer" src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)" title="Inspection" onclick="redirectToAssetsEPs(event,'@item.FloorAssetsId','@item.Assets.IsRouteInsp');" alt=""/>
+                    </td>
+                    <td style="display: none">
+                        @item.Assets.AssetId
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+
+    var pagelength  = 20
+    var type = getUrlVars()["type"];
+     var redirectToAssetsEPs = function (e, floorassetId,isRbi) {
+         e.stopPropagation();
+         debugger;
+         if (isRbi) {
+             window.location.href = '@Url.RouteUrl("routeInspection")';
+         } else
+         window.location.href = CRxUrls.Assets_AssetEps + "?epId=0&floorassetId=" + floorassetId;
+         return false;
+    };
+
+    $(document).ready(function () {
+
+        var datatable = $('#myTable3').DataTable({
+            "lengthChange": false,
+            "pageLength": pagelength,
+            "bPaginate": $('#myTable3 tbody tr').length > pagelength,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            buttons: [
+                {
+                    extend: 'pdf',
+                    title: 'Assets Without Floor',
+                    exportOptions: {
+                        columns: [2,3,4,5,6,7,8]
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Assets Without Floor',
+                    exportOptions: {
+                        columns: [2, 3, 4, 5, 6, 7,8]
+                    }
+                }
+            ],
+            "search": { regex: true },  
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            //    "<'row'<'col-sm-12'tr>>" +
+            //    "<'row'<'col-sm-5'i>>" + "Blfrtip",
+            dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+        });
+
+        $("input[name=filterAssets]:radio").change(function () {
+            getfilter();
+        });
+
+        getfilter();
+
+        $(".ChildCheck,.parentCheck,#checkAll").change(function () {
+            if ($('input[type="radio"][name="pageView"]:checked').val() == 2) {
+                filterDataByAssetId()
+            }
+        })
+        function getfilter() {
+           // debugger;
+            var Id =  parseInt($("input[name='filterAssets']:checked").val());
+            if (Id > 0) {
+                if (Id > 1)
+                {
+                    var buildingid = parseInt($("#buildingId").val());
+                    if (buildingid > 0) {
+                        console.log(buildingid);
+                        datatable.columns(0).search("").columns(1).search("").draw();
+                        datatable.columns(1).search(buildingid).draw();
+                    }
+                }
+                else {
+                        if (parseInt('@TempData["FloorId"]') > 0) {
+                            var floorId = parseInt('@TempData["FloorId"]');
+                            datatable.columns(0).search("").columns(1).search("").draw();
+                            datatable.columns(0).search(floorId).draw();
+                        }
+                    }
+            } else {
+                 datatable.columns(0).search("").columns(1).search("").draw();
+            }
+        }
+
+        function filterDataByAssetId() {
+
+            var checkedVals = $('.ChildCheck:checked').map(function () {
+                return this.value;
+            }).get();
+            var searchString = checkedVals.join("|")
+            datatable.column(10).search(searchString,true,false).draw();
+        }
+    });
+
+
+
+
+    // Read a page's GET URL variables and return them as an associative array.
+    function getUrlVars() {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++) {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+
+
+    $('body').on('click', '.floorAssets', function () {
+        var floorAssetId = $(this).attr("id");
+        if (floorAssetId) {
+            $.get(CRxUrls.Assets_tfloorAssetEdit + '?mode=' + pageMode + '&tfloorAssetId=' + floorAssetId, function (data) {
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+                $('#EditAssetsPopup').modal('show');
+            });
+        }
+    });
+
+</script>

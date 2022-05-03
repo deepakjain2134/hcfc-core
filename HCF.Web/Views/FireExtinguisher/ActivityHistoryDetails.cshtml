@@ -1,0 +1,56 @@
+﻿@model HCF.BDO.TInspectionActivity
+@{
+    ViewBag.Title = "ActivityHistoryDetails";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1 class="align-left">
+            Activity History (Read Only)
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="tble_shadow">
+                        <!--<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr>
+                <td>
+                    <strong> @Localizer["InspectorName"] : </strong>@Model.UserProfile.FullName&nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong> @Localizer["InspectionDateTime"] : </strong>@Model.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                </td>-->
+                        @*<td width="16%"><strong> @Resources.Resource.InspectorName : </strong></td>
+        <td width="27%">@Model.UserProfile.FullName</td>
+        <td width="16%"><strong> @Resources.Resource.InspectionDateTime : </strong></td>
+        <td width="27%">@Model.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()</td>*@
+                        <!--</tr>
+        </tbody>
+    </table>-->
+
+                        <div class="row tablelist-topform">
+                            
+                            <div class="col-md-4"><label>@Localizer["InspectorName"] :</label>  @Model.UserProfile.FullName</div>
+                            <div class="col-md-4">
+                                <label>@Localizer["InspectionDateTime"] :</label>
+                                                        @Model.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                                                    </div>
+                        </div>
+                    </div>
+                    @*@{
+                        @
+                        Html.RenderAction("Activity", "Assets", new { activity = Model, area = "" });
+                    }*@
+
+                    @await Component.InvokeAsync("AssetsActivity", new { activity = Model, area = "" }) 
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+

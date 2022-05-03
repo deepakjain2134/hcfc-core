@@ -1,0 +1,61 @@
+﻿@model List<HCF.BDO.Menus>
+
+@{
+    var menus = new List<HCF.BDO.Menus>();
+
+    ViewBag.Title = "InspectionQuestion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var services = Model;
+    if (services != null&& services.Count>0)
+    {
+        var Id = services.FirstOrDefault(x => x.Alias.Trim().ToLower() == "dash_inspection".Trim().ToLower()).Id;
+        //var menus = OrganizationRepository.GetUserDashBoard(HCF.Web.Base.UserSession.CurrentUser.UserId, Id).Services.ToList();
+        menus = Model.Where(x => x.ParentId == Id).ToList();
+    }
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Inspection
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-left">
+                <div class="box box-primary">
+                    @foreach (var item in menus)
+                    {
+                        <a id="@item.PageUrl" class="inspLeftMenu" href="@Url.Action("RedirectRoute", "Common", new { routeName = item.PageUrl })" title="@string.Format("{0}{1}",item.Name,(!string.IsNullOrEmpty(item.Description)? $": {item.Description}" : ""))"
+                           data-toggle="popover"
+                           data-trigger="manual"
+                           data-content="@item.Description"
+                           data-placement="right">
+                            <div class="inspection-SubMenu">
+                                @*@Html.CommonImage(item.ImagePath, item.Name, "inspQuestionimg")*@
+                                <common-image src="@item.ImagePath" title="@item.Name" class="inspQuestionimg"></common-image>
+                                <span>@item.Name</span>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-md-10 col-sm-9 col-right">
+                <div class="box box-primary">
+                    <div class="divmain">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<link rel="stylesheet" href="@Url.Content("~/dist/css/bootstrap.min.css")">
+<link rel="stylesheet" href="@Url.Content("~/dist/css/Inspectionquest-styles.css")">
+<link rel="stylesheet" href="@Url.Content("~/dist/css/jquerysctipttop.css")">
+@section scripts
+{
+    <script src='@Url.Content($"~/dist/Scripts/page_scripts/Inspection/Inspectionquestion.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>    
+}
+

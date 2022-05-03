@@ -1,0 +1,73 @@
+﻿@model IEnumerable<HCF.BDO.MainGoal>
+<div class="slider">
+    <div class="add_button_comman">
+        <a href="@Url.Action("AddMainGoalPartial", "Goal", new { assetId = ViewBag.AssetId , floorAssetId = ViewBag.FloorAssetId })" class="pull-right modal-link">
+            <span class="atsbtntitle">Add ATS</span> <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Steps" alt="3d_add_button" />
+        </a>
+    </div>
+    @if (Model.Any(x => x.Steps.Where(y => y.IsActive).ToList().Count > 0))
+    {
+        <table id="FloorAssetSteps" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="80%">
+            <thead>
+                <tr>
+                    <th>ATS Name</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 100px;">Action</th>
+                    @*<th>Edit ATS</th>
+                        <th>Delete ATS</th>*@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    foreach (var step in item.Steps.Where(x => x.IsActive))
+                    {
+                        <tr id="step_@step.StepsId">
+                            <td>@step.Step</td>
+                            <td class="comman_checkboxStatus align-center">
+                                @Html.DisplayFor(a => step.IsActive, new { @checked = step.IsActive })<span></span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("AddMainGoalPartial", "Goal", new { assetId = ViewBag.AssetId, floorAssetId = ViewBag.FloorAssetId })" class="pull-right modal-link">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                </a>
+                                <a href="" data-id="@step.StepsId" class="delete button1" style="cursor:pointer">
+                                    Delete
+                                </a>
+                                @*<a href="#" id="delete"><span>Delete</span></a>*@
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<script>
+    $(document).on('click', 'a.delete', function (e) {
+        e.preventDefault();
+        var stepId = $(this).data("id");
+        swal({
+            html: true,
+            title: "Are you sure?",
+            text: "You will not be able to recover this step!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Goal_DeleteSteps + "?stepId=" + stepId,
+                    success: function (data) {
+                        $("#step_" + stepId).remove();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+</script>
+

@@ -1,0 +1,127 @@
+﻿@model List<HCF.BDO.EPGroups>
+<div class="modal-dialog epgroup-head" style="background: #fff;">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle"> @Model.FirstOrDefault().EPGroupName </span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    @using (Html.BeginForm())
+    {
+        <div class="modal-body">
+
+            @Html.AntiForgeryToken()
+            @if (@ViewBag.Checkbox != 1)
+            {
+                <div>
+                    Confirm EPs this document relates to. Document will get attached after next step.
+                </div>
+            }
+          
+                @Html.ValidationSummary(true)
+                <div class="row">
+                    <div class="col-lg-12 epsassign-Scroll">
+                        @if (Model.Count > 0)
+                        {
+                            <table id="epgroupsTable" class="table table-bordered table-striped no-footer">
+                                <thead>
+                                    <tr>
+                                        @if (@ViewBag.Checkbox != 1)
+                                        {
+                                            <th>
+                                                <input type="checkbox" class="checkBox selectAll" checked="checked" value="0" /><span></span>
+                                            </th>}
+                                    <th>
+                                        @Localizer["StandardEP"]
+                                        
+                                    </th>
+                                    <th>
+                                        @Localizer["Description"]                                       
+                                    </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var standards in Model.FirstOrDefault().StandardEps)
+                                    {
+                                        <tr>
+                                            @if (@ViewBag.Checkbox != 1)
+                                            {
+                                                <td>
+                                                    <input type="checkbox" class="checkBox epgroup-eps" checked="checked" value="@standards.EPDetailId" /><span></span>
+                                                </td>}
+                                            <td>
+                                                @standards.StandardEP
+                                            </td>
+                                            <td>
+                                                @await Html.PartialAsync("_EpDescription", standards.Description,
+                                 new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                 { { "standardEp", @standards.StandardEP }}
+                                )
+                                                @*@await Html.PartialAsync("_EpDescription", standards.Description, new ViewDataDictionary {
+        { "standardEp", @standards.StandardEP } })*@
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="tble_shadow text-center">No data available in table</div>
+                        }
+                    </div>
+                </div>
+
+           
+
+        </div>
+        <div class="modal-footer">
+            @if (@ViewBag.Checkbox != 1)
+            {
+                <input type="button" name="submitButton" value="Continue " class="button1" data-dismiss="modal" id="btnSaveButton" />
+            }
+            <input type="submit" name="submitButton" value="Close" data-dismiss="modal" class="button1" />
+        </div>
+    }
+</div>
+<script>
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+    var savecntl = $("#btnSaveButton");
+    savecntl.click(function () {
+        debugger;
+        policyObject.epDetailId = [];
+        $('input:checkbox.epgroup-eps:checked').each(function () {
+            var epdetailId = $(this).val();
+            policyObject.epDetailId.push(epdetailId);
+        });
+        if (policyObject.epDetailId.length == 0) {
+            console.log("EPgroup does not have any EPs")
+            swalalert('message', "Please select at least one EP to continue.", 'warning');
+            return false;
+        }
+        viewAfterFileUpload(fileObject);
+    });
+
+    $(".epgroup-eps").change(function () {
+        debugger;
+        var numberOfChecked = $('input:checkbox.epgroup-eps:checked').length;
+        var totalCheckboxes = $('input:checkbox.epgroup-eps').length;
+        if (totalCheckboxes == numberOfChecked) {
+            $('.selectAll').prop('checked', true);
+        } else {
+            $('.selectAll').prop('checked', false);
+        }
+    });
+
+    $(".selectAll").change(function () {
+        debugger;
+        $('.epgroup-eps').prop('checked', $(this).is(":checked"));
+    });
+
+   
+</script>
+

@@ -1,0 +1,106 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<UserSecretsId>772230d2-a451-4aa9-9fe7-97ca1f87d337</UserSecretsId>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<EnableDefaultContentItems>false</EnableDefaultContentItems>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="wwwroot\**\*;modules.json;appsettings.staging.json;appsettings.production.json;Modules\**\*;Views\**\*">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Views\Shared\Components\RoundCategoryInspection\**" />
+	  <Content Remove="Views\Shared\Components\RoundCategoryInspection\**" />
+	  <EmbeddedResource Remove="Views\Shared\Components\RoundCategoryInspection\**" />
+	  <None Remove="Views\Shared\Components\RoundCategoryInspection\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Controllers\ImportController.cs" />
+	  <Compile Remove="ViewComponents\RoundCategoryInspectionViewComponent.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Views\Documents\GetMiscEpDocByBinder.cshtml" />
+	  <None Remove="Views\Documents\GetReqEpDocWithoutBinder.cshtml" />
+	  <None Remove="Views\Documents\_MiscEPDocByBinder.cshtml" />
+	  <None Remove="Views\Documents\_ReqEpDocWithoutBinder.cshtml" />
+	  <None Remove="Views\Goal\_epDocList.cshtml" />
+	  <None Remove="Views\Organization\OrgSettings.cshtml" />
+	  <None Remove="Views\Round\AddTempRoundsQuestionnaires.cshtml" />
+	  <None Remove="Views\Round\RoundActivity.cshtml" />
+	  <None Remove="Views\Round\RoundCategoryInspection.cshtml" />
+	  <None Remove="Views\Round\RoundGroupUserDropDownList.cshtml" />
+	  <None Remove="Views\Round\RoundInspectionSelection.cshtml" />
+	  <None Remove="Views\Round\RoundReportBinder.cshtml" />
+	  <None Remove="Views\Round\_RoundActivity.cshtml" />
+	  <None Remove="Views\Round\_roundActivityReportBinder.cshtml" />
+	  <None Remove="Views\Round\_RoundCategoryStepInspection.cshtml" />
+	  <None Remove="Views\Round\_roundReportBinder.cshtml" />
+	  <None Remove="Views\Shared\Components\MicrosoftLogin\Default.cshtml" />
+	  <None Remove="Views\Shared\Components\RoundCategoriesAddRemove\Default.cshtml" />
+	  <None Remove="Views\Shared\Components\RoundCategoryStepInspection\Default.cshtml" />
+	  <None Remove="Views\Shared\_roundStepFileAttach.cshtml" />
+	  <None Remove="Views\Shared\_ValidationSummary.cshtml" />
+	  <None Remove="Views\User\UserLoginCodes.cshtml" />
+	  <None Remove="wwwroot\dist\css\PasswordValidationPopup.css" />
+	  <None Remove="wwwroot\dist\Images\Services\menu_sprite.png" />
+	  <None Remove="wwwroot\dist\js\crx.js-passwordPopup.js" />
+	  <None Remove="wwwroot\dist\Scripts\page_scripts\Rounds\round_save_update.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.101" />
+		<PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
+		<PackageReference Include="CertificateManager" Version="1.0.7" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.7.27" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.7.27" />
+		<PackageReference Include="IdentityServer4" Version="4.1.2" />
+		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="5.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.22.1" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+		<PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
+		<PackageReference Include="MyTested.AspNetCore.Mvc.TempData" Version="5.0.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+		<PackageReference Include="Shyjus.BrowserDetector" Version="2.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+		<PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+		<PackageReference Include="WebEssentials.AspNetCore.OutputCaching" Version="1.0.38" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HCF.BAL\HCF.BAL.csproj" />
+		<ProjectReference Include="..\HCF.BDO\HCF.BDO.csproj" />
+		<ProjectReference Include="..\Modules\HCF.Module.CadViewer\HCF.Module.CadViewer.csproj" />
+		<ProjectReference Include="..\Modules\HCF.Module.ExternalAuth\HCF.Module.ExternalAuth.csproj" />
+		<ProjectReference Include="..\Modules\HCF.Module.ModuleTraining\HCF.Module.ModuleTraining.csproj">
+			<TreatAsUsed>true</TreatAsUsed>
+		</ProjectReference>
+		<ProjectReference Include="..\Modules\HCF.Module.News\HCF.Module.News.csproj">
+			<TreatAsUsed>true</TreatAsUsed>
+		</ProjectReference>
+		<ProjectReference Include="..\TMS\TMS.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="Views\Shared\Components\MicrosoftLogin\Default.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	  </Content>
+	</ItemGroup>
+</Project>

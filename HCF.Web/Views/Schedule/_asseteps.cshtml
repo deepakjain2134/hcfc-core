@@ -1,0 +1,119 @@
+﻿@model List<HCF.BDO.EPDetails>
+<div class="rbn_container">
+    <div id="exTab1">
+        <ul class="nav nav-pills">
+            @foreach (var ep in Model)
+            {
+                <li id="@ep.EPDetailId">
+                    <a href="@($"#{ep.EPDetailId}a")" data-toggle="tab">
+                        <input type="radio" name="epdetail" value="@ep.EPDetailId" />@ep.StandardEp
+                    </a>
+                    <b>Frequency:</b>@ep.GetFrequencyName()
+                </li>
+            }
+        </ul>
+        <div class="tab-content clearfix" style="margin: 0 0 6px 0">
+            @foreach (var ep in Model)
+            {
+            <div class="tab-pane" id="@($"{ep.EPDetailId}a")">
+                <div id="@($"divEp{ep.EPDetailId}")">
+                    @*@await Html.PartialAsync("_EpDescription", ep.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", ep.StandardEp } })*@
+
+                    @await Html.PartialAsync("_EpDescription", ep.Description,
+                                new ViewDataDictionary(
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                {{ "minLength", "100" }, { "standardEp", ep.StandardEp }}
+                               )
+                </div>
+                <a href="@Url.Action("EpUserView", "Common", new { epDetailId = ep.EPDetailId,standardEP =ep.StandardEp })"
+                   class="modal-link">
+                    @if (ep.EPUsers.Count > 0)
+                    {
+                        if (ep.EPUsers.Count > 1)
+                        {
+                            <span>@($"{ep.EPUsers[0].FullName}{" + "}{ep.EPUsers.Count - 1}{" More"}")</span>
+                        }
+                        else
+                        { <span>
+                                @ep.EPUsers.FirstOrDefault().FullName
+                          </span>
+                        }
+                    }
+                </a>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+<div id="assets_view">
+</div>
+
+
+<script>
+        
+
+    //});
+    //
+    var ShowActiveEpDetails = function (epId) {
+        $(".epsection").hide();
+        $(".eps" + epId).show();
+    }
+
+
+
+
+
+    $(document).ready(function (e) {
+        $("input:radio[name=epdetail]:first").attr('checked', true);
+        var value = $("input[name=epdetail]:radio:checked").val();
+        ShowActiveEpDetails(value);
+        $("#divEp" + value).show()
+        activeTab(value + "a");
+
+
+        function activeTab(tab) {
+            $('.nav-pills a[href="#' + tab + '"]').tab('show');
+        };
+        $('.nav-pills li').click(function () {
+            var value = $(this).attr("id");
+            $(this).focusout();
+            ///alert(value);
+            activeTab(value + "a");
+            $("input[name=epdetail][value=" + value + "]").prop('checked', true);
+            $(".epDescription").hide();
+            $("#divEp" + value).show();
+            ShowActiveEpDetails(value);
+            if (value > 0) {
+                loadfloorAssets(value);
+            }
+        });
+    });
+
+</script>
+
+<style>
+    .button1 {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    #exTab1 .tab-content {
+        color: black;
+        border: 1px solid #777;
+        padding: 5px 15px;
+    }
+
+    #exTab1 .nav-pills > li > a {
+        border-radius: 0;
+    }
+
+    .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+        color: #337ab7;
+        background-color: white;
+    }
+
+    .nav > li > a:focus, .nav > li > a:hover {
+        color: #337ab7;
+    }
+</style>

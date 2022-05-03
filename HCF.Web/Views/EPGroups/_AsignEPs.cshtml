@@ -1,0 +1,111 @@
+﻿@model List<HCF.BDO.EPGroups>
+
+
+<div class="modal-dialog epgroup-head" style="background: #fff;width: 90%; margin: 20px auto; height:100%;">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Assign EPs</h4>
+    </div>
+    <div class="modal-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()            
+            
+                @Html.ValidationSummary(true)
+                <div class="row" style="height: calc(100% - 50px);overflow-y: scroll;">
+                    <div class="col-lg-12">
+                        @if (Model.Count > 0)
+                        {
+                            <table id="epgroupsTable" class="table table-bordered table-striped no-footer">
+                                <thead>
+                                    <tr>
+                                        <th>                                             
+                                            @*<input type="checkbox" class="checkBox selectAll" checked="checked" value="0" /><span></span>*@
+                                        </th>
+                                        <th>
+                                            @Localizer["StandardEP"]
+                                        </th>
+                                        <th>
+                                            @Localizer["Description"]
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var standards in Model.FirstOrDefault().StandardEps)
+                                    {
+                                        var isEpChecked = Model.Where(x=>x.EPDetailId==standards.EPDetailId && x.IsActive).Count()>0 ? "checked":"";
+                                        <tr>
+                                            <td>
+                                                <p style="display:none">@isEpChecked</p><input type="checkbox" class="checkBox epgroup-eps" value="@standards.EPDetailId" @isEpChecked/><span></span>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" name="strJson" id="epgroupid" value="@ViewBag.epgroupid" />
+                                                @standards.StandardEP
+                                            </td>
+                                            <td>
+                                                @standards.Description.Substring(0, Math.Min(standards.Description.Length, 100))
+                                                @if (standards.Description.Length > 100)
+                                                {
+                                                    <a href="javascript:void(0);"
+                                                       tabindex="0" data-trigger="focus"
+                                                       class="descriptions" rel='popover'
+                                                       data-placement='right'
+                                                       data-original-title='@standards.StandardEP'
+                                                       data-content='@standards.Description'>@string.Format("{0}", "...See More")</a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="tble_shadow text-center">No data available in table</div>
+                        }
+                    </div>
+                </div>
+                <div class="button_Div">
+                    @*<input type="button" name="submitButton" value="Continue " class="button1" data-dismiss="modal" id="btnSaveButton" />*@
+                    <input type="button" name="submitButton" value="Close" data-dismiss="modal" class="comm-Cancelbutton" />
+                </div>
+           
+        }
+    </div>
+</div>
+<script>   
+
+    $("[type=checkbox]").on('change', function () {
+        debugger;
+        var IsActive = $(this).is(':checked');
+        var epGroupId = $('#epgroupid').val();
+        var epdetailId = $(this).val();
+         $.ajax({
+             url: '@Url.Action("AssignEPsGroup","EPGroups")' + "?epGruopId=" + epGroupId + "&epdetailId=" + epdetailId + "&IsActive=" + IsActive,
+            type: 'GET',
+            success: function (data) {
+                console.log(data);
+            }
+        })
+        //$.get(CRxUrls.EPGroups_AssignEPsGroup + '?epdetailId=' + epdetailId + '&IsActive=' + IsActive, function (data) {
+        //});
+    });
+
+    var table = $('#epgroupsTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 10,
+        "aaSorting": [],
+        "bPaginate": $('#epgroupsTable tbody tr').length > 20,
+        "bInfo": false,
+        "order": [[0, "desc"]],
+        "searching": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+    });
+</script>
+
+

@@ -1,0 +1,59 @@
+﻿@*@model HCF.BDO.RoundUserGroup
+
+@{
+    ViewBag.Title = "addRoundUserGroup";
+}
+
+<div class="inner_main">
+    <section class="content-header">
+        <h1>addRoundUserGroup</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @Html.Partial("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm("addRoundUserGroup", "Rounds", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            
+                            <div class="box-body">
+                                <div class="row">
+                                    @Html.HiddenFor(m => m.RoundUserGroupId)
+                                    @Html.HiddenFor(m => m.CreatedBy)
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Name)
+                                        </div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                                            @Html.TextBoxFor(model => model.Description, new { @class = "form-control", required = "required" })
+                                            @Html.ValidationMessageFor(model => model.Description)
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group comman_checkbox">
+                                            Status
+                                            @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                                            @Html.ValidationMessageFor(m => m.IsActive)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button_Div">
+                                    <input type="submit" value='@Resources.Resource.Save' class="comm-button" />
+                                    @Html.ActionLink("Cancel ", "RoundUserGroup", "Rounds", new { @class = "comm-button" })
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>*@

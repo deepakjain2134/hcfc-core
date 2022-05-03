@@ -1,0 +1,209 @@
+﻿@model HCF.Web.ViewModels.Account.AccountRecoverStatus
+
+@{
+    ViewBag.Title = "Recover Password";
+}
+
+@{  
+    var Type = "";
+    string passwordStatusValue = "";
+    if (Model != null && !String.IsNullOrEmpty(Model.PasswordMode))
+    {
+        Type = Model.PasswordMode;
+        passwordStatusValue = "";
+    }
+
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @* @Resources.Resource.TitleRecoverPassword*@
+            @if (HCF.BDO.Enums.passwordStatus.create.ToString() == Type)
+            {
+                passwordStatusValue = HCF.BDO.Enums.passwordStatus.create.ToString();
+                ViewBag.PassType = "Create";
+            }
+
+            else if (HCF.BDO.Enums.passwordStatus.recover.ToString() == Type)
+            {
+                passwordStatusValue = HCF.BDO.Enums.passwordStatus.recover.ToString();
+                ViewBag.PassType = "Recover";
+            }
+
+            else if (HCF.BDO.Enums.passwordStatus.reset.ToString() == Type)
+            {
+                passwordStatusValue = HCF.BDO.Enums.passwordStatus.reset.ToString();
+                ViewBag.PassType = "Reset";
+            }
+
+            @($"{passwordStatusValue}".ToUpper()) PASSWORD
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="">
+                        <h4 class="expiredPassword">@Model.ErrorMsg</h4>
+                        @if (Model.StatusCode == 404 || Model.StatusCode == 200)
+                        {
+
+                            <p class="text-center"><a asp-controller="Account" asp-action="LogOff" class="comm-bluebutton">Click here to login </a></p>
+                        }
+                    </div>
+
+                    if (!Model.IsSuccess)
+                    {
+                        <div class="row recover-form">
+                            <div class="col-md-12 form-group">
+                                <label>Password</label>
+                                <div class="form-group has-feedback">
+                                    @Html.Password("newPassword", null, new { @class = "form-control", @placeholder = "New password", required = "required", @autocomplete = "off" })
+                                    <span class="hideShowpass" id="hideShow1"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <label>Confirm Password</label>
+                                <div class="form-group has-feedback">
+                                    @Html.Password("confirmPassword", null, new { @class = "form-control", @placeholder = "Confirm new password", required = "required", autocomplete = "off" })
+                                    <span class="hideShowpass" id="hideShow2"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-12 text-right form-group">
+                                <input type="submit" value='@ViewBag.PassType' Class="btn comm-button changepbtn" />
+                            </div>
+
+                        </div>
+
+                        @*@if (TempData["type"] != null && TempData["type"].ToString() == "1")
+                            {
+                                if (ViewBag.ErrorMessage == "The link you are trying to access is either expired or does not exist. Please check if you are entering the correct URL or re-initiate the password recovery to reset your CRx account password.")
+                                {
+                                    <script>
+                                        linkExpiredAlert();
+                                    </script>
+                                }
+
+
+                                else if (ViewBag.Sucess == "Password changed successfully click ok to Login")
+                                {
+                                    <script>
+                                        sucessPopUp();
+                                    </script>
+                                }
+
+
+                                else
+                                {
+                                    <script>
+                                         AlertWarningMsg('@ViewBag.ErrorMessage');
+                                    </script>
+                                }
+
+                            }*@
+                    }
+                    @*else
+                        {
+
+                            <span></span>
+
+                        }*@
+
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+    $(function () {
+
+        @*var logOutUrl = '@Url.Action("LogOff", "Account")';*@
+        PasswordValidator.setup('newPassword', 'confirmPassword');
+
+        //function linkExpiredAlert() {
+        //    swal({
+        //        html: true,
+        //        title: "",
+        //        text: "The link you are trying to access is either expired or does not exist. Please check if you are entering the correct URL or re-initiate the password recovery to reset your CRx account password.?",
+        //        type: "info",
+        //        showCancelButton: false,
+        //        confirmButtonColor: "#DD6B55",
+        //        confirmButtonText: "OK",
+        //        cancelButtonText: "No",
+        //        closeOnConfirm: false,
+        //        closeOnCancel: false
+        //    },
+        //        function (isConfirm) {
+        //            if (isConfirm) {
+        //                window.location.href = logOutUrl;
+        //            }
+        //        });
+
+        //}
+
+        //function sucessPopUp() {
+        //    swal({
+        //        html: true,
+        //        title: "Message",
+        //        text: "<label>Password has been changed successfully.</label>",
+        //        type: "success",
+        //        confirmButtonColor: "#DD6B55",
+        //        confirmButtonText: "OK",
+        //        closeOnConfirm: false
+        //    },
+        //        function (isConfirm) {
+        //            if (isConfirm) {
+        //                window.location.href = logOutUrl;
+        //            }
+        //        });
+        //}
+
+        $("#hideShow1").on('click', function () {
+            var $pwd = $("#newPassword");
+            if ($pwd.attr('type') === 'password') {
+                $pwd.attr('type', 'text');
+            } else {
+                $pwd.attr('type', 'password');
+            }
+        });
+        $("#hideShow1").click(function () {
+            $("#hideShow1 .fa").toggleClass("fa-eye-slash");
+        });
+        $("#hideShow2").on('click', function () {
+            var $pwd = $("#confirmPassword");
+            if ($pwd.attr('type') === 'password') {
+                $pwd.attr('type', 'text');
+            } else {
+                $pwd.attr('type', 'password');
+            }
+        });
+        $("#hideShow2").click(function () {
+            $("#hideShow2 .fa").toggleClass("fa-eye-slash");
+        });
+
+        $('.top_menu').remove();
+        $('.breadcrumb').remove();
+    });
+    </script>
+
+    <style>
+        .recover-form {
+            max-width: 400px;
+            margin: 0px auto;
+            box-shadow: 0px 0px 6px #cacaca;
+            border-radius: 4px;
+            padding: 25px 8px 8px;
+            margin-top: 44px;
+        }
+    </style>
+}

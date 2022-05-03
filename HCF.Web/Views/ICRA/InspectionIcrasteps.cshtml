@@ -1,0 +1,320 @@
+﻿@model List<HCF.BDO.ICRASteps>
+@{
+    ViewBag.Title = "Inspection Icra Steps";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    <section class="content-header">
+        <h1>
+            Inspection Icra Steps
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                @foreach (var step in Model.OrderBy(x => x.Sequence))
+                {
+                    <div style="width:100%">
+                        @if (step.ICRAStepId == 1)
+                        {
+                            <span>
+                                Step One:<br />
+                                Using the following table, identify the Type of Construction Project Activity(Type A-D)
+                                @{
+                                    @await Component.InvokeAsync("ICRATICRAConstructionProject")
+                                    //Html.RenderAction("TICRAConstructionProject", "ICRA");
+                                }
+                            </span>
+
+                        }
+                        else if (step.ICRAStepId == 2)
+                        { <span>
+                                Step Two:
+                                Using the following table, identify the Patient Risk Groups that will be affected. If more than one risk group will be affected, select the higher risk group:
+                                @{
+                                    @await Component.InvokeAsync("ICRATICRARiskGroups")
+                                    //Html.RenderAction("TICRARiskGroups", "ICRA");
+                                }
+                            </span>
+                        }
+                        else if (step.ICRAStepId == 3)
+                        {
+                            <span>
+                                Step Three: Match the Patient Risk Group (Low, Medium, High, Highest) with the planned … Construction Project Type (A, B, C, D) on the following matrix, to find the … Class of Precautions (I, II, III or IV) or level of infection control activities required. Class I-IV or Color-Coded Precautions are delineated on the following page.
+                                IC Matrix - Class of Precautions: Construction Project by Patient Risk
+                                @{
+                                    @await Component.InvokeAsync("ICRATICRAICMatrix")
+                                    //Html.RenderAction("TICRAICMatrix", "ICRA");
+                                }
+                            </span>
+
+                        }
+                        else if (step.ICRAStepId == 4)
+                        {
+                            <span>
+                                Step 4.Identify the areas surrounding the project area, assessing potential impact #1835
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                @string.Format("{0} {1}", step.Alias, step.Steps)
+                            </span><br />
+                            <input type="text" class="form-control" />
+
+                        }
+                    </div>
+                }
+
+
+                <table width="100%" cellpadding="0" cellspacing="0" border="1">
+                    <tr>
+                        <td colspan="6">
+                            Infection Control Construction Permit
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"></td>
+                        <td>
+                            Permit #:1835
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Location of Construction:<input type="text" value="3 Chadwick" /> </td>
+                        <td colspan="3">Project Start Date:  <input type="text" value="10/22/2018" class="datepicker" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Project Coordinator:<input type="text" value="Stephen Bennett" /></td>
+                        <td colspan="3">Estimated Duration:<input type="text" value=" Two Weeks" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Contractor Performing Work: <input type="text" value="Bozzo" /></td>
+                        <td colspan="3">Permit Expiration Date: <input type="text" value="11/9/2018" class="datepicker" /> </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Supervisor: <input type="text" value="Greg Bozzo" /> </td>
+                        <td colspan="3">Telephone: <input type="text" value="3175" /></td>
+                    </tr>
+                    <tr>
+                        <td>YES</td>
+                        <td>NO</td>
+                        <td>CONSTRUCTION ACTIVITY</td>
+                        <td>YES</td>
+                        <td>NO</td>
+                        <td>INFECTION CONTROL RISK GROUP</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>TYPE A: Inspection, non-invasive activity</td>
+                        <td></td>
+                        <td></td>
+                        <td>GROUP 1: Low Risk</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>TYPE B: Small scale, short duration, moderate to high levels</td>
+                        <td></td>
+                        <td></td>
+                        <td>GROUP 2: Medium Risk</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>TYPE C: Activity generates moderate to high levels of dust, requires greater 1 work shift for completion</td>
+                        <td></td>
+                        <td></td>
+                        <td>GROUP 3: Medium/High Risk</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>TYPE D: Major duration and construction activities Requiring consecutive work shifts</td>
+                        <td></td>
+                        <td></td>
+                        <td>GROUP 4: Highest Risk</td>
+                    </tr>
+                    <tr>
+                        <td>CLASS I</td>
+                        <td colspan="5">
+                            <ul>
+                                <li>
+                                    1.	Execute work by methods to minimize raising dust from constructionoperations.
+                                </li>
+                                <li>
+                                    2.	Immediately replace any ceiling tile displaced forvisual inspection.
+                                </li>
+                                <li>
+                                    3.	Minor Demolition forRemodeling
+                                </li>
+                            </ul>
+
+
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>CLASS II</td>
+                        <td colspan="5">
+                            <ul>
+                                <li> 1.	Provides active means to prevent air-borne dust from dispersing intoatmosphere</li>
+                                <li> 2.	Water mist work surfaces to control dust whilecutting.</li>
+                                <li> 3.	Seal unused doors with ducttape.</li>
+                                <li> 4.	Block off and seal airvents.</li>
+                                <li> 5.	Wipe surfaces withcleaner/disinfectant.	6.	Contain construction waste before transport in tightly coveredcontainers.</li>
+                                <li> 7.	Wet mop and/or vacuum with HEPA filteredvacuum before leaving workarea.</li>
+                                <li> 8.	Place dust mat at entrance and exit of workarea.</li>
+                                <li> 9.	Isolate HVAC system in areas where work isbeing performed; restore when workcompleted.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div>
+                                <span>
+                                    CLASS III
+                                </span>
+                                <p>
+                                    <input type="text" class="datepicker" placeholder="Date" />
+                                    Date
+                                </p>
+                                <p>
+                                    <input type="text" placeholder="Initial" />
+                                    Initial
+                                </p>
+                            </div>
+                        </td>
+                        <td colspan="5">
+                            <ul>
+
+                                <li>
+                                    1.	Obtain infection control permit before constructionbegins.
+                                </li>
+                                <li>
+                                    2.	Isolate HVAC system in area where work is being done to prevent contamination of the ductsystem.
+                                </li>
+                                <li>
+                                    3.	Complete all critical barriers or implement controlcube method before constructionbegins.	6.	Vacuum work with HEPA filteredvacuums.
+                                </li>
+                                <li>
+                                    4.	Maintain negative air pressure within work siteutilizing
+                                    HEPA equipped air filtration units.
+                                </li>
+                                <li>
+                                    5.	Do not remove barriers from work area until complete project is checked by Infection Prevention & Controland
+                                    thoroughly cleaned by Environmental Services.	tightly covered containers.
+                                </li>
+                                <li>6.	Vacuum work with HEPA filteredvacuums.</li>
+                                <li>7.	Wet mop withcleaner/disinfectant</li>
+                                <li> 8.	Remove barrier materials carefully to minimize spreading of dirt and debris associated with construction.</li>
+                                <li> 9.	Contain construction waste before transportin</li>
+                                <li>  10.	Cover transport receptacles or carts. Tapecovering. </li>
+                                <li>  11.	Upon completion, restore HVAC system where work wasperformed. </li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div>
+                                <span>
+                                    CLASS IV
+                                </span>
+                                <p>
+                                    <input type="text" class="datepicker" placeholder="Date" />
+                                    Date
+                                </p>
+                                <p>
+                                    <input type="text" placeholder="Initial" />
+                                    Initial
+                                </p>
+                            </div>
+                        </td>
+                        <td colspan="5">
+                            <ul>
+                                <li>
+
+
+                                    1.	Obtain infection control permit before constructionbegins.
+                                </li>
+                                <li> 2.	Isolate HVAC system in area where work is being done to prevent contamination of ductsystem.</li>
+                                <li> 3.	Complete all critical barriers or implement controlcube method before constructionbegins.</li>
+                                <li> 4.	Maintain negative air pressure within work siteutilizing HEPA equipped air filtrationunits.</li>
+                                <li> 5.	Seal holes, pipes, conduits, and puncturesappropriately.</li>
+                                <li> 6.	Construct anteroom and require all personnel to pass through this room so they can be vacuumed using a HEPA vacuum cleaner before leaving work site or they can wear cloth or paper coveralls that are removed each time they leave the worksite.</li>
+                                <li> 7.	All personnel entering work site are required to wear shoe covers.	8.	Do not remove barriers from work area untilcompleted project is checked by Infection Prevention & Control and thoroughly cleaned by Environmental.Services.</li>
+                                <li> 9.	Vacuum work area with HEPA filteredvacuums.</li>
+                                <li> 10.	Wet mop withdisinfectant.</li>
+                                <li> 11.	Remove barrier materials carefully to minimize spreading of dirt and debris associated with construction.</li>
+                                <li> 12.	Contain construction waste before transport in tightly coveredcontainers.</li>
+                                <li> 13.	Cover transport receptacles or carts. Tapecovering.</li>
+                                <li>14.	Upon completion, restore HVAC system where work wasperformed.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Additional Requirements:
+                        </td>
+                        <td colspan="5">
+                            <input type="text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3">
+
+                            Date
+                            Initials
+
+                        </td>
+                        <td colspan="3">
+                            DateInitials	Exceptions/Additions to this permit are noted by attached memoranda
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            Permit Request By: <input type="text" />
+
+                        </td>
+                        <td colspan="3">
+                            Permit Authorized By: <input type="text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            Date:  <input type="text" class="datepicker" />
+
+                        </td>
+                        <td colspan="3">
+                            Date :  <input type="text" class="datepicker" />
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+<style>
+    ul {
+        width: 100%;
+        overflow: hidden;
+        border-top: 1px solid #ccc;
+    }
+
+    li {
+        line-height: 1.5em;
+        float: left;
+        display: inline;
+    }
+
+    .double li {
+        width: 50%;
+    }
+</style>

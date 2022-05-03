@@ -1,0 +1,248 @@
+﻿@model HCF.BDO.EPDetails
+@{
+    Layout = null;
+    int currentYear = Convert.ToInt32(DateTime.Now.Year.ToString());
+}
+<span style="float: left;padding: 10px;">
+
+</span>
+<div class="yearsAddSelect" id="menu-outer">
+    <ul class="Yearbtn-innerlist">
+        <li id="Month_12" value="-1" class="yerabtn">Last 12 Months</li>
+        <li id="CurrentYear" value="@currentYear" class="yerabtn active">@currentYear</li>
+        <li id="LastYear" value="@(currentYear - 1)" class="yerabtn">@(currentYear - 1)</li>
+        <li id="BeforeLastYear" value="@(currentYear - 2)" class="yerabtn">@(currentYear - 2)</li>
+    </ul>
+    <span class="form-group text-right firedrill_filter f-right">
+        @Html.DropDownList("Year", Enumerable.Range(@currentYear - 7, 5).OrderByDescending(x => x.ToString()).Select(x => new SelectListItem { Text = x.ToString(), Value = x.ToString() }), "--Year--")
+    </span>
+    <input type="hidden" id="hiddendate" />
+</div>
+<table id="docsTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none">
+            </th>
+            <th style="display:none">
+            </th>
+            <th>File Name</th>
+            <th>Review Date</th>
+            <th>Uploaded Date</th>
+            <th>Uploaded By</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var activity in Model.EpDocs)
+        {
+            <tr>
+                <td style="display:none">
+                    @activity.CreatedDate.Year
+                </td>
+
+                @if ((DateTime.Now - activity.CreatedDate).Days < 365)
+                {
+                    <td style="display:none" days="@((DateTime.Now - activity.CreatedDate).Days)">
+                        1
+                    </td>
+                }
+                else
+                {
+
+                    <td style="display:none"></td>
+                }
+                <td>
+                    <a href="@commonModelFactory.FilePath(activity.Path)" target="_blank">
+                        <img src="@commonModelFactory.UploadDocTypeImagePath(activity.UploadDocTypeId,activity.DocTypeId)" alt="">
+                        <span class="epdocName-elips">@activity.FileName.CastToNA()</span>
+                    </a>
+                </td>
+                <td data-sort="@activity.DtEffectiveDate.DateSort()">
+                    @if (activity.DtEffectiveDate.HasValue)
+                    {
+                        <span>@activity.DtEffectiveDate.CastLocaleDate()</span>
+                    }
+                </td>
+                <td data-sort="@activity.CreatedDate.Ticks">@activity.CreatedDate.ToClientTime().ToFormatDateTime()</td>
+                <td>
+                    @if (activity.FirstName != "")
+                    {
+                        @activity.FullName
+                    }
+                    else
+                    {
+                        <span>CRx</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.html5.min.js"></script>
+<script>
+    $(document).ready(function () {
+       console.log('@Model.Description')
+
+       var epTitle='@Model.StandardEp';
+       @if(!Model.IsApplicable)
+    {
+        @:epTitle=epTitle + " - Non-Tracked EP";
+    }
+     var epFrequency= "@Model.GetFrequencyName()";
+
+
+        $("#binderEpTitle").text(epTitle + " ( " + epFrequency + " )");
+        $("#binderEpDescription").html('@Model.Description');
+
+        $(".epNumberList").removeClass('active');
+        $('@string.Format("#stdec_{0}",Model.StDescID)').removeClass('hide');
+        $('@string.Format("#stdec_{0} li",Model.StDescID)').removeClass('hide');
+        $('@string.Format("#lefteps_{0}", Model.EPDetailId)').addClass("active");
+
+        $("#LastInspDate").text($("#_inspectionDate").val());
+        var maxLength = 38;
+        $(".epdocName-elips").each(function () {
+            var myStr = $(this).text();
+            if ($.trim(myStr).length > maxLength) {
+                var newStr = myStr.substring(0, maxLength);
+                $(this).empty().html(newStr);
+                $(this).append(' <a href="javascript:void(0);" class="read-more">...</a>');
+            }
+        });
+
+        var year = new Date().getFullYear();
+        $('#hiddendate').val(year);
+        var FilterVal = $('#hiddendate').val();
+
+        $(".comment").shorten({
+            "showChars": 150,
+            "moreText": "See More",
+        });
+
+        var dtable = $('#docsTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "aaSorting": [],
+            "bPaginate": $('#docsTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: ""
+            }
+        });
+
+        var filterBtn = localStorage.getItem("binderYearFilter");
+        if (filterBtn) {
+            debugger;
+            filterData($("#" + filterBtn));
+        }
+
+        function setDefaultYearFilter(ctr) {
+            var ctrId = ctr.attr("id");
+            localStorage.setItem("binderYearFilter", ctrId);
+        }
+
+        $(".yerabtn").click(function () {
+            var ctr = $(this);
+            var year = ctr.attr("value");
+            $(".yerabtn").removeClass('active');
+            $("#Year").removeClass('active');
+            ctr.addClass('active');
+            $("#Year").val("");
+            setDefaultYearFilter(ctr);
+            filterData(year);
+        });
+
+        $("#Year").change(function () {
+            var year = $('#Year').val();
+            $(".yerabtn").removeClass('active');
+            $(this).addClass('active');
+            filterData(year);
+        });
+
+        function filterData(year) {
+            debugger;
+            dtable.columns(0).search("").draw();
+            dtable.columns(1).search("").draw();
+            console.log(year);
+            if (year > 0) {
+                dtable.columns(0).search(year).draw();
+            } else
+                dtable.columns(1).search("1").draw();
+        }
+
+        //function filterData(ctr) {
+        //    debugger;
+        //    dtable.columns(0).search("").draw();
+        //    dtable.columns(1).search("").draw();
+        //    setDefaultYearFilter(ctr);
+        //    $(".yerabtn").removeClass('active');
+        //    ctr.addClass('active');
+        //    var year = ctr.attr("value");
+        //    console.log(year);
+        //    if (year > 0) {
+        //        dtable.columns(0).search(year).draw();
+        //    } else
+        //        dtable.columns(1).search("1").draw();
+        //}
+    });
+</script>
+
+
+<style>
+    .dataTables_wrapper .dataTables_filter input[type="search"] {
+        padding: 0px 0px;
+        border: #fff solid 0px;
+        display: none;
+    }
+
+    #YearFilter {
+        float: left;
+        margin-bottom: 8px;
+        border: #ddd solid 1px;
+        padding: 5px;
+        position: relative;
+        z-index: 9;
+        min-width: 160px;
+        right: -670px;
+    }
+
+    span.form-group.text-right.firedrill_filter.f-right .active {
+        background-color: green;
+        color: #fff;
+    }
+
+    .Yearbtn-innerlist li {
+        min-width: 118px;
+        border: 2px solid #00000082;
+        margin-bottom: 4px;
+        border-radius: 30px;
+        align-items: center;
+        justify-content: center;
+        display: inline-flex;
+        cursor: pointer;
+        padding: 4px 15px;
+    }
+
+        .Yearbtn-innerlist li.active {
+            background-color: green;
+            color: #fff;
+        }
+
+    .yearsAddSelect {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+    }
+
+    .firedrill_filter select {
+        border: 2px solid #00000082;
+        border-radius: 30px;
+        padding: 4px 15px;
+        margin-left: 5px;
+    }
+</style>

@@ -1,0 +1,27 @@
+﻿@model List<HCF.BDO.Vendors>
+
+<h4>Assign Vendors</h4>
+<div class="assets_view" style="width:100% !important;">
+    <ul>
+        @foreach (var item in Model.Where(x => x.IsActive == true))
+        {
+            <li>
+                <input type="checkbox" value='@item.VendorId' name="vendors"
+                       checked="@commonModelFactory.IsVendorsChecked(item, (List<HCF.BDO.Assets>)ViewBag.mappingAssets)" /> <span></span>
+                @item.Name
+            </li>
+        }
+    </ul>
+</div>
+<script>
+    $("[type=checkbox]").on('change', function () {
+        var IsActive = $(this).is(':checked');
+        var vendorId = $(this).val();
+        var assetId = $("#drpAssets").val();
+        debugger;
+        //var url = '@Url.Action("UpdateVendorAssets", "Vendor")';
+        $.get(CRxUrls.Vendor_UpdateVendorAssets + '?assetId=' + assetId + '&vendorId=' + vendorId + '&IsActive=' + IsActive, function (data) {
+        });
+    });
+
+</script>

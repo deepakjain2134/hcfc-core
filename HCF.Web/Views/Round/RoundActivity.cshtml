@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Rounds Activity";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Round Activity
+        </h1>
+    </section>
+}
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="" id="div_ViewAssignment">
+                            @await Html.PartialAsync("_RoundActivity", "activity")
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+

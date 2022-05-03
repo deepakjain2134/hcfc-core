@@ -1,0 +1,136 @@
+﻿@using HCF.Web.Base
+@inject ICommonModelFactory commonModelFactory
+
+@model List<HCF.BDO.Inspection>
+@{
+    ViewBag.Title = "Deficiency";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+
+                <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                    <label class="btn active">
+                        @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                    <label class="btn">
+                        @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                    <label class="btn">
+                        @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                    <label class="btn">
+                        @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                </div>
+                <table id="c_myTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="display:none">Status</th>
+                            <th style="display:none">CategoryId</th>
+                            <th width="130">
+                                @Localizer["StandardEP"]
+                            </th>
+                            <th>
+                                @Localizer["Score"]
+                            </th>
+                            <th>
+                                @Localizer["Assets"]
+                            </th>
+                            <th>
+                                @Localizer["Description"]
+                            </th>
+                            <th title="Inspection Date">
+                                <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.CalendarIcon)" title="Inspection Date">
+                            </th>
+                            <th title="User">
+                                <img alt="" src="@Url.Content("~/dist/Images/Icons/dashboard_user_icon.png")" title="User">
+                            </th>
+                            <th title="Frequency">
+                                <img alt="" src="@Url.Content("~/dist/Images/Icons/dashboard_clock.png")" title="Frequency">
+                            </th>
+                            <th title="DocRequired">
+                                <img alt="" src="@Url.Content("~/dist/Images/Icons/dashboard_doc_icon.png")" title="DocRequired">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td style="display:none">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </td>
+                                <td style="display:none">@Html.DisplayFor(modelItem => item.EPDetails.Standard.CategoryId)</td>
+                                <td class="@commonModelFactory.GetTranStatus(Convert.ToInt32(item.Status))">
+                                    <a href="@Url.Action("EPstate", "Goal", new { epId = item.EPDetailId, inspectionId=item.InspectionId })">
+                                        <span>
+                                            @commonModelFactory.GetEpStandard(item.EPDetails)
+                                        </span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <ep-risk-score risk-score="@item.EPDetails.Scores.Name">
+                                    </ep-risk-score>
+                                </td>
+                                <td>
+                                    @foreach (HCF.BDO.Assets asset in item.EPDetails.Assets)
+                                    {
+                                        <a href="@Url.Action("setup", "Assets", new { assetId = asset.AssetId })">
+                                            <span>@asset.Name</span>
+                                        </a>
+                                    }
+                                </td>
+                                <td style="text-align:left;">
+                                    @item.EPDetails.Description.Substring(0, Math.Min(item.EPDetails.Description.Length, 100))
+                                    <a href="javascript:void(0);" class="descriptions" rel='popover' data-placement='right' data-original-title='@commonModelFactory.GetEpStandard(item.EPDetails)' data-content='@item.EPDetails.Description'>@("...See More")</a>
+                                    @*@item.Description*@
+                                </td>
+                                <td>
+                                </td>
+                                <td>
+                                </td>
+                                <td>
+                                </td>
+                                <td>
+                                    @if (Convert.ToInt32(item.IsAllDocumentUploaded) > 0)
+                                    {
+                                        <a href="@Url.Action("EPDocs", "Goal", new { epId = item.EPDetailId, InspectionId = item.InspectionId })">
+                                            <span>
+                                            </span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a><span><b>-</b></span></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var dataTables = $('#c_myTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [],
+        "searching": false,
+        "pageLength": 20,
+        "bPaginate": $('#c_myTable tbody tr').length > 20,
+        "bInfo": false,
+        dom: 'Bfrtip',
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        buttons: [
+            'excel', 'pdf'
+        ]
+    });
+</script>

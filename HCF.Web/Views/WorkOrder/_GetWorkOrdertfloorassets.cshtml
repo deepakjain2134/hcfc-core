@@ -1,0 +1,74 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+<div class="QuestPopscroll crx-scrollBar">
+    <table id="my_asset_Table" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th> @Localizer["Asset"] </th>
+                <th> @Localizer["AssetNo"] </th>
+                <th> @Localizer["Location"] </th>
+                <th>
+                    Inspection Date
+                </th>
+                <th>
+                    Inspected by
+                </th>
+                <th>
+                    @Localizer["Details"]
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var currentInspection = item.TInspectionActivity.Where(x => x.IsCurrent == true).FirstOrDefault();
+                var currentWo = item.WorkOrders.FirstOrDefault();
+                <tr>
+                    <td>@item.Assets.Name</td>
+                    <td>@item.AssetNo</td>
+                    <td>@string.Format("{0},{1}", item.Floor.FloorName, item.Floor.Building.BuildingName)</td>
+                    <td>
+                        @if (currentWo != null && currentWo.WorkOrderFloorAssets.Count > 0 && currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity != null)
+                        {
+                            <span>@currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()</span>
+                        }
+                    </td>
+                    <td>
+                        @if (currentWo != null && currentWo.WorkOrderFloorAssets.Count > 0 && currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity != null)
+                        {
+                            <span>@currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity.UserProfile.FullName</span>
+                        }
+                    </td>
+                    <td>
+                        @if (currentWo != null && currentWo.WorkOrderFloorAssets.Count > 0 && currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity != null)
+                        {
+                            <img class="hover_sign" onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = currentWo.WorkOrderFloorAssets.FirstOrDefault().TinspectionActivity.ActivityId })'"
+                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                        }
+
+                        @*@if (currentInspection != null)
+                            {
+                                <span>@currentInspection.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()</span>
+                            }*@
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+         $('#my_asset_Table').dataTable({
+            "searching": false,
+            "lengthChange": false,
+            "bPaginate": $('#myTable tbody tr').length > 10,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+             }, 'aoColumnDefs': [{
+                 'bSortable': false,
+                 'aTargets': [-1] /* 1st one, start by the right */
+             }],
+        });
+    });
+</script>

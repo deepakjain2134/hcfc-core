@@ -1,0 +1,7473 @@
+.assetsIconstd img {
+    max-width: 22px;
+    margin: 0px auto;
+    display: block;
+}
+
+
+/* **************** Menu sprite CSS START HERE ***************************** */
+.minHeightTextarea {
+    min-height: 34px !important;
+}
+
+.comm-Backbutton {
+    cursor: pointer;
+    min-width: 100px;
+    background-color: #000000;
+    color: #fff !important;
+    border: 1px solid #000000;
+    display: inline-block;
+    text-align: center;
+    height: 31px;
+    text-transform: uppercase;
+    line-height: 30px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.menu-sprite {
+    display: inline-block;
+    width: 46px;
+    height: 46px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/menu_sprite.png);
+    background-position: -18px -18px;
+    background-repeat: no-repeat;
+}
+.menu-sprite.roundactivity {
+    background-position: -17px -975px;
+}
+.menu-sprite.dashboard {
+    background-position: -18px -18px;
+}
+.menu-sprite.riskmanagement {
+    background-position: -92px -17px;
+}
+.menu-sprite.inspection {
+    background-position: -309px -369px;
+}
+.menu-sprite.roundsdrills {
+    background-position: -308px -18px;
+}
+.menu-sprite.permits {
+    background-position: -308px -770px;
+}
+.menu-sprite.workorders {
+    background-position: -236px -227px;
+}
+.menu-sprite.drawings {
+    background-position: -164px -18px;
+}
+.menu-sprite.binders {
+    background-position: -528px -18px;
+}
+.menu-sprite.reports {
+    background-position: -382px -18px;
+}
+.menu-sprite.howto {
+    background-position: -817px -367px;
+}
+.menu-sprite.setup {
+    background-position: -598px -20px;
+}
+.menu-sprite.userSprite {
+    background-position: -308px -449px;
+}
+.menu-sprite.crxDemoSprite {
+    background-position: -671px -18px;
+}
+.menu-sprite.compliancedashboard {
+    background-position: -743px -367px;
+}
+.menu-sprite.riskmanagementdashboard {
+    background-position: -92px -17px;
+}
+.menu-sprite.deficiencydashboard {
+    background-position: -816px -18px;
+}
+.menu-sprite.documentdashboard {
+    background-position: -18px -692px;
+}
+.menu-sprite.compliancehistory {
+    background-position: -743px -525px;
+}
+.menu-sprite.cmsdashboard {
+    background-position: -308px -841px;
+}
+.menu-sprite.assetsdashboard {
+    background-position: -672px -911px;
+}
+.menu-sprite.ilsm {
+    background-position: -672px -841px;
+}
+.menu-sprite.myrounds {
+    background-position: -746px -770px;
+}
+.menu-sprite.roundscheduler {
+    background-position: -817px -449px;
+}
+.menu-sprite.adhocsurvey {
+    background-position: -454px -86px;
+}
+.menu-sprite.firedrills {
+    background-position: -528px -86px;
+}
+    .menu-sprite.firewatch {
+        background-position: -598px -87px;
+    }
+.menu-sprite.plantops {
+    background-position: -818px -18px;
+}
+.menu-sprite.projects {
+    background-position: -163px -525px;
+}
+.menu-sprite.cra {
+    background-position: -671px -525px;
+}
+.menu-sprite.paperpermit {
+    background-position: -815px -525px;
+}
+.menu-sprite.icra {
+    background-position: -743px -296px;
+}
+.menu-sprite.pcra {
+    background-position: -91px -525px;
+}
+.menu-sprite.icrav2 {
+    background-position: -743px -296px;
+}
+.menu-sprite.ceilingpermitrequest {
+    background-position: -382px -449px;
+}
+.menu-sprite.observationreport {
+    background-position: -235px -770px;
+}
+.menu-sprite.lifesafetydevice {
+    background-position: -379px -911px;
+}
+.menu-sprite.methodofprocedure {
+    background-position: -18px -526px;
+}
+.menu-sprite.hotworkpermit {
+    background-position: -306px -911px;
+}
+.menu-sprite.firesystembypasspermit {
+    background-position: -233px -911px;
+}
+.menu-sprite.occurrencereport {
+    background-position: -382px -770px;
+}
+.menu-sprite.allpermits {
+    background-position: -818px -770px;
+}
+.menu-sprite.nonactiveepreport {
+    background-position: -452px -910px;
+}
+.menu-sprite.compliancereports {
+    background-position: -744px -85px;
+}
+.menu-sprite.ilsmreports {
+    background-position: -815px -87px;
+}
+.menu-sprite.documentreports {
+    background-position: -381px -770px;
+}
+.menu-sprite.epassignmentreports {
+    background-position: -91px -154px;
+}
+.menu-sprite.inventoryinspection {
+    background-position: -164px -770px;
+}
+.menu-sprite.routebasedinspectionreports {
+    background-position: -527px -449px;
+}
+.menu-sprite.inventoryassetsreports {
+    background-position: -236px -155px;
+}
+.menu-sprite.assetcompliancematrix {
+    background-position: -526px -912px;
+}
+.menu-sprite.roundreports {
+    background-position: -18px -841px;
+}
+.menu-sprite.manageusers {
+    background-position: -671px -156px;
+}
+.menu-sprite.maintainassets {
+    background-position: -743px -153px;
+}
+.menu-sprite.vendorconfigurations {
+    background-position: -817px -154px;
+}
+.menu-sprite.floorplan {
+    background-position: -18px -227px;
+}
+.menu-sprite.binderconfigurations {
+    background-position: -91px -229px;
+}
+.menu-sprite.moreconfigurations {
+    background-position: -164px -229px;
+}
+.menu-sprite.assetdevicechange {
+    background-position: -816px -911px;
+}
+
+.yearsAddSelect option {
+    background-color: #fff;
+    color: #000 !important;
+}
+.bootstrap-select > .dropdown-toggle.bs-placeholder {
+    color: #555 !important; 
+}
+
+
+.fourPaneliconBox.deficiicon1 {
+    background-position: -1px -4px;
+    display: inline-block;
+    width: 76px;
+    height: 76px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/deficiBoxs.png) !important;
+    background-repeat: no-repeat;
+}
+.deficiicon1 {
+    background-position: -1px -4px;
+}
+.deficiicon2 {
+    background-position: -90px -4px;
+    display: inline-block;
+    width: 76px;
+    height: 76px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/deficiBoxs.png) !important;
+    background-repeat: no-repeat;
+}
+
+.deficiicon3 {
+    background-position: -178px -4px;
+    display: inline-block;
+    width: 76px;
+    height: 76px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/deficiBoxs.png) !important;
+    background-repeat: no-repeat;
+}
+.deficiicon4 {
+    background-position: -264px -4px;
+    display: inline-block;
+    width: 76px;
+    height: 76px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/deficiBoxs.png) !important;
+    background-repeat: no-repeat;
+}
+.deficiicon5 {
+    background-position: -354px -4px;
+    display: inline-block;
+    width: 76px;
+    height: 76px;
+    margin: 0px auto;
+    background-image: url(/dist/Images/Services/deficiBoxs.png) !important;
+    background-repeat: no-repeat;
+}
+
+.left-statub div {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url(/dist/Images/Services/lenged.png) !important;
+    /*background-position: 0px 0px;*/
+    background-repeat: no-repeat;
+}
+
+.processType-Sprite {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url(/dist/Images/Services/lenged.png) !important;
+    background-position: 0px 0px;
+    background-repeat: no-repeat;
+}
+.processType-Sprite.notdone-btn {
+    background-position: 0px 1px;
+}
+.processType-Sprite.deficiency-btn {
+    background-position: -20px 1px;
+}
+.processType-Sprite.due-btn {
+    background-position: -82px 1px;
+}
+.processType-Sprite.inProgress-btn {
+    background-position: -41px 1px;
+}
+.processType-Sprite.completed-btn {
+    background-position: -61px 1px;
+}
+
+.status_fail {
+    background-position: -20px 0px;
+}
+.status_grace_in_days_sysadmin {
+    background-position: -79px 0px;
+}
+
+
+/*.ins_check3_btn {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url(/dist/Images/Services/multiBtn.png);
+    background-position: 0px 0px;
+    background-repeat: no-repeat;
+}*/
+
+.tableHeight {
+    min-height: 350px;
+}
+/* **************** Menu sprite CSS end HERE ***************************** */
+/* **************** Slider Calender start here ***************************** */
+.xlsxflex {
+    display: flex;
+    align-items: center;
+}
+.ephisCol-1 {
+    width: 160px;
+    display: inline-block;
+    float: left;
+}
+.ephisCol-2 {
+    width: calc(100% - 160px);
+    display: inline-block;
+    float: left;
+}
+.help-faqpanellist {
+    background-color: #f0f2f5;
+    margin-bottom: 11px;
+    border-radius: 6px;
+    padding: 3px 0 0;
+    border: 1px solid #e4e4e4;
+}
+.help-faqpanellist.panel-active .howto-minus {
+    display: block;
+}
+.help-faqpanellist.panel-active .howto-plus {
+    display: none;
+}
+.trackingAssets-lenged ul li {
+    display: flex;
+    align-items: center;
+    margin: 0 2px;
+    font-weight: 600;
+    font-size: 12px;
+    border: 1px solid #484848;
+    border-radius: 20px;
+    padding: 4px 6px;
+    min-width: 60px;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+.schedulesList #detailsTab .trackingAssets-lenged ul li{
+    cursor: pointer;
+}
+.schedulesList #detailsTab .trackingAssets-lenged ul li:nth-child(2) {
+    border: #ed1c24 solid 1px;
+}
+.schedulesList #detailsTab .trackingAssets-lenged ul li:nth-child(3) {
+    border: #fadd64 solid 1px;
+}
+.schedulesList #detailsTab .trackingAssets-lenged ul li:nth-child(4) {
+    border: #33479e solid 1px;
+}
+.schedulesList #detailsTab .trackingAssets-lenged ul li:nth-child(5) {
+    border: #008000 solid 1px;
+}
+
+.btn-group-vertical {
+    position: initial;
+}
+.siteshide.sitesicon-rotated {
+    transform: rotate( 270deg);
+}
+/*.sitelocationhide ul.list li {
+    padding: 0 0px 0px !important;
+}*/
+.errorFileName {
+    border: 1px solid red !important;
+}
+.assetDeficienciesleg {
+    display: inline-block;
+    position: absolute;
+    right: 15px;
+    top: 6px;
+}
+.deficienciesProjects .ddlprojects label {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.inspectionBtn {
+    font-size: 12px;
+    color: #3c8dbc;
+    font-weight: 400;
+}
+.documentprogressDocument .progress {
+    margin-bottom: 6px;
+    background-color: #cdcdcd;
+    height: 8px;
+    border-radius:20px;
+}
+.documentprogressDocument .progress-bar {
+    line-height: 10px;
+    color: transparent;
+}
+td.disab {
+    opacity: 0.5;
+}
+.calender-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+}
+.calender-body {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    justify-content: center;
+}
+.calender-header .monthName {
+    color: #333;
+    background-color: #f5f5f5;
+    padding: 8px 0;
+    font-weight: 600;
+    font-size: 14px;
+}
+.calender-header p {
+    padding: 2px 6px;
+}
+.sliderArrowBox {
+    display: flex;
+    margin: 15px 0;
+}
+.inspectionsSlider {
+    width: 15px;
+    padding-top: 15px;
+}
+.calendarMainBox {
+    width: calc(100% - 30px);
+    border: 1px solid #ddd;
+}
+.inspectionsSlider .prev {
+    margin-left: 2px;
+}
+.calender-header .monthName,
+.calender-body .monthDates {
+    border-right: 1px solid #ddd;
+    text-align: center;
+    width: calc(100% / 12);
+    padding: 4px 4px 6px 4px;
+}
+.calender-header .monthName:last-child,
+.calender-body .monthDates:last-child {
+    border: none;
+}
+/* **************** Slider Calender END here ***************************** */
+
+/* **************** CRx Read more and less CSS START HERE ***************************** */
+.addReadMore.showlesscontent .SecSec,
+.addReadMore.showlesscontent .readLess {
+    display: none;
+}
+.addReadMore.showmorecontent .readMore {
+    display: none;
+}
+.addReadMore .readMore,
+.addReadMore .readLess {
+    margin-left: 2px;
+    color: #3a7da4;
+    cursor: pointer;
+    font-size: 14px;
+}
+.addReadMoreWrapTxt.showmorecontent .SecSec,
+.addReadMoreWrapTxt.showmorecontent .readLess {
+    display: block;
+}
+/* **************** CCRx Read more and less CSS END HERE ***************************** */
+
+/* **************** CRx Implementation Status CSS START HERE ***************************** */
+.implementationRow {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+.implementation-col {
+    width: 20%;
+    border: 1px solid #ddd;
+    padding: 4px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+.IsSendMailcols {
+    display: flex;
+}
+.firedrillradioTab {
+    padding-bottom: 6px;
+    padding-left: 6px;
+}
+.fa {
+    cursor: pointer;
+}
+.addtoFolder {
+    cursor: pointer;
+}
+/* **************** CRx Implementation Status CSS END HERE ***************************** */
+/* **************** CRx dropdownAnimation CSS START HERE ***************************** */
+.tablelist-topform select,
+.tablelist-topform .dropdown-toggle {
+    -webkit-animation: dropdownAnimation 0.6s;
+    -webkit-animation-iteration-count: 8;
+    animation: dropdownAnimation 0.6s;
+    animation-iteration-count: 8;
+}
+@keyframes dropdownAnimation {
+    from {
+        border-color: #d82c3d;
+    }
+
+    50% {
+        border-color: #d2d6de;
+    }
+
+    to {
+        border-color: #d82c3d;
+    }
+}
+/* **************** CRx dropdownAnimation CSS End HERE ***************************** */
+
+/* **************** CRx EP Frequency popup CSS START HERE ***************************** */
+.barcodesearch1 video {
+    width: 40%;
+    display: block;
+    background-color: whitesmoke;
+    margin: 0px auto;
+}
+#interactive video {
+    width: 99%;
+}
+.table-button {
+    background-color: #3c8dbc;
+    color: #fff;
+    border: 1px solid #2a79a7;
+    text-align: center;
+    height: 30px;
+    line-height: 27px;
+    padding: 0 8px;
+    margin: 0px auto;
+    display: block;
+    font-size: 13px;
+    min-width: 100px;
+}
+.table-Mbtn {
+    display: flex;
+}
+.checksign {
+    max-width: 100%;
+}
+.crxradio {
+    display: table;
+}
+.crxradio div {
+clear: both;
+overflow: hidden;
+}
+.crxradio label {
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid #D1D3D4;
+    font-weight: normal;
+}
+/*.disabled label {
+    background: #eee;
+}*/
+div#frequencyTable_paginate {
+    position: absolute;
+    right: 270px;
+}
+.crxradio input[type="radio"]:empty {
+    display: none;
+}
+.crxradio input[type="radio"]:empty ~ label {
+    position: relative;
+    line-height: 2.5em;
+    text-indent: 3.25em;
+    /*margin-top: 2em;*/
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.crxradio input[type="radio"]:empty ~ label:before {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
+    width: 2.5em;
+    background: #D1D3D4;
+    border-radius: 3px 0 0 3px;
+}
+.crxradio input[type="radio"]:hover:not(:checked) ~ label {
+    color: #888;
+}
+.crxradio input[type="radio"]:hover:not(:checked) ~ label:before {
+    content: '\2714';
+    text-indent: .9em;
+    color: #C2C2C2;
+}
+.crxradio input[type="radio"]:checked ~ label {
+    color: #777;
+}
+.crxradio input[type="radio"]:checked ~ label:before {
+    content: '\2714';
+    text-indent: .9em;
+    color: #333;
+    background-color: #ccc;
+}
+.crxradio input[type="radio"]:focus ~ label:before {
+    box-shadow: 0 0 0 3px #999;
+}
+.crxradio-default input[type="radio"]:checked ~ label:before {
+    color: #333;
+    background-color: #ccc;
+}
+.crxradio-primary input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #337ab7;
+}
+.crxradio-success input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #5cb85c;
+}
+.crxradio-danger input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #d9534f;
+}
+.crxradio-warning input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #f0ad4e;
+}
+.crxradio-info input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #5bc0de;
+}
+.crxradio {
+    padding: 0;
+}
+.modal-body .crxradio li {
+    width: 33.33%;
+    display: inline-block;
+    float: left;
+    padding: 0 4px;
+}
+/* **************** CRx EP Frequency popup CSS END HERE ***************************** */
+
+/* **************** CRx COMMON All Pages CSS START HERE ***************************** */
+.left-boxc.doc-list-item ul li {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e1e1e1;
+}
+.left-boxc.doc-list-item ul li a {
+    width: 90%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.left-boxc.doc-list-item ul li .deletefiles {
+    width: 10%;
+    text-align: right;
+}
+.demofilesListItems .ulilsmfiles li {
+    display: inline-block;
+    border-radius: 4px;
+    margin-right: 15px;
+}
+.demofilesListItems {
+    margin-top: 15px;
+}
+.demofilesListItems a.delete {
+    position: absolute;
+    right: -7px;
+    top: -9px;
+    background-color: #fff;
+}
+
+.permissions-scroll {
+    max-height: 510px;
+}
+.permissions-scroll thead {
+    position: sticky;
+    top: -1px;
+    background-color: #fff;
+}
+.permissions-scroll table thead tr th {
+    white-space: initial !important;
+}
+table #trackingassethead tr th {
+    white-space: inherit !important;
+}
+.dropdown-header {
+    background-color: #dfdfdf;
+    padding: 8px !important;
+    cursor: pointer;
+}
+ .dropdown-menu > .divider {
+    display: none;
+}
+.dropdown-menu .inner.open {
+    max-height: 200px !important;
+}
+i.jstree-icon.jstree-themeicon {
+    display: none;
+}
+.sweet-alert.showSweetAlert {
+    box-shadow: 0px 0px 6px #ccc;
+}
+.crxSignBox a img,
+.form-groupsign a img {
+    max-width: 100%;
+}
+/*.dataTables_wrapper .table-responsive {
+    overflow-x: inherit;
+}*/
+.assetLegends .assets-btnicons {
+    display: flex;
+    align-items: center;
+}
+.epsassign-Scroll {
+    max-height:300px;
+    overflow:auto;
+}
+.col-left {
+    padding-right: 0px !important;
+}
+
+.comm-bluebutton {
+    cursor: pointer;
+    min-width: 100px;
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff !important;
+    border: 1px solid #2a79a7;
+    display: inline-block;
+    text-align: center;
+    height: 31px;
+    text-transform: uppercase;
+    line-height: 30px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+table tr td a {
+    cursor: pointer;
+}
+.atsbtntitle {
+    font-size: 12px;
+    color: #0069aa;
+    font-weight: 600;
+}
+.box.box-primary.general_menu {
+    padding: 0px 0px 15px 0px !important;
+}
+.leftcol-setting.active .box.box-primary {
+    padding: 12px 4px 15px 4px !important;
+}
+tr .icratable-drop .dropdown-toggle {
+    padding: 0;
+}
+.bold {
+    font-weight: bold;
+}
+span.n {
+    padding-left: 10px !important;
+    display: block;
+}
+.occdrop-menu {
+    top: 33px !important;
+    bottom: auto;
+    min-height: 60px;
+    padding: 8px 15px;
+    box-shadow: 0px 3px 6px #a7a7a7;
+}
+.occdrop-menu li.btn_formType {
+    border-bottom: 1px solid #ddd;
+    padding: 3px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.occdrop-menu li.btn_formType .check-mark {
+    visibility: hidden;
+}
+.occdrop-menu li.btn_formType .check-mark {
+    visibility: hidden;
+}
+.occdrop-menu li.btn_formType.active .check-mark {
+    visibility: inherit;
+}
+.additionL-textarea textarea.form-control {
+    height: auto !important;
+}
+.sweet-alert {
+    z-index: 999999 !important;
+}
+tr:nth-child(1) .icratable-drop .dropdown-menu,
+tr:nth-child(2) .icratable-drop .dropdown-menu,
+tr:nth-child(3) .icratable-drop .dropdown-menu,
+tr:nth-child(4) .icratable-drop .dropdown-menu,
+tr:nth-child(5) .icratable-drop .dropdown-menu {
+    bottom: 0% !important;
+    top: 100% !important;
+    height: fit-content;
+    height: max-content;
+}
+tr:nth-last-child(1) .icratable-drop .dropdown-menu,
+tr:nth-last-child(2) .icratable-drop .dropdown-menu,
+tr:nth-last-child(3) .icratable-drop .dropdown-menu,
+tr:nth-last-child(4) .icratable-drop .dropdown-menu,
+tr:nth-last-child(5) .icratable-drop .dropdown-menu {
+    bottom: 100% !important;
+    top: auto;
+}
+
+.ddlproject {
+    outline: none;
+}
+.popover.clockpicker-popover {
+    overflow: initial;
+    height: auto;
+    width: auto;
+    min-height: auto;
+    max-width: initial;
+    min-width: auto;
+    max-height: initial;
+}
+.popover-header .popover-content {
+    word-break: break-word;
+}
+.popover.clockpicker-popover {
+    min-width: 200px;
+}
+.popover {
+    word-break: break-word;
+    max-width: 500px ;
+    min-width: 400px;
+    /*max-height: 212px;
+    overflow: auto;*/
+}
+.popover-content.popover-scrollBar {
+    max-height: 212px;
+    overflow: auto;
+}
+.firelog table.inner_table td {
+    padding: 0 6px;
+}
+.icra_action img {
+    max-width: 18px;
+}
+tr td img {
+    cursor: pointer;
+}
+button#btnloadMore {
+    text-align: center;
+    margin: 0px auto;
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.status_pass {
+    background-position: -61px 3px;
+}
+.status_pastdue {
+    background-position: -20px 1px;
+}
+.status_inprogress {
+    background-position: -41px 1px;
+}
+.status_not_started {
+    background-position: -18px 0px;
+}
+
+
+
+
+.tooltiplock {
+    position: relative;
+}
+.tooltipTitlelock {
+    display: none;
+    position: absolute;
+    bottom: -34px;
+    background-color: #949494;
+    padding: 4px 15px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    left: -3px;
+    z-index: 99;
+}
+.fa.fa-lock {
+    color: #949494;
+}
+.trackingUserchebox input[type="checkbox"] {
+    width: 20px !important;
+    height: 21px !important;
+}
+.selectList {
+    width: 100% !important;
+}
+.configurefloorassets-popup {
+    background-color: #fff;
+}
+.reports_short {
+    border: 1px solid #ddd;
+    padding: 4px 12px;
+    width: 100%;
+    margin-top: 15px;
+}
+/*.dateinlineBox #AddDoc {
+    display: flex;
+    margin-bottom: 2 px;
+    align-items: center;
+}*/
+.status_grace_period {
+    background-position: -83px 0px;
+    /*background: url(/dist/Images/Icons/due_days_point.png) 6px center no-repeat;
+    float: left;
+    width: 25px;
+    height: 25px;
+    margin-top: 2px;
+    background-size: 19px;
+    background-position: left top;*/
+}
+.endDate-field {
+    display: flex;
+    align-items: end;
+    width: 100%;
+}
+.roundEndDate {
+    width: calc(100% - 223px);
+}
+.vertical-mode {
+    writing-mode: vertical-rl;
+    word-break: keep-all;
+    max-height: 100px;
+    overflow: hidden;
+    transform: rotate(180deg);
+    display: block;
+    font-size: 13px;
+}
+.table-responsive.round-steptable {
+    max-height: 460px;
+    border: 1px solid #ddd;
+}
+.round-steptable tbody tr td:first-child, .round-steptable thead tr th:first-child {
+    min-width: 180px;
+    position: sticky;
+    left: -2px;
+    background-color: #fbfbfb;
+    z-index: 99;
+    text-align: left;
+}
+.list-firedrillfiles {
+    margin-top: 15px;
+}
+.list-firedrillfiles .firedrillfilediv,
+.Critiquefiredrillfilediv,
+.Educationfiredrillfilediv {
+    display: flex;
+    align-items: flex-start;
+    border: 1px solid #ddd;
+    margin: 0 15px;
+    padding: 4px;
+}
+.list-Actions .actiondiv {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.action-col1 {
+    width: 48%;
+    margin-right: 8px;
+}
+.action-col2 {
+    width: 4%;
+    text-align: center;
+}
+.list-firedrillfiles .imgSignName {
+    margin: 0;
+}
+.col-lg-6.interVendorBox {
+    padding-left: 0;
+    padding-bottom: 8px;
+    margin-bottom: -36px;
+    z-index: 99;
+}
+.floorAssetsBtn .button1 {
+    margin-bottom: 4px !important;
+    display: inline-block;
+}
+
+/* **************** CRx COMMON All Pages CSS END HERE ***************************** */
+
+/* **************** CRx EP REVIEW IN PROGRESS CSS START HERE ***************************** */
+.epreview-scrollBar {
+    height: 100%;
+    max-height: 500px;
+    overflow-x: auto;
+}
+
+.epreviewDashboard-row {
+    display: flex;
+    border-bottom: 1px solid #e2e2e2;
+}
+
+.viewDash-col1 {
+    width: 140px;
+    padding: 6px 2px;
+}
+
+.viewDash-col2 {
+    width: calc(100% - 140px);
+    padding-left: 15px;
+    padding: 3px 0 3px 10px;
+    display: flex;
+    align-items: baseline;
+}
+
+.viewDash-col2 h4 {
+    width: 140px;
+    font-size: 12px;
+    margin: 0 0 0px 0;
+    line-height: 15px;
+}
+
+.viewDash-col2 h4 span {
+    display: block;
+}
+
+.viewDash-col2 p {
+    margin: 0;
+    padding-left: 10px;
+    width: calc(100% - 140px);
+}
+
+td.userrecord-icons img {
+    max-width: 20px;
+    margin-right: 9px;
+}
+
+.userrecord-icons a {
+    color: #333;
+}
+.roundSelects {
+    margin-bottom: 8px;
+}
+.round-groupname.current {
+    border: 1px solid #838383 !important;
+}
+.round-groupname.current .buildingGroupBy {
+    background-color: #dcdcdc;
+}
+.expiredPassword {
+    text-align:center;
+    padding: 0 195px;
+    margin-bottom: 25px;
+    line-height: 22px;
+}
+.blockuserlist {
+    display: flex;
+    flex-wrap: wrap;
+}
+.blockuserlist li {
+    display: flex;
+    border: 1px solid #eaeaea;
+    width: calc(33.33% - 8px);
+    padding: 6px 15px;
+    margin: 4px;
+}
+.blockuserlist li div {
+    padding-left: 15px;
+}
+.blockuserlist li h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* **************** CRx EP REVIEW IN PROGRESS CSS End HERE ***************************** */
+
+
+/* **************** CRx COMMON CSS START HERE ***************************** */
+@font-face {
+    font-family: 'Glyphicons Halflings';
+    src: url('../dist/fonts/glyphicons-halflings-regular.eot');
+    src: url('../dist/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../dist/fonts/glyphicons-halflings-regular.woff') format('woff'), url('../dist/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../dist/fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+}
+@font-face {
+    font-family: 'Glyphicons Halflings';
+    src: url('../fonts/glyphicons-halflings-regular.eot');
+    src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+}
+/*@font-face {
+    font-family: 'MyWebFont';
+    src: url('../fonts/signature/WebFont.eot');
+    src: url('../fonts/signature/WebFont.eot?#iefix') format('embedded-opentype'), url('../fonts/signature/WebFont.woff') format('woff'), url('../fonts/signature/WebFont.ttf') format('truetype'), url('../fonts/signature/WebFont.svg#webfont') format('svg');
+}
+@font-face {
+    font-family: 'black_jackregular';
+    src: url('../fonts/signature/blackjack-webfont.woff') format('woff');
+}
+@font-face {
+    font-family: 'christopherhandregular';
+    src: url('../fonts/signature/comesinhandy-webfont.woff') format('woff'), url('../fonts/signature/comesinhandy-webfont.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'little_daysregular';
+    src: url('../fonts/signature/little_days-webfont.woff') format('woff');
+}*/
+.ddlproject {
+    position: absolute;
+    bottom: 26%;
+    right: 24px;
+    height: 14px;
+}
+#pageMessages .alert {
+    padding: 6px 15px;
+    position: absolute;
+    z-index: 9999;
+    left: 0;
+    right: 0;
+    margin: 0 15px;
+    top: -30px;
+}
+.button_green {
+    background: #008012;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+}
+h3.roundDefiHeading {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 28px;
+}
+
+.roundDefiHeading span {
+    display: block;
+    font-size: 14px;
+    padding-top: 4px;
+    font-weight: 600;
+}
+.folder-crumb.folderName {
+    cursor: pointer;
+}
+.foldercrumbs {
+    width: 100%;
+    height: 22px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+    .foldercrumbs a.binderMenu {
+        cursor: pointer;
+    }
+.folder-crumb, .folder-crumb-separator, .foldertree-label, .foldercontent-label {
+    padding: 0 2px;
+}
+.foldercontent-item, .folder-crumb {
+    line-height: 18px;
+    height: 18px;
+    font-weight: 600;
+    display: inline-block;
+    vertical-align: top;
+    font-family: Verdana, sans-serif;
+    font-size: 11px;
+}
+.folder-crumb-separator {
+    background: url("/dist/Images/Icons/arrow-right-small.png") no-repeat center center;
+    display: inline-block;
+    height: 20px;
+    width: 18px;
+}
+i.fa.fa-sign-out {
+    margin-right: 8px;
+}
+.excludebtn {
+    margin-top: 6px;
+}
+.bs-actionsbox {
+    overflow: auto;
+}
+.ui-widget.ui-widget-content {
+    z-index: 99999 !important;
+}
+.makeRecurring-6 {
+    margin-bottom: 4px;
+}
+.attachfileitems .files,
+.attachdrawingfiles .files {
+    width: calc(50% - 4px);
+    float: left;
+    margin-left: 4px;
+    position: relative;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding-right: 44px;
+}
+.deletefile.allowclick,
+.deletedrawing.allowclick {
+    position: absolute;
+    right: 8px;
+    top: 22%;
+    cursor:pointer;
+}
+.positionsign {
+    position: relative;
+}
+.deleteSignaturepermit {
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    cursor: pointer;
+}
+ul.col-lg-12.attachdrawingfiles,
+ul.col-lg-12.attachfileitems {
+    padding-right: 0;
+}
+.allcompliantFailSteps {
+    background: url(/dist/Images/Icons/mark_all_compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+.inspe-toggle-btn input[type="checkbox"] {
+    width: 100%;
+    height: 100%;
+}
+.rbn_container .tab-pane.active {
+    background-image: none;
+}
+.epdocName-elipsNo {
+    word-break: break-word;
+}
+.signaturebtnBox {
+    display: flex;
+    width: 100%;
+    align-items: end;
+    justify-content: space-between;
+    margin-top: 15px;
+    border-top: 1px solid #eaeaea;
+    padding-top: 10px;
+}
+
+div#newResult {
+    padding: 2px;
+}
+
+.signature input[type="text"] {
+    font-size: 50px;
+    border: 1px solid rgb(238, 238, 238);
+    padding: 26px 60px;
+    height: 114px;
+    text-align: center;
+    color: #000;
+    background: url(dist/Images/Icons/Sign_icon.png) no-repeat 0 0;
+}
+
+/*.table-responsive {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 0px;
+}*/
+
+.table {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+#body {
+    min-height: calc(100% - 115px);
+    background-color: #f5f5f5;
+}
+
+.box.box-primary {
+    border-radius: 4px;
+    padding: 12px 10px 15px 10px;
+    position: relative;
+    height: 100%;
+    min-height: 380px;
+    border-top-color: #3c8dbc;
+}
+
+.box {
+    position: relative;
+    border-radius: 3px;
+    background: #ffffff;
+    border-top: 3px solid #d2d6de;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.crxbraecrum-row {
+    background-color: #f5f5f5;
+    padding-top: 6px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.toggle-btn input.cb-value {
+    width: 100%;
+    height: 100%;
+}
+.tablelist-topform {
+    position:relative;
+    margin: 0 -10px;
+    padding: 0px 0px 10px;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 4px #dadada;
+}
+
+.dataTables_filter label {
+    margin-bottom: 0;
+}
+
+label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.attachedfile-lable {
+    min-width: 130px;
+}
+
+em.required-field {
+    color: red;
+    /*font-size: 14px;*/
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+td.dataTables_empty {
+    text-align: center;
+}
+
+.ui-datepicker-trigger {
+    display: none;
+}
+
+.datepicker,
+.hasDatepicker {
+    background-image: url(/dist/Images/Icons/calendar.gif);
+    background-repeat: no-repeat;
+    background-position: right 4px top 50%;
+    background-size: 16px 15px;
+    cursor: pointer;
+}
+
+.content-header > h1 {
+    background-color: #f5f5f5;
+    padding-right: 10px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: bold;
+    color: #3a7da4;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-family: 'Source Sans Pro',sans-serif;
+}
+
+.content-header {
+    position: relative;
+    padding: 0;
+    height: 28px;
+    display: flex !important;
+    display: -webkit-box;
+    align-items: center;
+    -webkit-box-align: center;
+}
+
+.button1,
+.button3{
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: none;
+    line-height: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.dash-tabMenu .button1.active {
+    background-image: linear-gradient( 45deg, #8dbc3f, #76a22d);
+}
+
+.breadcrumb {
+    background: none;
+    margin-bottom: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 12px;
+    float: right;
+    position: relative;
+    z-index: 1;
+}
+
+    .breadcrumb > li + li:before {
+        content: none;
+    }
+
+.breadcrumb {
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.binder-RightHeading .breadcrumb li {
+    cursor: pointer !important;
+}
+
+.contentArea-box {
+    background-color: #f5f5f5;
+}
+.bootstrap-select .dropdown-toggle:focus, .bootstrap-select > select.mobile-device:focus + .dropdown-toggle {
+    outline: 0px auto -webkit-focus-ring-color !important;
+}
+
+.btn-default.active, .btn-default:active, .btn-default:focus, .btn-default:hover, .open .dropdown-toggle.btn-default {
+    background-color: #fff;
+}
+.comm-button {
+    cursor: pointer;
+    min-width: 100px;
+    background-color: green;
+    color: #fff !important;
+    border: 1px solid #015a01;
+    display: inline-block;
+    text-align: center;
+    height: 31px;
+    text-transform: uppercase;
+    line-height: 30px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.comm-Cancelbutton {
+    cursor: pointer;
+    min-width: 100px;
+    background-color: red;
+    color: #fff !important;
+    border: 1px solid #c70000;
+    display: inline-block;
+    text-align: center;
+    height: 31px;
+    text-transform: uppercase;
+    line-height: 30px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.assetstypebtn a {
+    cursor: pointer;
+    min-width: 100px;
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff !important;
+    border: 1px solid #2a79a7;
+    display: inline-block;
+    text-align: center;
+    height: 31px;
+    text-transform: uppercase;
+    line-height: 30px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.comm-button:hover {
+    color: #fff;
+    box-shadow: 0px 2px 5px #015a01;
+    background-color: #015a01;
+    border: 1px solid #015a01;
+}
+
+.comm-Cancelbutton:hover {
+    color: #fff;
+    box-shadow: 0px 2px 5px #c70000;
+    background-color: #c70000;
+    border: 1px solid #c70000;
+}
+.inbox_file {
+    background-image: url(/dist/Images/Icons/document_blue-icon.png);
+    height: 19px;
+    width: 15px;
+    background-repeat: no-repeat;
+}
+.policy_file {
+    background-image: url(/dist/Images/Icons/policy_doc_icon.png);
+    height: 24px;
+    width: 24px;
+    background-repeat: no-repeat;
+}
+.report_file {
+    background-image: url(/dist/Images/Icons/report_doc_icon.png);
+    height: 24px;
+    width: 24px;
+    background-repeat: no-repeat;
+}
+.miscdocs_file {
+    background-image: url(/dist/Images/Icons/misc_doc_icon.png);
+    height: 24px;
+    width: 24px;
+    background-repeat: no-repeat;
+}
+.sampledocs_file {
+    background-image: url(/dist/Images/Icons/sample_doc_icon.png);
+    height: 24px;
+    width: 24px;
+    background-repeat: no-repeat;
+}
+.isUsedinbox_file {
+    background-image: url(/dist/Images/Icons/doc_reject_icon.png);
+    height: 25px;
+    width: 15px;
+    background-repeat: no-repeat;
+}
+.dinIons {
+    width: 16px;
+    margin: 2px;
+}
+
+a#btnCompliancebylocation {
+    margin-bottom: 10px;
+    margin-top: -10px;
+    margin-right: -15px;
+}
+.breadcrumb-arrow li + li:before {
+    padding: 0 !important;
+    content: "" !important;
+}
+.details.shareQuestr td {
+    word-break: break-all;
+}
+.comm-button, .comm-bluebutton, .comm-Cancelbutton {
+    margin-bottom: 5px;
+}
+/* **************** CRx COMMON CSS END HERE ***************************** */
+/* **************** CRx Pre-Construction Risk Assessment [PCRA]  CSS START HERE ***************************** */
+.rastep {
+    background: #f5f5f5 !important;
+    color: #404040 !important;
+    border-bottom: 2px solid #fff !important;
+}
+.picra-row {
+    display: flex;
+}
+.picra-listitem {
+    width: 32px;
+}
+.picra-listContent {
+    width: calc(100% - 32px);
+}
+
+.input-group {
+    width: 100%;
+}
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    background-color: #f7f7f7;
+}
+
+/* **************** CRx Pre-Construction Risk Assessment [PCRA]  CSS END HERE ***************************** */
+
+/* **************** CRx Vendor  CSS START HERE ***************************** */
+.verndorBanner-caption li {
+    display: flex;
+    background-color: #d9edf6;
+    align-items: center;
+    height: 32px;
+    border-radius: 20px 0 0 20px;
+    margin-bottom: 8px;
+}
+.verndorBanner-caption {
+    padding-left: 18px;
+    margin: 0;
+    padding: 0;
+}
+.permitlist-btn {
+    display: flex;
+}
+.vendor-listBtn {
+    background-image: linear-gradient(45deg, #3c8dbc, #387598);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: none;
+    line-height: 14px;
+    min-width: 68px;
+    margin: 0 2px;
+    text-align: center;
+    white-space: nowrap;
+}
+.crxhomeul.verndorBanner-caption {
+    height: initial;
+    padding-left: 0;
+}
+.vendor-captionsBox h4 {
+    font-size: 14px;
+    color: #000000;
+    font-weight: 600;
+}
+.vendor-captionsBox h4:first-child {
+    color: #1F7CB1;
+}
+.vendor-banner {
+    width: 100%;
+}
+.vendor-banner img {
+    width: 100%;
+    height: 387px;
+    border-radius: 10px;
+}
+.verndor-dashboard-table h4 {
+    font-size: 14px;
+    color: #000000;
+}
+.verndor-dashboard-table .table > thead > tr > th {
+    border: none;
+    color: #9E9E9E;
+    font-weight: 400;
+}
+.verndor-dashboard-table .table > tbody > tr > td {
+    border: none;
+}
+.contacts-editBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 95px;
+}
+.contacts-editBox h5 {
+    font-size: 15px;
+    color: #1F7CB1;
+    font-weight: 600;
+}
+.faciliMaintance {
+    font-size: 16px;
+    font-weight: 600;
+}
+.conEdit {
+    background-color: #1F7CB1;
+    color: #fff;
+    width: 50px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+}
+.verndor-addedit-remove a {
+    width: 22px;
+    height: 22px;
+    background-color: green;
+    display: inline-block;
+    color: #fff;
+    text-align: center;
+    border-radius: 50%;
+    line-height: 21px;
+    margin: 0 6px;
+}
+.verndor-addedit-remove .vendor-edit {
+    background-color: #1F7CB1;
+    color: #fff;
+    width: 43px;
+    height: 22px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+.verndor-addedit-remove .vendor-remove {
+    background-color: #ff4444;
+}
+.vendorpopup-dialog {
+    width: 1055px;
+}
+.verndor-addedit-remove {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.vendorpopup-dialog .verndor-dashboard-table h4 {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px;
+}
+.vendorpopup-dialog .faciliMaintance {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px;
+}
+.vendorpopup-dialog .modal-content {
+    border-radius: 10px;
+}
+.vendorpopup-header {
+    background-color: #EEEEEE;
+    height: 44px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+}
+.vendorpopup-dialog .modal-body {
+    padding: 0;
+    margin: 0;
+}
+.modal-body,
+.modal-footer {
+    background-color: #fff;
+    clear: both;
+}
+.vendorpopup-dialog .verndor-dashboard-table {
+    padding-left: 28px;
+}
+.verndor-popupBox {
+    padding: 18px 22px 18px 44px;
+}
+.vendor-btnBox {
+    text-align: center;
+    padding: 28px;
+}
+.verndor-border {
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+    padding-top: 8px;
+}
+.vendor_view .slider {
+    padding: 12px;
+}
+.ep_history_list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+.popup_content_fix {
+    height: 400px;
+    overflow-y: scroll;
+}
+
+.asset_list_popup ul {
+    margin: 0;
+    text-align: center;
+}
+.asset_list_popup ul li {
+    display: inline-block;
+    text-align: left;
+    width: 32%;
+    float: left;
+}
+.SerialNobar #btnbarcode {
+    position: absolute;
+    top: 7px;
+    right: 30px;
+}
+.SerialNobar {
+    position: relative;
+}
+.barcodeiconbox {
+    width: 70px;
+    display: flex;
+    justify-content: flex-end;
+}
+.barcodeiconbox a img {
+    width: 32px;
+    padding: 0 4px;
+}
+.ui-front .ui-menu-item-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.ui-front {
+    max-height: 320px;
+    overflow: auto;
+    max-width: 583px;
+}
+.modal-downloadpdf-header .close {
+    background-color: #ddd;
+    display: block;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 1;
+    opacity: 1;
+    border-radius: 50%;
+    text-shadow: none;
+}
+/* **************** CRx Vendor  CSS END HERE ***************************** */
+
+
+/* **************** CRx add floor  CSS START HERE ***************************** */
+td.td_btn_complaint {
+    position: relative;
+}
+.addfloor-items:nth-child(even) {
+    background: #f7f7f7;
+}
+.addfloor-items {
+    padding: 8px;
+    overflow: auto;
+}
+.floor_uploadicon.upload_file {
+    margin-top: 0;
+    float: left;
+}
+.upload_file {
+    padding: 0;
+    background: url(/dist/Images/Icons/upload_icon2.png) center center no-repeat;
+    width: 36px;
+    margin-top: -33px;
+    float: right;
+}
+.upload_file input[type="file"] {
+    opacity: 0;
+    width: 100%;
+    height: 33px;
+}
+.upload_file input[type=file] {
+    display: block;
+}
+
+
+/* **************** CRx add floor  CSS END HERE ***************************** */
+
+/* **************** CRx Policies  CSS START HERE ***************************** */
+.gorefersh-btn .button1 {
+    color: #fff;
+    border: #16628e solid 1px;
+    padding: 9px 10px 9px 10px;
+    border-radius: 20px;
+    min-width: 80px;
+    background-image: linear-gradient( 45deg, #3c8dbc, #3c8dbc);
+}
+/* **************** CRx Policies  CSS END HERE ***************************** */
+
+/* **************** CRx Vendor Configuration  CSS START HERE ***************************** */
+.venConView h4 {
+    font-size: 16px;
+    font-weight: 600;
+    /* border-bottom: 1px solid #f5f5f5; */
+    padding-bottom: 6px;
+}
+.confi-itembox ul {
+    overflow: hidden;
+    padding: 0;
+}
+.vendor_view ul li, .assets_view ul li {
+    width: 33.33%;
+    padding: 0 6px;
+}
+.vendor_view ul li, .assets_view ul li {
+    float: left;
+    text-align: left;
+    width: 32%;
+    margin-bottom: 6px;
+}
+.comman_checkbox1 input[type="checkbox"] + span {
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    margin: -1px 4px 0 0;
+    vertical-align: middle;
+    background: url(/dist/Images/Icons//unchecked_box.png) 0 0 no-repeat;
+    cursor: pointer;
+}
+
+.comman_checkbox1 .floorRoundtbl.comman_checkbox input[type="checkbox"] + span {
+    margin: 6px 4px 0 0;
+}
+
+.comman_checkbox .box.box-primary {
+    padding: 12px 10px 45px 10px;
+}
+
+.comman_checkbox1 input[type="checkbox"]:checked + span {
+    background: url(/dist/Images/Icons/checked_box.png) 0px 0 no-repeat;
+}
+
+.comman_checkbox1 input[type="checkbox"].disabled + span {
+    opacity: 0.2;
+}
+
+.comman_checkboxStatus input[type="checkbox"]:checked + span {
+    background: url(/dist/Images/Icons/active_status.png) 0px 0 no-repeat;
+}
+.comman_checkboxStatus input[type="checkbox"] + span {
+    display: inline-block;
+    width: 80px;
+    height: 22px;
+    margin: -1px 4px 0 0;
+    vertical-align: middle;
+    background: url(/dist/Images/Icons//inactive_status.png) 0 0 no-repeat;
+    /* cursor: pointer; */
+}
+.comman_checkboxStatus input[type="checkbox"] + span {
+    display: inline-block;
+    width: 80px;
+    height: 22px;
+    margin: -1px 4px 0 0;
+    vertical-align: middle;
+    background: url(/dist/Images/Icons//inactive_status.png) 0 0 no-repeat;
+    /* cursor: pointer; */
+}
+.comman_checkboxStatus input.check-box {
+    opacity: 0;
+    display: none;
+}
+
+
+.msilGoslCol-row {
+    display: flex;
+}
+.msilGoslCol-6 {
+    padding: 15px;
+}
+/* **************** CRx Vendor Configuration  CSS END HERE ***************************** */
+
+/* **************** CRx Setup Assets  CSS start HERE ***************************** */
+.crxtoggle-btn {
+    border: 1px solid #333;
+}
+.crxtoggle-btn .btn {
+    border-radius: 0;
+    color: #333;
+    font-size: 14px;
+    width: 66px !important;
+    text-align: center;
+    padding: 0;
+}
+.crxtoggle-btn .btn:hover {
+    background-color: #ddd;
+    color: #333;
+}
+.crxtoggle-btn .toggleGreenbtn.active,
+.crxtoggle-btn .toggleGreenbtn.active:hover {
+    background-color: green;
+    color: #fff;
+}
+.crxtoggle-btn .toggleRedbtn.active,
+.crxtoggle-btn .toggleRedbtn.active :hover {
+    background-color: red;
+    color: #fff;
+}
+
+
+.asset_list_view h3 {
+    margin-top: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 14px;
+}
+.asset_list_view ul {
+    margin: 0;
+    padding: 6px 0px 4px 0px;
+    list-style: none;
+}
+.asset_list_view ul li {
+    list-style: none;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #333;
+    overflow: hidden;
+    position:relative;
+}
+
+
+/* **************** CRx Setup Assets  CSS END HERE ***************************** */
+
+/* **************** CRx Add User  CSS Start HERE ***************************** */
+.tracking-lenged {
+    width: 100%;
+    box-shadow: 0px 2px 4px #ddd;
+    border: 1px solid #ddd;
+    display: inline-block;
+    min-height: 100px;
+    padding: 24px 0 0;
+    margin-bottom: 10px;
+    position: relative;
+    margin-top: 15px;
+}
+.tracking-lenged h3 {
+    background-color: #fff;
+    display: inline-block;
+    position: absolute;
+    font-size: 14px;
+    font-weight: 600;
+    top: -28px;
+    left: 15px;
+}
+.existing-sign {
+    text-align: center;
+    margin: 0px auto;
+    display: block;
+}
+
+
+
+
+
+
+
+
+
+/* **************** CRx Add User  CSS END HERE ***************************** */
+
+
+/* **************** CRx Drawings  CSS STRAT HERE ***************************** */
+.drawings-list .floorTypeli:first-child {
+    background-color: #f5f5f5;
+    border-color: #81b3d1;
+    padding-left: 0px;
+}
+.drawings-list .floorTypeli {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 15px;
+    border-bottom: 1px solid #ddd;
+}
+.drawings-list .floorTypeli a {
+    width: 100%;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.drawings-checkicon {
+    display: none;
+}
+.active .drawings-checkicon {
+    display: inline-block;
+    padding-right: 4px;
+}
+.floorthumb {
+    width: 32px;
+}
+.floorthumb {
+    border: #ccc solid 1px;
+    padding: 2px;
+}
+
+.epssweetpopup .radio1 {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+}
+.sweet-alert input.radio {
+    display: block !important;
+}
+.epssweetpopup input.radio {
+    width: 20px;
+}
+.epssweetpopup .radio1 label {
+    width: calc(100% - 40px);
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+    padding-left: 15px;
+}
+.epdocSteps-doc {
+    align-items: flex-end;
+    margin: 5px 0;
+    font-size: 14px;
+    display: flex;
+}
+.epdocol1 {
+    width: 18px;
+}
+.gray {
+    color: gray;
+    font-size: 12px;
+    line-height: 17px;
+}
+.epdocol2 {
+    width: calc(100% - 62px);
+}
+.epdocol3 {
+    width: 44px;
+}
+.epfileBox {
+    max-width: 160px;
+    font-weight: 600;
+    padding: 0 15px 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: black;
+}
+.epdocSteps-doc .delete {
+    float: right;
+    font-weight: 600;
+    font-size: 13px;
+}
+.epdocol2 .delete img {
+    max-width: 16px;
+    margin-left: 15px;
+}
+
+/* **************** CRx Drawings  CSS END HERE ***************************** */
+
+
+
+/* **************** CRx ilsm  CSS start HERE ***************************** */
+
+.activity_history li ul li {
+    clear: both;
+    display: inline-block;
+    padding: 6px 6px 6px 10px;
+    width: 100%;
+}
+.activity_history {
+    margin: 8px 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+.addcolms {
+    display: flex;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ccc;
+    padding: 4px;
+}
+.addilsmcol1 {
+    width: 168px;
+    display: flex;
+    align-items: center;
+}
+.addilsmcol2 {
+    display: inherit;
+    width: calc(100% - 168px);
+    float: right;
+    margin-top: -5px;
+}
+.left-boxc {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    overflow: hidden;
+}
+
+.left-boxc .sidebar-heading {
+    margin-top: 4px;
+}
+
+.left-boxc .sidebar-heading {
+    margin-bottom: 0px;
+    width: 100%;
+    background: #e1e1e1;
+    font-weight: 600;
+    padding: 0px 0 0 8px;
+    font-size: 14px;
+    height: 36px;
+    line-height: 34px;
+}
+.left-boxc ul {
+    padding: 2px 0;
+}
+.assetsInspection ul {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
+.sidebar-heading .head-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 73%;
+    float: left;
+}
+.plusicon1 {
+    float: right;
+    cursor: pointer;
+}
+.plusicon1 {
+    border-left: 1px solid #ccc;
+    width: 15%;
+   /* height: 35px;*/
+    text-align: center;
+    font-size: 18px;
+    float: right;
+    display: inline-block;
+}
+.topfileUplod {
+    float: right;
+    width: 30px;
+    margin-bottom: 5px;
+}
+.commentIcon {
+    float: right;
+    position: relative;
+    filter: grayscale(5);
+    cursor: pointer;
+}
+.img_file_upload_C {
+    border-radius: 8px;
+    padding: 0 6px 0px 0px;
+    font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+    color: #7f7f7f;
+    margin-top: 0;
+    background: url(/dist/img/camera_icon.png) 10px 2px no-repeat;
+    width: 40px;
+    float: right;
+    overflow: hidden;
+}
+.img_file_upload_C input[type="file"] {
+    -webkit-appearance: none;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    width: 30px;
+}
+.img_file_upload_D {
+    border-radius: 8px;
+    padding: 0 0px 0px 8px;
+    color: #7f7f7f;
+    margin-top: 0;
+    background: url(/dist/img/upload_icon.png) 10px 2px no-repeat;
+    width: 35px;
+    float: right;
+    overflow: hidden;
+}
+.img_file_upload_D input[type="file"] {
+    -webkit-appearance: none;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    width: 30px;
+}
+.deficiencies_itemBox .deficiencies_header {
+    background-color: #3c8dbc;
+    color: #fff;
+    border-radius: 2px;
+    padding: 4px 6px;
+    margin-left: 6px;
+    font-weight: 400;
+    font-size: 11px;
+    cursor: pointer;
+}
+.deficiencies_itemBox {
+    padding: 6px 2px;
+    margin-top: 15px;
+}
+.deficiencies_itemBox .deficiencies_content {
+    margin-top: 15px;
+}
+
+
+
+
+input.ins_check3_Ins_btn[value="0"] {
+    background: url(/dist/Images/Icons/non_compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    border: none;
+    height: 30px;
+    padding: 8px;
+}
+input.ins_check_btn[value="0"] {
+    background: url(/dist/Images/Icons/not_done.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    border: none;
+    height: 30px;
+    padding: 8px;
+}
+input.ins_check_btn[value="-3"] {
+    background: url(/dist/Images/Icons/not_applicable.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    border: none;
+    height: 30px;
+    padding: 8px;
+}
+input.ins_check_btn[value="1"] {
+    background: url(/dist/Images/Icons/done_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check_btn[value="-1"] {
+    background: url(/dist/Images/Icons/pending_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check3_Ins_btn[value="1"] {
+    background: url(/dist/Images/Icons/compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check3_btn[value="0"] {
+    background: url(/dist/Images/Icons/non_compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    border: none;
+    height: 30px;
+    padding: 8px;
+}
+input.ins_check3_btn[value="1"] {
+    background: url(/dist/Images/Icons/compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check3_Ins_btn[value="-1"] {
+    background: url(/dist/Images/Icons/pending_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check2_btn[value="-1"] {
+    background: url(/dist/Images/Icons/pending_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check2_btn[value="1"] {
+    background: url(/dist/Images/Icons/compliant_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+
+
+
+
+.inspe-toggle-btn {
+    width: 104px;
+    height: 26px;
+    border-radius: 50px;
+    display: inline-block;
+    position: relative;
+    background: url(/dist/Images/Icons/mark_all_compliant_button.png) 0 0 no-repeat;
+    cursor: pointer;
+    -webkit-transition: background-color .40s ease-in-out;
+    -moz-transition: background-color .40s ease-in-out;
+    -o-transition: background-color .40s ease-in-out;
+    transition: background-color .40s ease-in-out;
+    cursor: pointer;
+}
+/*.status_grace_in_days_sysadmin {
+    background: yellow;
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+    margin-left: 5px;
+    border-radius: 50%;
+}*/
+/*.locationlist-scroll .grey {
+    background: gray;
+    width: 15px;
+    height: 14px;
+    margin-left: 6px;
+}*/
+/*.status_grace_in_days_sysadmin {
+    background: yellow;
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+    margin-left: 5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.grey {
+    background: gray;
+    width: 18px;
+    height: 18px;
+    margin-bottom: -4px;
+    margin-left: 5px;
+    display: inline-block;
+}
+.yellow {
+    background: yellow;
+    width: 19px;
+    height: 18px;
+    display: inline-block;
+}*/
+.commentIcon {
+    float: right;
+    position: relative;
+    
+    filter: grayscale(5);
+    cursor: pointer;
+}
+.img_file_upload {
+    border-radius: 8px;
+    padding: 0 6px 0px 8px;
+    color: #7f7f7f;
+    margin-top: 0;
+    background: url(/dist/img/camera_icon.png) 10px 2px no-repeat;
+    width: 40px;
+    float: right;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 9;
+}
+    .img_file_upload input[type="file"] {
+        -webkit-appearance: none;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        width: 30px;
+        z-index: 999;
+    }
+.dropdown-content {
+    position: absolute;
+    z-index: 1;
+}
+.show {
+    display: block;
+}
+.ddlilsm {
+    display: none;
+    left: 10px;
+    top: 36px;
+    min-width: 92px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border-top: 2px solid #777777;
+    border-bottom: 2px solid #777777;
+}
+.dropdown-content a {
+    color: black;
+    text-decoration: none;
+    display: block;
+}
+.ddlilsm a {
+    padding: 4px 6px;
+    border-bottom: 1px solid #dadada;
+    line-height: 10px;
+    font-size: 10px;
+    text-align: center;
+    font-weight: 600;
+}
+ .dropdown-header .text {
+    font-weight: 600;
+    font-size: 13px;
+}
+.ilsmreports_ul li {
+    display: flex;
+    box-shadow: 0px 2px 3px #ddd;
+    padding: 5px 4px 2px 4px;
+}
+.ilsm-left-icon {
+    width: 25px;
+    display: block;
+}
+.ilsm-left-con {
+    width: calc(100% - 25px);
+}
+.ilsmColContainer {
+    display: flex;
+}
+.ilsmColleft-3 {
+    width: 25%;
+    background-color: #fdfdfd;
+    border: 1px solid #ddd;
+}
+.ilsmColright-9 {
+    width: 75%;
+    padding-left: 15px;
+}
+.searchReports {
+    padding: 15px 15px;
+    background-color: #e2e2e2;
+}
+.ilsm-clickArea {
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+}
+.leftilsmdate {
+    font-size: 12px;
+    font-weight: 500;
+}
+.crxSignBox {
+    position:relative
+}
+
+.sitelocationhide ul.list {
+    display: flex;
+    flex-wrap: wrap;
+}
+.sitelocationhide ul.list li {
+    padding: 0 6px 6px;
+}
+a.stopunload {
+    color: #333;
+}
+
+/* **************** CRx ilsm  CSS END HERE ***************************** */
+
+/* **************** CRx Upload Inspection  CSS START HERE ***************************** */
+.row.floorsPlan-head {
+    background-color: #f5f5f5;
+}
+.BuildingsLengedBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.siteshide {
+    background: #3b87b3;
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    padding: 6px;
+    transform: rotate( 90deg);
+    cursor: pointer;
+}
+.rbn_container {
+    clear: both;
+    width: 100%;
+}
+.comman_checkbox1 #exTab1.container {
+    width: 100%;
+    padding: 0;
+}
+.rbn_container ul {
+    background: #ddd;
+    min-height: 46px;
+    padding-left: 1px;
+}
+.rbn_container #exTab1 .nav-pills > li {
+    cursor: pointer;
+}
+.rbn_container #exTab1 .nav-pills > li > a {
+    display: flex;
+    cursor: pointer;
+}
+#exTab1 .nav-pills > li > a {
+    border-radius: 0;
+    padding: 6px 8px;
+    border-right: 1px solid #cac9c9;
+    width: 100%;
+    cursor: pointer;
+}
+.rbn_container input[type=checkbox], .rbn_container input[type=radio] {
+    margin: 3px 2px 0;
+    z-index: 1;
+}
+.rbn_container #exTab1 .nav-pills > li > a label {
+    text-align: center;
+    z-index: 2;
+    width: 100%;
+    margin-left: -28px;
+    padding-left: 35px;
+    cursor: pointer;
+}
+
+/* **************** CRx Upload Inspection  CSS END HERE ***************************** */
+
+
+/* **************** CRx Permit Workflow  CSS START HERE ***************************** */
+.formIcons {
+    border: 1px solid #dadada;
+    padding: 0px 10px;
+    cursor: pointer;
+    margin-top: 0px;
+    display: inline-block;
+    height: 34px;
+    line-height: 31px;
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+}
+.formIcons.active {
+    border: 1px solid green !important;
+}
+.formIcons img {
+    width: 24px;
+}
+
+.notification-ulitems {
+    margin-left: 34px;
+}
+.notfi-menuSubmenulist li {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 0 12px 8px;
+    border-radius: 6px;
+}
+
+.noti-menuicon .tomailBox ul li {
+    border: none;
+}
+
+.notfi-menuSubmenulist li ul li {
+    border-radius: 0;
+    padding: 6px 4px;
+    margin-bottom: 0;
+}
+
+.notfi-menuSubmenulist li .notification-ulitems {
+    display: none;
+    cursor: auto !important;
+}
+
+.notfi-emailBox {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    padding-top: 6px;
+    margin-top: 32px;
+    position: relative;
+}
+
+.notification-ulitems:first-child {
+    border-top: 1px solid #e8e8e8;
+}
+
+.notfi-menuSubmenulist li.active .notification-ulitems {
+    display: block;
+}
+
+.addnotificationEmails li.mainlistemails {
+    width: 100%;
+}
+
+.notification-tabs span {
+    font-size: 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #ebebeb;
+}
+
+.notification-tabs {
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.mainlistemails.notfi-emailBox .innernotification li,
+.notification-ulitems.notfi-emailBox ul li {
+    margin-bottom: 8px;
+}
+
+.notification-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tomail-bg {
+    border-bottom-color: #3c8dbc !important;
+}
+
+.ccmail-bg {
+    border-bottom-color: #8dbc3f !important;
+}
+
+.defaultmail-bg {
+    border-bottom-color: #298d68 !important;
+}
+
+li.toemails.tomail-bg,
+li.ccemails.ccmail-bg,
+li.toemails.defaultmail-bg {
+    border: 2px solid #ddd;
+}
+
+.mailcate-btn {
+    position: absolute !important;
+    top: -20px;
+    background-color: #fff;
+}
+
+.toccmailBox span {
+    border: 2px solid #ddd;
+    min-width: 110px;
+    text-align: center;
+    border-radius: 4px;
+    margin-right: 16px;
+    display: inline-block !important;
+    float: left;
+    padding: 4px 15px !important;
+}
+
+.notification-tabs span {
+    border: 2px solid #ddd;
+    min-width: 110px;
+    text-align: center;
+    border-radius: 4px;
+    margin-right: 16px;
+    display: inline-block !important;
+    float: left;
+    padding: 4px 15px !important;
+}
+
+.notification-menubox ul {
+    padding: 0;
+}
+
+.notification-ulitems ul {
+    width: 100%;
+    overflow: hidden;
+    display: block;
+}
+
+.notification-tomails {
+    list-style-type: circle;
+    max-height: 43px;
+    position: relative;
+    overflow: hidden;
+}
+
+.tomailBox .tomailitems {
+    cursor: pointer;
+    background-image: linear-gradient(45deg, #3c8dbc, #387598);
+    color: #fff;
+    text-align: center;
+    height: 24px;
+    line-height: 24px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 8px;
+    margin-right: 44px;
+}
+
+    .tomailBox .tomailitems:hover {
+        background: #8dbc3f;
+    }
+
+.tomail-active {
+    max-height: initial;
+}
+
+.notification-tomails.tomail-active {
+    margin-bottom: 24px;
+}
+
+.notification-tomails li {
+    padding: 0px 6px !important;
+}
+
+.noti-icon-details {
+    width: calc(100% - 468px);
+    justify-content: left;
+}
+
+.noti-menuicon span:nth-child(2) {
+    width: 440px;
+    justify-content: space-between;
+}
+
+.noti-menuicon span:nth-child(3) {
+    width: 28px;
+    padding-top: 12px;
+}
+
+.addquestionoption {
+    display: flex;
+}
+
+    .addquestionoption .comman_checkbox {
+        margin-right: 15px;
+    }
+
+.notfi-menuSubmenulist li span {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0 0;
+    position: relative;
+}
+
+.tomailBox .notification-tomails {
+    width: 100%;
+}
+
+    .tomailBox .notification-tomails li {
+        width: 100%;
+        text-align: right;
+    }
+
+.notfi-menuSubmenulist li.active .notification-tomails {
+    display: none;
+}
+
+.notfi-menuSubmenulist .notification-icon {
+    margin-right: 6px;
+    display: inline-table;
+    font-size: 28px;
+    background: url(https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png) no-repeat center center;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+}
+
+.notfi-menuSubmenulist li.active .notification-icon {
+    background: url(https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png) no-repeat center center;
+}
+
+.notfi-menuSubmenulist li ul li span {
+    justify-content: flex-start;
+}
+
+.notfi-menuSubmenulist li span h4 span {
+    font-size: 15px;
+    font-weight: 600;
+    padding-top: 3px;
+    width: 100% !important;
+}
+
+.notfi-menuSubmenulist li h4 {
+    font-size: 16px;
+    font-weight: 600;
+    width: calc(100% - 28px);
+    margin: 0;
+}
+
+.innerBoxNoti {
+    margin-left: 23px;
+    width: calc(100% - 13px) !important;
+}
+
+    .innerBoxNoti .addnotificationEmails .notfi-emailBox {
+        border-radius: 4px !important;
+    }
+
+.noti-subtitle {
+    font-weight: 500 !important;
+}
+
+.notification-ulitems li {
+    display: inline-block;
+    float: left;
+    margin-right: 6px;
+    border-radius: 20px !important;
+    padding: 4px 10px !important;
+}
+
+.notification-ulitems {
+    width: calc(100% - 34px);
+    padding: 10px;
+    clear: both;
+    position: relative;
+}
+
+.notification-footer {
+    border-top: 1px solid #f5f5f5;
+    padding-left: 34px !important;
+}
+
+    .notification-footer .notification-ulitems {
+        padding-left: 0px !important;
+    }
+
+
+
+
+
+.allpermit-action {
+    display: flex;
+}
+
+.mopmoredot {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.dot-icons {
+    position: relative;
+    background: #e8e8e8;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    margin: 0px auto;
+    line-height: 0;
+    width: 24px;
+    height: 27px;
+    border: 2px solid #3c8dbc;
+}
+.icratable-drop .dropdown-menu {
+    right: 0px;
+    left: auto;
+    border: 2px solid #d2d2d2;
+    background: #eee;
+    padding: 0;
+    max-height: 290px;
+    overflow-y: auto;
+}
+.icratable-drop .dropdown-menu li:last-child {
+    border-bottom: none;
+}
+.icratable-drop .dropdown-menu li {
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+.dropdown-menu li {
+    float: inherit;
+    padding: inherit;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
+}
+.dropdown-menu li:last-child a {
+    border: none;
+}
+.icratable-drop .dropdown-menu li a {
+    padding: 4px 6px;
+}
+.dropdown-menu li a {
+    padding: 4px 20px;
+    border-bottom: #eee solid 1px;
+    color: #333;
+    display: block;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    font-size: 12px;
+}
+.mopmoredot .icratable-drop.icondpwnload .fa-ellipsis-v {
+    bottom: -6px;
+    left: 0;
+    right: 0;
+}
+button.btn.dropdown-toggle {
+    position: relative;
+}
+.mopmoredot .icratable-drop .fa-ellipsis-v {
+    transform: rotate( 90deg );
+    position: absolute;
+    bottom: -3px;
+    font-size: 10px;
+}
+
+/* **************** CRx Permit Workflow  CSS END HERE ***************************** */
+
+
+/* **************** CRx Fire Drill  CSS START HERE ***************************** */
+.evaluationthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.evaluation-col1 {
+    width: calc(100% - 322px);
+    display: inline-block;
+    float: left;
+}
+.evaluation-col2 {
+    width: 126px;
+    display: inline-block;
+    float: left;
+    position: relative;
+}
+.evaluation-col3 {
+    width: 126px;
+    display: inline-block;
+    float: left;
+}
+.evaluation-col4 {
+    width: 70px;
+    display: inline-block;
+    float: left;
+}
+input.ins_check_btn_yes_no[value="0"] {
+    background: url(/dist/Images/no_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check_btn_yes_no[value="1"] {
+    background: url(/dist/Images/yes_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+.evaluation-row {
+    padding: 4px 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+.evaluation-colFull {
+    display: block;
+    width: 100%;
+    clear: both;
+    padding-top: 4px;
+}
+#signAndSave {
+    z-index: 9999 !important;
+}
+input.ins_check_btn_yes_no[value="1"] {
+    background: url(/dist/Images/yes_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+    input .ins_check_btn_yes_no[value="0"] {
+    background: url(/dist/Images/no_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+
+.firedrill_filter select {
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    padding: 5px;
+}
+.firedrillUpload-btn {
+    margin-top: 15px;
+    text-align: right;
+}
+.printfiredrill {
+    display: inline-block;
+    position: absolute;
+    bottom: 15px;
+    left: 10px;
+}
+.issueandAction {
+    display: block;
+    margin-top: 15px;
+}
+.update_bt {
+    float: right;
+    margin-top: -25px;
+    margin-left:4px;
+}
+.fire-btnBox {
+    margin-bottom: 15px;
+    clear: both;
+    overflow: auto;
+}
+.docpending-btn {
+    cursor: pointer;
+    margin-top: 4px;
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff;
+    border: 1px solid #2a79a7;
+    display: inline-block;
+    text-align: center;
+    text-transform: capitalize;
+    margin-left: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.fgf .table {
+    text-align:center;
+}
+.fgf {
+    padding-top: 15px;
+}
+input.check2_btn[value="0"] {
+    background: url(/dist/Images/Icons/unchecked_box.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 22px;
+    height: 22px;
+    border: none;
+}
+input.check2_btn[value="1"] {
+    background: url(/dist/Images/Icons/checked_box.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 22px;
+    height: 22px;
+    border: none;
+}
+/*.dash_btnfilter .active {
+    background-color: #eae1e2;
+}*/
+
+li.btn_formType:after {
+    content: '\f00c';
+    font-family: FontAwesome;
+    font-weight: normal;
+    font-style: normal;
+    margin: 0px 0px 0px 10px;
+    text-decoration: none;
+    display:none;
+}
+li.btn_formType.active:after {
+    display: block;
+}
+.button1.active {
+    background-color: #ccc;
+    box-shadow: 1px 1px 2px #464646;
+}
+
+/* **************** CRx Fire Drill  CSS END HERE ***************************** */
+/* **************** CRx Adhoc Survey  CSS START HERE ***************************** */
+.asset_list {
+    width: 100%;
+    overflow: hidden;
+    padding: 4px 10px 4px 8px;
+}
+.asset_list label {
+    width: 50%;
+    font-weight: 500;
+    display: inline-block;
+    vertical-align: top;
+    margin-bottom: 0;
+    word-break: break-all;
+}
+.asset_list ul {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    padding: 0 2px 6px;
+    list-style: none;
+}
+.buildingFloors {
+    border-bottom: 1px dashed #dcdcdc;
+    padding-bottom: 6px;
+}
+.box_noplan {
+    background-color: #F7E368;
+    width: 19px;
+    height: 18px;
+    display: inline-block;
+    margin: 0 4px;
+}
+.box_assetsfloor {
+    background-color: #F9baa7;
+    width: 19px;
+    height: 18px;
+    display: inline-block;
+    margin: 0 4px;
+}
+.noplan {
+    background-color: #F7E368;
+}
+.plan {
+    background-color: #F9baa7;
+}
+.fail-color {
+    background: red;
+}
+h4 {
+    font-size: 14px;
+    font-weight: 600;
+}
+.asset_list ul li {
+    margin: 0;
+    width: 26px;
+    height: 20px;
+    border: #333 solid 1px;
+    color: #333;
+    text-align: center;
+    float: left;
+}
+.asset_list ul li a {
+    color: #333;
+    display: block;
+    font-size: 13px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
+/* **************** CRx Adhoc Survey  CSS END HERE ***************************** */
+
+/* **************** CRx EP  CSS START HERE ***************************** */
+.epStepsBox {
+    background-color: #f5f5f5;
+    padding: 4px 10px 0px;
+    box-shadow: inset 0px 0px 4px #cdcdcd;
+    border-radius: 4px;
+}
+.epStepsBox h5 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+.epSteps-listBox {
+    display: flex;
+    align-items: baseline;
+}
+.epStepsCol1 {
+    width: 30px;
+}
+.epStepsCol2 {
+    width: calc(100% - 30px);
+    border-bottom: 1px solid #ddd;
+}
+.epStepsCol2 h4 {
+    font-size:13px;
+    font-weight: 700;
+    margin: 4px 0;
+    line-height: 24px;
+}
+.epStepsCol2 a {
+    float: right;
+}
+.epdoc-heading {
+    width: 20px;
+}
+.listBullet .epSteps-listBox .epStepsCol1 img {
+    max-width: 70%;
+}
+
+
+.ep_heading {
+    width: 100%;
+    background: #e1e1e1;
+    font-weight: 600;
+    padding: 3px 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    min-height: 36px;
+    line-height: 28px;
+}
+.assetsInspection ul {
+    width: 100%;
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
+.ep_heading ul li {
+    position: relative;
+    padding-top: 4px;
+}
+.eplistMenu {
+    width: calc(100% - 26px);
+    line-height: 20px;
+    display: block;
+}
+.eplistBox .ep-headingSearch {
+    top: -4px !important;
+}
+.ep-headingSearch {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: absolute;
+    right: 0;
+    top: -4px;
+    max-width: 90%;
+}
+.ep-headingSearch .form-control {
+    border: 2px solid #bfbfbf;
+    display: none;
+    border-right: none;
+    height: 36px;
+    font-weight: 500;
+}
+.ep-headingSearch .fa-search {
+    height: 36px;
+    background-color: #bfbfbf;
+    min-width: 34px;
+    text-align: center;
+    padding: 10px 0px;
+    cursor: pointer;
+    margin-right: -8px;
+}
+.document-sublist {
+    overflow: hidden;
+}
+.crx-mainscrollBar, .crx-scrollBar {
+    height: 100% !important;
+    max-height: 236px;
+}
+
+.crx-scrollBar {
+    max-height: none !important;
+}
+
+    .epexpandbox .tble_shadow {
+        overflow: auto;
+        box-shadow: 0px 4px 6px #ececec;
+        padding: 12px 6px 6px 6px;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+    }
+.eptoggle-rowbox {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.eppanel-active .ep-panelDescption {
+    display: none;
+}
+.ep-panelDescption {
+    padding-top: 15px;
+    border-top: 1px solid #dedede;
+}
+.eptoptoggleBox h3 {
+    font-size: 16px;
+    margin: 0 0 10px;
+}
+.eptoptoggleBox h3 span {
+    font-weight: 600;
+    font-size: 15px;
+}
+.ep-panellist.eppanel-active .howto-plus {
+    display: block;
+}
+.ep-panellist .howto-plus {
+    display: none;
+}
+.ep-panellist.eppanel-active .howto-minus {
+    display: none;
+}
+.tble_shadow img, .hover_sign, .asset_table img {
+    cursor: pointer;
+}
+.ep-campusList {
+    display: inline-block;
+    padding: 6px 4px;
+}
+.no-bordertop.editor-field {
+    justify-content: space-between;
+}
+.inspectionFlex {
+    display: flex;
+}
+.no-bordertop.editor-field {
+    border-bottom: none;
+}
+
+.editor-field {
+    display: inline-flex;
+}
+
+.editor-field, .epview-row, .inspComment-row {
+    margin-left: 0px;
+   /* width: calc(100% - 24px);*/
+    width:100%;
+    /*padding-left: 10px;*/
+}
+.compliant-Col1 {
+    width: 104px;
+}
+input.ins_check3_btn[value="-1"] {
+    background: url(/dist/Images/Icons/pending_button.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check3_btn[value="-3"] {
+    background: url("/dist/Images/Icons/not_applicable.png") 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    border: none;
+    height: 30px;
+    padding: 8px;
+}
+.compliant-Col2 {
+    width: calc(100% - 404px);
+    padding: 0 15px;
+}
+.compliant-rightCol {
+    display: flex;
+    align-items: center;
+    width: 300px;
+    justify-content: flex-end;
+}
+.compliant-Col4 {
+    width: 216px;
+    padding-right: 10px;
+}
+.compliant-Col6 {
+    display: flex;
+    width: 84px;
+}
+.compliant-Col55 {
+    width: 50px;
+}
+.compliant-Coldate {
+    display: flex;
+    width: calc(100% - 294px);
+    justify-content: end;
+}
+.evaluation-col4 .filledCommentIcon {
+    float: right;
+}
+.compliant-Coldate .dvinputValue, .compliant-Coldate .dvinput {
+    max-width: 46px;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+.compliant-Coldate .dvinputValue label,
+.compliant-Coldate .dvinput label {
+    font-size: 12px;
+}
+.compliant-Col7Date {
+    width: 220px;
+}
+.raScore {
+    float: right;
+    margin-left: 8px;
+}
+
+.ulassets img {
+    float: left;
+    margin-right: 10px;
+    width: 22px;
+}
+.divleft {
+    float: left;
+    width: calc(100% - 33px);
+    width: -webkit-calc(100% - 33px);
+}
+.assetsInspection ul h5 {
+    font-size: 15px;
+    margin-bottom: 0;
+    margin-top: 0;
+    font-weight: 600;
+}
+.assetsInspection ul h5 span {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+}
+.divleft .doc-fileName {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+}
+.assetsInspection ul h5 span {
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+}
+.assetsInspection ul ul h4 {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    padding: 8px;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #f1f1f1;
+    margin: 0;
+}
+.epstatusCol-row {
+    display: flex;
+    justify-content: space-between;
+}
+.multicra ul.multiselect-container.dropdown-menu {
+    max-height: 235px !important;
+    overflow: auto;
+    box-shadow: 0px 6px 8px #505050;
+}
+/* **************** CRx EP Review CSS END HERE ***************************** */
+/* **************** CRx trackingAssets-lenged CSS START HERE ***************************** */
+.trackingAssets-lenged ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    /*padding-top: 22px;*/
+}
+.trackingAssets-lenged ul li span img {
+    width: 20px;
+    margin: 0 6px 0 15px;
+}
+.left-statub {
+    width: 24px;
+    float: left;
+}
+.left-cont-list {
+    width: calc(100% - 24px);
+    float: left;
+}
+
+/* **************** CRx trackingAssets-lenged CSS END HERE ***************************** */
+
+/* **************** CRx profile CSS START HERE ***************************** */
+.user-profilebanner {
+    position: relative;
+    width: 100%;
+    height: 320px;
+}
+.banner-setting, .banner-setting img {
+    max-width: 100%;
+    width: 100%;
+    height: 320px;
+}
+
+.banner-setting {
+    max-height: 320px;
+    overflow: hidden;
+}
+.myprofile_photo {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -95px;
+    left: 8%;
+    border: 8px solid #fff;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 3px 4px #a9a9a9;
+}
+    .myprofile_photo img {
+        width: 100%;
+        height: auto;
+        border-radius: 50%;
+        display: block;
+        text-align: center;
+    }
+.upload_image {
+    display: none;
+    background: rgba(0,0,0,.4);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    color: #FFFFFF;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    vertical-align: middle;
+    width: 100%;
+    text-shadow: 1px 1px 6px #000;
+    justify-content: center;
+    align-items: center;
+}
+.update_banner input[type="file"] {
+    cursor: pointer;
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+}
+.user-detail-box {
+    padding-left: 28%;
+    padding-top: 34px;
+}
+.user-detail-innerbox {
+    padding: 20px 34px 20px 20px;
+    box-shadow: 0px 2px 10px #eaeaea;
+    border-radius: 6px;
+    max-width: 720px;
+}
+.user-detail-box .display-label {
+    margin: 8px 0px;
+}
+.editMode {
+    display: none;
+}
+
+/* **************** CRx profile CSS END HERE ***************************** */
+
+/* **************** CRx change password CSS START HERE ***************************** */
+.generateBox {
+    display: flex !important;
+    display: -webkit-box;
+    justify-content: center;
+    -webkit-box-pack: center;
+    padding: 52px 0;
+}
+.change_password {
+    width: 400px;
+    box-shadow: 0px 3px 10px #ccc;
+    padding: 26px 15px;
+    background: #ffffff;
+    border-radius: 4px;
+}
+.change_password ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.change_password ul li {
+    margin-bottom: 15px;
+}
+.change_password ul li input,
+.change_password .has-feedback .form-control {
+    margin-bottom: 8px;
+    border-radius: 20px;
+    height: 40px;
+}
+.hideShowpass {
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    z-index: 9;
+    padding: 8px;
+    cursor: pointer;
+}
+.changePAssHeading {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 22px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+}
+/* **************** CRx change password CSS END HERE ***************************** */
+/*on/off toggle slider css start here*/
+.onoffswitch {
+    display: inline-block;
+    position: relative;
+    width: 66px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    opacity: 1 !important;
+}
+.onoffswitch-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.onoffswitch-label {
+    display: block;
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 0px;
+    border: 1px solid #f5f5f5;
+    border-radius: 20px;
+}
+.onoffswitch-inner {
+    display: block;
+    width: 200%;
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block;
+    float: left;
+    width: 50%;
+    height: 28px;
+    padding: 0;
+    line-height: 26px;
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "ON";
+    padding-left: 10px;
+    background-color: #1ca51c;
+    color: #FFFFFF;
+    border: 1px solid #1ca51c;
+    border-radius: 20px;
+}
+.onoffswitch-inner:after {
+    content: "OFF";
+    padding-right: 10px;
+    background-color: #EEEEEE;
+    color: #999999;
+    text-align: right;
+    border: 1px solid #8e8e8e;
+    border-radius: 20px;
+}
+.onoffswitch-switch {
+    display: block;
+    width: 12px;
+    margin: 6px 0px;
+    background: #FFFFFF;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 44px;
+    border: 2px solid #999999;
+    border-radius: 20px;
+    transition: all 0.3s ease-in 0s;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 6px;
+}
+.panel-crxMenu .panel-default .panel-heading .panel-title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0px;
+}
+.panel-crxMenu .panel-default .panel-heading .panel-title a {
+    color: #232323;
+    font-size: 15px;
+    font-weight: 600;
+    width: 100%;
+    line-height: 30px;
+}
+.panel-crxMenu .panel-default .panel-heading {
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+.crxMenulist-box {
+    display: flex;
+    flex-wrap: wrap;
+}
+.crxMenulist-item {
+    width: 25%;
+    border-right: 1px solid #ededed;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #ededed;
+}
+.crxMenulist-item:nth-child(4n+4) {
+    border-right: none;
+}
+.crxMenulist-item:nth-last-child(-n+2) {
+    border-bottom: none;
+}
+.panel-crxMenu {
+    margin-top: 12px;
+}
+.panel-crxMenu .panel-default .panel-heading:hover {
+    background-color: #eeeeee;
+}
+.panel-crxMenu .panel-default .panel-heading .panel-title a:hover {
+    color: #0f69ac;
+}
+.trialDesciption {
+    color: #232323;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 30px;
+    white-space: nowrap;
+    padding: 0 25px 0 15px;
+    margin-bottom: 0;
+}
+
+/* on/off toggle slider css end here */
+
+/* **************** CRx Loader CSS START HERE ***************************** */
+.loadingModal {
+    display: none;
+    position: fixed;
+    z-index: 9999999999999;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background: url('/dist/Images/loader.gif'), radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 20%, rgba(255,255,255,0) 153%);
+}
+.loadingModalEPAssignment {
+    display: none;
+    position: fixed;
+    z-index: 9999999999999;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background: url('/dist/Images/loader.gif'), radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 20%, rgba(255,255,255,0) 153%);
+}
+.loadingbox {
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba( 255, 255, 255, .8 ) url('/dist/Images/loader.gif') 50% 50% no-repeat;
+    background-size: 200px;
+    border: 1px solid #eee;
+}
+.loading {
+    overflow: hidden;
+}
+.loading .loadingModal {
+    display: block;
+}
+/* **************** CRx Loader CSS END HERE ***************************** */
+
+/* **************** CRx Fire Extinguisher DashBoard CSS START HERE ***************************** */
+.facili-actions {
+    display: flex;
+}
+ul.route_ep_assets_frequency {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    border: 1px solid #ddd;
+    padding: 4px 4px 0;
+}
+.route_ep_assets_frequency label.btn {
+    display: flex;
+    font-size: 12px;
+    text-align: left;
+}
+label input[type="radio"]:checked ~ i.fa.fa-circle-o {
+    display: none;
+}
+label input[type="radio"] ~ i.fa.fa-circle-o {
+    color: #c8c8c8;
+    display: inline;
+}
+.exitSigns-radio .btn .fa-2x {
+    margin-right: 8px;
+    font-size: 16px;
+}
+div[data-toggle="buttons"] label .fa {
+    font-size: 16px;
+    line-height: 22px;
+}
+label input[type="radio"] ~ i.fa.fa-dot-circle-o {
+    display: none;
+}
+ul.route_ep_assets_frequency input[type=radio] {
+    display: none;
+}
+
+/* **************** CRx Fire Extinguisher DashBoard CSS END HERE ***************************** */
+
+/* **************** CRx Risk Management Dashboard CSS START HERE ***************************** */
+.activity-firstCol {
+    display: flex;
+    align-items: flex-start;
+}
+.activity-firstCol p {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+.activity-firstCol .processType-Sprite {
+    margin-right: 6px;
+}
+.firstRisktd p {
+    -ms-transform: rotate(-90deg);
+    -webkit-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    width: 150px;
+    margin-left: -39px;
+}
+.firstRisktd {
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    width: 78px !important;
+    padding: 0 !important;
+    float: left;
+    padding-top: 115px !important;
+}
+.matrix-row {
+    display: flex;
+    margin-bottom: 34px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #dedede;
+}
+.matrix-col1.saferMatrixbox {
+    width: 50%;
+}
+.matrix-col2.saferMatrixbox {
+    width: 50%;
+    margin-left: 15px;
+}
+.saferMatrixbox {
+    box-shadow: 0px 0px 8px #d6d6d6;
+    padding-top: 15px;
+    background-color: #fff;
+}
+.icon_list ul {
+    padding: 2px 15px;
+    margin-bottom: 0;
+    list-style: none;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.icon_list ul li a {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.ep-analytics {
+    display: none;
+    max-height: 250px;
+    padding-left: 0px;
+    padding-right: 4px;
+    padding-top: 4px;
+    border-bottom: 1px solid #7a7a7a;
+    padding-bottom: 4px;
+    overflow-y: auto;
+    min-height: 250px;
+}
+.analytics-row .col-md-4 {
+    padding-left: 0;
+    padding-right: 0;
+    border-top: 1px solid #7a7a7a;
+    border-left: 1px solid #7a7a7a;
+}
+.non-eps {
+    padding: 10px 0;
+}
+.non-eps a {
+    background-color: #3c8dbc;
+    color: #fff;
+    border-radius: 4px;
+    padding: 4px 16px;
+    margin-left: 15px;
+    font-weight: 400;
+    font-size: 14px;
+    cursor: pointer;
+}
+.ep-analytics ul {
+    margin: 0;
+    padding: 0 15px;
+}
+.ep-analytics ul li a {
+    color: #333;
+}
+.ep-analytics ul li {
+    padding: 2px 0;
+}
+
+.icon_list ul li {
+    text-align: center;
+    margin-bottom: 0px;
+    width: 20%;
+    padding: 12px;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+
+    .icon_list ul li:last-child {
+        margin-right: 0px;
+    }
+
+    .icon_list ul li span {
+        display: block;
+        margin-top: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .icon_list ul li em {
+        font-style: normal;
+        font-size: 18px;
+    }
+.Risk_management td {
+    padding: 5px;
+}
+
+    .Risk_management td a {
+        color: #000;
+    }
+
+.analytics-row h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0px;
+    border-bottom: 1px solid #7a7a7a;
+    padding: 6px 15px;
+}
+
+.analytics-row {
+    display: flex;
+    padding: 0 54px;
+    margin-bottom: 100px;
+}
+
+.Risk_management span {
+    display: block;
+    font-size: 11px;
+}
+
+.EPstate-Insperow {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 10px 0 10px;
+}
+
+    .EPstate-Insperow .card {
+        width: 25%;
+        text-align: center;
+        box-shadow: 0px 2px 2px #ddd;
+        padding: 15px;
+    }
+
+    .EPstate-Insperow .inspQuestionimg {
+        max-width: 56%;
+    }
+
+.analytics-row h3 span {
+    font-size: 15px;
+    font-weight: 700;
+    background: #3c8dbc;
+    display: inline-block;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-left: 15px;
+}
+
+.analytics-row .col-md-4:last-child {
+    border-right: 1px solid #7a7a7a;
+}
+
+.vhighPattern {
+    background-color: rgba(223,0,0,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.vhighWidespread {
+    background-color: rgba(185,0,0,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.vhighIsolated {
+    background-color: rgba(255,0,0,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.highIsolated {
+    background-color: rgba(253,78, 78,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.highPattern {
+    background-color: rgba(247,55,55,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.highWidespread {
+    background-color: rgba(234,5,5,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.mediumPattern {
+    background-color: rgba(245,153, 46,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.mediumWidespread {
+    background-color: rgba(255,140,15,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.lowIsolated {
+    background-color: rgba(249, 244,21,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.lowPattern {
+    background-color: rgba(241,236,13,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.lowWidespread {
+    background-color: rgba(222, 210, 38,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+
+.mediumIsolated {
+    background-color: rgba(248,188, 43,1) !important;
+    -webkit-print-color-adjust: exact;
+}
+.signatureBoxBorder .divpermitworkflow {
+    overflow: auto;
+    padding: 15px 0px 10px;
+    border: 1px solid #ddd;
+    margin: 10px;
+}
+.progressRed{
+    background-color:red !important;
+}
+.progressyellow {
+    background-color: yellow !important;
+}
+.progressorange {
+    background-color: orange !important;
+}
+.progressGreen {
+    background-color: green !important;
+}
+.signatureBoxBorder {
+    overflow: auto;
+}
+
+/* **************** CRx Risk Management Dashboard CSS END HERE ***************************** */
+/* **************** CRx Building & Floors CSS Strat HERE ***************************** */
+.eparrow {
+    font-size: 38px;
+    display: inline-block;
+    float: left;
+    line-height: 29px;
+    margin-left: -166px;
+}
+.dashboard_filter.allEPassign {
+    clear: both;
+    padding-top: 6px;
+}
+.route-assetsleft h4 {
+    margin: 0;
+}
+.asset_list_view ul {
+    margin: 0;
+    padding: 6px 0px 4px 0px;
+    list-style: none;
+}
+    .asset_list_view ul li {
+        list-style: none;
+        font-size: 14px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        color: #333;
+        overflow: hidden;
+    }
+        .asset_list_view ul li ul li {
+            font-size: 14px;
+            color: #333;
+        }
+
+    .asset_list_view ul li {
+        list-style: none;
+        font-size: 14px;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        color: #333;
+        overflow: hidden;
+    }
+.asset_list_view .route-assetsleft ul.list ul {
+    padding: 0px 0px 0px 0px;
+}
+.asset_list_view ul.list ul li {
+    padding: 2px 6px 2px 6px;
+    border-bottom: 1px solid #e4e4e4;
+    display: flex;
+    align-items: center;
+}
+
+.asset_list_view ul li ul li {
+    font-size: 14px;
+    color: #333;
+}
+
+.asset_list_view ul li {
+    list-style: none;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #333;
+    overflow: hidden;
+}
+.asset_list_view ul.list ul li img {
+    margin-right: 6px;
+}
+.asset_list_view ul li a {
+    color: #333;
+}
+
+/* **************** CRx Building & Floors CSS END HERE ***************************** */
+
+/* **************** CRx disabled CSS Start HERE ***************************** */
+.disabled {
+    cursor: default !important;
+    pointer-events: none;
+    opacity: 0.8;
+}
+.disable {
+    opacity: .4;
+    cursor: default !important;
+    pointer-events: none;
+}
+.form-horizontal .form-group {
+    clear: both;
+}
+.form-horizontal {
+    clear: both;
+}
+/* **************** CRx disabled CSS END HERE ***************************** */
+
+
+
+/* **************** CRx TABLE PEGINATION  CSS START HERE ***************************** */
+.dataTables_paginate {
+    border: 1px solid #ccc;
+    padding-top: 0 !important;
+    display: inline-block;
+}
+.paginate_button {
+    color: #333;
+    cursor: pointer;
+    text-align: center;
+    min-width: 28px !important;
+    height: 26px;
+    display: inline-block;
+    padding: 2px 6px !important;
+}
+.dataTables_paginate span .paginate_button {
+    border-left: 1px solid #ccc !important;
+    border-right: 1px solid #ccc !important;
+}
+.tableactions .dataTables_filter,
+.tableactions .dataTables_paginate {
+    margin-right:8px;
+}
+.dataTables_wrapper .dataTables_paginate {
+    color: #333;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #3c8dbc;
+    border: none;
+    color: #fff !important;
+    border-radius: 0px;
+}
+.inboxlistAction {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+table.dataTable tbody tr.selected {
+    background-color: #B0BED9;
+}
+
+
+/* **************** CRx TABLE PEGINATION CSS END HERE ***************************** */
+/* **************** CRx CRx Updates CSS Start HERE ***************************** */
+.lasted-newsBox h1 {
+    font-size: 20px;
+    margin-top: 0;
+    font-weight: 600;
+    color: #333;
+}
+.Certificate_list ul {
+    padding: 0;
+    max-height: 790px;
+}
+.Certificate_list li:last-child {
+    border-bottom: 1px solid #ddd;
+}
+.newsli.liactive {
+    border-top: 1px solid #3c8dbc;
+    background-color: #f6fafd;
+}
+.Certificate_list li {
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 2px;
+    line-height: 19px;
+    /* box-shadow: 0px 2px 6px #f3f3f3; */
+    border-top: 1px solid #ddd;
+    background: #fff;
+}
+.Certificate_list ul li a {
+    word-break: break-word;
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Roboto', sans-serif;
+}
+.newupdateDate {
+    font-size: 12px;
+    font-weight: 500;
+    display: block;
+    margin-top: 4px;
+}
+
+
+
+/* **************** CRx CRx Updates CSS END HERE ***************************** */
+
+
+/* **************** CRx RADIO CSS END HERE ***************************** */
+.float-left {
+    float: left;
+    display: contents;
+}
+.radio_button {
+    float: right;
+}
+.radio_button label.btn span {
+    font-size: 15px;
+    color: #333;
+}
+.radio_button label input[type="radio"] ~ i.fa.fa-circle-o {
+    color: #c8c8c8;
+    display: inline;
+    font-size: 18px;
+}
+.radio_button label input[type="radio"] ~ i.fa.fa-dot-circle-o {
+    display: none;
+}
+.radio_button label input[type="radio"]:checked ~ i.fa.fa-circle-o {
+    display: none;
+}
+.radio_button label input[type="radio"]:checked ~ i.fa.fa-dot-circle-o {
+    color: #7AA3CC;
+    display: inline;
+    font-size: 18px;
+}
+.radio_button label:hover input[type="radio"] ~ i.fa {
+    color: #7AA3CC;
+}
+.radio_button div[data-toggle="buttons"] label.active {
+    color: #7AA3CC;
+}
+.radio_button div[data-toggle="buttons"] label {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 2em;
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: top;
+    cursor: pointer;
+    background-color: none;
+    border-radius: 3px;
+    color: #c8c8c8;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    width: auto;
+}
+.radio_button div[data-toggle="buttons"] label:hover {
+    color: #7AA3CC;
+}
+.radio_button div[data-toggle="buttons"] label:active, div[data-toggle="buttons"] label.active {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.asset_list_view input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+}
+.asset_list_view input[type="checkbox"] + label {
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+.asset_list_view input[type="checkbox"] + span {
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    margin: -1px 4px 0 0;
+    vertical-align: middle;
+    background: url(/dist/img/checkbox.png) 0 0 no-repeat;
+    cursor: pointer;
+}
+.asset_list_view input[type="checkbox"]:checked + span {
+    background: url(/dist/img/checkbox.png) -24px 0 no-repeat;
+}
+label.btn {
+    float: left !important;
+    width: auto !important;
+}
+label.btn span {
+    font-size: 1.5em;
+}
+label input[type="radio"] ~ i.fa.fa-circle-o {
+    color: #c8c8c8;
+    display: inline;
+}
+label input[type="radio"] ~ i.fa.fa-dot-circle-o {
+    display: none;
+}
+label input[type="radio"]:checked ~ i.fa.fa-circle-o {
+    display: none;
+}
+label input[type="radio"]:checked ~ i.fa.fa-dot-circle-o {
+    color: #7AA3CC;
+    display: inline;
+}
+label:hover input[type="radio"] ~ i.fa {
+    color: #7AA3CC;
+}
+label input[type="checkbox"] ~ i.fa.fa-square-o {
+    color: #c8c8c8;
+    display: inline;
+}
+label input[type="checkbox"] ~ i.fa.fa-check-square-o {
+    display: none;
+}
+label input[type="checkbox"]:checked ~ i.fa.fa-square-o {
+    display: none;
+}
+label input[type="checkbox"]:checked ~ i.fa.fa-check-square-o {
+    color: #7AA3CC;
+    display: inline;
+}
+label:hover input[type="checkbox"] ~ i.fa {
+    color: #7AA3CC;
+}
+div[data-toggle="buttons"] label.active {
+    color: #7AA3CC;
+}
+div[data-toggle="buttons"] label {
+    display: inline-block;
+    padding: 0 10px 0 6px;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 22px;
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: top;
+    cursor: pointer;
+    border-radius: 3px;
+    color: #333;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    float: right;
+    margin-bottom: 0;
+}
+div[data-toggle="buttons"] label:hover {
+    color: #7AA3CC;
+}
+div[data-toggle="buttons"] label:active, div[data-toggle="buttons"] label.active {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+div[data-toggle="buttons"] label .fa {
+    font-size: 16px;
+    line-height: 22px;
+}
+
+/* **************** CRx RADIO CSS END HERE ***************************** */
+
+/* **************** CRx DATATABLE CSS START HERE ***************************** */
+table.dataTable thead .sorting {
+    background-image: url("/dist/images/sort_both.png");
+    background-repeat: no-repeat;
+    background-position: right;
+}
+table.dataTable thead .sorting_asc {
+    background-image: url("/dist/images/sort_asc.png");
+    background-repeat: no-repeat;
+    background-position: right;
+}
+table.dataTable thead .sorting_desc {
+    background-image: url("/dist/images/sort_desc.png");
+    background-repeat: no-repeat;
+    background-position: right;
+}
+table.dataTable thead .sorting_asc_disabled {
+    background-image: url("/dist/images/sort_asc_disabled.png");
+    background-repeat: no-repeat;
+    background-position: right;
+}
+table.dataTable thead .sorting_desc_disabled {
+    background-image: url("/dist/images/sort_desc_disabled.png");
+    background-repeat: no-repeat;
+    background-position: right;
+}
+table thead tr th {
+    white-space: nowrap;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: right;
+}
+.buttons-pdf {
+    background: url(/dist/Images/Icons/pdf_icon.png) 0 0 no-repeat !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 20px;
+    height: 22px;
+}
+.buttons-excel {
+    background: url(/dist/Images/Icons/excel_icon.png) 0 0 no-repeat !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 20px;
+    height: 22px;
+}
+.buttons-csv {
+    background: url(/dist/Images/Icons/excel_icon.png) 0 0 no-repeat !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 20px;
+    height: 22px;
+}
+
+.tableactions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.dataTables_filter input[type=search] {
+    border: 1px solid #ddd;
+    height: 28px;
+    font-size: 14px;
+    padding: 0 7px;
+    border-radius: 2px;
+    width: 180px;
+    font-weight: 500;
+}
+/*.table-responsive {
+    display: block;
+    clear: both;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 6px;
+}*/
+.buttons-pdf span, .buttons-excel span, .buttons-csv span {
+    display: none;
+}
+.table thead tr th {
+    font-size: 14px;
+    font-weight: 600;
+    vertical-align: middle;
+    color: #333;
+}
+.table-bordered > tbody > tr > td {
+    font-size: 14px;
+    font-weight: 500;
+}
+.table {
+    margin-bottom: 8px;
+    margin-top: 4px;
+    min-width: 100%;
+}
+.table > tbody > tr > td, 
+.table > tbody > tr > th, 
+.table > tfoot > tr > td, .table > tfoot > tr > th, 
+.table > thead > tr > td, 
+.table > thead > tr > th {
+    padding: 4px;
+}
+table.dataTable tbody td.details-control {
+    background: url(https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png) no-repeat center center;
+    cursor: pointer;
+    min-width: 40px;
+}
+table.dataTable tbody tr.shown td.details-control {
+    background: url(https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png) no-repeat center center;
+    min-width: 40px;
+}
+
+.binderDoc span {
+    word-break: break-all;
+}
+/* **************** CRx DATATABLE CSS END HERE ***************************** */
+a.inspectionsSlider span {
+    cursor: pointer;
+    font-size: 26px;
+}
+a.swaladdClose {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    color: #000;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-weight: 600;
+}
+/* **************** CRx General Settings CSS Start HERE ***************************** */
+.ddlproject:focus {
+    border-color: transparent !important;
+}
+
+.active .profile_setting_left li ul.tree {
+    padding-left: 0px;
+}
+.leftcol-setting.active .profile_setting_left li ul.tree li a {
+    padding-left: 12px !important;
+    background-color: whitesmoke;
+}
+.leftcol-setting.active .more-submenu {
+    right: 0px;
+}
+.profile_setting_left li ul.tree {
+    display: none;
+}
+.profile_setting_left li ul.tree li a {
+    padding-left: 12px !important;
+}
+.leftcol-setting.active .profile_setting_left li a .spritebg {
+    display: block;
+}
+.settingnewBox {
+    display: flex !important;
+    display: -webkit-box;
+    width: 100%;
+    margin-bottom: 15px;
+}
+.leftcol-setting.active {
+    width: 72px;
+}
+.rightcol-setting {
+    width: 100%;
+    padding: 0 0px 0 6px;
+    overflow: hidden;
+}
+.cneterCol-setting {
+    width: 23px;
+    display: flex;
+    position: relative;
+}
+.leftcol-setting.active .profile_setting_left li a span {
+    display: none;
+}
+.leftcol-setting {
+    width: 24%;
+    padding: 0 6px 0 0px;
+}
+.cneterCol-setting p {
+    color: #fff;
+}
+.cneterCol-setting p {
+    display: block;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 23px;
+    height: 23px;
+    padding: 1px 0 0 3px;
+    background-color: #3c8dbc;
+    border-radius: 0 15px 15px 0;
+    position: fixed;
+    top: 50%;
+}
+.arrow-rotate .fa {
+    transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transition: all 0.7s;
+    -webkit-transition: all 0.7s;
+}
+.leftcol-setting.active .profile_setting_left li a img {
+    margin-right: 0px;
+}
+/*.profile-user-menu-img img {
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+}*/
+.profile_setting_left {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: #ddd solid 1px;
+}
+.profile_setting_left li {
+    display: inline-block;
+    clear: both;
+    width: 100%;
+    vertical-align: top;
+}
+.profile_setting_left li a.active, 
+.profile_setting_left li a:hover {
+    background: #eee;
+    min-width: 35px;
+}
+.skin-purple .sidebar a {
+    color: #fff;
+    float: left;
+    width: 100%;
+    border-bottom: 1px solid #323b5a;
+}
+.profile_setting_left li a {
+    border-bottom: #ddd solid 1px !important;
+    padding: 4px 2px !important;
+    color: #333 !important;
+    display: flex !important;
+    display: -webkit-box;
+    align-items: center;
+    -webkit-box-align: center;
+    position: relative;
+}
+.spritebg {
+    background-image: url('/dist/Images/SetupImages/assets_sprite.png');
+    background-repeat: no-repeat;
+    display: inline-block;
+    width: 38px;
+    height: 38px;
+}
+.sprite-generalsettings {
+    background-position: 2px 4px;
+}
+.sprite-rolesmaster {
+    background-position: -50px 4px;
+}
+.sprite-sitemanagement {
+    background-position: -148px -1236px;
+}
+
+.sprite-questionnaire {
+    background-position: 2px -292px;
+}
+.sprite-epconfiguration {
+    background-position: 2px -528px;
+}
+.sprite-notificationsettings {
+    background-position: 2px -883px;
+}
+.sprite-assets {
+    background-position: 2px -999px;
+}
+.sprite-roundsetup {
+    background-position: -48px -1470px;
+}
+.sprite-icra {
+    background-position: 2px -1295px;
+}
+.sprite-pcra {
+    background-position: -201px -940px;
+}
+.sprite-vendorConfiguration {
+    background-position: 0px -1704px;
+}
+.sprite-CRxSettings {
+    background-position: 0px -587px;
+}
+.sprite-routes {
+    background-position: 2px -1176px;
+}
+.sprite-stops {
+    background-position: 2px -1117px;
+}
+.sprite-wings {
+    background-position: 0px -57px;
+}
+.sprite-Site {
+    background-position: -97px -1529px;
+}
+.sprite-FireDrill {
+    background-position: 2px -350px;
+}
+.sprite-plantOps {
+    background-position: 2px -470px;
+}
+.sprite-epFrequency {
+    background-position: 2px -706px;
+}
+.sprite-roundcategory {
+    background-position: 2px -1235px;
+}
+.sprite-roundQuestionnaires {
+    background-position: 2px -410px;
+}
+.sprite-constructiontype {
+    background-position: -48px -56px;
+}
+.sprite-constructionrisk {
+    background-position: -48px -115px;
+}
+.sprite-constructionclass {
+    background-position: -48px -175px;
+}
+.sprite-icrasteps {
+    background-position: -48px -233px;
+}
+.sprite-icramatrix {
+    background-position: -48px -292px;
+}
+.sprite-icrareportscheck {
+    background-position: -48px -351px;
+}
+.sprite-Constructionarea {
+    background-position: 2px -1353px;
+}
+.sprite-tips {
+    background-position: 2px -1529px;
+}
+.sprite-states {
+    background-position: -147px -1176px;
+}
+.sprite-assetstype {
+    background-position: 2px -1648px;
+}
+.sprite-news {
+    background-position: 2px -1589px;
+}
+.sprite-schedules {
+    background-position: 2px -1412px;
+}
+.sprite-ilsmmatrix {
+    background-position: 2px -234px;
+}
+.sprite-riskScoring {
+    background-position: 2px -175px;
+}
+.maintain-assets {
+    background-position: -252px -1647px;
+}
+.conats-assets {
+    background-position: -252px -1707px;
+}
+.trackings-assets {
+    background-position: -252px -1765px;
+}
+.user-profilebanner {
+    position: relative;
+    width: 100%;
+    height: 320px;
+}
+.banner-setting, 
+.banner-setting img {
+    max-width: 100%;
+    width: 100%;
+    height: 320px;
+}
+.banner-setting {
+    max-height: 320px;
+    overflow: hidden;
+}
+
+
+/* **************** CRx General Settings CSS END HERE ***************************** */
+
+/* **************** CRx CHECKBOX CSS START HERE ***************************** */
+.comman_checkbox1 input[type="checkbox"] {
+    position: absolute;
+    opacity: 0 !important;
+    margin: 3px 2px 0;
+    cursor: pointer;
+
+    /*width: 100%;
+    height: 100%;*/
+}
+.comman_checkbox input[type="checkbox"]:checked + input[type="hidden"] + span {
+    background: url(/dist/Images/Icons/checked_box.png) 0px 0 no-repeat;
+}
+.comman_checkbox input[type="checkbox"] + input[type="hidden"] + span {
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    margin: 1px 4px 0 0;
+    vertical-align: middle;
+    background: url(/dist/Images/Icons//unchecked_box.png) 0px 0 no-repeat;
+    cursor: pointer;
+    /*background-size: 22px 22px !important;*/
+    background-repeat: no-repeat;
+}
+.assetsHistory-actions {
+    display: flex;
+    align-items: flex-end;
+}
+.assetsHistory-actions img {
+    max-width: 20px;
+}
+
+
+
+/* **************** CRx CHECKBOX CSS END HERE ***************************** */
+
+
+/* **************** CRx client_logo CSS Start HERE ***************************** */
+.client_logo {
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+    .client_logo li {
+        width: 25%;
+        padding: 15px;
+    }
+.clint_main a {
+    border-radius: 50%;
+    box-shadow: 0 0 3px #ccc;
+    display: inline-block;
+    overflow: hidden;
+    padding: 6% 3%;
+}
+.client_logo li .img {
+    max-width: 100%;
+}
+.clint_main a:hover {
+    box-shadow: 0 0 4px #3c8dbc;
+}
+
+
+/* **************** CRx client_logo CSS END HERE ***************************** */
+
+/* **************** CRx ILSM Binder CSS START HERE ***************************** */
+.monthsBoxbinders {
+    display: block;
+    float: right;
+}
+.binderilsmRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #efefef;
+    margin-bottom: 20px;
+}
+.ilsmbindersrach {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.binderpage-heading {
+    width:100%;
+    padding: 20px 0 10px;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+    .binderpage-heading img {
+        width: 80px;
+        margin-right: 28px;
+        overflow: hidden;
+        height: 80px;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+        font-size: 10px;
+        text-align: center;
+        word-break: break-word;
+        line-height: 15px;
+    }
+.binder-RightHeading {
+    width: calc(100% - 100px);
+}
+    .binder-RightHeading h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 6px;
+    }
+    .binder-RightHeading p {
+        font-size: 14px;
+        color: #3c8dbc;
+    }
+.status-colsBox {
+    display: flex;
+    align-items: baseline;
+    max-width: 260px;
+    margin-bottom: -10px;
+    padding-left: 0;
+}
+    .status-colsBox label {
+        margin-right: 15px;
+        min-width: 50px;
+    }
+/*#YearFilter {
+    margin-bottom: 8px;
+    border: #ddd solid 1px;
+    padding: 5px;
+    position: relative;
+    z-index: 9;
+    min-width: 160px;
+}*/
+
+#btnuploadfile, #btnattachingdrawings {
+    cursor: pointer;
+}
+.inspmodal-btn {
+    cursor: pointer;
+    min-width: 100px;
+   /* width: 15.73%;*/
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff;
+    border: 1px solid #2a79a7;
+    display: inline-block;
+    text-align: center;
+    height: 34px;
+    text-transform: uppercase;
+    line-height: 34px;
+    margin-left: 6px;
+    padding: 0 15px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 500;
+}
+/* **************** CRx ILSM Binder CSS END HERE ***************************** */
+
+
+/* **************** CRx Binders CSS Start HERE ***************************** */
+.documentProgressbar {
+    margin-left: 55px;
+}
+.documentProgressbar .progress {
+    height: 6px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    background-color: #bfbfbf;
+    border-radius: 10px !important;
+}
+.documentProgressbar h3 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: #000;
+}
+.documentProgressbar h3 span {
+    float: right;
+    color: red;
+}
+.progressRow {
+    width: 100%;
+    overflow: auto;
+    position: relative;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 4px #e8e8e8;
+}
+.documentProgressbar .fa {
+    font-size: 18px;
+    color: #333;
+    margin-left: 15px;
+    cursor: pointer;
+}
+.documentProgressbar .fa:hover {
+    color: #0069aa !important;
+}
+
+#freeSpacepopup .modal-dialog {
+    width: 420px !important;
+    margin-top: 15%;
+}
+.storagedetailsBox h4 {
+    margin-bottom: 44px;
+}
+#freeSpacepopup .modal-content {
+    padding: 28px !important;
+}
+.bindertitleIcons {
+    display: flex;
+    align-items: center;
+}
+.ahjFilename {
+    padding-left: 8px;
+    font-size: 14px;
+}
+.binder-tabBox {
+    min-height: 500px;
+    display: flex;
+    height: 100%;
+    padding: 15px 0px 120px;
+}
+.binder-tabBox .binder-9 {
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 0px 0px 6px #00000057;
+    border-radius: 6px;
+    padding-left: 28px;
+    padding-bottom: 15px;
+}
+.binder-tabBox .binder-3 {
+    padding: 0;
+    position: relative;
+    background: #FFEBD9 0% 0% no-repeat padding-box;
+    box-shadow: 0px 0px 6px #00000057;
+    border-radius: 6px;
+    z-index: 9;
+}
+.binder-review {
+    border-radius: 5px;
+    margin-top: 44px;
+    width: 443px;
+    height: 54px;
+    background-color: #fff8be;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+    font-size: 18px;
+    color: #707070;
+}
+.binder-review:after, .binder-review:before {
+    right: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.binder-review:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-right-color: #fff8be;
+    border-width: 16px;
+    margin-top: -15px;
+}
+.binder-review img {
+    margin-right: 18px;
+}
+.more-submenu {
+    position: absolute;
+    right: 9px;
+    top: 12px;
+    font-size: 21px !important;
+    color: #ababab;
+}
+.binder-3 .nav-tabs li ul {
+    display: none;
+}
+.binder-3 .nav-tabs li.active ul {
+    display: block;
+}
+.binder-tabBox .binder-3:after {
+    content: "";
+    background-image: url(/dist/Images/binder-bg.png);
+    position: absolute;
+    width: 28px;
+    height: -webkit-fill-available;
+    right: -15px;
+    top: 0px;
+    bottom: 0px;
+    background-size: contain;
+    background-repeat-y: repeat;
+    z-index: 999;
+}
+.binder-3 .nav-pills > li {
+    width: 100%;
+}
+.binder-3 .nav-tabs > li > a .fa-angle-right {
+    display: none;
+    font-size: 18px;
+}
+.binder-3 .nav-tabs > li.active > a .fa-angle-right,
+.binder-3 .nav-tabs > li > a:focus .fa-angle-right,
+.binder-3 .nav-tabs > li > a:hover .fa-angle-right {
+    display: block;
+}
+.binder-3 .nav-pills > li {
+    border-top: none;
+    border-radius: 0;
+    border-bottom: 1px #dedede dashed;
+    color: #5A5A5A;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    margin-left: 0;
+}
+.binder-3 .nav-pills > li > a {
+    padding-left: 2px;
+    border: none;
+    cursor: pointer;
+}
+.binder-3 .nav-pills > li ul {
+    padding-left: 18px;
+}
+.binder-3 .nav-pills > li ul li:last-child {
+    padding-bottom: 12px;
+}
+.binder-3 .nav > li > a {
+    padding: 8px 12px 8px 6px;
+}
+.binder-leftHead {
+    border-bottom: 3px solid #3c8dbc;
+    border-radius: 4px;
+    margin: 15px 12px 4px 0;
+    padding-left: 8px;
+}
+.fireDrillReoprtform {
+    margin-bottom: 15px;
+}
+.firedrill-heading {
+    padding: 20px 0 10px;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.binder-leftHead li {
+    padding: 0 0 6px 0px;
+}
+.binder-leftHead li a {
+    cursor: pointer;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+}
+.binder-epsNumber {
+    color: #737373;
+    cursor: pointer;
+    width: 173px;
+    height: 33px;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    border: 1px solid #CECECE;
+    border-radius: 3px;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    justify-content: space-between;
+}
+.binder-epsNumber.active,
+.binder-epsNumber:hover,
+.binder-epsNumber:focus {
+    width: 191px;
+    border: 2px solid #3E8BBC;
+    color: #3E8BBC;
+}
+.binder-arrow {
+    color: #fff;
+}
+.binder-epsNumber:hover .binder-arrow {
+    color: #3E8BBC;
+}
+.binder-green {
+    width: 12px;
+    height: 12px;
+    background: green;
+    border-radius: 50%;
+}
+.binder-blue {
+    background-color: #33479E;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.binder-9 thead tr th {
+   /* color: #3E8BBC;*/
+    font-size: 13px;
+    /*border: none;*/
+}
+.binderName.active {
+    color: #3c8dbc !important;
+}
+.binderName.active .fa-angle-right {
+    display: block !important;
+}
+.binder-leftHead li.active a {
+    color: #3c8dbc;
+}
+.epbinder-legand li span {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+.epbinder-legand li span img {
+    width: 16px;
+}
+.epbinder-legand li span.yellow {
+    background-color: yellow;
+    margin-bottom: -5px;
+}
+.epbinder-legand li span.gray {
+    background-color: gray;
+    margin-bottom: -5px;
+}
+.epbinder-legand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 6px 6px;
+}
+.epbinder-legand li {
+    width: 50%;
+    margin-bottom: 4px;
+}
+.EPbinders-row {
+    display: flex;
+}
+.EPbinders-11 {
+    width: calc(100% - 50px);
+}
+.EPbinders-1 {
+    width: 50px;
+    text-align: right;
+    padding-top: 80px;
+}
+.epNumberList {
+    background-color: #d2d2d2;
+    margin-bottom: 2px;
+    text-align: center;
+    padding: 2px;
+    border-radius: 4px 0;
+    margin-right: -16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.epNumberList.active {
+    background-color: #3c88b3;
+    color: #fff;
+}
+.tabbable .nav > li {
+    width: auto !important;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 9;
+}
+    .tabbable .nav > li > a {
+        padding: 2px 10px;
+        line-height: 22px;
+    }
+
+.binder_ep li {
+    width: 20% !important;
+    margin-top: 3px;
+    margin-bottom: 3px !important;
+}
+.documentProgressbar .progress-bar {
+    background-color: green;
+}
+.storageRow {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    justify-content: space-between;
+    padding-left: 4px;
+}
+    .storageRow:last-child {
+        border-top: 2px solid #ddd;
+        padding-top: 12px;
+    }
+/* **************** CRx Binder CSS END HERE ***************************** */
+
+/* **************** CRx All pupop CSS Start HERE ***************************** */
+.modal {
+    padding-left: 0 !important;
+}
+.modal-dialog {
+    width: calc(100% - 30px) !important;
+}
+/* **************** CRx All pupop CSS END HERE ***************************** */
+
+
+
+/* **************** CRx Round Scheduler CSS STRAT HERE ***************************** */
+.editRoundwithadd {
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+.editRoundwithadd a#addrounds {
+    padding-left: 12px;
+}
+
+.locationlist-scroll {
+    max-height: 363px;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 0px;
+    border-top: 1px solid #ccc;
+}
+.round-PageFlow-row a {
+    color: #333;
+    text-decoration: none;
+}
+.form-group{
+    position:relative;
+}
+.roundschedular.roundleftpanel li a:hover, .roundschedular.roundleftpanel li a.roundActive {
+    background-color: #ebebeb;
+    color: #000;
+    border-color: #ffffff;
+}
+.roundschedular li a:hover, .roundschedular li a.roundActive {
+    border-color: #3c8dbc;
+    color: #3c8dbc;
+}
+.roundleftpanel li a {
+    font-weight: 500;
+}
+.roundschedular li a {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    padding: 8px 6px;
+    cursor:pointer;
+}
+.roundleftpanel li a span {
+    background-color: #0f69ac;
+    color: #fff;
+    border-radius: 8px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+.stepsButton {
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff !important;
+    text-align: center;
+    height: 32px;
+    margin-top: 6px;
+    border-radius: 20px;
+    font-size: 12px;
+    line-height: 15px;
+}
+.volunteer-col1 h4 {
+    color: #2494be;
+    font-size: 18px;
+    font-weight: 600;
+}
+.roundBlue {
+    color: #2494be;
+}
+td.roundLVE-icons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.roundLVE-icons img {
+    width: 24px;
+}
+.roundsListBox {
+    margin-bottom: 10px;
+    position: relative;
+}
+.roundlocations .roundsheadBox {
+    border: none;
+}
+.roundsheadBox {
+    /*border: 1px solid #dcdcdc;*/
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 8px;
+}
+.addfloor-content {
+    padding: 4px 10px 8px 0;
+}
+.addfloor-content h4 {
+    font-size: 16px;
+}
+.round-groupname {
+    border: none;
+}
+.round-groupname {
+    border: 1px solid #ccc !important;
+    border-bottom: none;
+    margin-bottom: 10px;
+    background-color: #fdfdfd;
+}
+.round-groupname .buildingGroupBy {
+    background-color: #f5f5f5;
+}
+.round-groupname .buildingGroupBy {
+    font-size: 14px;
+    font-weight: 600;
+    position:relative;
+    padding: 6px;
+    margin-bottom: 0;
+}
+.buildinglocationsGroupitems {
+    position: relative;
+    background-color: #e8e8e8;
+    border-bottom: 2px solid #fff;
+    padding: 4px;
+}
+span.buildingClose {
+    cursor:pointer;
+    position: absolute;
+    top: 11px;
+    right: 15px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.roundsheadBox p {
+    position: relative;
+    margin: 0;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 26px;
+}
+.round-groupdetails {
+    display: none;
+    margin: 15px 8px;
+}
+.addfloorBox1 {
+    display: flex;
+    justify-content: space-between;
+}
+.addfloorBox1 p, .selectedaddfloorBox1 p {
+    width: 24%;
+    line-height: 20px;
+    word-break: break-all;
+    float: left;
+}
+.roundfloor_list {
+    width: 76%;
+    border-bottom: 1px dashed #dcdcdc;
+    padding-left: 6px;
+    padding-bottom: 6px;
+    overflow: hidden;
+    float: left;
+}
+.roundfloor_list li {
+    display: inline-block;
+    float: left;
+    width: 26px;
+    height: 20px;
+    border: #333 solid 1px;
+    color: #333;
+    text-align: center;
+    margin-left: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    overflow: hidden;
+}
+.volunteer-col1 ul li {
+    border-bottom: 1px solid #ddd;
+    padding: 6px 4px 10px;
+}
+.volunteer-flexgroup {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.roundsheadBox p {
+    position: relative;
+    margin: 0;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 26px;
+}
+.volunteerc-checkBox {
+    display: flex;
+}
+
+.commentInsp {
+    float: right;
+    position: relative;
+    z-index: 999;
+    filter: grayscale(5);
+}
+.commentInsp.text {
+    filter: grayscale(0);
+}
+.zoomBtn {
+    position: absolute;
+    right: 5px;
+    bottom: 58px;
+    font-size: 27px;
+    transform: rotate( 90deg );
+    color: #01405f;
+}
+.zoomBtn button {
+    cursor: pointer;
+    background-color: #fff;
+    border: 2px solid #01405f;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+}
+.round-PageFlow-row a:hover .round-PageFlowCategory {
+    background-color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+.round-PageFlowCategory {
+    width: 200px;
+    height: 200px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 50%;
+    border: 2px solid #000;
+    margin: 0px auto;
+}
+.round-PageFlow-row {
+    text-align: center;
+    padding: 54px 135px;
+    width: 50%;
+    display: inline-block;
+    float: left;
+}
+.round-PageFlow-row h4 {
+    font-weight: 600;
+    font-size: 15px;
+}
+.round-PageFlow-row p {
+    font-size: 14px;
+}
+.round-PageFlow-row a:hover {
+    text-decoration: none;
+}
+.selectedaddfloorBox1 {
+    display: flex;
+    clear: both;
+    overflow: hidden;
+    align-items: flex-end;
+    box-shadow: 2px 4px 4px #efefef;
+    margin-bottom: 10px;
+}
+.ddlroundgroupName {
+    font-weight: 600;
+    padding: 10px 0;
+    display: block;
+    font-size: 15px;
+}
+.volunteerc-checkBox .button1 {
+    margin: 2px;
+}
+
+
+
+/* **************** CRx Round Scheduler CSS END HERE ***************************** */
+
+
+
+/* **************** CRx inspection/question CSS START HERE ***************************** */
+.round-buttonHeading {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ecebeb;
+    margin-bottom: 12px;
+}
+.MarkDeficiency.floor_inspection_pop .btn input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+}
+.MarkDeficiency .btn input[type="radio"] {
+    opacity: 0;
+    float: left;
+}
+.MarkDeficiency input[type="radio"] {
+    margin-left: 10px;
+}
+.MarkDeficiency.floor_inspection_pop .btn label {
+    margin-right: 20px;
+}
+.MarkDeficiency .btn label {
+    float: right;
+}
+.MarkDeficiency.floor_inspection_pop .btn .fa {
+    margin-left: 0;
+    margin-right: 10px;
+}
+
+label input[type="radio"] ~ i.fa.fa-circle-o {
+    color: #c8c8c8;
+    display: inline;
+}
+.MarkDeficiency .btn .fa {
+    float: left;
+    font-size: 18px;
+    margin-left: -15px;
+    margin-right: 5px;
+    margin-top: 2px;
+}
+label input[type="radio"] ~ i.fa.fa-dot-circle-o {
+    display: none;
+}
+
+
+
+
+.inspLeftMenu {
+    box-shadow: 0px 2px 2px #efefef;
+    font-size: 15px;
+    text-align: center;
+    display: block;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    text-decoration: none;
+    color: #333;
+    position: relative;
+}
+.inspQuestionimg {
+    max-width: 44px;
+    text-align: center;
+    margin: 0px auto;
+    display: block;
+}
+.inspection-SubMenu span {
+    font-size: 14px;
+    color: #333;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    display: block;
+    padding-top: 6px;
+}
+/* **************** CRx inspection/question CSS END HERE ***************************** */
+
+
+
+/* **************** CRx COPYRIGHT CSS START HERE ***************************** */
+.main-footer {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    text-align: center;
+    background: #fff;
+    color: #444;
+    border-top: 1px solid #d2d6de;
+}
+.manage-popgorup {
+    text-align: center;
+}
+
+/* **************** CRx COPYRIGHT CSS END HERE ***************************** */
+
+
+/* **************** CRx menu css start here ***************************** */
+.main-header {
+    box-shadow: 0px 3px 2px #f1f1f1;
+    background: #fff;
+    /*min-height: 67px;*/
+    padding: 4px 0 0 0;
+    position: relative;
+    /*max-height: 100px;*/
+    z-index: 1014;
+}
+.skin-purple .main-header .logo {
+    border-bottom: 0 solid transparent;
+    color: #fff;
+    /*height: 60px;*/
+    background-color: #fff;
+    padding: 0;
+    float: left;
+    /*width: 160px;*/
+    overflow: hidden;
+}
+
+.skin-purple .main-header .logo {
+    border-bottom: 0 solid transparent;
+    color: #fff;
+    /*height: 60px;*/
+    background-color: #fff;
+    padding: 0;
+    float: left;
+    /*width: 160px;*/
+    overflow: hidden;
+}
+.main-header .logo .logo-mini {
+    display: none;
+}
+.logo-lg {
+    /*display: flex;
+    align-items: flex-end;*/
+    padding-top: 4px;
+}
+.toggle_menu {
+    display: none;
+}
+.main-header .navbar {
+    position: initial;
+    /*min-height: 42px;*/
+    margin-left: 0px;
+}
+.top_menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    float: right;
+}
+.top_menu li {
+    float: left;
+    text-align: center;
+    padding: 1px 10px 4px;
+    border-bottom: 3px solid #ffffff;
+    transition: transform 2s;
+    cursor: pointer;
+}
+.top_menu li a {
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative;
+}
+.top_menu li img {
+    max-width: 46px;
+    cursor: pointer;
+}
+.top_menu li span {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #333;
+    /*margin: 2px 0 0 0;*/
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.tooltipTitle {
+    display: none;
+    position: absolute;
+    bottom: -42px;
+    background-color: #2f2f2f;
+    padding: 4px 15px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    left: -10px;
+    z-index: 99;
+}
+.multi-column.dropdown-data {
+    overflow: hidden;
+    background: #f5f5f5;
+    box-shadow: 0px 2px 4px #717171;
+    z-index: 999;
+}
+.dropdown-data {
+    position: absolute;
+    top: 67px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    width: calc(100% - 30px);
+    padding: 20px 0px 10px 0px;
+    margin: 10px 15px 0;
+    font-size: 14px;
+    border-top: none !important;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: none;
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.dropdown-data {
+    min-width: 400px;
+}
+.menusublist {
+    width: 16.33%;
+    display: inline-block;
+    position: relative;
+    float: left;
+    margin-bottom: 25px;
+    border-left: 1px solid #e6e6e6;
+}
+.dropmenu-div {
+    padding-bottom: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .5s;
+}
+.dynamic_menu.activeMenu .dropdown-data {
+    display: block;
+}
+.user-menu .dropdown-menu {
+    right: 0 !important;
+    left: auto;
+    z-index: 9999 !important;
+    box-shadow: 0px 6px 4px #797979;
+}
+.user-menu .dropdown-menu li {
+    width: 100%;
+    text-align: left;
+   
+}
+    
+form#logoutForm {
+    /*padding: 3px 20px;*/
+    color: #333;
+}
+form#logoutForm a#_linkLogout {
+    color: #525252;
+}
+
+
+/* **************** CRx menu css end here ***************************** */
+
+
+
+/* **************** CRx Construction Risk Assessment [CRA] css START here ***************************** */
+.addcra-identify {
+    background-color: #d8d8d8;
+    display: block;
+    clear: both;
+    overflow: auto;
+    border: 2px solid #d8d8d8;
+    border-radius: 2px;
+    margin-bottom: 15px;
+}
+.col-md-9.identify-col9 {
+    background-color: #fff;
+}
+.ctype {
+    overflow: auto;
+    border-bottom: 1px solid #c3c3c3;
+}
+.area-surrounding {
+    width: 33.33%;
+    display: inline-block;
+    float: left;
+    padding: 0 2px;
+}
+.unitBelowRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.riskGroupddl {
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    appearance: none;
+    text-align: right;
+}
+.risk-craBOx {
+    text-align: right;
+}
+.list.pcraaddlists {
+    display: flex;
+}
+.list.pcraaddlists .siteinnerlist {
+    margin-right: 15px;
+}
+.list.pcraaddlists .siteinnerlist a {
+    color: #333;
+}
+.icratopStepsRow {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #6d6d6d;
+    padding-bottom: 8px;
+}
+.icratopStepsRow .icrasteps {
+    padding: 10px 4px 0;
+    min-width: 100px;
+}
+.icrasteps a {
+    color: #fff;
+}
+div#scroll-to-permit {
+    text-align: right;
+}
+#scroll-to-permit a {
+    color: #fff;
+}
+.crActive {
+    background-color: gray;
+    color: #ffffff;
+}
+.matrixActive {
+    background-color: blue;
+    color: #ffffff;
+}
+/*.divpermitworkflow {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: baseline;
+}*/
+.ctypeActive {
+    background-color: gray;
+    color: #ffffff;
+}
+.mop-search {
+    position: relative;
+    width: 100%;
+    display: block;
+}
+.mop-search textarea.form-control.assetNo {
+    overflow: hidden;
+    padding-right: 22px;
+    line-height: 22px;
+}
+.mop-search .openAssetsSearchPopUp {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+.icra_action {
+    display: flex;
+    align-items: center;
+}
+.observationLeft-panel li {
+    display: block;
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 15px 10px 0;
+    cursor: pointer;
+    border-bottom: #ddd solid 1px !important;
+}
+.observationLeft-panel a {
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    padding-left: 10px;
+}
+.observationLeft-panel li.active,
+.observationLeft-panel li:hover {
+    color: #fff;
+    background: #eee;
+}
+img#btneditobservation {
+    cursor: pointer;
+}
+/* **************** CRx Construction Risk Assessment [CRA] css end here ***************************** */
+/* **************** Dashboard icons with dropdown toggle css start here ***************************** */
+.deficiencyIcons {
+    width: 24px;
+    margin: 0px auto;
+    display: block;
+}
+.dash-tabMenu .search_options .form-control {
+    height: 26px;
+    padding: 0px 6px;
+    font-size: 13px;
+}
+.tabbable.tabs-left .tab-content {
+    border: 1px solid #ddd !important;
+    /*overflow: hidden;*/
+    background-color: #fff;
+    margin-top: -4px;
+}
+.mytageditembtn {
+    position: relative;
+}
+.mytageditembtn img {
+    width: 20px;
+    position: absolute;
+    top: 7px;
+    left: 9px;
+}
+.mytageditembtn #btnMytaggeditem {
+    padding-left: 28px;
+}
+.mytageditembtn .button1 {
+    opacity: 0.6;
+}
+.dash-tabMenu {
+    display: flex;
+    padding: 0 4px;
+    justify-content: space-between;
+}
+.activity-contentBox {
+    border: #dedede solid 1px;
+    margin-top: -6px;
+}
+.tabbable .nav-tabs {
+    border-bottom: none;
+}
+.tabbable > .nav > li > a {
+    padding: 2px 6px !important;
+}
+.countec {
+    font-size: 12px !important;
+}
+.dash_btnfilter {
+    position: relative;
+}
+.assets-dropdown {
+    min-width: 0px;
+    bottom: inherit !important;
+    overflow: auto;
+    z-index: 9999;
+    height: 150px !important;
+    top: 32px !important;
+    box-shadow: 0px 4px 6px #959595;
+}
+.search_options button.btn.dropdown-toggle.btn-default {
+   /* padding: 3px 15px;
+    border-radius: 4px;*/
+}
+.deficiens-btn12 input[type="submit"] {
+    background-image: linear-gradient( 45deg, #3c8dbc, #387598);
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 5px 10px !important;
+    border-radius: 3px !important;
+    border: none;
+    line-height: 14px;
+    background-repeat: repeat !important;
+}
+.dash_btnfilter .button1 {
+    border-radius: 20px;
+    padding: 4px 10px 4px 26px;
+    background-size: 16px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: 5px 8px;
+    margin-left: 4px;
+    color: #333 !important;
+}
+.dash-actvity-box input[type=submit] {
+    padding: 8px 10px 8px 26px;
+    background-size: 16px;
+    margin-right: 4px;
+    background-repeat: no-repeat;
+    background-position: left 6px center;
+    color: #333;
+    border-radius: 20px;
+}
+.assets_with_day {
+    background: url(/dist/Images/Icons/assets.png);
+    border: #33b9f5 solid 1px;
+}
+.building_with_day {
+    background: url(/dist/Images/Icons/building.png);
+    border: #cc5a44 solid 1px;
+}
+.due_with_day {
+    background: url(/dist/Images/Icons/due_within_status_icon.png);
+    border: #fadd64 solid 1px;
+}
+.btn_pastdue {
+    background: url(/dist/Images/Icons/past_due_status_icon.png);
+    border: #ed1c24 solid 1px;
+}
+.Inprogress {
+    background: url(/dist/Images/Icons/inprogress_icon.png);
+    border: #33479e solid 1px;
+}
+/*.status_fail {
+    background: url(/dist/Images/Icons/past_due_point.png) 0px center no-repeat;
+    float: left;
+    width: 25px;
+    height: 25px;
+    background-size: 17px;
+    margin-bottom: 0px;
+    background-size: 18px;
+}*/
+/*.status_pastdue {
+    background: url(/dist/Images/Icons/past_due_point.png) 6px center no-repeat;
+    vertical-align: middle !important;
+    width: 25px;
+    height: 25px;
+    margin-top: -3px;
+    background-size: 18px;
+}*/
+.toggle-btn {
+    width: 104px;
+    height: 26px;
+    border-radius: 50px;
+    display: inline-block;
+    position: relative;
+    background: url(/dist/Images/Icons/mark_all_compliant_button.png) 0 0 no-repeat;
+    cursor: pointer;
+    -webkit-transition: background-color .40s ease-in-out;
+    -moz-transition: background-color .40s ease-in-out;
+    -o-transition: background-color .40s ease-in-out;
+    transition: background-color .40s ease-in-out;
+    cursor: pointer;
+   /* margin-left: 15px;*/
+}
+table.dataTable tbody td.details-control2 {
+    background: url('https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png') no-repeat center center;
+    cursor: pointer;
+    min-width: 24px;
+}
+table.dataTable tbody tr.shown td.details-control2 {
+    background: url('https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png') no-repeat center center;
+    cursor: pointer;
+    min-width: 24px;
+}
+input.ins_check_btn_yes_no[value="-1"] {
+    background: url("/dist/Images/Icons/pending_button.png") 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check_btn_yes_no[value="0"] {
+    background: url(/dist/Images/no_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+input.ins_check_btn_yes_no[value="1"] {
+    background: url(/dist/Images/yes_icon.png) 0 0 no-repeat;
+    font-size: 0;
+    width: 104px;
+    height: 30px;
+    border: none;
+    padding: 8px;
+}
+button#Generate-ilsm-report {
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+}
+.ilsmComments {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+}
+.ilsmCol1 {
+    width: 100px;
+    float: left;
+    margin-right: 5px;
+}
+.ilsmCol2 {
+    width: calc(100% - 150px);
+    border-left: 2px solid #ddd;
+    padding: 0 10px;
+}
+.ilsmCol3 {
+    width: 50px;
+}
+.ilsmCol3 img {
+    cursor: pointer;
+    width: 20px;
+    display: inline-block !important;
+}
+
+
+.row.hislistBordered {
+    border-bottom: 2px solid #f5f5f5;
+    margin-bottom: 2px;
+}
+.attachedFileFlex .img_prev_upload {
+    width: 30px;
+    margin-bottom: 4px;
+}
+.img_prev_upload {
+    height: 25px;
+    background: #fff;
+    width: 25px;
+}
+
+.img_prev_upload_C {
+    float: right;
+    height: 25px;
+    width: 26px;
+    background: #fff;
+}
+
+.img_prev_upload_D {
+    float: right;
+    height: 25px;
+    width: 26px;
+    background: #fff;
+}
+
+.img_prev {
+    display: none;
+}
+
+
+
+.epdetailsBox-row,
+#Divcampus {
+    margin-bottom: 15px;
+}
+.alleps {
+    background: url(/dist/Images/Icons/all_icon.png);
+    border: #3f4040 solid 1px;
+}
+.CompletedEp {
+    background: url(/dist/Images/Icons/CompletedEp.png);
+    border: #008000 solid 1px;
+}
+/*
+
+.status_not_started {
+    background: url(/dist/Images/Icons/past_due_point.png) 0px center no-repeat;
+    float: left;
+    width: 25px;
+    height: 25px;
+    background-size: 17px;
+    margin-bottom: 0px;
+}*/
+.addpolicy-binder {
+    margin-top: 15px;
+    background-color: #fbfbfb;
+    clear: both;
+    border: 1px solid #ddd;
+}
+.addpolicy-binder .mb-0 {
+    margin: 0;
+}
+.addpolicy-binder .btn-link {
+    font-size: 14px;
+    font-weight: bolder;
+    color: #333;
+}
+
+
+.matrix-popupboxlist {
+    overflow: hidden;
+    width: 100%;
+    background-color: #f3f3f3;
+    padding: 15px 6px !important;
+}
+.matrix-popupboxlist li {
+    width: 50% !important;
+    padding-right: 15px;
+    float: left;
+}
+.selectBoxs {
+    padding: 9px 0 0;
+    height: 100%;
+}
+.selectBoxs .ullistitem {
+    max-height: 317px;
+    overflow: auto;
+}
+.selectBoxs .selectList {
+    width: 100% !important;
+    border: 1px solid #c9c9c9;
+    padding: 6px;
+}
+.selectBoxs .ullistitem li {
+    display: inline-block;
+    float: left;
+    width: 33.33%;
+    padding: 4px 10px;
+    position: relative;
+}
+.email_nameuser {
+    font-size: 14px;
+    color: #505050;
+    font-weight: 500;
+}
+.email_nameuser span {
+    padding-left: 25px;
+    font-size: 13px;
+    color: #888;
+}
+/* **************** Dashboard icons with dropdown toggle css end here ***************************** */
+
+
+/* **************** CRx Compliance Dashboard SEARCH BOX START here ***************************** */
+.assetDeficienciesleg .legand {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+.assetDeficienciesleg .legand li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 8px;
+}
+.assetDeficienciesleg .legand li img {
+    margin-right: 4px;
+}
+.tabbable.tabs-left {
+    padding: 4px;
+}
+.tabbable .nav-tabs{
+    display: inline-flex;
+    width: 100%;
+}
+.dash-actvity-box {
+    overflow: inherit !important;
+}
+.dash-actvity-box {
+    min-height: 46px;
+    display: flex;
+    display: -webkit-box;
+    align-items: center;
+    -webkit-box-align: center;
+    width: 100%;
+    justify-content: flex-end;
+    justify-content: -webkite-flex-end;
+    -moz-justify-content: flex-end;
+    -webkit-box-pack: end;
+}
+.input-sublistItems {
+    position: absolute;
+    z-index: 999;
+    top: 29px;
+    border: 1px solid #3c8dbc;
+    background-color: #fff;
+    left: 0;
+    right: 0;
+    display: none;
+}
+.input-active {
+    display: block !important;
+}
+.input-sublist {
+    position: relative;
+}
+.input-sublistItems li {
+    padding: 2px 12px;
+    border-bottom: 1px solid #daf1ff;
+}
+.input-sublistItems li:last-child {
+    border-bottom: none;
+}
+.input-sublistItems ul {
+    padding-left: 0px;
+    margin-bottom: 4px;
+}
+.input-sublistItems ul li a {
+    padding: 10px 0;
+    text-decoration: none;
+    color: #3c8dbc;
+    font-size: 12px;
+}
+.closesearch {
+    position: absolute;
+    right: 49px;
+    z-index: 9;
+    font-style: normal;
+    top: 9px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.activityFilters {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+#dvsearch {
+    position: relative;
+    width: 204px;
+    float: left;
+}
+.dash_btnfilter {
+    position: relative;
+    display: flex;
+    float: right;
+    padding-left: 10px;
+}
+.row.cal-activityBox {
+    padding: 15px 4px;
+}
+/* **************** CRx Compliance Dashboard END here ***************************** */
+
+/* **************** CRx DASHBOARD css START here ***************************** */
+
+
+
+.dashimg {
+    width: 75px;
+}
+.topBanner-listbox {
+    display: flex;
+    margin-bottom: 15px;
+}
+.homeslider-listbox {
+    width: 25%;
+    min-width: 294px;
+    max-height: 354px;
+}
+.iwantBox {
+    width: 25%;
+    min-width: 294px;
+    padding: 0 15px;
+    border-right: 1px solid #ddd;
+}
+.currentuser-name {
+    margin-top: 6px;
+    padding-left: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+.iwant-name {
+    font-size: 17px;
+    margin-top: 6px;
+    padding-bottom: 0px;
+}
+.iwantBox ul {
+    padding-left: 0px;
+    max-height: 354px;
+}
+.iwantBox ul li a {
+    color: #41baff;
+    font-size: 13px;
+    font-weight: 600;
+}
+.iwantBox ul li a:hover {
+    color: #3c8dbc;
+}
+.iwantBox ul li {
+    margin-bottom: 2px;
+}
+.banner {
+    width: calc(100% - 50%);
+    width: 100%;
+}
+.banner img {
+    width: 100%;
+    max-height: 344px;
+}
+.dashbord_listing {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+.dashbord_listing li {
+    display: inline-block;
+    width: 24%;
+    vertical-align: top;
+    text-align: center;
+    margin-bottom: 40px;
+}
+.dashbord_listing li a {
+    display: inline-block;
+    text-decoration: none;
+}
+.dashbord_listing li img {
+    margin-bottom: 30px;
+}
+.dashbord_listing li span {
+    display: block;
+    text-align: center;
+    font-size: 14px;
+    color: #000;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+.dashbord_listing li a:hover span {
+    color: #0088B9;
+}
+.dashbord_listing li a:hover img {
+    opacity: .6;
+}
+.homeul-col1 {
+    width: 32px;
+}
+.homeul-col2 {
+    width: calc(100% - 32px);
+    padding: 0 15px 0 6px;
+}
+.crxhomeul {
+    overflow: hidden;
+    padding-left: 18px;
+    height: 79%;
+    margin: 0;
+}
+.prenext-box {
+    height: 20px;
+}
+.homeul-col1 span {
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    background-image: linear-gradient(45deg, #3c8dbc, #387598);
+}
+.homeul-col2 p {
+    color: #3c8dbc;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 12px;
+}
+.crxhomeul li {
+    display: flex;
+    background-color: #d9edf6 !important;
+    align-items: center;
+    height: 32px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+.crxhomeul li:hover,
+.crxhomeul li.active {
+    background-color: #3c8dbc;
+}
+.crxhomeul li:hover .homeul-col2 p,
+.crxhomeul li.active .homeul-col2 p {
+    color: #2b6c92 !important;
+    border-bottom: 1px solid #2b6c92;
+}
+.crxhomeul li:hover .homeul-col1 span,
+.crxhomeul li.active .homeul-col1 span {
+    color: #fff;
+}
+.prenext-box p {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 18px;
+    margin: 0;
+    height: 20px;
+    align-items: flex-end;
+}
+
+.col-sm-2-5 {
+    width: 20%;
+}
+marquee p {
+    white-space: nowrap;
+    margin-right: 1000px;
+}
+.eps {
+    margin-bottom: 37px;
+}
+.banner1 img {
+    width: 100%;
+    max-height: 350px;
+}
+.deficiBoxs {
+    display: flex;
+    flex-wrap: wrap;
+}
+.deficiBoxs .col-sm-2-5 {
+    width: calc(20% - 0px);
+    margin: 0;
+    padding: 0 2px;
+}
+.dashboardViewCalender {
+    position: relative;
+}
+.panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.marquee-Col12 {
+    position: absolute;
+    left: 110px;
+    right: 110px;
+    width: calc(100% - 220px);
+    padding-top: 4px;
+}
+
+
+
+/* **************** CRx DASHBOARD css END here ***************************** */
+
+
+
+
+/* **************** CRx POPUP CSS START HERE ***************************** */
+
+.close-header {
+    background: #ddd;
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 15px;
+    border-radius: 10px 10px 0 0;
+}
+.close-header button.close {
+    opacity: 1;
+    color: #505050;
+    font-size: 22px;
+}
+.fileupload .modal-body {
+    /*padding: 0px;*/
+    margin: 0;
+    min-height: 100px;
+}
+.fileupload-mainBox {
+    /*padding: 24px 15px 15px;*/
+}
+.file-heading h4,
+.file-heading h4 label {
+    font-size: 16px;
+    color: #000;
+    margin-top: 0;
+    font-weight: 600;
+}
+.file-heading h4 label {
+    padding: 0 4px;
+}
+.uploadSteps {
+    display: none;
+}
+.uploadSteps.fileactive {
+    display: block;
+}
+.fileupload-optionBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fileupload-or {
+    width: 67px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fileupload-option {
+    width: 216px;
+    height: 168px;
+    background-color: #D7FFD2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.fileupload-option.inner-options {
+    width: 100%;
+    height: 88px;
+    display: none;
+}
+.table-Box .heading-backbtn h4 img {
+    max-width: 30px;
+    margin-right: 8px;
+}
+.crxDrops {
+    display: block !important;
+    padding-top: 10px;
+    text-align: center;
+}
+.inner-options a img {
+    max-width: 40px;
+}
+.inner-options a p {
+    margin-top: 6px;
+}
+.trfileactive {
+    background-color: #d1f3f9;
+}
+.fileupload .modal-dialog {
+   /* max-width: 1364px;
+    width: 98%;
+    margin:0px auto;*/
+}
+.dropupload {
+    width: 434px;
+    background-color: #FFFBD5;
+    border: 2px dashed #000000;
+}
+.browefiles {
+    background-color: #ffe2ed;
+}
+.fileupload-or span {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #777575;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.fileupload-option p {
+    color: #000000;
+    font-size: 14px;
+    margin-top: 15px;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+.fileupload-mainBox.inner-mainBox {
+    padding-top: 0;
+}
+#detailsTab .legand li img {
+    width: 20px;
+}
+.heading-backbtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.firebtn {
+    display: inline-block;
+    float: left;
+}
+a.btn.btn-success.bbi-pdf {
+    margin-bottom: 12px;
+}
+.fileupload-scroll {
+    max-height: 312px;
+    overflow: auto;
+}
+
+.browse_Div {
+    text-align: center;
+    padding-top: 24px;
+}
+.facilities-row {
+    display: flex;
+}
+.facilities-col6 {
+    width: 50%;
+}
+.fileupload-option a {
+    text-align: center;
+}
+.table-Box .table-responsive {
+    background-color: #F1FDFF;
+    padding: 4px 26px;
+    border-radius: 8px;
+}
+.table-Box table {
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+.table-Box h4 {
+    font-size: 16px;
+    font-weight: bold;
+}
+.help-tabRow .ui-widget-header {
+    padding: 10px !important;
+}
+/***********************************************/
+.modal-header {
+    background: #333;
+    color: #fff;
+    padding: 8px 6px;
+    border: none;
+    text-transform: uppercase;
+}
+.modal-header .close {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    line-height: 0;
+    opacity: 1;
+    color: #dedede;
+    text-shadow: none;
+    font-weight: 600;
+    font-size: 24px;
+    outline: none;
+    border: 1px solid;
+    margin-top: -2px;
+    padding: 0;
+}
+.modal-title {
+    margin: 0;
+    line-height: 1.42857143;
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 6px;
+}
+
+
+.bootstrap-select > .dropdown-toggle {
+    border-radius: 0;
+    width: 100%;
+}
+/* **************** CRx POPUP CSS END HERE ***************************** */
+
+
+
+
+/* **************** CRx BARECODE CSS START HERE ***************************** */
+
+.codeSearch {
+    position: relative;
+    max-width: 584px;
+    margin: 0px auto;
+}
+.barcode-control {
+    width: 584px;
+    height: 46px;
+    border-radius: 24px;
+    margin: 28px 0 22px;
+    font-size: 18px;
+    padding: 0 137px 0 26px;
+}
+.barcode-row {
+    text-align: center;
+    padding: 44px 0;
+}
+.barcodebtn {
+    position: absolute;
+    top: 1px;
+    right: 10px;
+    z-index: 9;
+    height: 44px;
+    border-radius: 0 24px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.barcodebtn #btnbarcode {
+    background-image: url(/dist/Images/Icons/scanner_icon.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.barcodebtn .highlight {
+    background-image: url(/dist/Images/Icons/scanner_blue.png) !important;
+}
+.barcodebtn svg {
+    display: block;
+    height: 32px;
+    width: 26px;
+}
+.barcodebtn a {
+    border-right: 1px solid #ddd;
+    min-width: 40px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #333;
+}
+a.clearable__clear {
+    display: none;
+}
+.barcodebtn a:last-child {
+    border-right: none !important;
+}
+.barcode-heading h4 {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+.codeSearch #empty-message {
+    color: red;
+}
+/* **************** CRx BARECODE CSS END HERE ***************************** */
+
+
+
+/* **************** CRx Upload Inspection CSS START HERE ***************************** */
+.uploadAssets-heading {
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 2px;
+    padding-bottom: 10px;
+}
+.addremove-data {
+    margin: 0;
+}
+.assetsPlus {
+    display: none;
+    float: right;
+}
+.finalizeleft_view ul {
+    padding: 0;
+}
+.finalizeleft_view .list li a label {
+    padding: 6px 0px 4px 0px;
+    list-style: none;
+    /*border-top: 1px solid #e4e4e4;*/
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex !important;
+    align-items: center;
+    line-height: 14px;
+    cursor: pointer;
+}
+.finalizeleft_view .list li a label .fa {
+    font-size: 20px;
+    background: #3c8dbc;
+    min-width: 24px;
+    max-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    margin-right: 4px;
+    text-align: center;
+    line-height: 22px;
+}
+ul.crxcheckbox.assetsList {
+    padding-left: 24px;
+}
+
+.crxcheckbox.assetsList li {
+    border-top: 1px solid #e4e4e4;
+}
+ul.crxcheckbox.assetsList .crxcheckbox-success {
+    display: flex;
+    width: 100%;
+    padding-top: 5px;
+}
+ul.crxcheckbox.assetsList .crxcheckbox-success .assetsListLi {
+    width: 100%;
+}
+/* **************** CRx Upload Inspection CSS END HERE ***************************** */
+
+/* **************** CRx Notification Settings CSS STRAT HERE ***************************** */
+.notification-leftMenu {
+    padding: 0;
+}
+.notification-leftMenu li {
+    border-bottom: #ddd solid 1px;
+    color: #333;
+    width: 100%;
+    cursor: pointer;
+}
+.notification-leftMenu li .notifyType {
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 40px;
+    width: 100%;
+    display: block;
+    padding: 10px 12px 10px 8px;
+    text-transform: uppercase;
+}
+.notification-leftMenu li ul {
+    padding: 0px;
+}
+#questtblediv ul#btn_user_ddl {
+    top: 27px;
+    right: 0px;
+    left: auto;
+    min-height: 90px;
+    box-shadow: 0px 4px 6px #a9a9a9;
+}
+.crxSignBox .ddlproject {
+    z-index: -1;
+    position: absolute;
+    left: 130px;
+    opacity: 0;
+    border: none;
+    color: transparent;
+}
+.notification-leftMenu li ul {
+    display: none;
+}
+.notification-leftMenu .crxcheckbox .building {
+    padding-left: 10px;
+}
+
+.notification-leftMenu li ul li {
+    border-bottom: none;
+    border-top: 1px solid #ddd;
+}
+.notification-leftMenu li .notifyType {
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 40px;
+    width: 100%;
+    display: block;
+    padding: 10px 12px 10px 8px;
+    text-transform: uppercase;
+}
+.notification-leftMenu li .notifyType.activeSite .fa {
+    transform: rotate( 90deg);
+    transition: 1s;
+}
+.float-right {
+    float: right;
+}
+/* **************** CRx Notification Settings CSS END HERE ***************************** */
+
+
+/* **************** CRx .crxgeneral-details CSS start HERE ***************************** */
+.crxgeneral-details {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 15px;
+}
+.crxgeneral-itemBox {
+    font-size: 13px;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    float: left;
+    width: 50%;
+    word-break: break-all;
+}
+.crxgeneral-itemBox .crxgeneral-label {
+    font-weight: 600;
+    text-transform: capitalize;
+    min-width: 130px;
+    display: inline-block;
+    padding-right: 6px;
+    color: #333;
+    font-size: 13px;
+}
+/* **************** CRx .crxgeneral-details CSS END HERE ***************************** */
+.round-groupname.panel-active .round-groupdetails {
+    display: block;
+}
+
+
+/* **************** CRx HOW TO CSS START HERE ***************************** */
+.help-panelDescption {
+    display: none;
+    font-size: 14px;
+    color: #000;
+    padding: 8px 0 6px 48px;
+    border-top: 1px solid #e4e4e4;
+    background-color: #fff;
+    border-radius: 0 0 6px 6px;
+}
+.faqHowtos-panel .panel-active .help-panelDescption {
+    display: block;
+}
+.help-panelDescption ul,
+.help-panelDescption ol {
+    padding-left: 0;
+}
+.search-searchicon .search-query {
+    height: 39px;
+    background: #FFFFFF;
+    border: 1px solid #707070;
+    border-radius: 5px !important;
+    opacity: 1;
+}
+.help-tabRow {
+    padding: 0 0 15px 0;
+}
+
+.help-search {
+    display: block;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.help-panelHeading h3 {
+    margin: 0;
+    font-size: 14px;
+    padding: 12px;
+    color: #333;
+    font-weight: 600;
+}
+.faq-bottom .howto-9 {
+    background-color: #f0f2f5;
+    padding: 0 15px;
+    border-radius: 6px;
+}
+.help-panelHeading .fa-angle-down {
+    font-size: 18px;
+}
+.descUl-details {
+    padding-left: 15px;
+    list-style: decimal;
+}
+.faqHowtos-panel .panel-active {
+    background-color: #f0f2f5 !important;
+}
+.descUl-details ul {
+    list-style: lower-alpha;
+    padding-left: 15px;
+}
+.help-panelHeading {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding-right: 26px;
+    padding-left: 18px;
+}
+.help-panellist {
+    background-color: #f0f2f5;
+    margin-bottom: 11px;
+    border-radius: 6px;
+    padding: 3px 0 0;
+    border: 1px solid #e4e4e4;
+}
+.faqHowtos-panel .collapse-row {
+    margin: 0;
+    padding: 0;
+    border: none !important;
+    margin-bottom: 55px;
+    z-index: 9 !important;
+}
+.helptab-btn {
+    background: no-repeat;
+    border: none;
+}
+.search-searchicon {
+    position: relative;
+    max-width: 620px;
+    min-width: 330px;
+}
+.help-tabRow .ui-tabs-active a {
+    border-bottom: 2px solid #1F7CB1 !important;
+}
+.panel-active .fa-angle-down {
+    transform: rotate(180deg);
+}
+.search-searchicon .fa-search {
+    position: absolute;
+    right: 24px;
+    z-index: 999;
+    top: 12px;
+    color: #a9a9a9;
+}
+.help-tabRow li.ui-tabs-tab.ui-corner-top.ui-state-default.ui-tab {
+    border: none;
+    background-color: transparent;
+    min-width: 134px;
+    border-right: 1px solid #ccc;
+    margin-right: 22px;
+    border-radius: 0;
+}
+.help-tabRow li.ui-tabs-tab.ui-corner-top.ui-state-default.ui-tab:last-child {
+    border-right: none;
+}
+.faqHowtos-panel .collapse-row .ui-tabs-panel {
+    padding: 0;
+}
+.faqHowtos-panel .collapse-row .ui-state-active a,
+.faqHowtos-panel .collapse-row .ui-state-active a:link,
+.faqHowtos-panel .collapse-row .ui-state-active a:visited {
+    color: #1F7CB1 !important;
+}
+.helptab-btn .ui-tabs-anchor {
+    padding: 0 !important;
+    font-size: 14px;
+    font-weight: 600;
+    color: #929292 !important;
+}
+.left-panel-howto {
+    border: 1px solid #707070;
+    border-radius: 5px;
+    padding: 15px;
+    height: 100%;
+}
+.leftul-list {
+    margin: 0;
+    padding: 0;
+}
+.howto-3 {
+    width: 262px;
+    padding-right: 24px;
+}
+.howto-9 {
+    width: calc(100% - 262px);
+}
+.howto-panelsRow {
+    display: flex;
+}
+
+.leftul-list li a {
+    font-size: 14px;
+    color: #000;
+    display: block;
+    padding: 4px 0;
+    position: relative;
+}
+.leftul-list li a:hover,
+.leftul-list li.active a {
+    color: #1F7CB1;
+}
+.leftul-list li a:hover:after,
+.leftul-list li.active a:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 7px solid #1F7CB1;
+    top: 11px;
+    margin-left: 7px;
+}
+.leftul-list.faq-list li a:hover:after,
+.leftul-list.faq-list li.active a:after {
+    display: none;
+}
+.leftul-list.faq-list li span {
+    width: 28px;
+    height: 19px;
+    border-radius: 10px;
+    background-color: #D9D9D9;
+    font-size: 14px;
+    color: #000;
+    display: block;
+    text-align: center;
+}
+.leftul-list.faq-list li a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.leftul-list.faq-list li a:hover span,
+.leftul-list.faq-list li.active span {
+    background-color: #1F7CB1;
+    color: #fff;
+}
+.help-panelHeading .howto-minus {
+    display: none;
+}
+.help-panellist.panel-active .howto-minus {
+    display: block;
+}
+.help-panellist.panel-active .howto-plus {
+    display: none;
+}
+.help-panelHeading .howto-minus,
+.help-panelHeading .howto-plus {
+    cursor: pointer;
+    padding-top: 2px;
+}
+.faq-bottom .button1 {
+    color: #fff;
+    padding: 8px 32px;
+    float: right;
+}
+
+
+.roundschedular li a {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    padding: 8px 6px;
+}
+
+    .roundschedular li a:hover,
+    .roundschedular li a.roundActive {
+        border-color: #3c8dbc;
+        color: #3c8dbc;
+    }
+
+.roundsHeading {
+    background: #f5f5f5;
+    text-transform: capitalize;
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #e7e7e7;
+    cursor: pointer;
+    line-height: 20px;
+    padding: 8px 6px 8px 8px;
+    margin: 0 0 6px 0;
+}
+li.stripe.strikethrough {
+    text-decoration: line-through;
+}
+
+.stripe {
+    cursor: pointer;
+}
+
+/* **************** CRx HOW TO CSS END HERE ***************************** */
+
+
+.TJCDescription {
+    margin-bottom: 15px;
+}
+
+.TJCDescription lable {
+    margin-bottom: 0px !important;
+}
+
+/* **************** CRx ROUND INSPECTION CATEGORIES CSS STARTS HERE ***************************** */
+
+.adduserlistBox .adduserListpanel ul.rCategoriesUl span {
+    font-weight: 700;
+}
+
+.adduserlistBox .adduserListpanel ul.rCategoriesUl li {
+    padding: 1px 5px;
+}
+
+
+
+
+
+/* **************** CRx ROUND INSPECTION CATEGORIES CSS END HERE ***************************** */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

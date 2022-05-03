@@ -1,0 +1,500 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@{
+    ViewBag.Title = "AssetsInventoryReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedValues = "0";
+    if (@ViewBag.InventoryAssetIDs != null) { selectedValues = @ViewBag.InventoryAssetIDs; }
+    //var lists =AssetsRepository.Get().Where(x => x.IsActive).ToList();
+    //int[] values = lists.Select(x => x.AssetId).ToArray();
+    //string concat = String.Join(",", values.ToArray());
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Inventory & Inspection
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-4 col-xs-6 form-group">
+                        <div class="search_options">
+                            <label>Assets (<small>Select the assets for which you want the inventory report</small>)</label>
+                            @*@Html.AssetsDownList("AssetId", selectedValues, "All", new { @class = "form-control ddlboxLive", multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })*@
+                            <assetsdownlist name="AssetId" selectedvalue="@selectedValues" firsttext="All" class="form-control ddlbox" multiple="multiple">
+
+                            </assetsdownlist>
+                        </div>
+                        <input type="hidden" value="@ViewBag.AssetsId" id="assetids" />
+                    </div>
+                    <div class="col-md-4 col-xs-6 form-group">
+                        <label>Building</label>
+                        <buildingdropdownList selectedvalue="@ViewBag.BuildingId" name="drpBuildings" firsttext="All" class="form-control selectyear"></buildingdropdownList>
+                        @*@Html.BuildingDropDownList("drpBuildings", ((Int32)ViewBag.BuildingId), "All", new { @class = "form-control selectyear" })*@
+
+                    </div>
+                    <div class="col-md-4 col-xs-6 form-group">
+                        <label>Floor</label>
+                        <select id="floorId" class="form-control"></select>
+                    </div>
+                    <div class="col-md-2 col-xs-6 form-group">
+                        <label>From</label>
+                        <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-md-2 col-xs-6 form-group">
+                        <label>To</label>
+                        <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-md-4 col-xs-6 form-group">
+                        <label>Status</label>
+                        <assetstatusdropDown name="drpStatus" firsttext="All Assets" selectedvalue="ACTIV" class="form-control ddlbox"></assetstatusdropDown>
+                    </div>
+                    <div class="col-md-4 col-xs-6 form-group runDownloadBox">
+                        <div>&nbsp;</div>
+                        <div style="display:flex;">
+                            <button class="comm-button" id="btnrunreport">Run Report</button>
+                            <button class="comm-button" id="btnrefresh">Refresh</button>
+                            @using (Html.BeginForm("CreateAssetsInspectionReport", "Pdf"))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="submit" value='Download Report' class="comm-button" id="btndownloadreprort" style="display:none" />
+                                <input type="hidden" name="selAssetId" id="selAssetId" value="" />
+                                <input type="hidden" name="fromDate" id="fromDate" value="" />
+                                <input type="hidden" name="toDate" id="toDate" value="" />
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12">
+                        @*<div class="text-right trackingAssets-lenged">
+                                <ul class="legand">
+                                    <li><label>Status:</label></li>
+                                    <li><span class="fail"></span> Non compliance</li>
+                                    <li><span class="pass"></span> Compliance</li>
+                                </ul>
+                            </div>*@
+                        <div class="trackingAssets-lenged">
+                            <label>Status:</label>
+                            <ul class="legand">
+                                <li><span class="processType-Sprite deficiency-btn"></span>Not compliance</li>
+                                <li><span class="processType-Sprite completed-btn"></span>Compliance</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="partialContents">
+                            @await Html.PartialAsync("~/Views/Reports/_AssetsInventoryInspectionReport.cshtml", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        var assetIdindex = 0;
+        $(document).ready(function () {
+            $("#floorId").empty();
+            ClearAllFields();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            if (parseInt(@ViewBag.FloorId) > 0) {
+                getfloors(@ViewBag.FloorId);
+            }
+            var assetids = localStorage.getItem("InventoryassetIds");
+            var AssetSIDS = localStorage.getItem("InventoryassetIds");
+            var drpBuildings = localStorage.getItem("drpBuildings");
+            var floorId = localStorage.getItem("floorId");
+            var from = localStorage.getItem("InventoryfromDate");
+            var todate = localStorage.getItem("Inventorytodate");
+            var drpStatus = localStorage.getItem("drpStatus");
+            var data = null; //localStorage.getItem("InventroyData");
+
+
+            if (from != "" && todate != "" && assetids != null) {
+                ids = AssetSIDS.split(',').length
+
+
+                if (ids > 0) {
+                    $(".multiSelStaus").empty().text(ids + " assets selected");
+                } else {
+                    $(".multiSelStaus").empty().text("Select");
+                }
+
+                $("#assetids").val(assetids);
+                $("#drpBuildings").val(drpBuildings);
+                $("#floorId").val(floorId);
+                $("#from").val(from);
+                $("#todate").val(todate);
+                $("#drpStatus").val(drpStatus);
+                if (data != null) {
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                }
+                //LoadData();
+            }
+            else {
+                SetDefaultDate();
+            }
+            if ('@ViewBag.AssetsId' != '') {
+                var assetsId = '@ViewBag.AssetsId';
+                var assetId = assetsId.split(",");
+                for (var i = 0; i < assetId.length; i++) {
+                    $('.mutliSelect input[type=checkbox]').each(function () {
+                        var control = $(this);
+                        var val = control.attr("id");
+                        if (assetId[i] == val) {
+                            control.prop("checked", true);
+                        }
+                    });
+                }
+                $(".multiSelStaus").empty().text(assetId.length + " assets selected");
+            }
+        });
+
+
+        $(document).on("change", "#AssetId", function () {
+            var thisObj = $(this);
+            var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+            if (assetIdindex == 0) {
+                var lastAllSelected = false;
+                assetIdindex++;
+            }
+            else {
+                var lastAllSelected = $(this).data('all');
+            }
+            var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+            var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+
+            console.log(selectedOptions);
+            var selectedOptionsLength = selectedOptions.length;
+
+            if (isAllSelected == lastAllSelected) {
+
+                if ($.inArray("-1", selectedOptions) >= 0) {
+                    selectedOptionsLength -= 1;
+                }
+
+                if (allOptionsLength <= selectedOptionsLength) {
+
+                    thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                    isAllSelected = true;
+                } else {
+                    thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                    isAllSelected = false;
+                }
+
+            } else {
+                thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+            }
+
+            $(this).data('all', isAllSelected);
+
+    });
+
+    function getSelectedAsset(value) {
+        //var url = "@Url.Action("AssetsInventoryInspectionReport", "Reports")";
+        //window.location.href = url + '?assetIds=' + value;
+
+    }
+        //$(window).scroll(function () {
+        //    debugger
+        //    var data = localStorage.getItem("InventroyData")
+        //    if (data != null) {
+        //        var index = localStorage.getItem("index");
+        //        LoadData(index);
+        //    }
+        //});
+
+        $('body').on('click', '#btnloadMore', function () {
+            var index = localStorage.getItem("index");
+            LoadData(index);
+        });
+
+        function LoadData(index) {
+            var InventoryassetIds = $("#AssetId").val();
+            if (InventoryassetIds != null && InventoryassetIds != "") {
+                InventoryassetIds = InventoryassetIds.filter(i => i !== "-1");
+            }
+            $("#selAssetId").val(InventoryassetIds);
+            var buildingId = $("#drpBuildings").val();
+            var floorId = $("#floorId").val();
+            var InventoryfromDate = $("#from").val();
+            var Inventorytodate = $("#todate").val();
+            var status = $("#drpStatus").val();
+            var isScroll = localStorage.getItem("isScroll");
+            localStorage.setItem("InventoryassetIds", InventoryassetIds);
+            localStorage.setItem("drpBuildings", buildingId);
+            localStorage.setItem("floorId", floorId);
+            localStorage.setItem("InventoryfromDate", InventoryfromDate);
+            localStorage.setItem("Inventorytodate", Inventorytodate);
+            localStorage.setItem("drpStatus", status);
+
+            if (InventoryassetIds) {
+                InventoryassetIds = InventoryassetIds.join(',');
+                var url = '@Url.Action("GetAssetsInventoryInspectionReport", "Reports")';
+                $.ajax({
+                    url: url + '?page=' + index + '&assetIds=' + InventoryassetIds + "&buildingId=" + buildingId + "&floorId=" + floorId + "&fromdate=" + InventoryfromDate + "&todate=" + Inventorytodate + "&status=" + status + "&isScroll=" + isScroll,
+                    cache: false,
+                    type: "GET",
+                    success: function (data) {
+                        localStorage.setItem("InventroyData", data);
+                        $('#partialContents').html(data);
+                        $('#partialContents').fadeIn('fast');
+
+                        var isDataExists = localStorage.getItem("isDataExists");
+
+                        if (isDataExists != "0") {
+                            $("#btndownloadreprort").removeClass("hidden");
+                            //var lbltext = "SHOW MORE RECORDS";
+                            //$('#c_myTable tr:last').after("<tr class='loadmore'><td colspan='11'><div id='divloadmore'><button id='btnloadMore' class='showmorebtn'>" + lbltext + "</button></div></td></tr>");
+                        }
+                        else {
+                            $("#btndownloadreprort").addClass("hidden");
+                        }
+                        //    if (isDataExists == '0') {
+                        //    $('table tr.loadmore').remove();
+                        //    $('#divloadmore').hide();
+                        //}
+                        localStorage.setItem("index", parseInt(index) + 1);
+                        localStorage.setItem("isScroll", true);
+                        $("#btndownloadreprort").show();
+
+                    }
+                });
+            } else {
+                AlertWarningMsg("Please select assets");
+                return false;
+            }
+        }
+
+
+
+
+
+
+    //$('.mutliSelect input[type="checkbox"]').on('click', function () {
+    //    var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+    //        title = $(this).val() + ",";
+
+    //    console.log();
+    //    if ($(this).val() === "0") {
+    //        console.log($(this).is(':checked'))
+    //        var status = $(this).is(':checked');
+    //        $('input:checkbox[class=assetChekcBox]').each(function () {
+    //            $(this).prop("checked", status);
+    //            //.prop('checked', false)
+    //        });
+    //    } else {
+    //        if ($(this).is(':checked')) {
+    //            $(this).addClass("mulSelect");
+    //        } else {
+    //            $(this).removeClass("mulSelect");
+    //        }
+    //    }
+
+    //    if ($('.assetChekcBox:checkbox:checked').length == $('.assetChekcBox:checkbox').length) {
+    //        $(".selectAll:checkbox").prop("checked", true);
+    //    } else {
+    //        $(".selectAll:checkbox").prop("checked", false);
+
+    //    }
+    //    //return false;
+    //    //$(".dropdown dd ul").hide();
+
+    //    var assets = [];
+    //    $('.assetChekcBox:checkbox:checked').each(function () {
+    //        assets.push($(this).attr("id"));
+    //    });
+
+
+    //    if (assets.length > 0) {
+    //        $(".multiSelStaus").empty().text(assets.length + " assets selected");
+    //    } else {
+    //        $(".multiSelStaus").empty().text("Select");
+    //    }
+
+    //    $("#assetids").val(assets.join(","))
+    //    //LoadData();
+    //    //LoadData(assets.join(","));
+    //});
+
+
+
+    //$(function () {
+
+    //});
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        //var startDate = new Date(currentTime.getFullYear() - 1, 0, 1);
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat:dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+
+    $("#drpBuildings").change(function () {
+            getfloors();
+    });
+
+    function getfloors(floorId) {
+        if ($("#drpBuildings").val() != "") {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization")';
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ buildingId: $("#drpBuildings").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (floorList) {
+                for (var i = 0; i < floorList.length; i++) {
+                    $("#floorId").append(
+                        $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                }
+                $("#floorId").val(floorId);
+                @*if (parseInt(@ViewBag.FloorId) > 0) {
+                    $("#floorId").val(@ViewBag.FloorId);
+                }*@
+                //LoadData();
+
+            };
+            floorOptions.error = function () { alert("Error in Getting States!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#floorId").empty();
+            $("#floorId").append(
+                $('<option></option>').val("").html("All"));
+            //LoadData();
+        }
+    }
+
+
+
+        $("#btnrunreport").click(function () {
+            var fromDate = $("#from").val();
+            var toDate = $("#todate").val();
+            $("#fromDate").val(fromDate);
+            $("#toDate").val(toDate);
+            LoadData(1);
+        });
+
+        $("#btnrefresh").click(function () {
+            ClearAllFields();
+        });
+
+
+        function ClearAllFields() {
+        $("#drpBuildings").val('')
+        $("#floorId").val('');
+        $('#drpStatus').val('ACTIV');
+            $("#assetids").val('');
+            $('#partialContents').empty();
+            $(".ddlbox").selectpicker('val', 0);
+        $('.mutliSelect input[type="checkbox"]').each(function () {
+            $(this).removeClass("mulSelect");
+            $(this).prop("checked", false);
+        });
+        $(".selectAll:checkbox").prop("checked", false);
+        $(".multiSelStaus").empty().text("Select");
+            SetDefaultDate();
+
+        //LoadData();
+        }
+
+        $('.ddlbox').selectpicker().on('loaded.bs.select', enableBoostrapSelectOptgroup);
+
+        function enableBoostrapSelectOptgroup() {
+
+            let that = $(this).data('selectpicker'),
+                inner = that.$menu.children('.inner');
+
+            // remove default event
+            inner.off('click', '.divider, .dropdown-header');
+            // add new event
+            inner.on('click', '.divider, .dropdown-header', function (e) {
+                // original functionality
+                e.preventDefault();
+                e.stopPropagation();
+                if (that.options.liveSearch) {
+                    that.$searchbox.trigger('focus');
+                } else {
+                    that.$button.trigger('focus');
+                }
+
+                // extended functionality
+                let position0 = that.isVirtual() ? that.selectpicker.view.position0 : 0,
+                    clickedData = that.selectpicker.current.data[$(this).index() + position0];
+
+                // copied parts from changeAll function
+                let selected = null;
+                for (let i = 0, data = that.selectpicker.current.data, len = data.length; i < len; i++) {
+                    let element = data[i];
+                    if (element.type === 'option' && element.optID === clickedData.optID) {
+                        if (selected === null) {
+                            selected = !element.selected;
+                        }
+                        element.option.selected = selected;
+                    }
+                }
+                that.setOptionStatus();
+                that.$element.triggerNative('change');
+            });
+        }
+
+</script>
+
+<style>
+    .trackingAssets-lenged {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+        justify-content: end;
+    }
+</style>
+

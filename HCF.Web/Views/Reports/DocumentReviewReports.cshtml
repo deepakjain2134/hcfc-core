@@ -1,0 +1,73 @@
+﻿@model IEnumerable<HCF.BDO.Standard>
+@{
+    ViewBag.Title = "Document Review Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Document List and Review Tool
+        </h1>
+    </section>
+        }
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div>
+                            Legend: C=Compliant; NC=Not compliant; NA=Not applicable; IOU=Surveyor awaiting documentation
+                        </div>
+                        <table id="documentTable" class="table table-bordered table-striped" width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td colspan="6">
+                                    @foreach (var item in Model)
+                                    {
+                                        <table id="documentTable" class="table table-bordered table-striped" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <thead>
+                                                <tr>
+                                                    <th width="10%">STANDARD - EPs</th>
+                                                    <th width="2%">C</th>
+                                                    <th width="2%">NC</th>
+                                                    <th width="2%">NA</th>
+                                                    <th width="2%">IOU</th>
+                                                    <th width="30%">Document / Requirement</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td width="10%">@item.TJCStandard</td>
+                                                    <td width="2%"></td>
+                                                    <td width="2%"></td>
+                                                    <td width="2%"></td>
+                                                    <td width="2%"></td>
+                                                    <td width="30%">@item.TJCDescription</td>
+                                                </tr>
+                                                @foreach (var ep in item.EPDetails)
+                                                {
+                                                    <tr>
+                                                        <td width="10%">@ep.EPNumber</td>
+                                                        <td width="2%"></td>
+                                                        <td width="2%"></td>
+                                                        <td width="2%"></td>
+                                                        <td width="2%"></td>
+                                                        <td width="30%">
+                                                            @ep.Description
+                                                           
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                </td>
+                            </tr>
+                            <tr><td colspan="6"></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+

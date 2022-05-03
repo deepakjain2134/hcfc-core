@@ -1,0 +1,123 @@
+﻿@model HCF.BDO.Binders
+@{
+    Layout = null;
+}
+
+<div class="binderpage-heading">
+    <common-image src="@Model.FilePath" title="@Model.BinderName" class="img_binder"></common-image>
+    <div class="binder-RightHeading">
+        <h3>
+            <a href="@Url.Action("GetEpDocByBinder", "Repository", new { id = Model.BinderId })">@Model.BinderName</a>
+        </h3>
+        <h4 id="binderEpTitle"></h4>
+        <h4 id="binderEpDocTitle"></h4>
+        <h4 id="binderEpDescription" class="ePDescriptions" style="padding-right: 50px;"></h4>
+        <button id="backToList" class="button1 hide" style="float: right;margin-top: -50px;">Back</button>
+    </div>
+</div>
+
+<div id="epBinders">
+    <div class="table-responsive" style="clear: both;">
+        @if (Model.EpDetails.Count != 0)
+        {
+            <table id="c_myTable" class="table">
+                <thead>
+                    <tr>
+                        <th style="width:240px;">Assigned EPs</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.EpDetails.Where(x => x != null).OrderBy(x => x.StandardEp))
+                    {
+                        <tr>
+                            <td>
+                                <a class="binderEp binder-epsNumber" epid="@item.EPDetailId" binderId="@Model.BinderId">
+                                    <span class="processType-Sprite @commonModelFactory.GetInspectionStatus(item.EpTransStatus)"></span> @item.StandardEp
+                                    <i class="fa fa-angle-right binder-arrow" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                            @if (item.DocumentType.Count != 0)
+                            {
+                                <td>
+                                    <ul>
+                                        @foreach (var docTYpe in item.DocumentType.OrderBy(x => x.Name))
+                                        {
+                                            <li class="docTypeName">@docTYpe.Name</li>
+                                        }
+                                    </ul>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <span>NA</span>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div id="para">
+                <p class="binder-review"><img src="~/dist/Images/binder-tooltip.png" />Standards,EPs not link with @Model.BinderName</p>
+            </div>
+        }
+    </div>
+</div>
+<div class="EPbinders-row">
+    <div class="EPbinders-11">
+        <div id="epDocs">
+        </div>
+    </div>
+    <div class="EPbinders-1">
+        <div id="binderEpBox" class="hide">
+            <ul class="epbinder-listitem">
+                @foreach (var item in Model.EpDetails.Where(x => x != null).GroupBy(x => x.StDescID).Select(x => x.FirstOrDefault()).ToList())
+                {
+                    <li id="@string.Format("stdec_{0}",item.StDescID)" class="hide">
+                        <ul class="epbinder-innerlist epbtns">
+                            @foreach (var eps in Model.EpDetails.Where(x => x != null && x.StDescID == item.StDescID).OrderBy(x => x.StandardEp))
+                            {
+                                <li id="@string.Format("lefteps_{0}",eps.EPDetailId)" epid="@eps.EPDetailId" binderId="@Model.BinderId" class="epNumberList binderEp">
+                                    @eps.EPNumber
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+
+     $(document).ready(function () {
+
+
+        $(".ePDescriptions").shorten({
+            moreText: 'read more',
+            showChars: 120,
+            lessText: 'read less'
+        });
+
+    $(document).on('click', '#backToList', function () {
+        $("#epBinders").show();
+        $("#epDocs").hide();
+        $(this).addClass("hide");
+        $("#binderEpBox").addClass('hide');
+        $("#binderEpBox li").addClass('hide');
+        $(".epNumberList").removeClass("active");
+        $("#binderEpDocTitle").empty();
+        $("#binderEpTitle").empty();
+        $("#binderEpDescription").empty();
+    });});
+</script>
+<style>
+    .para_text {
+        text-align: justify;
+        text-align-last: justify;
+    }
+</style>

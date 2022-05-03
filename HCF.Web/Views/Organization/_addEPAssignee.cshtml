@@ -1,0 +1,74 @@
+﻿@model HCF.Web.ViewModels.Organization.EpAssignmentsViewModel
+@{
+    var assignedUser = new List<HCF.BDO.UserProfile>();
+    var unAssignedUser = new List<HCF.BDO.UserProfile>();
+
+    if (Model.UserIds != null && Model.UserList != null)
+    {
+        int[] userArray = Model.UserIds;
+        assignedUser = Model.UserList.ToList().Where(x => userArray.Contains(x.UserId)).ToList();
+        unAssignedUser = Model.UserList.ToList().Where(x => !userArray.Contains(x.UserId)).ToList();
+    }
+    else
+    {
+        unAssignedUser = Model.UserList.ToList();
+    }
+
+}
+
+<div class="modal-dialog model_big">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span class="modelTitle">EP Users</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+        </div>
+        <div class="modal-body asset_list_popup" id="modelContent">
+            <div class="asset_list_view">
+                <div id="non-tracked-info" class="hide">
+                    You have chosen to track this EP.
+                    <br />
+                    Below, you can check and assign user(s) to be responsible for this EP.  If unneeded at this time, click ‘Close’.
+                    <br />
+                </div>
+                <div class="">
+                    <ul id="demoOne" class="demo epreview-scrollBar">
+                        @foreach (var item in assignedUser.OrderBy(x => x.Name))
+                        {
+                            <li><input type="checkbox" value="@item.UserId" checked /><span></span><a href="#">@item.Name</a>  </li>
+                        }
+
+                        @foreach (var item in unAssignedUser.OrderBy(x => x.Name))
+                        {
+                            <li><input type="checkbox" value="@item.UserId" /> <span></span><a href="#">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn comm-button" id="saveEpAssignee" data-dismiss="modal">Save</button>
+            <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#demoOne').listnav({
+        includeAll: true,
+        includeNums: false,
+    });
+</script>
+
+<style>
+    .listNavHide {
+        display: none !important;
+    }
+    .epreview-scrollBar {
+        max-height: 380px;
+    }
+    .modal-open .modal {
+        overflow-y: hidden;
+    }
+</style>

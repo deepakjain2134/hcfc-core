@@ -1,0 +1,80 @@
+﻿@model HCF.BDO.FireDrillQuestionnaires
+@{  ViewBag.Title = "Fire Drill Questionnaires";}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add FireDrill Questionnaire
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 settingnewBox">
+
+            @await Html.PartialAsync("_MoreConfig")
+
+            <div class="rightcol-setting">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("AddFiredrillQuestionnaires", "Rounds", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(x => x.FireDrillQuesId)
+                        
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Firedrill Category<em class="required-field"> *</em></label>
+                                        @Html.DropDownListFor(m => m.FireDrillCatId, new SelectList(ViewBag.FireDrillCategory, "FiredrillCatId", "CategoryName", Model.FireDrillCatId),
+                                               "Select Category",
+                                             new { @class = "form-control", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.FireDrillCatId)
+                                        @*@if (Model.FireDrillQuesId == 0)
+                                            {
+                                                @Html.DropDownListFor(m => m.FireDrillCatId, new SelectList(ViewBag.FireDrillCategory, "FiredrillCatId", "CategoryName", Model.FireDrillCatId),
+                                                   "Select Category",
+                                                 new { @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FireDrillCatId)
+                                            }
+                                            else
+                                            {
+                                                @Html.DropDownListFor(m => m.FireDrillCatId, new SelectList(ViewBag.FireDrillCategory, "FiredrillCatId", "CategoryName", Model.FireDrillCatId),
+                                                   "Select Category",
+                                                 new { @class = "form-control disabled", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.FireDrillCatId)
+                                            }*@
+                                    </div>
+                                    <div class="form-group comman_checkbox">
+
+                                        @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                        @Html.ValidationMessageFor(m => m.IsActive)
+                                        <label>Active</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Questionnaire<em class="required-field"> *</em></label>
+                                        @Html.TextAreaFor(model => model.Questionnaries, new { @class = "form-control", required = "required", @maxlength = "500", oninput = "validate(this)" })
+                                        @Html.ValidationMessageFor(model => model.Questionnaries)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right button_Div">
+                                <input type="submit" value='Save ' class="comm-button" />
+                                @*@Html.ActionLink("Cancel", "FireDrillQues", "Rounds", new { @class = "comm-button" })*@
+                                @Html.ActionLink("Cancel", "FireDrillQues", new { controller = "Rounds" }, new { @class = "comm-Cancelbutton" })
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+</script>

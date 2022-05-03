@@ -1,0 +1,379 @@
+﻿
+@{
+
+    ViewBag.Title = "ManagementReports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Management Reports
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="workOrder-search">
+                        <div class="col-xs-4" style="padding-left:0;">
+                            <label><strong>Buildings</strong></label>
+                            <buildingdropdownList name="drpBuildings" selectedvalue="0" required="required" firsttext="Select Building" class="form-control selectyear select_group"></buildingdropdownList>
+                            @*@Html.BuildingDropDownList("drpBuildings", 0, "Select Building", new { @class = "form-control selectyear select_group", required = "required" })*@
+                        </div>
+                        <div class="col-xs-2">
+                            <label><strong>Report Type</strong></label>
+                            <select id="ReportType" name="" class="form-control" required="required">
+                                <option value="">Select Report Type</option>
+                                <optgroup label="Permit Report">
+                                    <option value="1">ICRA</option>
+                                </optgroup>
+                                <optgroup label="Asset Report">
+                                    <option value="2">Asset Inspection</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <label><strong>From</strong></label>
+                            <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                        </div>
+                        <div class="col-xs-2">
+                            <label><strong>To</strong></label>
+                            <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                        </div>
+                        <div class="col-xs-2">
+                            <label style="display:block;"><strong>&nbsp;</strong></label>
+                            <button class="comm-button" id="btnrunreport">Run Report</button>
+                        </div>
+                    </div>
+                    <div class="" id="partialContents">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        SetDefaultDate();
+
+    });
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        debugger;
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+
+       $("#btnrunreport").click(function () {
+           if ($('#ReportType').val() != '')
+        {
+               var ReportType = $('#ReportType').val();
+            var from = $('#from').val();
+        var todate = $('#todate').val();
+               if (ReportType == 1) {
+                   var url = '@Url.Action("PermitReport", "Permit")';
+                   $.ajax({
+                       url: url + '?permittype=' + '1' + '&from=' + from + '&todate=' + todate,
+                       cache: false,
+                       type: "GET",
+                       success: function (data) {
+                           $('#partialContents').html(data);
+                           $('#partialContents').fadeIn('fast');
+                           PermitChart();
+                           if ($("#PermitTbl tbody tr").length == 0) {
+                               $("#PermitTbl").closest('div.round-groupname').hide();
+                               swalalert("NO Data Available");
+                           } 
+
+                       }
+                   });
+               }
+               else {
+                   var url = '@Url.Action("GetAssetDeficiencyData", "Reports")';
+                   $.ajax({
+                       url: url + '?from=' + from + '&todate=' + todate,
+                       cache: false,
+                       type: "GET",
+                       success: function (data) {
+                           $('#partialContents').html(data);
+                           $('#partialContents').fadeIn('fast');
+                           AssetChart();
+                           if ($("#assettbl tbody tr").length == 0) {
+                               $("#assettbl").closest('div.round-groupname').hide();
+                               swalalert("NO Data Available");
+                           }
+
+
+                       }
+                   });
+               }
+
+      
+        }
+   else {
+            AlertWarningMsg("Please select Report Type")
+        }
+
+
+    });
+
+    function PermitChart() {
+
+
+        var count = [];
+        $('#PermitTbl .PermitCount').each(function () {
+
+            $(this).each(function () {
+                var _status
+                var cell = $(this).html();
+
+                count.push(parseInt(cell))
+
+            });
+        });
+
+        var Status = [];
+        var color = [];
+        $('#PermitTbl .Status').each(function () {
+            var _status;
+            var _color;
+            $(this).each(function () {
+                var cell = $(this).html();
+
+                if (cell == '2') {
+                    _status = 'Requested';
+                    _color = '#ffc029';
+
+                }
+                else if (cell == '1') {
+                    _status = 'Approved';
+                    _color = '#6ead4f';
+                }
+                else if (cell == '5') {
+                    _status = 'Closed';
+                    _color = '#4272c1';
+                }
+
+                Status.push((_status))
+                color.push((_color))
+            });
+
+
+
+        });
+
+
+
+        var data = []
+
+        for (i = 0; i < count.length; i++) {
+            obj = {};
+            var y = count[i]
+            var _color = color[i]
+           
+            obj["y"] = y;
+            obj["color"] = _color;
+
+
+            data.push(obj);
+        }
+
+        debugger
+        Highcharts.chart('PermitChart', {
+            chart: {
+                type: 'column',
+
+            },
+            title: {
+                text: ''
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: {
+                categories: Status
+            },
+            yAxis: {
+                title: {
+                    text: 'Status'
+                },
+                showEmpty: false
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+
+            series: [{
+                showInLegend: false,
+                data: data
+            }],
+
+        });
+    }
+
+    function AssetChart() {
+  
+        var count = [];
+        $('#assettbl .Assets').each(function () {
+
+            $(this).each(function () {
+                               var cell = $(this).html();
+
+                count.push(parseInt(cell))
+
+            });
+        });
+
+        var name = [];
+        var color = [];
+        $('#assettbl .AssetStatus').each(function () {
+         
+            var _color;
+            $(this).each(function () {
+                var cell = $(this).html();
+
+                if (cell == 'Low Risk') {
+                   
+                    _color = '#4272c1';
+
+                }
+                else if (cell == 'Medium Risk') {
+                   
+                    _color = '#ffc029';
+                }
+                else if (cell == 'High Risk') {
+                   
+                    _color = '#ef7d37';
+                }
+                else if (cell == 'Very High Risk') {
+
+                    _color = '#ff0000';
+                }
+
+                name.push(cell);
+                color.push((_color))
+            });
+
+
+
+        });
+
+
+
+        var data = []
+
+        for (i = 0; i < count.length; i++) {
+            obj = {};
+            var y = count[i]
+            var _color = color[i]
+            var _name = name[i]
+
+            obj["y"] = y;
+            obj["name"] = _name;
+            obj["color"] = _color;
+
+
+            data.push(obj);
+        }
+
+
+
+        Highcharts.chart('Assetpiechart', {
+
+            legend: {
+                enabled: true
+            },
+            title: {
+                    text: ''
+                },
+          
+            plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            formatter: function () {
+                                return '<b>' + this.point.name + '</b>: ' + parseFloat(this.percentage).toFixed(2) + ' %';
+                            }
+                        }
+                    }
+                },
+          
+            series: [{
+                showInLegend: true,
+                type: 'pie',
+                allowPointSelect: true,
+                states: {
+                    inactive: {
+                        opacity: 1
+                    },
+                    select: {
+                        opacity: 0.5
+                    }
+                },
+
+                keys: ['name','y', 'color'],
+                data: data
+                
+            }]
+
+        });
+
+
+
+    }
+</script>
+

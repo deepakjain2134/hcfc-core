@@ -1,0 +1,204 @@
+﻿@model IEnumerable<HCF.BDO.FireDrillCategory>
+@{
+    ViewBag.Title = "Fire Drill Questionnaries";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Fire Drill Questionnaire
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href='@(Url.RouteUrl("addQuestionnaires", new { fireDrillquesid = 0 }))' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Questionnaire" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="f_myTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none">CategoryId</th>
+                                        <th>
+                                            Fire Drill Category
+                                        </th>
+                                        <th>
+                                            Questionnaire
+                                        </th>
+                                        <th> Active </th>
+                                        <th> Action </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        foreach (var ques in item.FireDrillQuestionnaires)
+                                        {
+                                            <tr>
+                                                <td style="display:none">
+                                                    @item.FiredrillCatId
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => ques.Questionnaries)
+                                                </td>
+                                                <td class="comman_checkbox1">
+                                                    @Html.CheckBoxFor(modelItem => ques.IsActive, new { @class = "chkQues", rel = ques.FireDrillQuesId })<span></span>
+                                                </td>
+                                                <td>
+                                                    <a title="Edit Firedrill Question" href='@Url.RouteUrl("addQuestionnaires", new {  fireDrillquesid= ques.FireDrillQuesId})' class="pull-right">
+                                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" alt="3d_add_button" />
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var firedrillCatId = '@ViewBag.fireCatId';
+
+        function getExporteDExcelTitle() {
+            var title = "Fire Drill Questionnaire Report";
+            return title;
+        }
+
+        var dtable = $('#f_myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "aaSorting": [0, 'desc'],
+            "bPaginate": $('#f_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            dom: "Blfrtip",
+            columnDefs: [
+                {
+                    targets: [2, 3],
+                    orderable: false
+                }
+            ],
+            buttons: [
+                {
+                    extend: 'pdf',
+                    text: 'Export as pdf',
+                    title: function () { return getExporteDExcelTitle(); },
+                    exportOptions: {
+                        columns: [1,2]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: 'Fire Drill Questionnaire Report',
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n @HCF.Web.Base.UserSession.CurrentOrg.Address',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Fire Drill Questionnaire Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+        if (firedrillCatId > 0) {
+            dtable.column(0).search("^" + firedrillCatId + "$", true, true, false).draw();
+        }
+    });
+
+
+
+        $('.chkQues').on('change', function () {
+            debugger;
+            var id = $(this).attr("rel")
+            var val = $(this).prop('checked');
+            $.get("@Url.Action("FireDrillActive", "Rounds")" + "?id=" + id + "&IsActive=" + val, function () { });
+    });
+
+</script>

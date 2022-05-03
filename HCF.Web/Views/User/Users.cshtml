@@ -1,0 +1,545 @@
+﻿@model IEnumerable<HCF.BDO.UserProfile>
+@{
+    var users = Model.ToList();
+    ViewBag.Title = "Users";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Users
+        </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary">
+
+                <div class="row tablelist-topform">
+                    <div class="col-md-6">
+                        @await Html.PartialAsync("_userViewSelect")
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a class="btn comm-bluebutton" href="@Url.Action("UserCertificates", "User", new {UserId = ""})" title="Certificates">
+                            <span>Certificates</span>
+                        </a>
+                        <a class="btn comm-bluebutton openOutlook" href="javascript:void(0);" onclick="openOutlook();" title="Open in Outlook to Send Mail">
+                            <span>Send Email</span>
+                        </a>
+
+                        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+                        {
+                            <a href="@Url.Action("UnlockUserPopUp", "User")" title="Unlock User"
+                               data-toggle="modal" data-target="#modal-container"
+                               class="btn comm-Cancelbutton">
+                                Unlock User
+                            </a>
+                        }
+
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="allusers-Box">
+                            <input type="checkbox" id="showallActiveuser" class="comman_checkbox" checked="checked" /><span></span>Internal Users &nbsp;&nbsp;
+                            <input type="checkbox" id="showvendoruser" class="comman_checkbox" /><span></span>Vendor Users &nbsp;&nbsp;
+                            <input type="checkbox" id="showalluser" name="chkActive" class="comman_checkbox" checked="checked" /><span></span>Active Users &nbsp;&nbsp;
+                            <input type="checkbox" id="showinactive" name="chkActive" class="comman_checkbox" /><span></span>Inactive Users
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <table id="userTable" class="display table table-bordered table-striped comman_checkbox1">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.CheckBox("CheckAllEmail", false, new { @title = "ALL - Checking this will check all checkbox and viceversa" })<span></span>
+                                    </th>
+                                    <th>
+                                        First Name
+                                    </th>
+                                    <th>
+                                        Last Name
+                                    </th>
+
+                                    <th title="Email">
+                                        <img src="@Url.Content("~/dist/Images/Icons/internal_user_mail_icon.png")" alt="internal_user_mail_icon" title="Email" />
+                                    </th>
+                                    <th style="display:none;">
+                                        Email
+                                    </th>
+                                    <th title="PhoneNo ">Phone #</th>
+                                    <th>
+                                        Vendor Name
+                                    </th>
+                                    <th>
+                                        Last Login
+                                    </th>
+
+                                    <th>
+                                        Orientation Date
+                                    </th>
+                                    <th style="display:none;">User Group</th>
+                                    <th title="Status">
+                                        <img src="@Url.Content("~/dist/Images/Icons/internal_user_status_icon.png")"
+                                             alt="internal_user_status_icon" title="Status" />
+                                    </th>
+                                    <th title="User Group"><img src="@Url.Content("~/dist/Images/Icons/internal_usergroup_icon.png")" alt="internal_usergroup_icon" title="User Group" /></th>
+                                    <th>Action</th>
+                                    <th style="display:none"></th>
+                                    <th><img src="/dist/Images/Icons/internal_user_certificate_icon.png" alt="Certificates" title="Certificates" class="align-right"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in users.Where(x => !(string.IsNullOrEmpty(x.Email))))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.CheckBox("sendMailCheckbox", new { @mailId = item.Email })<span></span>
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FirstName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.LastName)
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td style="display:none;">
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td class="mask-phone-div">
+                                            @item.PhoneNumber
+                                        </td>
+                                        <td>
+                                            @*@Html.DisplayFor(modelItem => item.VendorName)*@
+                                            @item.GetVendorName()
+                                        </td>
+
+                                        @if (item.UserLogin.ToList().Count > 0)
+                                        {
+                                            <td>
+                                                <a class="" style="cursor:pointer" onclick="location.href ='@Url.Action("LoginHistory", "User", new { userid = item.UserId })'">
+                                                    @item.UserLogin.OrderByDescending(x => x.LogOnDate).FirstOrDefault().LogOnDate.ToClientTime().ToFormatDateTime()
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td></td>
+                                        }
+                                        <td>
+                                            @item.OrientationDate.ToFormatDate()
+                                        </td>
+                                        <td style="display:none;">
+                                            @if (item.UserGroups.Count > 1)
+                                            {
+
+                                                <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover' data-placement='left' data-original-title='Role Group'
+                                                   data-content='@string.Join(",", item.UserGroups.Select(x => x.Name))'>
+                                                    @string.Join(",", item.UserGroups.Select(x => x.Name))
+                                                </a>
+                                            }
+                                            else if (item.UserGroups != null && item.UserGroups.Count == 1)
+                                            {
+                                                @item.UserGroups[0].Name
+                                            }
+                                        </td>
+                                        <td>
+                                            @*@Html.DisplayFor(modelItem => item.StatusCode)*@
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                            <span style="display:none">(@item.IsActive.Equals(false))</span>
+                                        </td>
+                                        <td>
+                                            @if (item.UserGroups.Count > 1)
+                                            {
+                                                @item.UserGroups[0].Name
+                                                <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover' data-placement='left' data-original-title='Role Group'
+                                                   data-content='@string.Join(",", item.UserGroups.Select(x => x.Name))'>
+                                                    @($"{"...See More"}")
+                                                </a>
+                                            }
+                                            else if (item.UserGroups != null && item.UserGroups.Count == 1)
+                                            {
+                                                @item.UserGroups[0].Name
+                                            }
+                                        </td>
+                                        <td title="Edit">
+                                            <img onclick="location.href ='@Url.Action("Register", "User", new { userId = item.UserId, vendorId = item.VendorId })'"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                        </td>
+                                        <td checked="checked" style="display:none">
+                                            <span style="display:none">@item.IsVendorUser  </span>
+                                        </td>
+                                        <td>
+                                            @if (item.UserCertificates.Any())
+                                            {
+                                                <img onclick="location.href ='@Url.Action("UserCertificates", "User", new { userId=item.UserId , view = "UserView"})'"
+                                                     src="@Url.Content("~/dist/Images/Icons/internal_user_certificate_icon.png")" alt="Certificates"
+                                                     title="View Certificates" class="align-right" />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</div>
+
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
+@*<div class="modal fade" id="UnlockUserAccount" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content" style="min-height: 200px;">
+            </div>
+        </div>
+    </div>*@
+
+@section scripts{
+
+    <script type="text/javascript">
+        function getExporteDExcelTitle() {
+
+            var title = "Users";
+
+            return title;
+        }
+        $(document).ready(function () {
+
+            if (performance.navigation.type == 2) {
+                 location.reload();
+            }
+
+            $('input:radio[id=user]').prop('checked', true);
+            $(".mask-phone-div").each(function (index) {
+                if ($(this).html().trim().length > 0) {
+                    $(this).mask("(000) 000-0000");
+                }
+            });
+
+            var userdatatable = $('#userTable').DataTable({
+
+                "searching": true,
+                "pageLength": 20,
+                "lengthChange": false,
+                "bPaginate": $('#userTable tbody tr').length > 20,
+                "bInfo": false,
+                "stateSave": true,
+                "aaSorting": [],
+                "language": {
+                    "emptyTable": "No data available in table",
+                    "search": "_INPUT_",
+                    "searchPlaceholder": "Search User..."
+                },
+                'aoColumnDefs': [{
+                    'bSortable': false,
+                    'aTargets': [0, -1, -2, -3,]
+                }],
+                drawCallback: function () {
+                    $('[rel="popover"]').popover();
+                },
+                columnDefs: [
+                    { type: 'non-empty-string', targets: 1 },
+                    { type: 'non-empty-string', targets: 2 },
+                    { type: 'non-empty-string', targets: 3 },
+                    { type: 'date', targets: 5 }
+                ],
+                initComplete: function () {
+            $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.RouteUrl("adduser"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add User" alt="3d_add_button"></a></div >');
+                },
+
+                    dom:"<'row'<'col-sm-2'B><'col-sm-10 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+                    /*  dom: "<'row' <'col-sm-12 tableactions'flp  <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",*/
+
+                    buttons: [
+                     {
+                        extend: 'pdfHtml5',
+                orientation: 'portrait',
+                //pageSize:'LEGAL',
+                title: 'User Report',
+                exportOptions: {
+                    columns: [1, 2,  4, 5, 6,7,8,  9]
+                },
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                customize: function (doc) {
+                    //genereateRpeort(doc)
+                    //Remove the title created by datatTables
+                    doc.content.splice(0, 1);
+                    //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                    var now = new Date();
+                    var jsDate = setDateFormat(now);
+                    //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                    // Logo converted to base64
+                    //var logo = $("#logoimgbase64").val();
+                    debugger;
+                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                    //console.log(logo);
+                    // The above call should work, but not when called from codepen.io
+                    // So we use a online converter and paste the string in.
+                    // Done on http://codebeautify.org/image-to-base64-converter
+                    // It's a LONG string scroll down to see the rest of the code !!!
+                    //var logo = '';
+                    // A documentation reference can be found at
+                    // https://github.com/bpampuch/pdfmake#getting-started
+                    // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                    // or one number for equal spread
+                    // It's important to create enough space at the top for a header !!!
+                    doc.pageMargins = [20, 60, 20, 30];
+                    // Set the font size fot the entire document
+                    doc.defaultStyle.fontSize = 8;
+                    // Set the fontsize for the table header
+                    doc.styles.tableHeader.fontSize = 7;
+                    // Create a header object with 3 columns
+                    // Left side: Logo
+                    // Middle: brandname
+                    // Right side: A document title
+                    doc['header'] = (function () {
+                        return {
+                            columns: [
+                                { image: logo, width: 40 },
+                                {
+                                alignment: 'left',
+                                    italics: true,
+                                   text: ('@HCF.Web.Base.UserSession.CurrentOrg'!=null ?getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'):""), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: 'User Report',
+                                    margin: [0, 6, 0, 0]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Create a footer object with 2 columns
+                    // Left side: report creation date
+                    // Right side: current page and total pages
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Created on: ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated from: ', { text: 'CRx' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                      text: ['Generated by: ', { text: ('@HCF.Web.Base.UserSession.CurrentUser'!=null ?'@HCF.Web.Base.UserSession.CurrentUser.Name':"") }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Change dataTable layout (Table styling)
+                    // To use predefined layouts uncomment the line below and comment the custom lines below
+                    // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+               {
+                   extend: 'excel',
+                   text: 'Export as excel',
+                   filename: function () { return getExporteDExcelTitle(); },
+                   title: function () { return getExporteDExcelTitle(); },
+                   customize: function (xlsx) {
+                       var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                       var col = $('col', sheet);
+                       //set the column width otherwise it will be the length of the line without the newlines
+                       $(col[3]).attr('width', 50);
+                       $('row c[r^="B"]', sheet).each(function () {
+
+                           $(this).attr('s', '55');
+
+                       })
+                   },
+                   exportOptions: {
+                       modifer: {
+                           page: 'all',
+                           search: 'none'
+                       },
+                       columns: [1, 2, 4, 5, 6, 7, 8, 9]
+                   }
+               }
+            ]
+            });
+
+            if ('@HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")'=='False')
+            {
+                $(".buttons-pdf").hide();
+                $(".buttons-exel").hide();
+            }
+
+            function UserFilterthroughCheckBox() {
+                userdatatable.columns(-2).search("").columns(-5).search("").draw();
+                //Internal Users List Default View
+                debugger;
+                if ($("#showallActiveuser").is(":checked") && $("#showvendoruser").is(":not(:checked)")) {
+
+                    if ($("#showalluser").is(":checked")) {
+                        userdatatable.columns(-2).search(false).columns(-5).search(false).draw();
+                    }
+                    else if ($("#showinactive").is(":checked")) {
+                        userdatatable.columns(-2).search(false).columns(-5).search(true).draw();
+                    }
+                }
+                // Show both Users Internal & Vendor
+               
+                else if ($("#showallActiveuser").is(":checked") && $("#showvendoruser").is(":checked")) {
+
+                    if ($("#showalluser").is(":checked")) {
+                        userdatatable.columns(-5).search(false).draw();
+                    }
+                    else if ($("#showinactive").is(":checked")) {
+                        userdatatable.columns(-5).search(true).draw();
+                    }
+
+                }
+                     // vendor Users List
+               
+                else if ($("#showallActiveuser").is(":not(:checked)") && $("#showvendoruser").is(":checked")) {
+                    
+                    if ($("#showalluser").is(":checked")) {
+                        userdatatable.columns(-2).search(true).columns(-5).search(false).draw();
+                    }
+                    else if ($("#showinactive").is(":checked")) {
+                        userdatatable.columns(-2).search(true).columns(-5).search(true).draw();
+                    }
+                }
+                     // Internal Users List Default View
+             
+                else {
+             
+                    if ($("#showalluser").is(":checked")) {
+                        userdatatable.columns(-2).search(false).columns(-5).search(false).draw();
+                    }
+                    else if ($("#showinactive").is(":checked")) {
+                        userdatatable.columns(-2).search(false).columns(-5).search(true).draw();
+                    }
+                }
+
+            }
+
+            // Internal Users Checkbox
+            $("#showallActiveuser").change(function () { UserFilterthroughCheckBox();
+            });
+
+            // All Vendor Users Checkbox
+            $("#showvendoruser").change(function () { UserFilterthroughCheckBox(); 
+            });
+
+            // Active Users Checkbox
+            $("#showalluser").change(function () {
+
+                userdatatable.columns(-2).search("").columns(-5).search("").draw();
+                console.log($(this).attr("id"));
+                if ($("#showalluser").is(":checked")) {$("#showinactive").prop('checked', false);}
+                else {$("#showinactive").prop('checked', true);}
+
+                if ($(this).is(":checked")) {UserFilterthroughCheckBox();}
+            });
+
+            //Non Active Users Checkbox
+            $("#showinactive").change(function () {
+                userdatatable.columns(-2).search("").columns(-5).search("").draw();
+                console.log($(this).attr("id"));
+                if ($("#showinactive").is(":checked")) { $("#showalluser").prop('checked', false); }
+                else {$("#showalluser").prop('checked', true); }
+
+                if ($(this).is(":checked")) { UserFilterthroughCheckBox();}
+            });
+
+            filteruser("False");
+
+            function filteruser(value) {
+                userdatatable.columns(-2).search(value).draw();
+                userdatatable.columns(-5).search(value).draw();
+            }
+
+            var allPages = userdatatable.cells().nodes();
+            $('input#CheckAllEmail[type="checkbox"]').click(function () {
+
+                let checkedValue = this.checked;
+                let isAllChecked = $(allPages).find('input[name="sendMailCheckbox"][type="checkbox"]').prop('checked');
+                if (checkedValue) {if (isAllChecked) {isAllChecked = false;}}
+                if (checkedValue) {
+                    if (!isAllChecked) {$(allPages).find('input[name="sendMailCheckbox"][type="checkbox"]').prop('checked', true);}
+                    else {$(allPages).find('input[name="sendMailCheckbox"][type="checkbox"]').prop('checked', false);}
+                }
+                else {$(allPages).find('input[name="sendMailCheckbox"][type="checkbox"]').prop('checked', false);}
+                });
+            });
+
+        function openOutlook() {
+            //debugger;
+            var items = document.querySelectorAll('input[name="sendMailCheckbox"][type="checkbox"]:checked');
+            var emailIDs = '';
+            for (let item of items) {
+                let emailId = $(item).attr('mailId');
+                emailIDs += emailId;
+                emailIDs += ';';
+            }
+            if (emailIDs.trim() == '') {
+                $('.openOutlook').removeAttr('target');
+                $('.openOutlook').attr('href', 'javascript:void(0)');
+                swalalert("Please check at least one record to send email");
+            } else {
+                let url = `mailto:?bcc=${emailIDs}`;
+                $('.openOutlook').attr('target', '_blank');
+                $('.openOutlook').attr('href', url);
+                //window.location.href = `mailto:?bcc=${emailIDs}`;
+            }
+        }
+
+
+        $('input[name="sendMailCheckbox"][type="checkbox"]').change(function () {
+            debugger;
+            let el = $('input#CheckAllEmail[type="checkbox"]');
+            el[0].checked = false;
+        });
+       
+
+    </script>
+    @*<style>
+        .comman_checkbox1 input[type="checkbox"]:checked {
+            pointer-events: none;
+        }
+    </style>*@
+}

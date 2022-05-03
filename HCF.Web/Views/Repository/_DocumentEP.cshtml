@@ -1,0 +1,183 @@
+﻿@model IEnumerable<HCF.BDO.DocumentType>
+<input type="hidden" id="duedays" value="@ViewBag.DueDays" />
+<table id="documentep" class="table table-bordered table-striped no-footer" width="100%">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th style="display:none"></th>
+            <th>Policy Name</th>
+            <th>Standard,EP</th>
+            <th>Last Review</th>
+            <th>Next Review</th>
+            <th>Responsible </th>
+            <th>View Policy </th>
+            <th>View Sample </th>
+            <th>History </th>
+            <th>Update </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Where(x => x.DocCategoryID == HCF.BDO.Enums.DocCategory.Policy).Where(x => x.EPDocument.Any()))
+        {
+            var tinspectionEPdocs = new HCF.BDO.InspectionEPDocs();
+            var epDocLists = item.TInspectionActivity.OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+            if (epDocLists != null)
+            {
+                tinspectionEPdocs = epDocLists.InspectionEPDocs;
+            }
+            <tr id="@item.DocTypeId"
+                ondragover="onEPdragOver(event);"
+                ondrop="policyEPdrop(event);"
+                epid="@string.Join(",", item.EPDocument.Where(x => x.EPDetailId > 0).Select(x => x.EPDetailId))">
+                <td style="display:none">
+                    @item.DocTypeId
+                </td>
+                <td style="display:none">
+                    @commonModelFactory.GetTranStatus(item.Status)
+                </td>
+                <td>
+                    @*<span>
+                        <img src="@HCF.Web.Base.Common.ReturnImagePath(Convert.ToInt32(item.DocStatus),true)"
+                             title="@HCF.Web.Base.Common.ReturnImageTooltip(Convert.ToInt32(item.DocStatus),true)"
+                             alt="" />
+                    </span>*@
+                    <span id="statuslabel" class="processType-Sprite @commonModelFactory.GetTranStatus(item.DocStatus)"></span>
+                    <span>@item.Name </span>
+                </td>
+                <td>
+                    <ul>
+                        @foreach (var epDocs in item.EPDocument.Where(x => x.EPDetailId > 0))
+                        {
+                            <li>
+                                <a href="@Url.Action("EpInspections", "Goal", new { epId = epDocs.EPDetailId })">
+                                    @epDocs.StandardEPs.StandardEP
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </td>
+                <td data-sort="@item.LastUploadedDate.DateSort()">
+                    @if (item.LastUploadedDate.HasValue)
+                    {
+                        <span>
+                            @item.LastUploadedDate.CastLocaleDate()
+                        </span>
+                    }
+
+                </td>
+                <td data-sort="@item.NextDueDateDate.DateSort()">
+                    @if (item.NextDueDateDate.HasValue)
+                    {
+                        <span>
+                            @item.NextDueDateDate.CastDate()
+                        </span>
+                    }
+                </td>
+                <td>
+                    <a href="@Url.Action("EpUserView", "Common", new { epDetailId = 0, standardEP = item.Name,docTypeId = item.DocTypeId })"
+                       class="modal-link">
+                        @{
+                            if (item.DocUserProfiles.Any())
+                            {
+                                var users = item.DocUserProfiles.Where(x => x.IsCRxUser == false).GroupBy(x => x.UserId).Select(x => x.FirstOrDefault()).ToList();
+
+                                var showCounts = 3;
+                                var totalCount = users.Count;
+                                var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+                                if (totalCount > showCounts)
+                                {
+                                    <span>@($"{usersText} +  {totalCount - showCounts}")</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @usersText
+                                    </span>
+                                }
+                            }
+                        }
+                    </a>
+
+                </td>
+                <td>
+                    @if (item.NextDueDateDate.HasValue)
+                    {
+                        <a style="float: left;padding: 3px;" href="@commonModelFactory.FilePath(epDocLists.InspectionEPDocs.Path)" target="_blank">
+                            <img src="@Url.Content("~/dist/Images/Icons/policy_doc_icon.png")" alt="">
+                        </a>
+                    }
+                </td>
+                <td align="center">
+                    <a style="float: left;padding: 3px;" href="@commonModelFactory.CommonFilePath(item.Path)" target="_blank">
+                        <img src="@Url.Content("~/dist/Images/Icons/sample_doc_icon.png")" alt="">
+                    </a>
+                </td>
+                <td>
+                    @if (item.DocTypeId > 0)
+                    {
+                        <img class="hover_sign" onclick="location.href ='@Url.Action("PolicyBinderHistory", "Repository", new { docTypeId = item.DocTypeId })'"
+                             src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" />
+                    }
+                    else
+                    {
+                        <img class="hover_sign" onclick="location.href ='@Url.Action("EpHistory", "Assets", new { epId = item.EPDocument.Where(x => x.EPDetailId > 0).Select(x => x.EPDetailId).FirstOrDefault() })'"
+                             src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" />
+                    }
+                </td>
+                <td width="100px">
+                    @if (ViewBag.PolicyView == "view")
+                    {
+                        <a href="@Url.Action("PolicyBinders", "Repository",new { epId= item.EPDocument.Where(x => x.EPDetailId > 0).Select(x => x.EPDetailId).FirstOrDefault()})" class="button1">
+                            Update
+                        </a>
+                    }
+                    else
+                    {
+                        <input docTypeId='@item.DocTypeId'
+                               epid="@string.Join(",", item.EPDocument.Where(x => x.EPDetailId > 0).Select(x => x.EPDetailId))"
+                               type="button" value='Select' class="btnAddPolicy button1" name="submitType" />
+                        <input type="button" value='Remove' class="btnRemovePolicy hide button1" />
+
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+
+    var policyTable = $('#documentep').DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "bPaginate": $('#documentep tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        drawCallback: function () {
+            $('[rel="popover"]').popover();
+        },
+        "aoColumnDefs": [{
+            'bSortable': false,
+            'aTargets': [-1, -2, -3] /* 1st one, start by the right */
+        }],
+        dom: "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7 text-right'p>>"
+       
+    });
+
+    $(document).ready(function () {
+        debugger;
+        var epCount = '@Model.ToList().Count()';
+        if (epCount == 1) {
+            try {
+                $(".btnAddPolicy").click();
+                $(".btnRemovePolicy").addClass("disabled");
+                $("#collapseTwo").collapse("true");
+            } catch{
+            }
+        }
+    });
+
+</script>

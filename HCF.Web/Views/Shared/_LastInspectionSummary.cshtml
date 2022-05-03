@@ -1,0 +1,692 @@
+﻿@model IEnumerable<HCF.BDO.InspectionReport>
+<div class="row">
+    <div class="col-md-4">
+        <label>Active Year : <span id="spnactiveyear"></span></label>
+    </div>
+    <div class="col-md-8 text-center">
+        <label>Select a previous EP Review date to add a document to that review period</label>
+    </div>
+    <div class="col-md-12">
+        <a class="inspectionsSlider"><span class="prev">&#10094;</span></a>
+        <table id="inspectionTable" class="table table-bordered table-striped" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr class="red">
+                    <th style="display:none">
+                    </th>
+                    @*<th width="140px" onclick="SetInspectionSortingOrder('StandardEP')" class="sorting1" id="IStandardEP">Standard</th>
+                        <th width="260px">Description</th>
+                        <th width="100px">Frequency</th>
+                        <th width="120px">Responsible</th>*@
+                    <th width="52px" title="January">Jan</th>
+                    <th width="52px" title="February">Feb</th>
+                    <th width="52px" title="March">Mar</th>
+                    <th width="52px" title="April">Apr</th>
+                    <th width="52px" title="May">May</th>
+                    <th width="52px" title="June">Jun</th>
+                    <th width="52px" title="July">Jul</th>
+                    <th width="52px" title="August">Aug</th>
+                    <th width="52px" title="September">Sep</th>
+                    <th width="52px" title="October">Oct</th>
+                    <th width="52px" title="November"> Nov</th>
+                    <th width="52px" title="December">Dec</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    // var count = 0;
+                    foreach (var yr in item.Years.OrderBy(x => x.YearId))
+                    {
+                        <tr class="dataRow">
+
+                            @{
+
+                                var startDate = new DateTime(Convert.ToInt32(yr.Name), 1, 1);
+                                // var endDate = new DateTime();
+                                var numberNames = GetColumnColumnCount(item.EPFrequency.FirstOrDefault().Frequency.FrequencyId);
+                                int columCOunt = numberNames["columCount"];
+                                int colSpanCount = numberNames["colspan"];
+                                for (int i = 0; i < columCOunt; i++)
+                                {
+                                    var endDate = startDate.AddMonths(colSpanCount).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+                                    <td colspan="@colSpanCount" startdate="@startDate.ToFormatDate()" enddate="@endDate" style="text-align:center" class="@string.Format("frequency_{0}", item.EPFrequency.FirstOrDefault().Frequency.FrequencyId)">
+                                        <span class="dateinlineBox">
+                                            <span>
+                                                @{
+
+                                                    var inspections = yr.Months.SelectMany(x => x.Inspections);
+                                                    var data = inspections.Where(x => x.StartDate >= startDate && x.StartDate <= endDate).OrderBy(x => x.StartDate).ToList();
+                                                    var NAcount = data.Count(x => x.SubStatus == "NA");
+
+                                                    if (colSpanCount > 1)
+                                                    {
+                                                        if (data.Count > 1)
+                                                        {
+                                                            <a alt="" data-toggle="modal" data-target="@string.Format("#popup_{0}", i)" style="cursor:pointer">
+
+                                                                @if (data.Count == NAcount)
+                                                                {
+                                                                    <p>Completed(@data.Count)</p>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <p>Pending Reviews (@data.Count)</p>
+                                                                }
+
+                                                            </a>
+
+
+                                                        }
+                                                        else
+                                                        {
+
+
+
+                                                            foreach (var inspection in data.GroupBy(x => x.StartDate.Date))
+                                                            {
+
+                                                                if (inspection.FirstOrDefault().IsPreviousCycle == 0)
+                                                                {
+                                                                    <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.ToFormatDate())">
+                                                                        <span style="background-color:@($"{(inspection.FirstOrDefault().InspectionId > 0  ? "yellow" : "yellow")}");padding:2px">@string.Format("{0}", inspection.Key.Day)</span>
+                                                                        <br /> <span style="padding:2px">@string.Format("{0}", "Current Cycle")</span>
+                                                                    </a>
+
+                                                                }
+
+                                                                else
+                                                                {
+                                                                    <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" , IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.ToFormatDate())">
+                                                                        <span style="background-color:@($"{(inspection.FirstOrDefault().InspectionId > 0  ? "yellow" : "yellow")}");padding:2px">@string.Format("{0}", inspection.Key.Day)</span>
+                                                                        <br /><span style="padding:2px">@($"{(data.Count == NAcount ? "Completed" : "Start Review")}")</span>
+                                                                    </a>
+                                                                }
+
+                                                            }
+                                                        }
+
+
+
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (data.Count > 1)
+                                                        {
+                                                            <a alt="" data-toggle="modal" data-target="@string.Format("#popup_{0}", i)" style="cursor:pointer">
+
+                                                                @if (data.Count == NAcount)
+                                                                {
+                                                                    <p>Completed(@data.Count)</p>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <p>Pending Reviews (@data.Count)</p>
+                                                                }
+
+                                                            </a>
+
+
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var inspection in data.GroupBy(x => x.StartDate.Date))
+                                                            {
+
+                                                                if (inspection.FirstOrDefault().IsPreviousCycle == 0)
+                                                                {
+                                                                    <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.Date.ToFormatDate())">
+                                                                        <span style="background-color:@($"{(inspection.FirstOrDefault().InspectionId > 0  ? "yellow" : "yellow")}");padding:2px">@string.Format("{0}", inspection.Key.Day)</span>
+                                                                        <br /> <span style="padding:2px">@string.Format("{0}", "Current Cycle")</span>
+                                                                    </a>
+                                                                }
+
+                                                                else
+                                                                {
+                                                                    <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" , IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.Date.ToFormatDate())">
+                                                                        <span style="background-color:@($"{(inspection.FirstOrDefault().InspectionId > 0  ? "yellow" : "yellow")}");padding:2px">@string.Format("{0}", inspection.Key.Day)</span>
+                                                                        <br /><span style="padding:2px">@($"{(data.Count == NAcount ? "Completed" : "Start Review")}")</span>
+                                                                    </a>
+
+                                                                }
+
+
+
+                                                            }
+                                                        }
+
+
+                                                    }
+
+
+                                                }
+
+
+                                            </span>@{startDate = startDate.AddMonths(colSpanCount);}
+                                        </span>
+                                    </td>
+
+
+                                    <div class="modal fade" id="@string.Format("popup_{0}", i)" role="dialog">
+                                        <div class="modal-dialog">
+                                            @*Modal content*@
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title">EP Review</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="epreview-scrollBar">
+
+                                                        <div class="epreviewDashboard" style="display: inline-flex; flex-wrap: wrap;">
+                                                            @foreach (var inspection in data.GroupBy(x => x.StartDate.Date))
+                                                            {
+
+                                                                if (inspection.FirstOrDefault().IsPreviousCycle == 0)
+                                                                {
+                                                                    <div style="padding-inline-end: 5px;">
+                                                                        <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.Date.ToFormatDate())">
+                                                                            <span style="background-color:@($"{(inspection.FirstOrDefault().InspectionId > 0  ? "green" : "yellow")}");padding:2px ;cursor:pointer; color: black;">@string.Format("{0}", inspection.Key.ToFormatDate())</span>
+                                                                            <br /> <span style="padding:2px">@string.Format("{0}", "Current Cycle")</span>
+                                                                        </a>
+                                                                        <br />
+                                                                    </div>
+
+                                                                }
+
+                                                                else
+                                                                {
+                                                                    <div style="padding-inline-end: 5px;">
+                                                                        <a id="AddDoc" onclick="confirmEOPEpInspectionPopUp(this)" inspectionid="@inspection.FirstOrDefault().InspectionId" , IsDocRequired="@inspection.FirstOrDefault().IsDocRequired" epId="@inspection.FirstOrDefault().EPDetailId" ispreviouscycle="@inspection.FirstOrDefault().IsPreviousCycle" tcycleid="@inspection.FirstOrDefault().TCycleId" title="@string.Format("{0}", inspection.Key.Date.ToFormatDate())">
+                                                                            <span style="        background-color: @($"{(inspection.FirstOrDefault().InspectionId > 0  ? "green" : "yellow")}");
+        padding: 2px;
+        cursor: pointer;
+        color: black;">@string.Format("{0}", inspection.Key.ToFormatDate())</span>
+        <br />
+
+    </a>
+    <br>
+</div>
+
+}
+
+
+
+}
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </tr>
+                    }
+                }
+
+                <tr class='notfound'>
+                    <td colspan='15' style="text-align:center">No record found</td>
+                </tr>
+            </tbody>
+        </table>
+        <a class="inspectionsSlider"><span class="next">&#10095;</span></a>
+    </div>
+    <input type="hidden" id="IsPreviousCycle" value="" />
+    <input type="hidden" id="PreviousCycleInspectionId" value="" />
+    <input type="hidden" id="Startyear" value="@DateTime.Now.Year" />
+    <input type="hidden" id="Activeyear" value="" />
+    <input type="hidden" id="rbnUploadtype" name="rbnUploadtype" />
+</div>
+
+
+@functions{
+
+    public static IDictionary<string, int> GetColumnColumnCount(int frquencyId)
+    {
+        IDictionary<string, int> numberNames = new Dictionary<string, int>();
+
+        var frequency = (HCF.BDO.Enums.Frequency)frquencyId;
+        switch (frequency)
+        {
+            case HCF.BDO.Enums.Frequency.Annually:
+                numberNames.Add("columCount", 1);
+                numberNames.Add("colspan", 12);
+                break;
+            case HCF.BDO.Enums.Frequency.Quarterly:
+                numberNames.Add("columCount", 4);
+                numberNames.Add("colspan", 3);
+                break;
+            case HCF.BDO.Enums.Frequency.SemiAnnually:
+                numberNames.Add("columCount", 2);
+                numberNames.Add("colspan", 6);
+                break;
+            default:
+                numberNames.Add("columCount", 12);
+                numberNames.Add("colspan", 1);
+                break;
+        }
+        return numberNames;
+    }
+
+    public static string GetClass(DateTime boxDateTime, DateTime dueDate, DateTime inspectionDate)
+    {
+        if (boxDateTime.Month == inspectionDate.Month && boxDateTime.Year == inspectionDate.Year)
+        {
+            return "active";
+        }
+
+        if (boxDateTime.Month == dueDate.Month && boxDateTime.Year == dueDate.Year)
+        {
+            return "duemonth";
+        }
+
+        if (boxDateTime > dueDate && boxDateTime < DateTime.UtcNow)
+        {
+            return "dueDatePass";
+        }
+        //boxDateTime = dueDate  retrun textboxclass
+        //boxtime >   dueDate but less than current date
+        //boxdatetime = inspectionDate
+        return "";
+    }
+
+}
+
+<script>
+    //$(".numeric").numericInput();
+    var IsDocRequired = "";
+    $(document).ready(function () {
+
+
+        $('#lastpage').on('click', function () {
+            var pagenUmber = $("#pagNumber").val();
+            inspectionTable.page(pagenUmber).draw(true);
+        });
+
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+
+
+        var filter = $("input[name=EPCat]:checked").val();
+        if (filter > 0) {
+            //var filter = this.value;
+            if (filter == "0") {
+                $("tr.dataRow").css("visibility", "visible");
+                return false;
+            }
+            else {
+                $("tr.dataRow").css("visibility", "collapse")
+            };
+
+            $("tr.dataRow").find("td.catId").each(function () {
+                $this = $(this);
+                if ($this.html().trim() == filter) {
+                    matchFound = true;
+                    $this.parent().css("visibility", "visible");
+                }
+            });
+        }
+
+        @*$("#txtEpEcCount").text('@Model.Count(x => x.Standard.CategoryId==1)');
+        $("#txtEpLsCount").text('@Model.Count(x => x.Standard.CategoryId==2)');
+        $("#txtEpEmCount").text('@Model.Count(x => x.Standard.CategoryId==3)');*@
+        $("#txtEpAllCount").text('@Model.Count()');
+
+    });
+
+    function getTheDays(year, month) {
+        month = month - 1;
+        var firstDay = 1;
+        var lastDay = 0;
+        var FirstDay = new Date(year, month, 1);
+        var LastDay = new Date(year, month + 1, 0);
+        lastDay = LastDay.getDate();
+        firstDay = FirstDay.getDay();
+        return lastDay;
+    }
+
+
+    $('#txt_searchall').keyup(function () {
+        // Search Text
+        var search = $(this).val();
+
+        // Hide all table tbody rows
+        $('table tbody tr').hide();
+
+        // Count total search result
+        var len = $('table tbody tr:not(.notfound) td:containsIN("' + search + '")').length;
+
+        if (len > 0) {
+            // Searching text in columns and show match row
+            $('table tbody tr:not(.notfound) td:containsIN("' + search + '")').each(function () {
+                $(this).closest('tr').show();
+            });
+        } else {
+            $('.notfound').show();
+        }
+
+    });
+
+    $.extend($.expr[":"], {
+        "containsIN": function(elem, i, match, array) {
+            return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+        }
+    });
+
+    $('.redborder-insp').on('click', function () {
+        $(this).addClass('current');
+    });
+
+
+
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+
+    $(function () {
+        $('.descriptions').popover();
+    });
+
+     var docUploadUrl = "";
+    var docupload = function (inspectionid, epId) {
+        debugger
+        //var inspectionid = e.getAttribute('inspectionid');
+        //var epId = e.getAttribute('epId/*');
+        //alert(epid);
+        swal.close();
+        LoadRecentFiles();
+
+        docUploadUrl = '@Url.Action("EPDocs", "Goal")?epId=' + epId + '&inspectionid=' + inspectionid + '&IsPreviousCycle=' + 1
+        @if (Model.FirstOrDefault().IsDocRequired) {
+            @:$("#rbnUploadtype").val(1);
+        }
+        else {
+            @:$("#IsPreviousCycle").val(1);
+           @: $("#PreviousCycleInspectionId").val(inspectionid);
+
+           @: $("#rbnUploadtype").val(3);
+        }
+
+
+    };
+
+    $("#Activeyear").val($("#Startyear").val());
+    var Activeyear = $("#Activeyear").val();
+    $("#spnactiveyear").text($("#Activeyear").val());
+    $('.prev').on('click', function () {
+        debugger
+        var Activeyear = $("#Activeyear").val();
+        var Startyear = $("#Startyear").val();
+        if (Activeyear <= Startyear) {
+            var Year = parseInt(Activeyear) - 1;
+            $("#Activeyear").val(Year);
+            $("#spnactiveyear").text($("#Activeyear").val());
+            loadYearData(Year);
+        }
+    });
+
+    $('.next').on('click', function () {
+        debugger
+        var Activeyear = $("#Activeyear").val();
+        var Startyear = $("#Startyear").val();
+        if (Activeyear != Startyear) {
+            var Year = parseInt(Activeyear) + 1;
+            $("#Activeyear").val(Year)
+            $("#spnactiveyear").text($("#Activeyear").val());
+            loadYearData(Year);
+        }
+    });
+
+
+   var confirmEOPEpInspectionPopUp = function (e) {
+        debugger;
+        var IsPreviousCycle = e.getAttribute('ispreviouscycle');
+        var inspectionid = e.getAttribute('inspectionid');
+        var epId = e.getAttribute('epId');
+       var TCycleId = e.getAttribute('tcycleid');
+        IsDocRequired = e.getAttribute('isdocrequired');
+        localStorage.clear();
+        localStorage.setItem('IsPreviousCycle', IsPreviousCycle);
+        localStorage.setItem('inspectionid', inspectionid);
+        localStorage.setItem('TCycleId', TCycleId);
+        var urlInspect = '@Url.Action("EPstate", "Goal")?epId=' + epId;
+       var urlHistory = '@Url.Action("EpInspectionsHistory", "Goal")?epId=' + epId;
+        if (inspectionid > 0) {
+            //var IsPreviousCycle = e.getAttribute('IsPreviousCycle');
+            //var inspectionid = e.getAttribute('inspectionid');
+            //var epId = e.getAttribute('epId');
+            //var TCycleId = e.getAttribute('TCycleId');
+            //localStorage.setItem('IsPreviousCycle', IsPreviousCycle);
+            //localStorage.setItem('inspectionid', inspectionid);
+            //localStorage.setItem('TCycleId', TCycleId);
+            swal({
+                html: true,
+                title: "EP Inspection",
+                text:'<a href="#" class="swaladdClose" onclick="swal.close(); return false;">x</a>' +
+                    '<div>Would you like to Re-Inspect Or View History ?</div>' +
+                    '<br><a class="comm-button" style="margin-right:5px" href=' + urlInspect + '>Re-Inspect</a>' +
+                    '<a class="comm-bluebutton" style="margin-right:5px" href=' + urlHistory + '>History</a>' +
+                    '<a class="comm-button @(Model.FirstOrDefault().IsDocRequired == true ? "" : "hidden")" style="margin-right:5px" onclick="docupload(' + inspectionid +','+ epId +')">Attach Addtional Doc</a>',
+                type: "info",
+                showCancelButton: false,
+                showConfirmButton: false
+            },
+                function (isConfirm) {
+                                                    setTimeout(function () {
+                                                        if (isConfirm) {
+
+                                                            var url = '@Url.Action("EPstate", "Goal")?epId=' + epId;
+
+                                                            window.location.href = url;
+                                                        }
+                                                        else {
+
+                                                            var url = '@Url.Action("EpInspectionsHistory", "Goal")?epId=' + epId;
+                                                            window.location.href = url;
+                                                        }
+
+                                                    }, 400)
+
+                });
+        } else {
+
+            swal({
+                html: true,
+                title: "EP Inspection",
+                text: '<a href="#" class="swaladdClose" onclick="swal.close(); return false;">x</a>' +
+                    '<div>Would you like to Inspect?</div>' +
+                    '<br><a class="comm-button" style="margin-right:5px" href=' + urlInspect + '>Yes</a>' +
+                    '<a class="comm-Cancelbutton" style="margin-right:5px" onclick="swal.close()">No</a>',
+
+                type: "info",
+                showCancelButton: false,
+                showConfirmButton: false
+            },
+                function (isConfirm) {
+                    setTimeout(function () {
+                        if (isConfirm) {
+
+                            var url = '@Url.Action("EPstate", "Goal")?epId=' + epId;
+
+                              window.location.href = url;
+                        }
+                        else {
+
+                        }
+
+                    }, 400)
+
+                });
+        }
+
+    }
+
+     var btnAddDoc = $("#btnAddDoc");
+    var btnAddDocMisc = $("#btnAddDocMisc");
+        var docUploadUrl = '@Url.Action("EPDocs", "Goal", new {epId = Model.FirstOrDefault().EPDetailId, InspectionId = 0})';
+
+        btnAddDoc.click(function() {
+            @if (Model.FirstOrDefault().IsDocRequired)
+
+            {
+                @:confirmFilePopUp();
+            }
+            else
+            {
+                @:loadFilePopup();
+            }
+    });
+
+
+ var loadFilePopup = function (uploadDocType) {
+            if (uploadDocType === "2") {
+                LoadRecentEpFiles();
+            } else {
+                LoadRecentFiles();
+            }
+        };
+
+
+        function LoadRecentEpFiles() {
+            var modelContainer = $("#modal-container");
+            modelContainer.empty();
+            const recentFiles = CRxUrls.Goal_EpDocHistory + "?epId=" + @Model.FirstOrDefault().EPDetailId;
+            $.get(recentFiles,
+                function(data) {
+                    modelContainer.html('');
+                    modelContainer.html(data);
+                    modelContainer.fadeIn('fast');
+                    modelContainer.modal('show');
+                });
+        }
+
+ var confirmFilePopUp = function() {
+            swal({
+                    html: true,
+                    title: "Add Document",
+                    text:
+                        '<div class="container1 epssweetpopup"> <div class="radio1">  <input class="radio" id="radio-1" name="doctyperadio" type="radio" checked value="1">' +
+                            '<label for="radio-1" class="radio-label">Required document <br /></label>' + @*(@Model.FirstOrDefault().DocName)*@
+                            '</div> ' +
+                            '<div class= "radio1" > ' +
+                            '<input id="radio-3" class="radio" name="doctyperadio" type="radio" value="2"> ' +
+                            '<label for= "radio-3" class= "radio-label">Re-use previously reviewed document</label> ' +
+                            '</div>' +
+                            '<div class= "radio1 hide" > ' +
+                            '<input id="radio-2" class="radio" name="doctyperadio" type="radio" value="0"> ' +
+                            '<label for= "radio-2" class= "radio-label"> Misc. Document</label> ' +
+                            '</div>' +
+                            //'<div class= "radio1" > ' +
+                            //'<input id="radio-2" class="radio" name="doctyperadio" type="radio" value="2"> ' +
+                            //'<label for= "radio-2" class= "radio-label"> Sample document</label> ' +
+                            //' </div>' +
+                            ' </div>',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        debugger;
+                        const uploadDocType = $('input[name=doctyperadio]:checked').val();
+                        $("#rbnUploadtype").val(uploadDocType);
+                        @*if (uploadDocType != "0" && '@Model.EpTransStatus' == "C") {
+                            showFileUploadPopUp(uploadDocType);
+                        } else {*@
+                            swal.close();
+                            loadFilePopup(uploadDocType);
+                        //}
+                    }
+                });
+        }
+
+ function fileUploadSuccess(tFiles, selectedFiles) {
+            console.log(tFiles, selectedFiles);
+            var uploadDocType = $("#rbnUploadtype").val();
+            if (uploadDocType === "1" || uploadDocType === "2") {
+                localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedFiles));
+                window.location.href = docUploadUrl;
+            } else {
+                AddMiscEPDocs(selectedFiles, '@Model.FirstOrDefault().EPDetailId', '108');
+            }
+        }
+
+</script>
+<style>
+
+
+
+    .prev {
+        position: absolute;
+        top: 28%;
+        left: 1px;
+    }
+
+    .maincal {
+        position: relative;
+    }
+
+    .next {
+        position: absolute;
+        right: 1px;
+        top: 28%;
+    }
+
+
+    .notfound {
+        display: none;
+    }
+
+    .frequency_1 {
+        background: #b7dee8;
+    }
+
+    .frequency_25 {
+        background: #f2dcdb;
+    }
+
+    .frequency_6 {
+        background: #c5be97;
+    }
+
+    .frequency_7 {
+        background: #c0c0c0;
+    }
+
+
+
+
+
+
+
+
+
+
+    .year_0 {
+        background: yellow;
+    }
+
+    .year_1 {
+        background: #9ae422;
+    }
+
+    .year_2 {
+        background: #ffd400;
+    }
+
+    .False {
+        cursor: not-allowed;
+    }
+
+    .duePassed {
+        background: red !important;
+    }
+</style>

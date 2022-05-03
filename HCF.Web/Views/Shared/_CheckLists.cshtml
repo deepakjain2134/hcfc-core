@@ -1,0 +1,205 @@
+﻿@model List<HCF.BDO.MainGoal>
+@{
+    var mainGoals = new List<HCF.BDO.MainGoal>();
+    var assets = new List<HCF.BDO.Assets>(); /*AssetsRepository.GetAssetsType();*/
+    var allDocType = new List<HCF.BDO.DocumentType>(); /*DocumentTypeRepository.GetDocumentType();*/
+    var activityType = commonModelFactory.GetActivityType(); //GoalMaster.GetActivityType();
+    HCF.BDO.EPDetails ep = new HCF.BDO.EPDetails();
+    var asset = new HCF.BDO.Assets();
+    var allassets = (List<HCF.BDO.Assets>)ViewBag.AllAssets;
+    var mode = "1";
+    if (ViewBag.CurrentEP != null)
+    {
+        ep = ViewBag.CurrentEP;
+        assets = ep.Assets;
+        allDocType = ep.DocumentType;
+        mainGoals = Model;
+    }
+    if (ViewBag.CurrentAssets != null)
+    {
+        mode = "2";
+        asset = ViewBag.CurrentAssets;
+        mainGoals = Model.Where(x => x.AssetId.HasValue && x.AssetId == asset.AssetId).ToList();
+    }
+}
+@if (Model.Count > 0)
+{
+    <input type="hidden" id="epId" value="@Model.FirstOrDefault().EPDetailId" />
+    <table id="Maingoal" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="display:none">
+                </th>
+                <th style="display:none">
+                </th>
+                <th width="30">
+                </th>
+                <th width="150" class="@(mode == "1" ? "" :"hide")">
+                    Goal Type
+                </th>
+                <th>@(mode == "1" ? "Main Goal" : "ATS Header")</th>
+                <th>Asset</th>
+                <th class="@(mode == "1" ? "align-center" :"hide")">Document Type</th>
+                <th style="width:50px;">Status</th>
+                <th style="width:150px;">Action</th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (var m in mainGoals.Where(x => x.IsCurrent))
+            {
+                <tr>
+                    <td style="display:none">
+                        @m.EPDetailId
+                    </td>
+                    <td style="display:none">
+                        @m.FrequencyId
+                    </td>
+                    <td class="details-control  @((m.Steps.Count==0)?"disable":"")" rel='@m.MainGoalId'></td>
+                    <td class="@(mode == "1" ? "" :"hide")">
+                        <input type="hidden" class="form-control" value="@m.MainGoalId" id="hdnMaingoalId" />
+                        <input type="hidden" class="form-control" value="@m.EPDetailId" id="hdnEPdetailId" />
+                        <select class="ddlActivityType form-control disabled" id="ddlActivityType">
+                            <option value="">Select Type</option>
+                            @foreach (var activty in activityType)
+                            {
+                                if (activty.ActivityTypeId == m.ActivityType)
+                                {
+                                    <option value="@activty.ActivityTypeId" selected>@activty.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@activty.ActivityTypeId">@activty.Name</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        @m.Goal
+                    </td>
+                    <td style="width:120px;">
+                        @if (m.AssetId.HasValue)
+                        {
+                            <span>@allassets.FirstOrDefault(x => x.AssetId == m.AssetId).Name</span>
+                        }
+                    </td>
+                    <td style="width:120px;" class="@(mode == "1" ? "" :"hide")">
+                        @if (m.ActivityType == 3)
+                        {
+                            foreach (var doc in allDocType)
+                            {
+                                <span>@doc.Name</span>
+                            }
+                        }
+                    </td>
+                    <td style="width:50px;" class="comman_checkboxStatus">
+                        @Html.DisplayFor(a => m.IsActive, new { @checked = m.IsActive })<span></span>
+                    </td>
+                    <td style="width:150px;">
+                        <span id="Edit">
+                            <input type="button" class="editGoal editCheckList btn button1" value="Update" id="Edit" epId="@m.EPDetailId" mgid="@m.MainGoalId" />
+                        </span>
+                        <input type="button" class="addSteps btn button1" value="Add Steps" id="" mgid="@m.MainGoalId" stid="0" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<script>
+
+
+    $(".editGoal").click(function () {
+        var mgid = $(this).attr("mgid");
+        var epId = $(this).attr("epId");
+        loadGoalData(mgid, epId);
+        $("#checksListTable").hide();
+        $("#addgoal").hide();
+    });
+
+    $(document).ready(function () {
+
+        if (window.location.href.indexOf("configurefloorassets") > -1) {
+            $(".addSteps").val("Add ATS");
+            $("#addgoal").val("Add ATS Header");
+        }
+
+        $(".ddlActivityType").change(function () {
+            var tr = $(this).parent("td").parent("tr");
+            var ddlAsset = tr.find('.ddlAsset');
+            var dllDocuments = tr.find('.dllDocument');
+            ddlAsset.hide();
+            dllDocuments.hide();
+            var activityType = $(this).val();
+            console.log(activityType);
+            if (activityType == 2) {
+                ddlAsset.show();
+            } else if (activityType == 3) {
+                dllDocuments.show();
+            } else {
+            }
+        });
+
+
+        var table = document.getElementById("Maingoal");
+
+        $('#Maingoal tr').each(function () {
+            var row = $(this);
+            var activityType = row.find('.ddlActivityType');
+            var ddlAsset = row.find('.ddlAsset');
+            var dllDocuments = row.find('.dllDocument');
+            ddlAsset.hide();
+            dllDocuments.hide();
+            if (activityType == 2) {
+                ddlAsset.show();
+            } else if (activityType == 3) {
+                dllDocuments.show();
+            } else {
+            }
+        });
+
+        var maingoal = $('#Maingoal').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#Maingoal tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }, dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        });
+
+        $('#Maingoal tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = maingoal.row(tr);
+
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var epId = $("#epId").val();
+                var mainGoalId = $(this).attr("rel");
+                var url = '@Url.Action("StepsToComplete", "Goal")';
+                $.get(url + '?maingoalId=' + parseInt(mainGoalId) + '&EPdetailId=' + parseInt(epId), function (data) {
+                    row.child(data, 'no-padding').show();
+                    tr.addClass('shown');
+                    $('#checksPointTable').show();
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    });
+
+</script>
+
+<style>
+    #Maingoal_filter {
+        display: none;
+    }
+</style>

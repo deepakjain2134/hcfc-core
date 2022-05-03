@@ -1,0 +1,186 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var RoundCat = Model.roundCategory;
+
+}
+
+<div id="round_view">
+    <div class="">
+        <p class="roundBlue">Select a frequency for each round type and an initial date for each location group in below table</p>
+    </div>
+    <div class="table-responsive round-steptable">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="z-index:99;">Location</th>
+                    <th colspan="@RoundCat.Count">Select Round Types</th>
+                </tr>
+                <tr>
+
+                    @foreach (var item in RoundCat.OrderBy(x => x.CategoryName))
+                    {
+                        <th>@item.CategoryName </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in Model.Roundgrouplist.Where(x => x.RoundGroupUsers.Any() && x.RoundType == 1 && x.RoundGroupLocations.Any()).OrderBy(x => x.Name))
+                {
+
+                    <tr>
+                        <td>@group.Name</td>
+                        @foreach (var item in RoundCat.OrderBy(x => x.CategoryName))
+                        {
+                            int frequencyId = 0;
+                            string datetime = string.Empty;
+                            <td>
+
+                                @if (group.RoundCategory.Any(x => x.RoundCatId == item.RoundCatId))
+                                {
+                                    <span>
+                                        @{
+
+                                            var tgroup = group.RoundSchedules.FirstOrDefault(x => x.RoundCatId == item.RoundCatId);
+                                            if (tgroup != null)
+                                            {
+                                                frequencyId = (int)tgroup.FrequencyId;
+                                                datetime = tgroup.StartInitialDate.ToFormatDate();
+                                            }
+                                        }
+
+                                        <div class="makeRecurring-6">
+                                            <frequencydropdownlist firsttext="Frequency"
+                                                       class="disable form-control"
+                                                       selectevalue="@frequencyId"
+                                                       name="@string.Format("frequency_{0}_{1}", group.RoundGroupId, item.RoundCatId)">
+
+                                            </frequencydropdownlist>
+                                        </div>
+                                        <div class="makeRecurring-6">
+                                            <!input type="text"
+                                id="@string.Format("date_{0}_{1}", group.RoundGroupId, item.RoundCatId)"
+                                catid="@item.RoundCatId" groupid="@group.RoundGroupId"
+                                class="form-control datepicker roundselectedDate disable"
+                                autocomplete="off" title="Select a date" placeholder="Select a date"
+                                name="StartInitialDate" value="@datetime" />
+                                        </div>
+
+                                        <a class='button1 modal-link'
+                               href="@Url.Action("RoundRecurence","Round",new { roundcatId = item.RoundCatId,roundGroupId=group.RoundGroupId,frequency=frequencyId,dates=datetime })">
+                                            <span>
+                                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                                                @(frequencyId>0?"Recurring": "Make Recurring")
+                                            </span>
+                                        </a>
+                                    </span>
+                                }
+
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <input id="btnCancel" onclick='openStep4()' type="button" value='@Localizer["Back"]' class="comm-Cancelbutton" />
+            <input id="btnViewAssignment" type="button" value=' @Localizer["Assignement"] ' class="comm-button" onclick="openStep6();" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".datepicker").datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: $.CRx_DateFormat,
+            minDate: 0,
+            onSelect: function (dateText, inst) {
+                saveScheduleData($(this).attr("catid"), $(this).attr("groupid"))
+                $("#btnmodel").click();
+            }
+        });
+
+        $(".frequency").change(function () {
+            saveScheduleData($(this).attr("catid"), $(this).attr("groupid"));
+        });
+
+
+        function saveScheduleData(catid, groupid) {
+            var frequencyCtrid = $("#frequency_" + groupid + "_" + catid);
+            var dateCtrid = $("#date_" + groupid + "_" + catid);
+            if (frequencyCtrid.val() && dateCtrid.val()) {
+                var url = '@Url.Action("UpdateGroupUserType", "Round")';
+                $.get(url + '?RoundcatId=' + catid + '&RoundGroupId=' + groupid + '&frequency=' + frequencyCtrid.val() + '&date=' + dateCtrid.val(), function (data) {
+                    successAlert("Saved Successfully.");
+                });
+
+            } else {
+                AlertWarningMsg("Please select frequency and date.");
+            }
+        }
+
+    });
+
+    $(document).ready(function () {
+        $('tbody').scroll(function (e) {
+            $('thead').css("left", -$("tbody").scrollLeft());
+            $('thead th:nth-child(1)').css("left", $("tbody").scrollLeft());
+            $('tbody td:nth-child(1)').css("left", $("tbody").scrollLeft());
+        });
+    });
+</script>
+<style>
+    .frequency .form-control {
+        margin-bottom: 4px;
+    }
+
+    #round_view .datepicker, #round_view .hasDatepicker {
+        background-image: none !important;
+    }
+
+
+
+    .roundselectedDate {
+        background-color: #b6eaf8;
+    }
+
+
+
+
+
+
+
+    .round-steptable tbody tr td:first-child,
+    .round-steptable thead tr th:first-child {
+        min-width: 120px;
+        position: sticky;
+        left: -2px;
+        background-color: #fbfbfb;
+        z-index: 99;
+        text-align: left;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+    }
+
+    .round-steptable td {
+        min-width: 56px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .round-steptable th {
+        position: sticky;
+        top: -1px;
+        background-color: #fbfbfb;
+        z-index: 9;
+        vertical-align: bottom !important;
+    }
+</style>

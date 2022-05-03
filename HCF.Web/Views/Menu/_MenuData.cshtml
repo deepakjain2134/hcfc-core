@@ -1,0 +1,31 @@
+﻿@model List<HCF.BDO.OrgServices>
+@{
+    List<HCF.BDO.OrgServices> userOrg = ViewBag.Organizationlist;
+}
+<h4>Assign Organization</h4>
+<div class="organization_view" style="width:100% !important;">
+    <ul class="uname-listitem">
+        @foreach (var item in Model)
+        {
+            <li>
+                <input type="hidden" value="@item.Status" id="statusid" />
+                <input type="checkbox" value='@item.ClientNo' name="organization"
+                       @((item.Status) ? "checked='checked'" : "")
+                       @*checked="@HCF.Web.Controllers.MenuController.Ischecked(item, userOrg)"*@ /> <span></span>
+                @item.Name
+            </li>
+        }
+    </ul>
+</div>
+<script>
+
+    $("[type=checkbox]").on('change', function () {
+        //debugger;
+        var IsActive = $(this).is(':checked');
+        var organizationId = $(this).val();
+        var menuId = $("#drpMenu").val();
+        var url = '@Url.Action("UpdateMenuOrganization", "Menu")';
+        $.get(url + '?organizationId=' + organizationId + '&menuId=' + menuId + '&IsActive=' + IsActive, function (data) {
+        });
+    });
+</script>

@@ -1,0 +1,12 @@
+﻿@model List<HCF.BDO.ProjectType>
+
+@{
+    Layout = null;}
+
+<ul>
+    @foreach (var project in Model)
+    {
+
+        <li><strong>@project.Name:</strong><span> @project.Description</span></li>
+    }
+</ul>

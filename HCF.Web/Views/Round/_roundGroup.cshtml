@@ -1,0 +1,96 @@
+﻿@model List<HCF.BDO.RoundGroup>
+@{
+    ViewBag.Title = "RoundGroup";
+}
+<div id="round_view">
+    <div class="box box-primary">
+        <div class="add_button_comman">
+            <a href='@Url.Action("AddRoundGroup","Round")' class="pull-right">
+                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add RoundUserGroup" alt="3d_add_button" />
+            </a>
+        </div>
+        
+            <table id="RoundUserTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Description
+                        </th>
+                        <th class="no-sorting" style="width:20px;">
+                            Active
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td class="comman_checkbox1 text-center">
+                                @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                            </td>
+                            <td>
+                                <a href='@Url.Action("AddRoundGroup","Round" ,new { roundUserGroupId = item.RoundGroupId })'>
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var roundtable = $('#RoundUserTable').DataTable({
+            searching: true,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#RoundUserTable tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "Blftip",
+            buttons: [
+
+            ]
+        });
+
+    });
+</script>
+
+<style>
+    div#RoundUserTable_filter {
+        margin-right: 44px;
+    }
+    .add_button_comman {
+        top: 18px;
+        position: absolute;
+        right: 10px;
+    }
+</style>

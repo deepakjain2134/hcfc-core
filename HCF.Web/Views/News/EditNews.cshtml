@@ -1,0 +1,134 @@
+﻿@model HCF.BDO.News
+@using HCF.Web.Helpers
+@{
+    /**/
+    ViewBag.Title = "EditNews";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<h2>EditNews</h2>*@
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Edit News
+            </h1>
+
+        </section>
+    }
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.CreatedBy)
+                        <div class="row">
+                           
+                                <div class="col-lg-6">
+                                    @Html.HiddenFor(m => m.Id)
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Title)<em class="required-field">*</em>
+                                        @Html.TextBoxFor(model => model.Title, new { @class = "form-control", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.Title)
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Published)
+                                        @Html.CheckBoxFor(model => model.Published, new { @checked = "checked" })<span></span>
+                                    </div>
+                                   
+
+                                 
+                                    <div class="form-group">
+
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-6">
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.StartDate)<em class="required-field">*</em>
+                                        @Html.TextBoxFor(model => Model.StartDate, $"{Model.StartDate:MMM d, yyyy}", new { @class = "datepicker startDate form-control", required = "required", @autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.StartDate)
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EndDate)<em class="required-field">*</em>
+                                        @Html.TextBoxFor(model => Model.EndDate, $"{Model.EndDate:MMM d, yyyy}", new { @class = "endDate form-control", required = "required", @autocomplete = "off" })
+                                        @Html.ValidationMessageFor(model => model.EndDate)
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Description</label><em class="required-field"> *</em>
+                                        @Html.TextAreaFor(x => x.Description, new { @class = "form-control", placeholder = "Enter description for tip", required = "required" })
+                                    </div>
+                                </div>
+
+                            <div class="common-btnBox">
+                                <input type="submit" value='@Localizer["Update"] ' class="comm-button" />
+                                @Html.ActionLink("Cancel ", "News", "News", new { @class = "comm-button" })
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script type="text/javascript" src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")"></script>
+
+<script>
+    $(document).ready(function () {
+
+        CKEDITOR.replace('Description', {
+            height: 150,
+            toolbar: [
+                { name: 'document', groups: ['mode', 'document', 'doctools'], items: ['-', 'Save', 'NewPage', 'Preview', '-', 'Templates'] },
+                '/',
+                { name: 'basicstyles', groups: ['basicstyles', 'cleanup'], items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi'], items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'] },
+                { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                { name: 'insert', items: ['HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+                { name: 'basicstyles', items: ['Font', 'FontSize'] },
+                { name: 'colors', items: ['TextColor', 'BGColor'] },
+                { name: 'others', items: ['-'] }
+            ]//,
+            // contentsCss: [CKEDITOR.basePath + 'contents.css', 'https://sdk.ckeditor.com/samples/assets/css/widgetstyles.css']
+        });
+        //$('#RouteUrl').val($('#RouteUrlPath').val())
+    });
+
+    $(".Spacevalid").on("keypress", function (e) {
+        debugger
+        if (e.which === 32 && !this.value.length)
+            e.preventDefault();
+    });
+
+</script>
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+<script src="~/dist/Scripts/ckeditor/ckeditor.js"></script>
+@section Scripts {
+
+    <script>
+        CKEDITOR.replace('Description');
+
+                
+
+    </script>
+}
+<style>
+    .input-group {
+        display: flex;
+    }
+</style>
+

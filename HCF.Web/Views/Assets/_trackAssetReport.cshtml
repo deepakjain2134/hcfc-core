@@ -1,0 +1,198 @@
+﻿<div>
+    <a href="@Url.Action("CreateTrackingAssetsReport", "Pdf", new { assetIds = ViewBag.TrackAssetIds, campusid =  ViewBag.TrackCampusIds, buildingId = ViewBag.TrackBuildingIds})">
+        <span>
+            <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+        </span>
+    </a>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="table-responsive round-steptable">
+            <table class="table table-bordered" id="trackingassetTbl">
+                <thead id="trackingassethead">
+                    <tr>
+                        <th class="trackingemp"><span></span></th>
+                        @{
+                            var assetdata = ViewBag.headerassetsdata;
+                            foreach (var assets in assetdata)
+                            {
+                                <th asset_id="@assets.AssetId"><div class="vertical-mode"><span>@assets.Name</span></div></th>
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody id="trackingassetbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="AddAssetsPopup" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" id="loadpartial">
+
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        $("div").removeClass("modal-backdrop fade in modal-stack");        
+    });
+
+    debugger;
+    var count = 0;
+    $("#trackingassetbody").empty();
+    var Getalldata = JSON.parse(@Html.Raw(Json.Serialize(@ViewBag.datalist)));
+    var sitedata = Getalldata[0];
+    var buildingdata = Getalldata[1];
+    var floordata = Getalldata[2];
+    var assetdata = @Html.Raw(@ViewBag.assetdata);
+    var floorassetdata = @Html.Raw(@ViewBag.FloorAssetdata);
+    var SiteIndexes = 1;
+    var BuildingIndexes = 1;
+    var FloorIndexes = 1;
+    if (sitedata != null) {
+        $.each(sitedata, function (Siteindex, siteElement) {
+            var sitefloorindex = SiteIndexes;
+            var sitebuildingdata = buildingdata.filter(x => x.SiteCode === siteElement.Code);
+            $("#trackingassetbody").append('<tr class="campusrow' + sitefloorindex + ' defaulthide"><td class="campusrowStyle" site_id = ' + siteElement.SiteId + ' style="color:#2494be;font-weight:bold;" onclick="campus(' + siteElement.SiteId + ')">' + siteElement.Name + '</td></tr>');
+            if (assetdata != null) {
+                $.each(assetdata, function (SiteassetIndex, assetElement) {
+                    var sitebuildassetcount = 0;
+                    if (buildingdata != null) {
+                        $.each(sitebuildingdata, function (SitebuildingIndex, buildElement) {
+                            if (floordata != null) {
+                                var sitebuildingfloor = floordata.filter(x => x.BuildingId === buildElement.BuildingId);
+                                $.each(sitebuildingfloor, function (SitefloorIndex, buildforasset, data) {
+                                    var sitebuildignfloorassetcount = floorassetdata.filter(x => x.FloorId === buildforasset.FloorId && x.AssetId === assetElement.AssetId);
+                                    sitebuildassetcount += sitebuildignfloorassetcount.length;
+                                })
+                            }
+                        })
+                        if (sitebuildassetcount > 0) {
+                            $('.campusrow' + sitefloorindex + '').append('<td style="color:darkgrey;cursor: pointer;"><i class="fa fa-check"></i></span></td>');
+                        }
+                        else {
+                            $('.campusrow' + sitefloorindex + '').append('<td></td>');
+                        }
+                        //$('.campusrow' + sitefloorindex + '').append('<td>' + sitebuildassetcount + '</td>');
+                    }
+                })
+            }
+            if (buildingdata != null) {
+
+                var BuildingData = buildingdata.filter(x => x.SiteCode === siteElement.Code);
+                $.each(BuildingData, function (buildingdataindex, buildElement, data) {
+                    var buildingindex = BuildingIndexes;
+                    var valueiszeroOrone = 0;
+                    $("#trackingassetbody").append('<tr class="buildingrow' + buildingindex + ' campusrow_' + siteElement.SiteId + '" onclick="building(' + buildElement.BuildingId + ')"><td style="padding-left:2em;cursor:pointer;color:#000;" building_id = ' + buildElement.BuildingId + ' class="buildingfirsttd' + buildElement.BuildingId + '">' + buildElement.BuildingName + '</td></tr>');
+                    if (assetdata != null) {
+                        floordatabybuildid = floordata.filter(x => x.BuildingId === buildElement.BuildingId);
+                        $.each(assetdata, function (assetindex, assetElement) {
+                            var buildingtotalcount = 0;
+                            var tfoorassetstatus = 0;
+                            if (floordata != null) {
+                                $.each(floordatabybuildid, function (floorindex, buildfoorasset, data) {
+                                    var buildflooraasetdata = floorassetdata.filter(x => x.FloorId === buildfoorasset.FloorId && x.AssetId === assetElement.AssetId);
+                                    var tfoorassetstatusdata = floorassetdata.filter(x => x.FloorId === buildfoorasset.FloorId && x.AssetId === assetElement.AssetId && x.StatusCode == "ACTIV");
+                                    buildingtotalcount += buildflooraasetdata.length;
+                                    tfoorassetstatus += tfoorassetstatusdata.length;
+                                    //valueiszeroOrone += buildflooraasetdata.length;
+                                })
+                                var FloorAssetDataID = floorassetdata.filter(x => x.AssetId === assetElement.AssetId);
+                                if (buildingtotalcount > 0) {
+                                    if (tfoorassetstatus > 0) {
+                                        $('.buildingrow' + buildingindex + '').append('<td><span style="color:green; cursor: pointer;" class="assetsFlooreditmodal" BuildingID = "' + buildElement.BuildingId + '" AssetsID = "' + assetElement.AssetId + '" floorAssetID = "' + FloorAssetDataID[0].FloorAssetsId + '" editfloorasset="1" title="Update Assets"><i class="fa fa-check"></i></span>' + '</td>');
+                                    }
+                                    else {
+                                        $('.buildingrow' + buildingindex + '').append('<td><span style="color:darkgrey;cursor: pointer;" class="assetsFlooreditmodal" BuildingID = "' + buildElement.BuildingId + '" AssetsID = "' + assetElement.AssetId + '" floorAssetID = "' + FloorAssetDataID[0].FloorAssetsId + '" editfloorasset="1" title="View tracking asset"><i class="fa fa-check"></i></span>' + '</td>');
+                                    }
+
+                                }
+                                else {
+                                    $('.buildingrow' + buildingindex + '').append('<td><span style="color:darkgrey;cursor: pointer;" class="assetsFlooraddmodal" BuildingID = "' + buildElement.BuildingId + '" AssetsID = "' + assetElement.AssetId + '" editfloorasset="0" title="Add Assets"><i class="fa fa-plus"></i></span>' + '</td>');
+                                }
+
+                            }
+                        })
+                    }
+
+                    BuildingIndexes += 1;
+                })
+            }
+            SiteIndexes += 1;
+        })
+    }
+
+    function campus(index) {
+        if (count == 0) {
+            $('.campusrow_' + index + '').show();
+            $('.campusrow_' + index + '').addClass("childhide");
+            count = 1;
+        }
+        else {
+            if (!$('.campusrow_' + index + '').hasClass("childhide")) {
+                $('.campusrow_' + index + '').show();
+                $('.campusrow_' + index + '').addClass("childhide");
+                count = 1;
+            }
+            else {
+                $('.campusrow_' + index + '').hide();
+                $('.campusrow_' + index + '').removeClass("childhide");
+                count = 1;
+            }
+
+        }
+
+    }
+    function building(index) {
+        $('.buildingrowAs_' + index + '').toggle();
+    }
+
+    $(document).off('click', '.assetsFlooraddmodal').on('click', '.assetsFlooraddmodal', function () {
+
+        var buidingId = $(this).attr("BuildingID");
+        var assetId = $(this).attr("AssetsID");
+        var edit = $(this).attr("editfloorasset");
+        var floorassetid = $(this).attr("floorAssetID");
+        $.ajax({
+            url: '@Url.Action("trackingassetmodel", "Assets")',//"Assets/trackingassetmodel",
+            method: "GET",
+            data: { buildingId: buidingId, assetId: assetId, edit: edit, floorassetID: floorassetid },
+            dataType: "html",
+            success: function (data) {
+                $("#loadpartial").empty();
+                $("#loadpartial").append(data);
+                $("#AddAssetsPopup").modal('show');
+
+            },
+            error: function (e) {
+                console.warn(e);
+            }
+        })
+
+    });
+
+    $(document).off('click', '.assetsFlooreditmodal').on('click', '.assetsFlooreditmodal', function () {
+
+        var buidingId = $(this).attr("BuildingID");
+        var assetId = $(this).attr("AssetsID");
+        var floorassetid = $(this).attr("floorAssetID");
+        $.ajax({
+            url: '@Url.Action("trackingeditassetmodel", "Assets")',//"Assets/trackingassetmodel",
+            method: "GET",
+            data: { buildingId: buidingId, assetId: assetId, floorassetID: floorassetid },
+            dataType: "html",
+            success: function (data) {
+                $("#loadpartial").empty();
+                $("#loadpartial").append(data);
+                $("#AddAssetsPopup").modal('show');
+
+            },
+            error: function (e) {
+                console.warn(e);
+            }
+        })
+    });
+
+</script>

@@ -1,0 +1,40 @@
+﻿@model HCF.BDO.Steps
+
+@{
+    string goalIndex = this.ViewData.ContainsKey("goalIndex") ? this.ViewData["goalIndex"].ToString() : string.Empty;
+    string stepIndex = this.ViewData.ContainsKey("stepIndex") ? this.ViewData["stepIndex"].ToString() : string.Empty;
+    string stepmode = this.ViewData.ContainsKey("stepmode") ? this.ViewData["stepmode"].ToString() : string.Empty;
+}
+
+
+
+@if (stepmode != "1")
+{
+    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />
+    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float: right; margin-right: 5px;" class="commentIcon disable" />
+}
+else
+{
+    <div class="img_file_upload">
+        <input name="file_Uploader"
+               type="file"
+               onchange="InsUploadfile(this, @Model.StepsId,'C',@Model.Status)"
+               tempname='MainGoal[@goalIndex].Steps[@stepIndex].FileContent'
+               filename="MainGoal[@goalIndex].Steps[@stepIndex].FileName"
+               filepath="MainGoal[@goalIndex].Steps[@stepIndex].FilePath" />
+    </div>
+
+    <img id="@($"stepcomment_{Model.StepsId}")" src="@Url.Content("~/dist/img/message_icon.png")"
+         alt=""
+         data-target="#commentModal"
+         data-toggle="modal"
+         tempname='MainGoal[@goalIndex].Steps[@stepIndex].Comments'
+         data-stepindex="@stepIndex"
+         data-goalindex="@goalIndex"
+         class="commentInsp @(!string.IsNullOrEmpty(Model.Comments) ? "text" : " ")" />
+
+    <div class="text-right">
+        <img class="@((!string.IsNullOrEmpty(Model.FilePath)) ? "img_prev_upload" : "img_prev")" id="imagePreview_@Model.StepsId" src="@commonModelFactory.FilePath(Model.FilePath)" alt="">
+    </div>
+   }
+

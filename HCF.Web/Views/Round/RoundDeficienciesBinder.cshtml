@@ -1,0 +1,235 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var userList = Model.userList;
+    var roundUserGroup = Model.Roundgrouplist;
+    ViewBag.Title = "Deficiencies Binder";
+    Layout = null;
+    string buildingIds = ViewBag.buildingIds != null ? ViewBag.buildingIds : "";
+
+}
+
+<h3 class="roundDefiHeading">Deficiencies Binder <span>(Round Deficiencies)</span></h3>
+<div class="foldercrumbs">
+    <a class="binderMenu" url="@Url.RouteUrl("deficienciesBinder")">
+        <span class="folder-crumb">Deficiencies Binder</span>
+    </a>
+    <span class="folder-crumb-separator"></span>
+    <span class="folder-crumb">Round Deficiencies</span>
+</div>
+<br />
+<br />
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+
+
+            <div class="form-group col-md-2">
+                <label>Campus</label>
+                <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Building(s)</label>
+                @Html.DropDownList("BuildingId", new SelectList(""), "All Building", new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+            </div>
+            <div class="form-group col-md-2">
+                <label>Round Type</label>
+                <select class="form-control" id="ddlroundgroup">
+                    @*<option value="">Select Location</option>*@
+                    <option value="0" selected="selected">All Round Type</option>
+                    @foreach (var item in roundUserGroup.OrderBy(x => x.Name))
+                    {
+                        <option value="@item.RoundGroupId">@item.Name</option>
+                    }
+
+                </select>
+
+            </div>
+            <div class="form-group col-md-4 col-left">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>From</label>
+                        <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>To</label>
+                        <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-2">
+                <button class="comm-button" id="btnSearch" style="margin-top: 24px;">Search</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+        <div id="partialContents"></div>
+    </div>
+</div>
+<style>
+    .roundtypeicon {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+        .roundtypeicon img {
+            width: 28px;
+            margin-right: 10px;
+        }
+</style>
+<script>
+
+
+
+
+    $(document).ready(function () {
+        getBuildings();
+        SetDefaultDate();
+
+        getRoundReportBinder(1);
+    });
+
+    $("#btnSearch").click(function () {
+        getRoundReportBinder(0);
+    });
+
+    function getRoundReportBinder(isatpageloaded) {
+        var fromdt = $('#from').val();
+        var todate = $('#todate').val();
+        console.log(fromdt,todate);
+       // var lstBuildingDetails = $("#lstBuildingDetails").val();
+        var lstBuildingDetails = $("#BuildingId").val() != null ? $("#BuildingId").val() : 0;
+        var roundType = $("#ddlroundgroup").val();
+        if (isatpageloaded == 1) {
+            //fromdt = '';
+           // todate = '';
+            roundType = 0;
+            lstBuildingDetails = '';
+        }
+        $.get(CRxUrls.Round_PartialRoundActivityReport + "?start=" + fromdt + "&enddate=" + todate + "&lstBuildingDetails=" + lstBuildingDetails + "&roundType=" + roundType + "&pageMode=binder", function (data) {
+            $('#partialContents').empty();
+            $('#partialContents').append(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+
+    var buildingIndex = 0;
+    $(document).on("change", "#BuildingId", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (buildingIndex == 0) {
+            var lastAllSelected = false;
+            buildingIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+    });
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        //var startDate = new Date(currentTime.getFullYear() - 1, 0, 1);
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+    $("#SiteCode").change(function () {
+        getBuildings();
+    });
+
+    function getBuildings() {
+        var buildtypeId = 0;
+        $("#BuildingId").empty();
+        $("#BuildingId").append(
+            $('<option buildtypeid =' + buildtypeId + '></option>').val("-1").html("All"));
+        var floorOptions = {};
+        floorOptions.url = '@Url.Action("GetBuildingBySite", "Organization", new { area = "" })';//"/Organization/GetFloorByBuilding";
+        floorOptions.type = "POST";
+        floorOptions.data = { sitecode: $("#SiteCode").val() };
+        floorOptions.datatype = "json";
+       /* floorOptions.contentType = "application/json";*/
+        floorOptions.success = function (buildlst) {
+            console.log(buildlst);
+          //  debugger;
+            for (var i = 0; i < buildlst.length; i++) {
+                $("#BuildingId").append(
+                    $('<option></option>').val(buildlst[i].BuildingId).html(buildlst[i].BuildingName).attr("buildtypeId", buildlst[i].BuildingTypeId));
+            }
+            $('#BuildingId').selectpicker('refresh');
+            //$('#BuildingId option[buildtypeid!="' + buildtypeId + '"]').remove();
+            $("#BuildingId").trigger("change");
+        };
+
+        floorOptions.error = function () { AlertWarningMsg("Error in Getting Buildings!!", ""); };
+        $.ajax(floorOptions);
+    }
+
+</script>
+<style>
+    select#roundType {
+        cursor: pointer;
+    }
+</style>

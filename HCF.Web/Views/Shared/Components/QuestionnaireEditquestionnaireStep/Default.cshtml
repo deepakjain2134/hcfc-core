@@ -1,0 +1,110 @@
+﻿@model HCF.BDO.QuestionnaireSteps
+@{
+    int i = Convert.ToInt32(ViewData["i"]);// this.ViewData.ContainsKey("i") ? this.ViewData["i"].ToString() : string.Empty;
+}
+
+@*@Model.QuestionnaireStepDetail[i].InputType*@
+<td>
+    <select name="QuestionnaireStep.QuestionnaireStepDetail[@i].InputType" class="form-control Inputype" id="QuestionnaireStep.QuestionnaireStepDetail[@i].InputType">
+        <option value="1">Number</option>
+        <option value="2">Text</option>
+        <option value="4">Decimal</option>
+        <option value="6">Dropdown</option>
+        @*<option value="3">Email</option>*@
+    </select>
+</td>
+<td>
+    <input type="hidden" name="QuestionnaireStep.QuestionnaireStepDetail[@i].QuestionnaireStepId" value="@Model.QuestionnaireStepId" />
+    <input type="text" name="QuestionnaireStep.QuestionnaireStepDetail[@i].RecommendedValue" value="@Model.QuestionnaireStepDetail[i].RecommendedValue" class="form-control text recommendtxtbox" />
+</td>
+<td>
+    <input type="text" name="QuestionnaireStep.QuestionnaireStepDetail[@i].MinValue" value="@Model.QuestionnaireStepDetail[i].MinValue" class="form-control number minumber" />
+</td>
+<td>
+    <input type="text" name="QuestionnaireStep.QuestionnaireStepDetail[@i].MaxValue" value="@Model.QuestionnaireStepDetail[i].MaxValue" class="form-control number maxnumber" />
+</td>
+<td>
+    <input type="text" name="QuestionnaireStep.QuestionnaireStepDetail[@i].Format" value="@Model.QuestionnaireStepDetail[i].Format" class="form-control" />
+</td>
+<td>
+    <input type="hidden" name="QuestionnaireStep.QuestionnaireStepDetail[@i].InputValueHeader" id="QuestionnaireStep.QuestionnaireStepDetail[@i].InputValueHeader" value="@Model.QuestionnaireStepDetail[i].InputValueHeader" />
+    @*@Html.QHeaderDropDownList("QuestionnaireStep.QuestionnaireStepDetail[" + i + "].InputValueHeader_ddl", 0,
+        "Select", new { @class = "form-control ddlOptions ddlbox text Optiondropdown", @multiple = "true", @title = "Select Options" })*@
+
+    <qheaderdropdownlist name="@string.Format("QuestionnaireStep.QuestionnaireStepDetail[{0}].InputValueHeader_ddl",i)"
+                         selectedvalue="0"
+                         firstvalue="Select"
+                         multiple="multiple"
+                         class="form-control ddlOptions ddlbox text Optiondropdown">
+    </qheaderdropdownlist>
+
+
+</td>
+
+<script>
+
+    var inputheader_hidden = $("[name='QuestionnaireStep.QuestionnaireStepDetail[" + @i + "].InputValueHeader']");
+    var inputHeaderDDL = $("[name='QuestionnaireStep.QuestionnaireStepDetail[" + @i + "].InputValueHeader_ddl']");
+    var inputType = $("[name='QuestionnaireStep.QuestionnaireStepDetail[" + @i + "].InputType']");
+
+    var cntrl = $("[name='QuestionnaireStep.QuestionnaireStepDetail[" + @i + "].IsActive']:hidden");
+
+    if ('@Model.IsActive' === "True") {
+       cntrl.val('@Model.IsActive');
+    };
+
+    inputType.val('@Model.QuestionnaireStepDetail[i].InputType');
+
+    $(".queschk").change(function () {
+        if ($(this).is(":checked")) {
+            cntrl.val(true);
+        } else { cntrl.val(false); }
+    });
+
+    $(document).ready(function () {
+        var selectedGroupId = [];
+        if (inputheader_hidden.val().length > 0) {
+            selectedGroupId = inputheader_hidden.val().split(',').map(function (item) {
+                return parseInt(item,10);
+            });
+        }
+        console.log(selectedGroupId);
+        var tid = inputHeaderDDL.attr("id");
+        $("#" + tid).selectpicker();
+        $("#" + tid).selectpicker('val', selectedGroupId)
+        $("#" + tid).selectpicker('refresh');
+    });
+
+    var ddlOptions = $('.ddlOptions');
+    ddlOptions.on('change', function () {
+        var ctr = $(this).attr("name").split('_')[0];
+        var selected = [];
+        $(this).find("option:selected").each(function (key, ctr) {
+            selected.push(parseInt(ctr.value));
+        });
+        $("input[name='" + ctr + "'][type=hidden]").val(selected.toString(","));
+    });
+    var Inputselect = $(".Inputype");
+    Inputselect.on('change', function () {
+       // debugger
+        var currentvalue = $(this).children(":selected").text();
+        var a;
+        if (currentvalue == "Dropdown") {
+            a = $(this).closest('tr').children()[3].children[0]; a.value = ""; a.disabled = true;
+            a = $(this).closest('tr').children()[4].children[0]; a.value = ""; a.disabled = true;
+            a = $(this).closest('tr').children()[2].children[1]; a.disabled = false;
+            a = $(this).closest('tr').children()[6].children[1].children[1]; a.disabled = false;
+        }
+        else {
+            a = $(this).closest('tr').children()[3].children[0]; a.value = "0"; a.disabled = false;
+            a = $(this).closest('tr').children()[4].children[0]; a.value = "0"; a.disabled = false;
+            a = $(this).closest('tr').children()[2].children[1]; a.value = ""; a.disabled = true;
+            a = $(this).closest('tr').children()[6].children[1].children[1].children[0].children[0].children[0]; a.innerHTML = "Select Options";
+            a = $($(this).closest('tr').children()[6].children[0]); a.val("");
+            a = $($(this).closest('tr').children()[6].children[1].children[2].children[0].children[0].children); a.removeClass("selected");
+            a = $($(this).closest('tr').children()[6].children[1].children[1]); a.attr("title", "");
+            a = $(this).closest('tr').children()[6].children[1].children[1]; a.disabled = true;
+
+        }
+    });
+</script>

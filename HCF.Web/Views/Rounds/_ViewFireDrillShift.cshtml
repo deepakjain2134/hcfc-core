@@ -1,0 +1,83 @@
+﻿@model HCF.BDO.TExercises
+@{
+    var i = this.ViewData.ContainsKey("i") ? this.ViewData["i"].ToString() : string.Empty;
+    var j = this.ViewData.ContainsKey("j") ? this.ViewData["j"].ToString() : string.Empty;
+    var ii = this.ViewData.ContainsKey("ii") ? this.ViewData["ii"].ToString() : string.Empty;
+}
+
+<table width="100%" border="0" cellspacing="0" id="firedrilltable">
+    <tbody>
+
+        @if (Model.TExerciseId > 0)
+        {
+            <tr id="viewfiredrill_@Model.TExerciseId">
+                <td width="30%" align="center">
+                    @*@Model.Date.CastDate()*@
+                    @{ var date = string.Empty; }
+                    @if (Model.Date.HasValue && Model.Date != null)
+                    {
+                        // date = Convert.ToDateTime(Model.Date).ToString("ddd, MMM d, yyyy");
+                        date =Model.Date.Value.ToString("ddd, MMM d");
+
+                    }
+                    @date
+
+                </td>
+                <td width="20%">@Model.StartTime</td>
+                <td width="20%" align="center">
+                    @*@Html.SpanBoolLabel(Model.Announced, "Yes", "No",new { })*@
+                    <span>@((Model.Announced)? "Yes": "No")</span>
+                </td>
+                <td width="15%" align="center">
+
+                    @if (Model.Status == 1)
+                    {
+                        <span> Done </span>
+                    }
+                    else
+                    {
+                        <span>Plan</span>
+                    }
+                </td>
+                <td width="15%" align="center">
+                    @if (Model.TExerciseFiles.Count > 0 || Model.TExerciseQuestionnaires.Any(x => x.Comments != string.Empty))
+                    {
+                        <div class="@((Model.TExerciseFiles.Any())?"uploadquesdocs_file":"uploadques_file")">
+                            <input type="button" id="btnPopup"
+                                   onclick="Openpoup(this,'@i','@j','@ii',0)"
+                                   tempname='Buildings[@i].Shifts[@j].Exercises[@ii].TExerciseFiles[0].FilesContent'
+                                   filename="Buildings[@i].Shifts[@j].Exercises[@ii].TExerciseFiles[0].FileName"
+                                   filepath="Buildings[@i].Shifts[@j].Exercises[@ii].TExerciseFiles[0].FilePath"
+                                   sdate="Buildings[@i].Shifts[@j].Exercises[@ii].Date"
+                                   sstarttime="Buildings[@i].Shifts[@j].Exercises[@ii].StartTime"
+                                   sannounced="Buildings[@i].Shifts[@j].Exercises[@ii].Announced"
+                                   sstatus="Buildings[@i].Shifts[@j].Exercises[@ii].Status"
+                                   sdrilltype="Buildings[@i].Shifts[@j].Exercises[@ii].DrillType" />
+                        </div>
+                    }
+                    else
+                    {
+                        <common-image src="@Url.Content("~/dist/Images/Icons/missing_doc_icon.png")"
+                                      title = "No document attached"
+                                      ></common-image>
+                        @*@Html.StaticImage(new {
+                       @src = @Url.Content("~/dist/Images/Icons/missing_doc_icon.png"),
+                       title = "No document attached" })*@
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" style="border-top: 1px solid #eee;text-align-last:left;padding-left: 5px;">
+                    @Model.NearBy
+                </td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td width="20%" colspan="5"></td>
+            </tr>
+        }
+
+    </tbody>
+</table>

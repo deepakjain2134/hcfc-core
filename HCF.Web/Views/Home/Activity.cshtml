@@ -1,0 +1,67 @@
+﻿@model HCF.Web.ViewModels.Home.AllRecentActivitiesViewModel
+@using HCF.BDO
+@{
+
+    ViewBag.Title = "Activity";   
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1 class="float-left">
+                User Activity
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @foreach (var activity in Model.Activities)
+                    {
+                        <div class="activityentry">
+                            @if (activity is HCF.BDO.EpAssignmentActivity)
+                            {
+                                var epAssignmentActivity = activity as EpAssignmentActivity;
+                                <div class="row badgeactivity">
+                                    <div class="activityinfo col-md-11">
+
+                                        @if (activity.ActivityMapped.Type == HCF.BDO.Enums.UserActivityType.EPAssigned.ToString())
+                                        {
+                                            <p class="activityinfotext">
+                                                @string.Format("User {0} was {1} to {2}", string.Join(",", epAssignmentActivity._user.Select(x => x.Name)),
+                                                "assigned",
+                                                            string.Join(",", epAssignmentActivity._standardEps.Select(x => x.StandardEP)))
+                                            </p>
+                                        }
+                                        else if (activity.ActivityMapped.Type == HCF.BDO.Enums.UserActivityType.EPUnAssigned.ToString())
+                                        {
+                                            <p class="activityinfotext">
+                                                @string.Format("User {0} was {1} to {2}", string.Join(",", epAssignmentActivity._user.Select(x => x.Name)),
+                                                "un assigned",
+                                                          string.Join(",", epAssignmentActivity._standardEps.Select(x => x.StandardEP)))
+                                            </p>
+                                        }
+                                        else if (activity.ActivityMapped.Type == HCF.BDO.Enums.UserActivityType.EPTransferToUser.ToString())
+                                        {
+                                            <p class="activityinfotext">
+                                                @string.Format("EPs of User {0} was {1} to {2}", string.Join(",", epAssignmentActivity._user.Select(x => x.Name)),
+                                                "assigned",
+                                                          string.Join(",", epAssignmentActivity._toUser.Select(x => x.Name)))
+                                            </p>
+                                        }
+                                        <p class="activitysubdate">
+                                            @epAssignmentActivity.ActivityMapped.CreatedDate.ToFormatDate()
+                                        </p>
+                                        <p>
+                                            @string.Format("{0}", @epAssignmentActivity._modifedBy?.Name)
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>

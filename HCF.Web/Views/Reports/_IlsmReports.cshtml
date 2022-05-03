@@ -1,0 +1,110 @@
+﻿@model IEnumerable<HCF.BDO.TIlsm>
+@{
+    Layout = null;
+}
+@if (Model.Any())
+{
+    
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ilsmColContainer">
+                    <div class="ilsmColleft-3">
+                        <div class="searchReports">
+                            @*<input type="text" class="form-control" id="txtsearch" onkeyup="searchfilter()" placeholder="Search for report name..." title="Type in a name of report">
+                <a class="ilsmreportsSearch" href="#" id="txtSearch"><i class="fa fa-search" id=""></i></a>*@
+
+                            <div class="input-group">
+                                <input class="form-control" type="text" id="txtsearch" onkeyup="searchfilter()" placeholder="Search for report name..." title="Type in a name of report">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default" type="submit" id="txtSearch">
+                                        <i class="glyphicon glyphicon-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="crx-scrollBarNo">
+                            <ul class="ilsmreports_ul" id="ulIlsmreport">
+                                @foreach (var item in Model.OrderByDescending(x => x.TIlsmId))
+                                {
+                                    <li onclick="Opendiv(@item.TIlsmId,'@commonModelFactory.FilePath(item.FilePath)',this);" id="@item.TIlsmId"
+                                        tempname="@commonModelFactory.FilePath(item.FilePath)">
+                                        <a style="display:none;">
+                                            @item.IncidentId @($"{commonModelFactory.GetFileNameWithoutExtension(item.FileName)}")
+                                        </a>
+                                        <div class="ilsm-left-icon">
+                                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentIcon)" alt="document_icon" />
+                                        </div>
+                                        <span class="ilsm-left-con">
+                                            <a href="#" class="ilsm-clickArea">
+
+                                                <span>@item.IncidentId</span>
+                                                @($"{commonModelFactory.GetFileNameWithoutExtension(item.FileName)}")
+                                                @*@Html.DisplayFor(modelItem => item.FileName)*@
+
+                                            </a>
+                                            <label class="leftilsmdate"><strong>Report Date : </strong>@item.CreatedDate.ToClientTime().ToFormatDate()</label>
+                                        </span>
+
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    <div class="ilsmColright-9">
+                        <div class="" id="divdocpreview">
+                            <div class="table">
+                                @foreach (var item in Model)
+                                {
+                                    <div id="div_@item.TIlsmId" style="display:none" class="tableRow row">
+                                        <div class="col-md-4">
+                                            <label> @Localizer["IncidentNo"] :</label> @Html.DisplayFor(modelItem => item.IncidentId)
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Name:</label> @Html.DisplayFor(modelItem => item.FileName)
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="crx-scrollBarNo">
+                                <iframe name="ilsmreports" id="ilsmframe" style="width:100%;height:800px;"></iframe>
+                            </div>
+                        </div>
+                        <div id="divnopreview" style="margin-top: 100px;text-align:center;">Choose a report from the list on the left for review.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+}
+else
+{
+    <div class="row" style="padding-top:100px;">
+        <div class="box box-primary">
+            <div class="tble_shadow text-center">No data available</div>
+        </div>
+    </div>
+}
+<script>
+
+    function searchfilter() {
+        debugger;
+        var input, filter, ul, li, a, i, txtValue;
+        input = document.getElementById("txtsearch");
+        filter = input.value.toUpperCase();
+        ul = document.getElementById("ulIlsmreport");
+        li = ul.getElementsByTagName("li");
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("a")[0];
+            txtValue = a.textContent.trim() || a.innerText.trim();
+            if (txtValue.trim().toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+    }
+
+
+</script>

@@ -1,0 +1,94 @@
+﻿@model IEnumerable<HCF.BDO.Organization>
+@{
+    ViewBag.Title = "Hospitals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = ViewBag.ReturnUrl;
+
+}
+
+@section pageHeader{
+    <section class="content-header"></section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 clint_main">
+            <div class="box box-primary">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="client_logo">
+                            @foreach (var item in Model.Where(x => x.ParentOrgKey == null))
+                            {
+                                <li>
+                                    @if (!string.IsNullOrEmpty(item.DbName))
+                                    {
+                                        <a href='@(Url.Action("SetClient","Campus", new { orgkey = item.Orgkey ,returnUrl=returnUrl}))' title="@item.Name">
+                                            <common-image src="@item.LogoPath" title="@item.Name" class="img"></common-image>
+                                        </a>
+
+                                    }
+                                    else
+                                    {
+                                        <a href='@(Url.RouteUrl("lists", new { orgkey = item.Orgkey,returnUrl=returnUrl }))'>
+                                            <common-image src="@item.LogoPath" title="@item.Name" class="img"></common-image>
+                                        </a>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <style type="text/css">
+        .client_li {
+            display: none;
+        }
+
+        li.chkpassword, li.liprofile {
+            display: none !important;
+        }
+
+        @@media screen and (min-width:320px) and (max-width:1024px) {
+            .toggle_menu {
+                display: none;
+            }
+
+            .navbar {
+                display: block;
+                position: inherit;
+                width: auto;
+                float: right;
+                text-align: center;
+                height: 50px;
+                border: none !important;
+                box-shadow: none;
+            }
+
+            .navbar-nav {
+                width: 100%;
+            }
+
+            .top_menu li {
+                padding: 6px 8px;
+                border: rgba(204, 204, 204, 0.37) solid 1px;
+                border-bottom: none;
+                border-top: none;
+                width: 100%;
+            }
+
+            .dropdown-menu li a {
+                padding: 0;
+            }
+        }
+    </style>
+
+    <script>
+        $('.top_menu').hide();
+        $('.breadcrumb').hide();
+    </script>
+}

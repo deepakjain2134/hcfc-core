@@ -1,0 +1,202 @@
+﻿@model HCF.BDO.RiskManagement
+@{
+    var currentOrg = HCF.Web.Base.UserSession.CurrentOrg;
+    int AllPermitCount = 0;
+    AllPermitCount = Model.AllPermitCount;
+    AllPermitCount = AllPermitCount + (commonModelFactory.IsMenuExist("CRA", Convert.ToString(session.ClientNo)) ? Model.CRACount : 0);
+    AllPermitCount = AllPermitCount + (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)) ? Model.ICRAPermitCount : 0);
+    AllPermitCount = AllPermitCount + (commonModelFactory.IsMenuExist("PCRA", Convert.ToString(session.ClientNo)) ? Model.PCRACount : 0);
+}
+<div class="row">
+    <div class="col-lg-12 topBanner-listbox">
+        <div class="banner">
+            @if (currentOrg != null)
+            {
+                <image src="@currentOrg.DashBoadImagePath" class="img" 
+                       title="@currentOrg.Name"></image>
+            }
+            else
+            {
+                <image src="" class="img" title="DashBoard Image"></image>
+            }
+        </div>
+        <div class="iwantBox" id="home_userOptions">
+            @await Html.PartialAsync("_UserOptions")
+        </div>
+        @if (!HCF.Web.Base.UserSession.CurrentUser.IsVendorUser)
+        {
+            <div class="homeslider-listbox">
+                <h4 class="currentuser-name">@($"Welcome {HCF.Web.Base.UserSession.CurrentUser.Name}") </h4>
+                <div id="home_userrecords">
+                    @await Component.InvokeAsync("HomeUserRecords")
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@if (commonModelFactory.IsAdminUser() || commonModelFactory.IsSystemAdminUser())
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="deficiBoxs">
+                <div class="col-sm-2-5">
+                    <a href="@Url.Action("Index", "WorkOrder")">
+                        <div class="panel panel-blue">
+                            <div class="panel-heading">
+                                <div class="panel-5">
+                                    <div class="fourPaneliconBox deficiicon1"></div>
+                                    @*<common-image src="~/Images/services/work_order.png" title="Work Order" class="dashimg"></common-image>*@
+                                </div>
+                                <div class="panel-7 text-right">
+                                    <div class="huge"><small class="counter-count">@Model.IsssueCount</small></div>
+                                    <div>Work Orders</div>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-2-5">
+                    <a href="@Url.RouteUrl("deficiencies", new { type = "0", mode = "de" })">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="panel-5">
+                                    <div class="fourPaneliconBox deficiicon2"></div>
+                                    @*<common-image src="~/Images/services/de.png" title="Deficiencies" class="dashimg"></common-image>*@
+                                </div>
+                                <div class="panel-7 text-right">
+                                    <div class="huge counter-count">@Model.DefecienciesCount</div>
+                                    <div>Deficiencies</div>
+                                </div>
+
+                            </div>
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-2-5">
+                    <a href="@Url.RouteUrl("deficiencies", new { type = "0", mode = "ra" })">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <div class="panel-5">
+                                    <div class="fourPaneliconBox deficiicon3"></div>
+                                    @*<common-image src="~/Images/services/ra.png" title="Risk Assessment" class="dashimg"></common-image>*@
+                                </div>
+                                <div class="panel-7 text-right">
+                                    <div class="huge counter-count">@Model.RaCount</div>
+                                    <div>Risk Assessment</div>
+                                </div>
+
+                            </div>
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-sm-2-5">
+                    <a href="@Url.Action("IlsmView", "Goal", new { PageName = "ILSM", Id = 0 })">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <div class="panel-5">
+                                    <div class="fourPaneliconBox deficiicon4"></div>
+                                    @*<common-image src="~/Images/services/ilsm.png" title="ILSM" class="dashimg"></common-image>*@
+                                </div>
+                                <div class="panel-7 text-right">
+                                    <div class="huge counter-count">@Model.IlsmCount</div>
+                                    <div>ILSM</div>
+                                </div>
+                            </div>
+
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+
+                @if (HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra") && HCF.Web.Base.UserSession.HasRoleForMenu("icra_inspectionicra"))
+                {
+                    <div class="col-sm-2-5" style="display:none;">
+                        <a href="@Url.RouteUrl("inspectionicra")">
+                            <div class="panel panel-cyan">
+                                <div class="panel-heading">
+                                    <div class="panel-5">
+                                        <div class="fourPaneliconBox deficiicon5"></div>
+                                        @*<common-image src="~/Images/services/icra.png" title="ICRA" class="dashimg"></common-image>*@
+                                    </div>
+                                    <div class="panel-7 text-right">
+                                        <div class="huge counter-count">@Model.ICRACount</div>
+                                        <div>ICRA</div>
+                                    </div>
+
+                                </div>
+
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+
+                @if (HCF.Web.Base.UserSession.HasRoleForMenu("permit_getallpermits") && HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra"))
+                {
+                    <div class="col-sm-2-5">
+                        <a href="@Url.RouteUrl("all_permits")">
+                            <div class="panel panel-cyan">
+                                <div class="panel-heading">
+                                    <div class="panel-5">
+                                        <div class="fourPaneliconBox deficiicon5"></div>
+                                        @*<common-image src="~/Images/services/all_permits_icon.png" title="Permits" class="dashimg"></common-image>*@
+                                    </div>
+                                    <div class="panel-7 text-right">
+                                        <div class="huge counter-count">@AllPermitCount</div>
+                                        <div>Permits</div>
+                                    </div>
+
+                                </div>
+
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i>Calender View
+                </div>
+                <div class="panel-body">
+                    @await Html.PartialAsync("_CalenderView")
+                </div>
+            </div>
+        </div>
+    </div>
+}

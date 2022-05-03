@@ -1,0 +1,256 @@
+﻿@model IEnumerable<HCF.BDO.InspectionEPDocs>
+@{
+    /**/
+
+    bool ishistory = this.ViewData.ContainsKey("ishistory") ? Convert.ToBoolean(this.ViewData["ishistory"]) : false;
+}
+
+@if (ishistory==false)
+{
+    if (Model.Where(x => x.DocTypeId != 108 && x.IsDeleted == false || (x.CreatedBy == 0)).Count() > 0)
+    {
+        <div class="ep-tableBox requireddoc">
+           
+                <table class="table">
+                    <thead>
+                        <tr>
+                            @*<th>Required Documents</th>*@
+                            <th>File Name</th>
+                            <th style="width:150px;">Doc Review Date</th>
+                            <th style="width:200px;">Uploaded By</th>
+                            <th style="width:100px; text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var epdocs in Model.Where(x => x.IsRequiredDoc && x.IsDeleted == false || (x.CreatedBy == 0)).OrderByDescending(x => x.CreatedDate))
+                        {
+                            var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                            <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                                @*<td>@($"{(epdocs.DocumentType != null ? epdocs.DocumentType.Name : "N/A")}")</td>*@
+                                <td><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></td>
+                                <td>@epdocs.DtEffectiveDate.ToFormatDate()</td>
+                                <td>
+                                    @*@($"{epdocs.UserProfile.FullName} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                                    @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                                </td>
+                                <td class="text-right">
+                                    <div class="ep-actionbox">
+                                        @if (!string.IsNullOrEmpty(filePath))
+                                        {
+                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = filePath, title = "Preview" })"  target="_blank" title="View">
+                                                <img src="/dist/Images/Icons/epview.png" alt="" />
+                                            </a>
+
+                                            <a href="@commonModelFactory.FilePath(epdocs.Path)" download title="Download" target="_blank">
+                                                <img src="/dist/Images/Icons/epdownload.png" alt="" />
+                                            </a>
+                                            <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="@(ishistory ? "delete hide" : "delete")"><img src="/dist/Images/Icons/delete.png" /></a>
+                                            @*<a title="Email">
+                                                <img src="/dist/Images/Icons/epmail.png" alt=""/></a>*@
+                                        }
+                                        else
+                                        {
+                                            <a class="disable" title="View"><img src="/dist/Images/Icons/epview.png" alt="" /></a>
+                                            <a class="disable" title="Download"><img src="/dist/Images/Icons/epdownload.png" alt="" /></a>
+                                            @*<a class="disable" title="Email"><img src="/dist/Images/Icons/epmail.png" /></a>*@
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            
+        </div>
+    }
+    if (Model.Where(x => x.DocTypeId == 108 && x.IsDeleted == false && (x.CreatedBy > 0)).Count() > 0)
+    {
+        <div class="ep-tableBox miscdoc">
+           
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Misc. Documents</th>
+                            @*<th>Doc Review Date</th>*@
+                            <th style="width:200px;">Uploaded By</th>
+                            <th style="width:100px;text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var epdocs in Model.Where(x => x.IsRequiredDoc == false && x.IsDeleted == false && (x.CreatedBy > 0)).OrderByDescending(x => x.CreatedDate))
+                        {
+                            var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                            <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                                <td><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></td>
+                                @*<td>NA</td>*@
+                                <td>
+                                    @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                                    @*@($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                                </td>
+                                <td class="text-right">
+                                    <div class="ep-actionbox">
+                                        @if (!string.IsNullOrEmpty(filePath))
+                                        {
+                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = filePath, title = "Preview" })" target="_blank" title="View">
+                                                <img src="/dist/Images/Icons/epview.png" alt="" />
+                                            </a>
+                                            <a href="@commonModelFactory.FilePath(epdocs.Path)"
+                                               download title="Download" target="_blank">
+                                                <img src="/dist/Images/Icons/epdownload.png" alt="" />
+                                            </a>
+                                            <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="@(ishistory ? "delete hide" : "delete")"><img src="/dist/Images/Icons/delete.png" /></a>
+                                        }
+                                        else
+                                        {
+                                            <a class="disable" title="View"><img src="/dist/Images/Icons/epview.png" alt="" /></a>
+                                            <a class="disable" title="Download"><img src="/dist/Images/Icons/epdownload.png" alt="" /></a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            
+        </div>
+    }
+}
+else
+{
+
+
+if (Model.Where(x => x.DocTypeId!=108|| (x.CreatedBy == 0)).Count() > 0)
+{
+    <div class="ep-tableBox requireddoc">
+       
+            <table class="table">
+                <thead>
+                    <tr>
+                        @*<th>Required Documents</th>*@
+                        <th>File Name</th>
+                        <th style="width:150px;">Doc Review Date</th>
+                        <th style="width:200px;">Uploaded By</th>
+                        <th style="width:100px; text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var epdocs in Model.Where(x => x.DocTypeId != 108 || (x.CreatedBy == 0)).OrderByDescending(x => x.CreatedDate))
+                    {
+                        var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                        <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                            @*<td>@($"{(epdocs.DocumentType != null ? epdocs.DocumentType.Name : "N/A")}")</td>*@
+                            <td> <span style="display: flex;align-items:self-start;"><img src="@commonModelFactory.UploadDocTypeImagePath(epdocs.UploadDocTypeId,epdocs.DocTypeId)" alt="" /><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></span></td>
+                            <td>@epdocs.DtEffectiveDate.ToFormatDate()</td>
+                            <td>
+                                @*@($"{epdocs.UserProfile.FullName} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                                @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                            </td>
+                            <td class="text-right">
+                                <div class="ep-actionbox">
+                                    @if (!string.IsNullOrEmpty(filePath))
+                                    {
+                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = filePath, title = "Preview" })" target="_blank"  title="View">
+                                            <img src="/dist/Images/Icons/epview.png" alt="" />
+                                        </a>
+
+                                        <a href="@commonModelFactory.FilePath(epdocs.Path)" download title="Download" target="_blank">
+                                            <img src="/dist/Images/Icons/epdownload.png" alt="" />
+                                        </a>
+                                        <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="@(ishistory ? "delete hide" : "delete")"><img src="/dist/Images/Icons/delete.png" /></a>
+                                        @*<a title="Email">
+                                            <img src="/dist/Images/Icons/epmail.png" alt=""/></a>*@
+                                    }
+                                    else
+                                    {
+                                        <a class="disable" title="View"><img src="/dist/Images/Icons/epview.png" alt="" /></a>
+                                        <a class="disable" title="Download"><img src="/dist/Images/Icons/epdownload.png" alt="" /></a>
+                                        @*<a class="disable" title="Email"><img src="/dist/Images/Icons/epmail.png" /></a>*@
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        
+    </div>
+    }
+    if (Model.Where(x => x.DocTypeId == 108 && (x.CreatedBy > 0)).Count() > 0)
+    {
+    <div class="ep-tableBox miscdoc">
+       
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Misc. Documents</th>
+                        @*<th>Doc Review Date</th>*@
+                        <th style="width:200px;">Uploaded By</th>
+                        <th style="width:100px;text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var epdocs in Model.Where(x => x.DocTypeId == 108 && (x.CreatedBy > 0)).OrderByDescending(x => x.CreatedDate))
+                    {
+                        var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                        <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                            <td><span style="display: flex;align-items:self-start;"> <img src="@commonModelFactory.UploadDocTypeImagePath(epdocs.UploadDocTypeId,epdocs.DocTypeId)" alt="" /><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></span></td>
+                            @*<td>NA</td>*@
+                            <td>
+                                @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                                @*@($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                            </td>
+                            <td class="text-right">
+                                <div class="ep-actionbox">
+                                    @if (!string.IsNullOrEmpty(filePath))
+                                    {
+                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = filePath, title = "Preview" })" target="_blank" title="View">
+                                            <img src="/dist/Images/Icons/epview.png" alt="" />
+                                        </a>
+                                        <a href="@commonModelFactory.FilePath(epdocs.Path)"
+                                           download title="Download" target="_blank">
+                                            <img src="/dist/Images/Icons/epdownload.png" alt="" />
+                                        </a>
+                                        <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="@(ishistory ? "delete hide" : "delete")"><img src="/dist/Images/Icons/delete.png" /></a>
+                                    }
+                                    else
+                                    {
+                                        <a class="disable" title="View"><img src="/dist/Images/Icons/epview.png" alt="" /></a>
+                                        <a class="disable" title="Download"><img src="/dist/Images/Icons/epdownload.png" alt="" /></a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        
+    </div>
+}
+}
+<style>
+    .deleted td {
+        text-decoration: line-through;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+
+        $("#LastInspDate").text($("#_inspectionDate").val());
+
+        var maxLength = 48;
+        $(".epdocName-elips").each(function () {
+            var myStr = $(this).text();
+            if ($.trim(myStr).length > maxLength) {
+                var newStr = myStr.substring(0, maxLength);
+                var removedStr = myStr.substring(maxLength, $.trim(myStr).length);
+                $(this).empty().html(newStr);
+                $(this).append(' <a href="javascript:void(0);" class="read-more">...</a>');
+
+            }
+        });
+
+    });
+</script>

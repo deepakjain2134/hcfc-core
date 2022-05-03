@@ -1,0 +1,33 @@
+﻿@model List<HCF.BDO.RoundCategory>
+<table id="newTbl" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th></th>
+            <th>Round Category</th>
+            <th>Questionnaire</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var roundItems in Model)
+        {
+            foreach (var item in roundItems.RoundItems)
+            {
+                <tr>
+                    <td style="display:none">
+                        @roundItems.RoundCatId
+                    </td>
+                    <td>
+                        <input type="checkbox" class="checkBoxRoqueId" value="@item.RouQuesId" onchange="AddQuestionToCustomRounds('@item.RouQuesId')" /><span></span>
+                    </td>
+                    <td>
+                        @roundItems.CategoryName
+                    </td>
+                    <td>
+                        @item.RoundStep
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

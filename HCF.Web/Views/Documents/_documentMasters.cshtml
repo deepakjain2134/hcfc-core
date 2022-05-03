@@ -1,0 +1,22 @@
+﻿@model List<HCF.BDO.DocumentMaster>
+<div class="slider">
+    <table id="docmaster_tbl" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th width="10%">
+                    File Name
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var files in Model.OrderBy(x=>x.FileName))
+            {
+                <tr>
+                    <td>
+                        @files.FileName
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

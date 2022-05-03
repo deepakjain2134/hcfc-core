@@ -1,0 +1,137 @@
+﻿
+@model IEnumerable<HCF.BDO.FloorTypes>
+   
+        <div class="row tablelist-topform">
+            <div class="col-md-4 col-sm-6 selbulding-bottom">
+                <div class="form-group">
+
+                    @*@Html.BuildingDropDownList("buildings", 0, "All", new { @class = "form-control select_group", required = "required" })*@
+
+                    <buildingdropdownlist firsttext="All"
+                                          required="required"
+                                          class="form-control select_group"
+                                          selectedvalue="0"
+                                          name="buildings">
+                    </buildingdropdownlist>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="floorDataTable" class="table table-bordered table-striped no-footer">
+                    <thead>
+                        <tr>
+                            <th style="display:none;"></th>
+                            <th> @Localizer["FloorPlan"] </th>
+                            <th> @Localizer["BuildingName"] </th>
+                            <th> @Localizer["FloorName"] </th>
+                            <th> @Localizer["Action"] </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var floorType in Model)
+                        {
+                            foreach (var item in floorType.Floors)
+                            {
+                                foreach (var floorPlans in item.FloorPlans.Where(x => x.FloorPlanTypeId == ViewBag.floorTypID && x.IsCurrent))
+                                {
+                                    <tr id="@floorPlans.FloorPlanTypeId">
+                                        <td style="display:none;">
+                                            @item.BuildingId
+                                        </td>
+                                        <td class="floorPlane-drawing">
+                                            @if (!string.IsNullOrEmpty(floorPlans.ImagePath) && (commonModelFactory.GetExtension(item.FileName) == ".pdf"))
+                                            {
+                                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = floorPlans.ImagePath, title = item.FloorName + " , " + item.Building.BuildingName })"
+                                                   class="modal-link" rel="popover" data-img="@commonModelFactory.FilePath(floorPlans.ThumbImagePath)">
+                                                    <img alt="@item.FloorName" src="@Url.Content("~/dist/Images/Icons/pdf_icon.png")" class="floorthumb" title="@item.FloorName" />
+                                                </a>
+                                            }
+                                            else if (!string.IsNullOrEmpty(floorPlans.ThumbImagePath))
+                                            {
+                                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = floorPlans.ImagePath, title = item.FloorName + " , " + item.Building.BuildingName })"
+                                                   class="modal-link" rel="popover" data-img="@commonModelFactory.FilePath(floorPlans.ThumbImagePath)">
+                                                    @*@Html.Image(floorPlans.ThumbImagePath, item.FloorName, "floorthumb")*@
+                                                    <image src="@floorPlans.ThumbImagePath" title="@item.FloorName" class="floorthumb"></image>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <img alt="@item.FloorName" src="@Url.Content("~/dist/Images/Icons/no_image.jpg")" class="floorthumb" title="@item.FloorName" />
+                                            }
+                                        </td>
+                                        <td>
+                                            @($"{item.Building.BuildingName} ({item.Building.BuildingCode})")
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FloorName)
+                                        </td>
+
+                                        <td class="floorplansDrawing">
+                                            <a href="@Url.Action("Index","Drawing",new { floorPlanId = item.FloorPlanId, mode="drawing",ispopup=1 })" title="Edit Plan " alt="Edit Plan">
+                                                <img class="fdplan-action" src="~/dist/Images/Icons/edit_plan_icon.png" alt="Edit Plan" />
+                                            </a>
+                                            <img class="fdplan-action" onclick="location.href ='@Url.RouteUrl("floorplanhistory", new { floorId = item.FloorId })'" src="~/dist/img/icon3.png" title="History" alt="History" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+    <script>
+
+        $(document).ready(function () {
+            var floorDataTable = $('#floorDataTable').DataTable({
+                searching: true,
+                pageLength: 10,
+                lengthChange: false,
+                bPaginate: $('#floorDataTable tbody tr').length > 10,
+                bInfo: false,
+                aaSorting: [],
+                language: {
+                    emptyTable: "No data available in table",
+                    search: "_INPUT_", //To remove Search Label
+                    searchPlaceholder: "Search..."
+                },
+                aoColumnDefs: [
+                    {
+                        orderSequence: ["desc", "asc"],
+                        aTargets: ['_all']
+                    }
+                ],
+                //dom: "<'row'<'col-sm-12'l p f>>" +
+                //    "<'row'<'col-sm-12'<'cus-responsive'tr>>>" +
+                //    "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+
+                dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+            });
+
+            $('#buildings').on('change', function () {
+                debugger;
+                var buildingId = $(this).val();
+                if (buildingId > 0) {
+                    floorDataTable.column(0).search("^" + buildingId + "$", true, true, false).draw();
+                }
+                else
+                    floorDataTable.columns(0).search("").draw();
+
+            });
+
+
+        });
+
+        $('a[rel=popover]').popover({
+            html: true,
+            animated: 'fade',
+            trigger: 'hover',
+            placement: 'right',
+            content: function () { return '<img height="250" width="250" src="' + $(this).data('img') + '" />'; }
+        });
+
+    </script>

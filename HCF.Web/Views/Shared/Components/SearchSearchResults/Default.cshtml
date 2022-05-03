@@ -1,0 +1,76 @@
+﻿@model HCF.BDO.SearchFilter
+<fieldset>
+    <legend>Search Results</legend>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tble_shadow" style="margin-top: 16px;">
+        <tbody>
+            <tr>
+                <td>
+                    @if (Model.TFloorAssets.Count > 0)
+                    {
+                        @await Html.PartialAsync("_SearchResultTfloorAssets", Model)
+                    }
+                    else if (Model.EPDetails.Count > 0)
+                    {
+                        @await Html.PartialAsync("_SearchResultEpdetails", Model)
+                    }
+                    else if (Model.SampleData.Any())
+                    {
+                        <table id="searchCommontable" class="table table-bordered table-striped">
+                            @foreach (var record in Model.SampleData)
+                            {
+                                <tr>
+                                    <td>@Enum.GetName(typeof(HCF.BDO.Enums.SearchFieldType), record.Type)</td>
+                                    @if (record.Type == 2)
+                                    {
+                                        <td>@record.BarCodeNo</td>
+                                        <td>@record.AssetNo</td>
+                                        <td>
+                                            <a href='@Url.RouteUrl("asseteps", new { floorassetId = record.Id, epId = 0, ismultipleEP = 0 })'>
+                                                <span>Go To Details</span>
+                                            </a>
+                                        </td>
+                                    }
+                                    else if (record.Type == 4)
+                                    {
+                                        <td>@record.BinderName</td>
+                                        <td></td>
+                                        <td>
+                                            <a href="@Url.RouteUrl("getepdocbybinder", new { id = record.Id })">
+                                                <span>Go To Details</span>
+                                            </a>
+                                        </td>
+                                    }
+                                    else if (record.Type == 5)
+                                    {
+                                        <td>@record.IncidentNo</td>
+                                        <td></td>
+                                        <td>
+                                            <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = record.Id })">
+                                                <span>Go To Details</span>
+                                            </a>
+                                        </td>
+
+                                    }
+                                </tr>
+                            }
+                        </table>
+                    }
+                    else
+                    {
+                        <text>
+                            <p class="nofound-search">
+                                No search record found...
+                            </p></text>
+                    }
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+<script>
+    $(document).ready(function () {
+        $("#IsSaveSearchData").prop("checked", false);
+        $("#FilterName").val('');
+        $("#dvfiltername").hide();
+    });
+</script>

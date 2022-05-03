@@ -1,0 +1,845 @@
+﻿@model List<HCF.BDO.RoundGroup>
+@{
+    var roundUserGroup = Model; //RoundInspectionsRepository.GetRoundUserGroup().Where(x => x.IsActive).ToList();
+}
+@{
+
+    ViewBag.Title = "RoundReports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<script src="~/dist/Scripts/highcharts.js"></script>*@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Round Reports
+            </h1>
+        </section>
+    }
+    <section class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+                        <div class="row tablelist-topform">
+                            <div class="col-xs-3">
+                                Location Group
+                                <select id="locationGroupId" name="" class="form-control" required="required">
+                                    <option value="">Select Location Group</option>
+                                    @foreach (var item in roundUserGroup.OrderBy(x => x.Name))
+                                    {
+                                        <option value="@item.RoundGroupId">@item.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-xs-3 searchItem1">
+                                <div>
+                                    From
+                                    <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                                </div>
+                            </div>
+                            <div class="col-xs-3 searchItem1">
+                                <div>
+                                    To
+                                    <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                                </div>
+                            </div>
+                            <div class="col-xs-3 report">
+                                <div>
+                                    <button class="comm-button" id="btnrunreport">Run Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="row">
+                            <div class="col-md-12">
+                            </div>
+                            <div class="" id="partialContents">
+
+                            </div>
+                        </div>
+
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+<style>
+    .report {
+        padding-top: 21px;
+    }
+
+    .green {
+        background-color: #54a77b;
+        /*color: #fff !important;*/
+    }
+
+    .red {
+        background-color: #cc6164;
+        /*color: #fff !important;*/
+    }
+
+    .yellow {
+        background-color: yellow;
+        /*color: #fff !important;*/
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        SetDefaultDate();
+        $("a.collapsed").click(function () {
+            $(this).find(".btn:contains('answer')").toggleClass("collapsed");
+        });
+    });
+
+   
+
+    $("#btnrunreport").click(function () {
+        if ($('#locationGroupId').val() != '')
+        {
+            var locationGroupId = $('#locationGroupId').val();
+            var from = $('#from').val();
+        var todate = $('#todate').val();
+
+        var url = '@Url.Action("GetRoundReportData", "Reports")';
+        $.ajax({
+            url: url + '?locationGroupId=' + locationGroupId + '&from=' + from + '&todate=' + todate,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('#partialContents').html(data);
+                $('#partialContents').fadeIn('fast');
+
+               
+                DataTable();
+                colorcode()
+                ComplianceByCat();
+                RoundRelatedBar();
+                pie();
+                MFdeficiency();
+                RoundInsptb();
+                RoundInspPer();
+                Riskchart();
+                hidedata();
+
+            }
+        });
+        }
+   else {
+            AlertWarningMsg("Please select location Group")
+        }
+
+
+    });
+
+    function RoundRelatedBar () {
+        var WorkOrder = [];
+
+        $('#WorkOrder .workOrder').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                WorkOrder.push(parseFloat(cell))
+
+            });
+        });
+        var status = [];
+        $('#WorkOrder .status').each(function () {
+
+            $(this).each(function () {
+                var _status
+                var cell = $(this).html();
+                if (parseInt(cell) == 2) {
+                    _status = 'Active';
+                }
+                else if (parseInt(cell) == -1) {
+                    _status = 'Pending';
+                }
+                else if (parseInt(cell) == 1) {
+                    _status = 'Completed';
+                }
+                else if (parseInt(cell) == 0) {
+                    _status = 'Cancelled';
+                }
+                else {
+                    _status = '';
+                }
+                status.push(_status)
+
+            });
+        });
+        if (WorkOrder.length > 0) {
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column',
+
+                },
+                title: {
+                    text: 'Round Related Work Orders'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: status
+                },
+                yAxis: {
+                    title: {
+                        text: 'Work Order'
+                    },
+                    showEmpty: false
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: false
+                    }
+                },
+                series: [{
+                    showInLegend: false,
+                    data: WorkOrder
+                }],
+               
+            });
+        }
+
+
+
+    };
+    function ComplianceByCat() {
+        var catname = Array();
+
+        $('#Compliance .catname').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                catname.push(cell)
+
+            });
+
+
+        });
+        var compcount = Array();
+        $('#Compliance .compcount').each(function () {
+
+            $(this).each(function () {
+
+                var cell = $(this).html(); // also tried val() here
+
+                compcount.push(parseFloat(cell))
+
+            });
+
+        });
+        if (catname.length > 0) {
+            Highcharts.chart('ComplianceChart', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Compliance by Category'
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: catname
+                },
+                yAxis: {
+                    title: {
+                        text: ''
+                    },
+                    showEmpty: false
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: false
+                    }
+                },
+                series: [{
+                    showInLegend: false,
+                    data: compcount
+                }]
+            });
+        }
+
+
+
+    };
+    function colorcode() {
+
+        $("#Compliance .compcount").map(function () {
+            if (parseFloat($(this).text()) >= 0.0 && parseFloat($(this).text()) <= 79.9) $(this).addClass("red")
+            if (parseFloat($(this).text()) > 79.9 && parseFloat($(this).text()) <= 89.9) $(this).addClass("yellow")
+            if (parseFloat($(this).text()) > 89.9 && parseFloat($(this).text()) <= 100.0) $(this).addClass("green")
+        })
+    }
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        debugger;
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+    function DataTable() {
+        $('#NonCompliance').dataTable({
+            searching: false,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#NonCompliance tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+            
+        });
+        $('#Compliance').dataTable({
+            searching: false,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#Compliance tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+            
+        });
+
+
+
+    };
+
+        function pie()
+        {
+
+
+                var table = document.getElementById('RoundsTbl'),
+                options = {
+                                        chart: {
+                                            renderTo: 'RoundChart',
+                                            type: 'pie'
+                                        },
+                                        title: {
+                                            text: 'Rounds Completed vs. Past Due'
+                                        },
+                                        xAxis: {
+                                        },
+                                        yAxis: {
+                                            title: {
+                                                text: 'Units'
+                                            }
+                                                },
+                                        tooltip:
+       {
+            formatter: function()
+           {
+               return '<b>'+ this.series.name +'</b><br/>'+
+                   parseFloat(this.y).toFixed(2)  +' '+ this.point.name;
+            }
+       },
+                                        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    connectorColor: '#000000',
+                    formatter: function () {
+                        return '<b>' + this.point.name + '</b>: ' + parseFloat(this.percentage).toFixed(2) + ' %';
+                    }
+                }
+            }
+        }
+                    };
+
+                Highcharts.setOptions({
+                    colors: ['#54a77b', '#cc6164'],
+                     
+                });
+                Highcharts.visualize = function (table, options) {
+                    // the categories
+                    options.xAxis.categories = [];
+                    $('tbody th', table).each(function (i) {
+                        options.xAxis.categories.push(this.innerHTML);
+                    });
+
+
+                    // the data series
+                    options.series = [];
+                    $('tr', table).each(function (i) {
+                        var tr = this;
+
+                        $('th, td', tr).each(function (j) {
+                            if (j > 0) {
+                                if (i == 0) {
+                                    options.series[j - 1] =
+                                        {
+                                            name: this.innerHTML,
+                                            data: []
+                                        };
+                                }
+                                else { // add values
+
+                                    sliceNames = [];
+                                    $('tbody th', table).each(function (i) {
+                                        sliceNames.push(this.innerHTML);
+                                    });
+
+                                    options.series[j - 1].data.push({ name: sliceNames[i - 1], y: parseFloat(this.innerHTML) });
+                                }
+                            }
+                        });
+                    });
+
+                    var chart = new Highcharts.Chart(options);
+                }
+
+                Highcharts.visualize(table, options);
+
+
+    };
+
+    function MFdeficiency() {
+        var question = [];
+
+        $('#NonCompliance .ques').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                question.push((cell))
+
+            });
+        });
+        var occurance = [];
+        $('#NonCompliance .occurance').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                occurance.push(parseFloat(cell))
+
+            });
+        });
+
+        var data = []
+        var colors = ["#4272c1"]
+        for (i = 0; i < occurance.length; i++) {
+            obj = {};
+            var y = occurance[i]
+            var color = colors[0]
+
+            obj["y"] = y;
+            obj["color"] = color;
+
+
+
+            data.push(obj);
+        }
+
+        Highcharts.chart('MFDeficiency', {
+            chart: {
+                type: 'column',
+
+            },
+            title: {
+                text: 'Most Frequently Found Deficiencies '
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: {
+                categories: question
+            },
+            yAxis: {
+                title: {
+                    text: 'Occurance'
+                },
+                showEmpty: false
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{
+                showInLegend: false,
+                data: data
+               
+            }],
+
+        });
+       
+       
+    }
+
+    function RoundInsptb() {
+        var occurance = [];
+
+        $('#RoundInsptbl .occurance').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                occurance.push(parseInt(cell))
+
+            });
+        });
+        var colors = ['#ff0000', '#a6a6a6', '#70ad47'];
+
+        
+        var status = [];
+        $('#RoundInsptbl .status').each(function () {
+
+            $(this).each(function () {
+                var _status
+                var cell = $(this).html();
+          
+                status.push(cell)
+
+            });
+        });
+
+        var percentage = [];
+
+        $('#RoundInsptbl .percentage').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                percentage.push(parseInt(cell))
+
+            });
+        });
+        var data = []
+
+        for (i = 0; i < occurance.length; i++) {
+            obj = {};
+            var y = occurance[i]
+            var color = colors[i]
+           
+            obj["y"] = y;
+            obj["color"] = color;
+          
+
+
+            data.push(obj);
+        }
+        Highcharts.chart('RoundInsp', {
+            chart: {
+                type: 'column',
+
+            },
+            title: {
+                text: 'Round Inspection Point by Status - Nominal'
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: {
+                categories: status
+            },
+            yAxis: {
+                title: {
+                    text: 'Question Count'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{
+                showInLegend: false,
+                data: data
+            }],
+
+        });
+
+       
+    }
+    function RoundInspPer() {
+        Highcharts.visualize = function (table, options) {
+            // the categories
+            options.xAxis.categories = [];
+            $('tbody th', table).each(function (i) {
+                options.xAxis.categories.push(this.innerHTML);
+            });
+
+            // the data series
+            options.series = [{
+                data: []
+            }];
+            $('tr', table).each(function (i) {
+                var tr = this;
+                if (i > 0) {
+                    options.series[0].data.push([]); // add empty array for a point
+                    $('th, td', tr).each(function (j) {
+                        console.log(this.innerHTML);
+                        if (j == 0) {
+                            options.series[0].data[i - 1].push(this.innerHTML);
+                        } else { // add values
+                            options.series[0].data[i - 1].push(parseFloat(this.innerHTML));
+                        }
+                    });
+                }
+            });
+
+            var chart = new Highcharts.Chart(options);
+        }
+
+        var table = document.getElementById('RoundInsptblPer'),
+            options = {
+                chart: {
+                    renderTo: 'RoundInspPer',
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Round Inspection Point by Status – Percentage'
+                },
+                xAxis: {},
+                yAxis: {
+                    title: {
+                        text: 'Question Count'
+                    }
+                },
+                tooltip: {
+                    formatter: function () {
+                        return '<b>' + this.series.name + '</b><br/>' + parseFloat(this.y).toFixed(2) + ' ' + this.point.name;
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            formatter: function () {
+                                return '<b>' + this.point.name + '</b>: ' + parseFloat(this.percentage).toFixed(2) + ' %';
+                            }
+                        }
+                    }
+                }
+            };
+        Highcharts.setOptions({
+            colors: ['#ff0000', '#a6a6a6', '#70ad47'],
+
+        });
+        Highcharts.visualize(table, options);
+
+
+       
+    }
+    function Riskchart() {
+
+        var Question = [];
+
+        $('#Risktbl .Questions').each(function () {
+
+            $(this).each(function () {
+                var cell = $(this).html();
+                Question.push((cell))
+
+            });
+        });
+        var count = [];
+        $('#Risktbl .RiskCount').each(function () {
+
+            $(this).each(function () {
+                var _status
+                var cell = $(this).html();
+
+                count.push(parseInt(cell))
+                
+            });
+        });
+
+        var RiskType = [];
+
+        $('#Risktbl .RiskType').each(function () {
+            var _status;
+            $(this).each(function () {
+                var cell = $(this).html();
+                if (cell == 'Low') {
+                    _status = 'green';
+                }
+                else if (cell == 'Medium') {
+                    _status = 'blue';
+                }
+                else if (cell == 'High') {
+                    _status = 'black';
+                }
+                else if (cell == 'Very High') {
+                    _status = 'orange';
+                }
+                else {
+                    _status = '';
+                }
+                RiskType.push((cell))
+              
+            });
+
+           
+          
+        });
+       
+
+      
+        var data = []
+      
+        for (i = 0; i < count.length; i++) {
+            obj = {};
+            var y = count[i]
+            var color = RiskType[i]
+           
+            obj["y"] = y;
+            obj["color"] = color;
+           
+
+            data.push(obj);
+        }
+       
+        debugger
+        Highcharts.chart('RiskDeficiencyChart', {
+            chart: {
+                type: 'column',
+
+            },
+            title: {
+                text: 'Deficiencies by Risk Score '
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: {
+                categories: Question
+            },
+            yAxis: {
+                title: {
+                    text: 'Risk Score'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+   
+            series: [{
+                showInLegend: false,
+                data: data
+            }],
+
+        });
+    }
+
+    function hidedata() {
+
+        if ($("#ComplianceChart").html() == "") {
+            $("#ComplianceChart").closest('div.round-groupname').hide();
+        }
+
+
+        if ($("#container").html() == "") {
+            $("#container").closest('div.round-groupname').hide();
+        }
+
+        if ($("#RoundsTbl tbody").find('tr:visible').length ==0) {
+            $("#RoundChart").closest('div.round-groupname').hide();
+        }
+        if ($("#RoundsBuilding tbody").find('tr:visible').length == 0) {
+            $("#RoundsBuilding").closest('div.round-groupname').hide();
+        }
+        if ($("#NonCompliance tbody tr").find('td.dataTables_empty').length ==1) {
+            $("#NonCompliance").closest('div.round-groupname').hide();
+        }
+        if ($("#Risktbl tbody tr").length == 0) {
+            $("#Risktbl").closest('div.round-groupname').hide();
+        }
+        
+        
+        
+    }
+    
+</script>
+
+
+

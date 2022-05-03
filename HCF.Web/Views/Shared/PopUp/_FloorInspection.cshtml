@@ -1,0 +1,298 @@
+﻿@model HCF.BDO.WorkOrder
+<div class="modal-header">   
+    <h4 class="modal-title">Floor Inspection
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        @using (Html.BeginForm("FloorRoundInspection", "Rounds", FormMethod.Post, new { id = "floorInspectionform" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => Model.Xcoordinate)
+            @Html.HiddenFor(m => Model.Ycoordinate)
+            @Html.HiddenFor(m => Model.FloorId)
+            @Html.HiddenFor(m => Model.IssueId)
+            @Html.HiddenFor(m => Model.ActivityId)
+            <div class="col-md-12">
+                <div class="col-lg-12 forward_form">
+                    <div id="tbl">
+                        <div class="form-group row">
+                            <input type="hidden" name="UserIds" value="" id="UserIds">
+                            <div class="col-lg-3">
+                                <label>Location:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                <label>@string.Format("{0} , {1}", Model.Floor.Building.BuildingName, Model.Floor.FloorName)</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-3">
+                                <label>Problem:</label><em class="required-field"> *</em>
+                            </div>
+
+                            <div class="col-lg-9">
+                                @Html.TextBoxFor(m => Model.Description, new { required = "required", maxlength = 150 })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-3">
+                                <label>Issue Type:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                @Html.DropDownListFor(m => Model.ProblemCode, new SelectList(ViewBag.WOStatus, "Code", "Name"), new { @class = "form-control email_drop" })
+                            </div>
+                        </div>
+                        <div class="form-group row datetimeDiv">
+                            <div class="col-lg-3">
+                                <label>Date:</label>
+                            </div>
+
+                            <div class="col-lg-9">
+                                @if (Model.IssueId == 0)
+                                {
+                                    <span>
+                                        @DateTime.UtcNow.ToClientTime().ToFormatDateTime()
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>@Model.CreatedDate.Value.ToClientTime().ToFormatDateTime()</span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (Model.WorkOrderId > 0)
+                        {
+                            <div class="form-group row">
+                                <a href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = Model.IssueId })' class="issueId">
+                                    <span>Go To @Localizer["WorkOrderNo"] @Model.WorkOrderNumber</span>
+                                </a>
+                            </div>
+                        }
+
+                        @if (Model.IssueId == 0)
+                        {
+                            <div class="form-group row">
+                                <div class="col-lg-12">
+                                    <div class="MarkDeficiency show floor_inspection_pop">
+                                        <div class="btn-group btn-group-vertical left_setting">
+                                            <label class="btn active">
+                                                @Html.RadioButtonFor(m => Model.IsDeficiency, true, new { onclick = "GetSelectedItem(this);" })@Html.Label("Mark deficiency")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                            <label class="btn">
+                                                @Html.RadioButtonFor(m => Model.IsDeficiency, false, new { onclick = "GetSelectedItem(this);" })@Html.Label("Time to resolve it")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>
+                                        </div>
+                                        <div id="dvtimetoresolve" class="dvtimetoresolve">
+                                            @if (Model.IssueId > 0)
+                                            {
+                                                @Html.TextBoxFor(m => Model.TimetoResolve, new { @class = "numeric TimeToresolve", maxlength = 2 })<label>&nbsp;(hrs)</label>
+                                            }
+                                            else
+                                            {
+                                                @Html.TextBoxFor(m => Model.TimetoResolve, new { @class = "numeric TimeToresolve", maxlength = 2, @Value = "4" })<label>&nbsp;(hrs)</label>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group row dvtimetoresolve">
+                                <div class="col-lg-3">
+                                    <label>TimeTo Resolve:</label>
+                                </div>
+                                <div class="col-lg-9">
+                                    @Model.TimetoResolve <span>(hrs)</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="dvtimetoresolve form-group row">
+                            <div class="col-lg-3">
+                                <label>Email:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                @Html.DropDownList("UserId", new SelectList(ViewBag.Users, "UserId", "Email"), new { @class = "form-control email_drop" })
+                            </div>
+                        </div>
+                        <div class="dvtimetoresolve form-group row fileUpload">
+                            <div class="col-lg-3">
+                                <label>Upload:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                <div id="hdn_div">
+                                    <input type="hidden" name="WorkOrderFiles[0].FileName" />
+                                    <input type="hidden" name="WorkOrderFiles[0].FileContent" />
+                                    <input type="hidden" name="WorkOrderFiles[0].FilePath" />
+                                </div>
+                                <div>
+                                    <input type="file" name="file" accept="image/*" id="file" tempname="WorkOrderFiles[0].FileName" filecontent="WorkOrderFiles[0].FileContent" class="fileUpload" onchange="Uploadfile(this)" />
+                                </div>
+                            </div>
+                            <div>
+                                @if (Model.WorkOrderFiles.Count > 0)
+                                {
+                                    <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;" src="@commonModelFactory.FilePath(Model.WorkOrderFiles[0].FilePath)" />
+                                }
+                                else
+                                {
+                                    <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;" src="@Url.Content("~/Images/Floors/default.jpg")" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.IssueId > 0)
+                    {
+                        <div id="tbl1">
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Status:</label>
+                                </div>
+                                <div class="col-lg-9">
+                                    @Html.DropDownListFor(m => Model.StatusCode, new SelectList(ViewBag.WOStatus, "Code", "Name"), new { @class = "form-control email_drop" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Completion Comments:</label>
+                                </div>
+
+                                <div class="col-lg-9">
+                                    @Html.TextBoxFor(m => Model.CompletionComments)
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            if (Model.WorkOrderNumber == null)
+            {
+                <div class="button_Div">
+                    <button name="submitButton" class="comm-button" id="Submit" type="submit">Save</button>
+                    <button name="cancelButton" class="comm-Cancelbutton" id="cancelButton" type="button">Cancel</button>
+                </div>
+                <div class="col-md-12 hide cwoDiv">
+                    <a href='@Url.Action("CreateWO", "WorkOrder", new { issueId=Model.IssueId })' class="issueId">
+                        <span>Create Work Order</span>
+                    </a>
+                </div>
+
+            }
+        }
+    </div>
+</div>
+
+
+<script src="@Url.Content("~/dist/js/numericInput.min.js")"></script>
+<script type="text/javascript">
+    $(".numeric").numericInput();
+    $(document).ready(function () {
+
+        $(".cwoDiv").hide();
+
+        if ('@Model.IssueId' > 0) {
+            $("#Description").prop("readonly", true);
+            $("#UserId").prop("disabled", "disabled");
+        } else {
+            $("#tbl1").hide();
+        }
+
+        @if (Model.StatusCode == "CMPLT" || Model.StatusCode == "CANCL")
+        {
+        @:$("#StatusCode").addClass("disabled"); $("#CompletionComments").addClass("disabled"); $(".fileUpload").hide();
+                                                }
+
+
+        @if(Model.WorkOrderId == 0 && DateTime.UtcNow >= Model.CreatedDate.Value.AddHours(Model.TimetoResolve))
+        {
+         @:$("#tbl1").hide(); $(".fileUpload").hide();
+        }
+
+
+        @if (!string.IsNullOrEmpty(Model.WorkOrderNumber) && Convert.ToInt32(Model.WorkOrderNumber) > 0)
+        {
+             @:$(".dvtimetoresolve").remove(); $("#tbl1").remove();
+
+        }
+
+        @if(Model.IssueId>0)
+        {
+        if (DateTime.UtcNow >= Model.CreatedDate.Value.AddHours(4) && Model.TimetoResolve > 0)
+        {
+            @:$(".button_Div").remove(); $(".cwoDiv").show();
+                }
+        }
+    });
+
+    $("#StatusCode").change(function () {
+        var statusCode = $(this).val();
+        var completionCommentsbox = $("#CompletionComments");
+        if (statusCode == "CMPLT") {
+            completionCommentsbox.prop('required', true);
+        } else {
+            completionCommentsbox.prop('required', false);
+        }
+    });
+
+
+    $("#cancelButton").click(function () {
+        $('#floorInspection').modal('hide');
+    });
+
+    function GetSelectedItem(rdbtnctrl) {
+
+        var Name = $(rdbtnctrl).attr("name");
+        var Val = $(rdbtnctrl).val();
+        if (Val == "True") {
+            $(".dvtimetoresolve").hide();
+            $("#TimetoResolve").val(0);
+        } else {
+            $(".dvtimetoresolve").show();
+            $("dvtimetoresolve").css("display", "inline-block");
+        }
+    }
+    $("#Submit").click(function () {
+        if ($("#Description").val() != "") {
+            var UserIds = $('#UserId').val() + ",";
+            $("#UserIds").val(UserIds);
+            $("#floorInspectionform").submit();
+        }
+    })
+
+    function Uploadfile(file) {
+
+        var C_fileName = file.getAttribute("tempName");
+        var fileContent = file.getAttribute("filecontent");
+        if (file.files.length > 0) {
+            var file = file.files[0];
+            var fileName = file.name;
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                var array = reader.result.split(",");
+                $("input[name='" + C_fileName + "'][type=hidden]").val(fileName);
+                $("input[name='" + fileContent + "'][type=hidden]").val(array[1]);
+                $("input[name='FilePath'][type=hidden]").val(null);
+                $('input[name="FilePath"').attr('data-dirrty-initial-value', '')
+            };
+            reader.onerror = function (error) {
+                console.log('Error: ', error);
+                $("#FileContent").val("");
+            };
+        }
+    }
+
+    $("#file").change(function () {
+        var file = document.getElementById("file").files[0];
+        var readImg = new FileReader();
+        readImg.readAsDataURL(file);
+        readImg.onload = function (e) {
+            $('.img').attr('src', e.target.result).fadeIn();
+        }
+    });
+
+</script>

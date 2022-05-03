@@ -1,0 +1,150 @@
+﻿@{
+    Layout = null;
+}
+@model List<HCF.BDO.WorkOrder>
+<div class="text-right">
+    <div id="rfilter" class="dashboard_filter">
+        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+            <label class="btn active">
+                @Html.RadioButton("roundfliter", "FI")@Html.Label("Time To Resolve")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("roundfliter", "FD")@Html.Label("Deficient")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("roundfliter", "", true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+        </div>
+    </div>
+</div>
+<table id="roundTable" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th style="display:none">Deficiency Code</th>
+            <th> @Localizer["Type"] </th>
+            <th> @Localizer["Problem"] </th>
+            <th> @Localizer["Location"] </th>
+            <th> @Localizer["CreatedDate"] </th>
+            <th> @Localizer["CompletedDate"] </th>
+            <th> @Localizer["Status"] </th>
+            <th> @Localizer["InspectorName"] </th>
+            <th> @Localizer["WorkOrderNo"] </th>
+            <th>ILSM No</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var wo in Model.Where(x => x.StatusCode != "ACTIV" && x.StatusCode != "PENDG").OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.DateCompleted))
+        {
+            <tr onclick="redirecttopage('@wo.DeficiencyCode','@wo.FloorId','@wo.IssueId')"
+                style="cursor:pointer">
+                <td style="display:none">@wo.DeficiencyCode</td>
+                <td>
+                    @if (wo.DeficiencyCode.ToLower() == HCF.BDO.Enums.WODeficiencyCode.FI.ToString().ToLower())
+                    {
+                        <span class="roundTimeToResolve">@($"{"Time to Resolve"}") </span>
+                        if (wo.StatusCode != HCF.BDO.Enums.StatusCode.CMPLT.ToString() && wo.StatusCode != HCF.BDO.Enums.StatusCode.CANCL.ToString())
+                        {
+                            <div class="timer" time="@wo.CreatedDate.Value.AddHours(wo.TimetoResolve)">
+                            </div>
+                        }
+
+                    }
+                    else
+                    {
+                        <span>
+                            Deficient
+                        </span>
+                    }
+                </td>
+
+                <td>@Html.DisplayFor(modelItem => wo.Description)</td>
+                <td>@($"{wo.Floor.FloorName} , {wo.Floor.Building.BuildingName}")</td>
+                <td>@wo.DateCreated.CastDate()</td>
+                <td>@wo.DateCompleted.CastLocaleDate()</td>
+                <td>
+                    <input type="button" class="btnwoStatus @(wo.StatusCode == "CMPLT" ? "button_green" : "btn btn-primary" )"
+                           value="@wo.StatusCode" />
+                </td>
+                <td>@Html.DisplayFor(modelItem => wo.UserProfile.FullName)</td>
+                <td>
+                    @if (wo.WorkOrderId > 0)
+                    {
+                        <a href="#" class="issueId" id='@wo.IssueId' type="U" onclick="RedirecttoWorkOrders('@wo.IssueId','U')">
+                            <span>@Html.DisplayFor(modelitem => wo.WorkOrderNumber)</span>
+                        </a>
+
+                    }
+                    else
+                    { <span>NA</span>}
+                </td>
+                <td>
+                    @if (wo.Ilsm != null && wo.Ilsm.TIlsmId > 0)
+                    {
+                      
+                            <a href="@Url.Action("AddIlsmShow", "ILSM", new { tilsmId = wo.Ilsm.TIlsmId })">
+                                <span>@wo.Ilsm.IncidentId</span>
+                            </a>
+                       
+                    }
+                    else
+                    { <span>NA</span>}
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        var roundTables = $('#roundTable').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#roundTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No history available in the table"
+            },
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        });
+        $("input[name=roundfliter]:radio").change(function () {
+            var val = $("input[name='roundfliter']:checked").val();
+            //alert(val);
+            roundTables.columns(0).search(val).draw();
+        });
+    });
+
+
+    function redirecttopage(type, floorId, issueId) {
+        var urlAction = '@Url.Action("FloorRoundInspection", "Rounds")';
+        window.location.href = urlAction + "?floorId=" + floorId + "&issueId=" + issueId;
+    }
+
+    function RedirecttoWorkOrders(Id, type) {
+        if (type == "N") {
+            urlAction = '/WorkOrder/CreateWO';
+            window.location.href = urlAction + "?issueId=" + Id;
+        } else {
+            urlAction = '/WorkOrder/UpdateWorkOrder';
+            window.location.href = urlAction + "?issueId=" + Id;
+        }
+    }
+
+    $(".issueId").click(function (event) {
+        event.preventDefault();
+        var Id = $(this).attr("id");
+        var type = $(this).attr("type");
+      //  console.log(Id, type);
+        RedirecttoWorkOrders(Id, type);
+        return false;
+    });
+
+   
+</script>
+<style>
+    .dataTables_filter {
+        display: none;
+    }
+</style>

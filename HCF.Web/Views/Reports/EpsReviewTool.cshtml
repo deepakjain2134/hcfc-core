@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "Inspection Detail Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <section class="content-header">
+        <h1>
+            Review tool
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="">
+                        <select id="year" name="year" class="form-control">
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                        </select>
+                        @*@Html.Action("EpsPartialReviewTool", "Reports")*@
+
+                        @await Component.InvokeAsync("ReportsEpsPartialReviewTool")
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="//cdn.datatables.net/plug-ins/1.10.7/pagination/select.js"></script>
+<script src="@Url.Content("~/dist/js/numericInput.min.js")"></script>
+<div id="inspectionContents">
+
+</div>
+<script type="text/javascript">
+
+
+    $("input[name=dashEPCat]:radio").change(function () {
+        getInspectionSummary();
+    });
+
+
+    function SetInspectionSortingOrder(Order) {
+        var sortOrder = localStorage.getItem("ISortOrder");
+        var orderbySort = localStorage.getItem("IOrderbySort");
+        if (sortOrder == Order && orderbySort == "ASC") {
+            localStorage.setItem("IOrderbySort", "DESC");
+        } else if (sortOrder == Order && orderbySort == "DESC") {
+            localStorage.setItem("IOrderbySort", "ASC");
+        } else {
+            localStorage.setItem("ISortOrder", Order);
+            localStorage.setItem("IOrderbySort", "ASC");
+        }
+        getInspectionSummary();
+    }
+
+
+    function getInspectionSummary() {
+        //debugger;
+        var catId = $("input[name='dashEPCat']:checked").val();
+        var sortOrder = localStorage.getItem("ISortOrder");
+        var orderbySort = localStorage.getItem("IOrderbySort");
+        if (sortOrder == null) {
+            sortOrder = "";
+        } if (orderbySort == null) {
+            orderbySort = "";
+        }
+        var url = '@Url.Action("InspectionSummary", "Reports")';
+        $.get(url + '?sortOrder=' + sortOrder + "&OrderbySort=" + orderbySort + "&categoryId=" + catId, function (data) {
+            $('#inspectionContents').html(data);
+            $('#inspectionContents').fadeIn('fast');
+            sortOrder = localStorage.getItem("ISortOrder");
+            orderbySort = localStorage.getItem("IOrderbySort");
+           // debugger;
+            if (orderbySort == "ASC") {
+                $("#IStandardEP").addClass("sorting_asc1");
+            } else if (orderbySort == "DESC") {
+                $("#IStandardEP").addClass("sorting_desc1");
+            }
+            $("#summary").addClass("isData");
+        });
+    }
+
+</script>

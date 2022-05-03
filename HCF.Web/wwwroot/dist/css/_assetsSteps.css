@@ -1,0 +1,57 @@
+.TimeToresolve {
+    display: inline-block !important;
+}
+
+.defeciencies {
+    display: none;
+}
+
+.disabled {
+    cursor: not-allowed !important;
+    color: #404040 !important;
+}
+
+.allcompliant {
+    width: 104px;
+    margin-left: 8px;
+}
+
+.editor-field {
+    display: inline-flex;
+}
+
+.box.box-primary table tr td {
+    line-height: 16px;
+}
+
+.toggle-btn {
+    width: 104px;
+    height: 26px;
+    border-radius: 50px;
+    display: inline-block;
+    position: relative;
+    background: url("/dist/Images/Icons/mark_all_compliant_button.png") 0 0 no-repeat;
+    /*background: url("/dist/Images/Icons/mark_all_pending_button.png") 0 0 no-repeat;*/
+    cursor: pointer;
+    -webkit-transition: background-color .40s ease-in-out;
+    -moz-transition: background-color .40s ease-in-out;
+    -o-transition: background-color .40s ease-in-out;
+    transition: background-color .40s ease-in-out;
+    cursor: pointer;
+}
+
+/*.active {
+    background: url("/dist/Images/Icons/mark_all_pending_button.png") 0 0 no-repeat;
+}*/
+
+.cb-value {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 9;
+    cursor: pointer;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+}

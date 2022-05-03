@@ -1,0 +1,61 @@
+﻿@*@{
+    List<HCF.BDO.UserGroup> userGroups = new List<HCF.BDO.UserGroup>();
+
+    var vendorid = 0; vendorid = Convert.ToInt32(Session["id"]);
+    if (vendorid != 0)
+    {
+        userGroups = HCF.BAL.Users.GetUserGroups().Where(x => x.IsActive && x.GroupId == vendorid).ToList();
+    }
+    else if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser == false || !HCF.Web.Base.UserSession.CurrentUser.UserGroups.Any(x=>x.GroupId==1))
+    {
+        string usergroupIds = String.Join(",", HCF.Web.Base.UserSession.CurrentUser.UserGroups.Select(x => x.GroupId));
+        if(HCF.Web.Base.UserSession.CurrentUser.UserGroups.Any(x => x.GroupId == 7))
+        {
+            userGroups = HCF.BAL.Users.GetUserGroups().Where(x => x.GroupId==6).ToList();
+        }
+        else
+        {
+            userGroups = HCF.BAL.Users.GetUserGroups().Where(x => usergroupIds.Contains(x.GroupId.ToString())).ToList();
+        }
+
+    }
+    else
+    {
+        userGroups = HCF.BAL.Users.GetUserGroups().Where(x => x.IsActive).ToList();
+    }
+}
+
+<select id="ddlRoles" multiple class="form-control selectpicker" title="Select Roles" data-selected-text-format="count > 5" required>
+    @foreach (var userGroup in userGroups.Where(x=> x.Name != "Guest User"))
+    {
+        <option value="@userGroup.GroupId">@userGroup.Name</option>
+    }
+</select>
+<script>
+    var ddlCtr = $('#ddlRoles');
+    $(document).ready(function () {
+        //debugger;
+        var selectedGroupId = [];
+        if ($("#UserGroupIds").val().length > 0) {
+            selectedGroupId = $("#UserGroupIds").val().split(',').map(function (item) {
+                return parseInt(item, 10);
+            });
+        }
+        ddlCtr.selectpicker();
+        ddlCtr.selectpicker('val', selectedGroupId)
+        ddlCtr.selectpicker('refresh');
+        @if (ViewBag.isVendorUser == 1)
+        {
+            @:ddlCtr.selectpicker('val', selectedGroupId); ddlCtr.selectpicker('refresh'); $("#UserGroupIds").val(selectedGroupId);
+        }
+    });
+
+    ddlCtr.on('change', function () {
+        var selected = [];
+        $(this).find("option:selected").each(function (key, ctr) {
+            selected.push(parseInt(ctr.value));
+        });
+        $("#UserGroupIds").val(selected.toString(","));
+        $(document).click();
+    });
+</script>*@

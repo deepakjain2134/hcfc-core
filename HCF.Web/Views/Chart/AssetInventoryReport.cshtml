@@ -1,0 +1,39 @@
+﻿<div id="container"></div>
+<input type="hidden" id="assetInventoryChart" value="@ViewBag.AssetInventoryChart" />
+<script>
+// Build the chart
+    var chartvalue = JSON.parse($("#assetInventoryChart").val());
+
+Highcharts.chart('container', {   
+    title: {
+        text: 'Assets Inventory Report'
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.y}',
+                style: {
+                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                },
+                connectorColor: 'silver'
+            }
+        }
+    },
+    credits: {
+        enabled: false
+    },
+    series: [{
+        type: 'pie',
+        allowPointSelect: true,
+        keys: ['name', 'y', 'selected', 'sliced'],
+        name: 'Share',
+        data: chartvalue.AssetInventorySeries.data
+    }]
+});
+</script>

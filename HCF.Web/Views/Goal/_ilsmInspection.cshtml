@@ -1,0 +1,261 @@
+﻿@model HCF.BDO.TIlsm
+@using System.IO;
+<div class="box box-primary  assetsInspection">
+    <div class="ep_heading">
+        Incident # : @Model.IncidentId
+    </div>
+
+    <div class="ep_heading">
+        ILSM Date : @Model.llsmDate.ToClientTime().ToFormatDate()&nbsp;@Model.llsmStartTime
+    </div>
+
+    <div class="ep_heading">
+        Name : @Model.Name.CastToNA("")
+    </div>
+
+    <!-- Location -->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">Location</h4>
+        <div class="crx-scrollBar">
+            @if (Model.Buildings.Count > 0)
+            {
+                <ul class="list-boxul">
+                    @foreach (var item in Model.Buildings)
+                    {
+                        <h4>@item.BuildingName</h4>
+                        <li>
+                            
+                            <ul>
+
+                                @foreach (var floor in item.Floor)
+                                {
+                                    <li>
+                                        @floor.FloorName
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <ul>
+                    <li><h4>NA</h4></li>
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- Additional LS Measures -->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">
+            <span class="head-title">Additional LS Measures</span>
+            @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+            {
+                <span class="plusicon1" title="Add" onclick="location.href = '@Url.Action("AddIlsmShow", "ILSM", new { tilsmId = Model.TIlsmId })'">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </span>
+            }
+        </h4>
+    </div>
+
+    <!-- WORK ORDER -->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">
+            Work Order
+            @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+            {
+                <span class="plusicon1 openWOPopUp" title="Add Work Order"><i class="fa fa-plus" aria-hidden="true"></i></span>
+            }
+        </h4>
+
+        <div class="crx-scrollBar">
+            <ul class="ulassets">
+                @foreach (var item in Model.WorkOrders.OrderByDescending(x => x.CreatedDate))
+                {
+                    if (item.WorkOrderNumber == "0")
+                    {
+                        <li class="assetLi">
+                            <div class="assetDiv">
+                                <a href="@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })"> </a>
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="assetLi">
+                            <div class="assetDiv">
+                                <a href="@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })"> WO#: @item.WorkOrderNumber (@item.StatusCode)</a>
+                            </div>
+                        </li>
+                    }
+                }
+
+            </ul>
+        </div>
+    </div>
+
+    <!-- ICRA -->
+    @if (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)))
+    {
+        <div class="left-boxc doc-list-item">
+            <h4 class="sidebar-heading">
+                ICRA
+                @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                {
+                    <span class="plusicon1 openICRAPopUp" title="Add ICRA"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                }
+            </h4>
+            <div class="crx-scrollBar">
+                <ul id="ulicralist">
+
+                    @if (Model.ICRALists.Count > 0)
+                    {
+                        foreach (var item in Model.ICRALists)
+                        {
+                            <li>
+                                <a href="@Url.Action("AddInspectionIcra", "ICRA", new { icraId = item.TicraId, iseditable = false })" target="_blank">
+                                    @($"Permit #: {item.PermitNo}")
+                                </a>
+                            </li>
+                        }
+                    }
+
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ICRA -->
+        <div class="left-boxc doc-list-item">
+            <h4 class="sidebar-heading">
+                CRA
+                @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                {
+                    <span class="plusicon1 openICRAPopUp" title="Add CRA"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                }
+            </h4>
+            <div class="crx-scrollBar">
+                <ul id="ulicralist">
+
+                    @if (Model.ICRALists.Count > 0)
+                    {
+                        foreach (var item in Model.ICRALists)
+                        {
+                            <li>
+                                <a href="@Url.Action("AddCRA", "PCRA", new { icraId = item.TicraId, iseditable = false })" target="_blank">
+                                    @($"Permit #: {item.PermitNo}")
+                                </a>
+                            </li>
+                        }
+                    }
+
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!--Fire Watch-->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">
+            <span class="head-title">Fire Watch</span>
+            @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+            {
+                <span class="plusicon1" title="Add Fire Watch" onclick="location.href = '@Url.Action("ManageFireWatchSchedules","FireWatch")'">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </span>
+            }
+        </h4>
+    </div>
+
+    <!--Observation Report-->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">
+            <span class="head-title">Observation Report</span>
+            @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+            {
+                <span class="plusicon1 openObservationReportPopUp" title="Add Observation Report">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </span>
+            }
+        </h4>
+        <div class="crx-scrollBar">
+            <ul class="ulassets">
+                @foreach (var reports in Model.TICRAReports.OrderByDescending(x => x.ReportName))
+                {
+                    <li class="assetLi">
+                        <div class="assetDiv">
+                            <a href="@Url.Action("ProjectObservationReports", "ICRA", new { projectIds = reports.ProjectIds })"> @reports.ReportName (@reports.ProjectNos)</a>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- ASSET -->
+    @if (Model.Buildings.Count > 0 && Model.Buildings.FirstOrDefault().Floor != null && Model.SourceInspection.TInspectionActivity.Count > 0)
+    {
+        <div class="left-boxc doc-list-item">
+            <h4 class="sidebar-heading">Assets</h4>
+            <div class="crx-scrollBar">
+                <ul class="list-boxul">
+
+                    @*<li><h4>@Model.Buildings.FirstOrDefault().Floor.FirstOrDefault().FloorLocation</h4></li>*@
+                    <li><h4>@string.Format("{0},{1}", Model.Buildings.FirstOrDefault().Floor.FirstOrDefault().FloorName, Model.Buildings.FirstOrDefault().BuildingName)</h4></li>
+                    @foreach (var item in Model.SourceInspection.TInspectionActivity.Distinct().ToList())
+                    {
+                        <li class='@(item.SubStatus != "NA" ? "assetLi" : "assetLipass")' id='@($"asset{item.FloorAssetId}")'>
+                            <div class="asset_list status-cont-box">
+                                <div class="left-statub">
+                                    <div class=@commonModelFactory.GetAssetsTranStatus(Convert.ToInt32(item.Status),item.DueDate)>
+                                    </div>
+                                </div>
+                                <div class="left-cont-list">
+                                    <div class="assetDiv">
+                                        @Html.Encode(item.TFloorAssets.Assets.Name)
+                                        <a href='@Url.Action("ActivityHistory", "Assets", new { activityId = item.ActivityId })'>
+                                            <span> , @Html.Encode(item.TFloorAssets.AssetNo)</span>
+                                        </a>
+                                    </div>
+                                    <div class="dateDiv" title="Inspection Date">
+                                        @if (item.ActivityInspectionDate.HasValue)
+                                        {
+                                            @item.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    }
+
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!-- DOCUMENT LIST-->
+    <div class="left-boxc doc-list-item">
+        <h4 class="sidebar-heading">Document List</h4>
+        <div class="crx-scrollBar">
+            <ul>
+                @foreach (var item in Model.TinspectionActivity.FirstOrDefault().TInspectionFiles.Where(x => x.IsDeleted == false).ToList())
+                {
+                    <li>
+                        <a href="@commonModelFactory.FilePath(item.FilePath)" target="_blank">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentIcon)" alt="document_icon" /> @($"{commonModelFactory.GetFileNameWithoutExtension(item.FileName)}")
+                        </a>
+                        <span class="@(Model.Status != HCF.BDO.Enums.ILSMStatus.Closed? "deletefiles": "deletefiles disable")">
+                            <a href="" data-id="@item.TInsFileId" class="delete">
+                                <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" />
+                            </a>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

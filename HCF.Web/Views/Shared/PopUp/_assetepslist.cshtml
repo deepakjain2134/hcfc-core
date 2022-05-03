@@ -1,0 +1,58 @@
+﻿@model List<HCF.BDO.EPDetails>
+
+@{
+    List<HCF.BDO.EPDetails> assetEPs = new List<HCF.BDO.EPDetails>();
+    string floorAssetId = this.ViewData.ContainsKey("floorAssetId") ? this.ViewData["floorAssetId"].ToString() : string.Empty;
+    string viewmode = this.ViewData.ContainsKey("viewmode") ? this.ViewData["viewmode"].ToString() : "insp";
+     assetEPs = Model;
+    
+}
+<div class="modal-dialog" style="margin-top: 45px; height: 74%;">
+    <div class="modal-content" style="height: 100%;">
+        <div class="modal-header" style="height: 40px;">
+            <button type="button" class="close hisclose-hide" data-toggle="modal" data-target="#HistoryPopup">&times;</button>
+            <button type="button" class="close inspclose-hide" data-toggle="modal" data-target="#InspectionPopup">&times;</button>
+        </div>
+        <div class="modal-body" style="height: calc(100% - 40px); overflow: auto;">
+            <div class="">
+                
+                    <h4>There are multiple EP assigned to this asset please select one EP.</h4>
+               
+                <table class="table table-bordered table-striped">
+                    @for (int i = 0; i < assetEPs.Count(); i++)
+                    {
+                        <tr>
+                            <td>
+                                @if (viewmode.ToLower() == "hist")
+                                {
+                                    <a href='@Url.Action("history", "Assets", new { epId = assetEPs[i].EPDetailId, floorassetId =floorAssetId })'>
+                                        <span>@string.Format("{0}  ({1})", assetEPs[i].StandardEp, assetEPs[i].GetFrequencyName())</span>
+                                    </a>
+                                }
+                                else if (viewmode.ToLower() == "insp")
+                                {
+                                    <a href='@Url.Action("AssetEps", "Assets", new { epId = assetEPs[i].EPDetailId, floorassetId = floorAssetId })'>
+                                        <span>@string.Format("{0}  ({1})", assetEPs[i].StandardEp, assetEPs[i].GetFrequencyName())</span>
+                                    </a>
+                                }
+                            </td>
+                            <td>
+                                <div class="comment">
+                                    @assetEPs[i].Description
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #InspectionPopup .hisclose-hide{
+        display:none;
+    }
+    #HistoryPopup .inspclose-hide {
+        display: none;
+    }
+</style>

@@ -1,0 +1,239 @@
+﻿@model HCF.BDO.Organization
+
+@{
+    var currentUser = HCF.Web.Base.UserSession.CurrentUser;
+    var currentOrg = Model; //HCF.Web.Base.UserSession.CurrentOrg;
+    var userOrgs = HCF.Web.Base.UserSession.UserOrganizations;
+}
+
+@await Component.InvokeAsync("Logo", new LogoModel { LogoPath = "~/dist/img/small-Logo.png", OrganizationName = Model.Name })
+
+<button class="toggle_menu">
+    <i class="fa fa-bars" aria-hidden="true"></i>
+</button>
+<nav class="navbar navbar-static-top">
+    <ul class="top_menu">
+        @if (Model != null && Model.Services != null)
+        {
+            foreach (var item in Model.Services.Where(x => x.ParentId == 0).ToList())
+            {
+                <li class="dynamic_menu" id="@item.Name.Trim().Replace(" ","").Replace("&","")">
+                    @if (!string.IsNullOrEmpty(item.PageUrl))
+                    {
+                        <a class="tooltipCus" asp-area="" asp-controller="Common" asp-route-routeName="@item.PageUrl"
+                           asp-action="RedirectRoute">
+                            @*<common-image class="imgDashBoard" src="@item.ImagePath"></common-image>*@
+
+
+                            <div class="@string.Format("menu-sprite {0}",item.Name.Trim().Replace(" ","").Replace("&","")).ToLower()"></div>
+
+
+                            <span>@item.Name</span>
+                            <strong class="tooltipTitle">@string.Format("{0}", item.Name)</strong>
+                        </a>
+                    }
+                    else if (string.IsNullOrEmpty(item.PageUrl) && Model.Services != null && Model.Services.Any(x => x.ParentId == item.Id))
+                    {
+                        <a class="tooltipCus">
+                            @*<common-image src="@item.ImagePath" class="imgDashBoard"></common-image>*@
+                            <div class="@string.Format("menu-sprite {0}",item.Name.Trim().Replace(" ","").Replace("&","")).ToLower()"></div>
+                            <span>@item.Name</span>
+                            <strong class="tooltipTitle">@string.Format("{0}", item.Name)</strong>
+                        </a>
+                        <div class="multi-column dropdown-data">
+                            @foreach (var childItems in Model.Services.Where(x => x.ParentId == item.Id))
+                            {
+                                <div class="menusublist dropmenu-div tooltipCus">
+                                    <a class="" onclick="showmoreconfigmsg('@childItems.Alias.TrimEnd()', '@childItems.PageUrl')">
+                                        @*<common-image class="imgDashBoard" src="@childItems.ImagePath"></common-image>*@
+
+                                        <div class="@string.Format("menu-sprite {0}",childItems.Name.Trim().Replace(" ","").Replace("&","")).ToLower()"></div>
+                                        <span>@childItems.Name</span>
+                                    </a>
+                                    <strong class="tooltipTitle">@string.Format("{0}", childItems.Name)</strong>
+                                </div>
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        }
+        @if (Model != null && userOrgs != null && userOrgs.Count > 1)
+        {
+            <li class="client_li">
+                @{
+                    var url = Url.Action("Clients", "Main", new { guid = currentUser.UserGuid, area = "" });
+                    if (Model.ParentOrgKey != null)
+                    {
+                        url = Url.RouteUrl("lists", new { orgkey = Model.ParentOrgKey });
+                    }
+                }
+                <a href="@url" class="home_icon tooltipCus">
+                    <div class="menu-sprite crxDemoSprite"></div>
+                    @*<common-image class="imgDashBoard" title="Facility" src="@HCF.Web.Models.ImagePathModel.FacilityIcon"></common-image>*@
+
+                    @if (Model != null && !string.IsNullOrEmpty(Model.Code))
+                    {
+                        <span>
+                            @Model.Code
+                        </span>
+                    }
+                    else
+                    {
+                        <span>@Model.Name</span>
+                    }
+                    @if (currentOrg != null)
+                    {
+                        <strong class="tooltipTitle usertooltop">@currentOrg.Name</strong>
+                    }
+                </a>
+            </li>
+        }
+        @if (currentUser.UserId > 0)
+        {
+            <li class="dropdown user user-menu" id="myProfile">
+                <a href="#" class="dropdown-toggle tooltipCus" data-toggle="dropdown">
+                    <div class="profile-user-menu-img">
+                        <div class="menu-sprite userSprite"></div>
+                        @*<img id="userimg" alt="Home" src="@HCF.Web.Base.UserSession.GetUserImage()"
+                            onerror="this.onerror = null; this.src = '@Url.Content(HCF.Web.Models.ImagePathModel.UserDefaultIcon)';" />*@
+
+                    </div>
+                    <span>Logged In</span>
+                    <strong class="tooltipTitle usertooltop">@currentUser.Name</strong>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <form asp-controller="Auth" asp-area="" asp-action="LogOff" method="post" id="logoutForm">
+                            <input type="hidden" name="currentpage" id="currentpage" />
+                            <a href="javascript:document.getElementById('logoutForm').submit()" id="_linkLogout">
+                                <i class="fa fa-sign-out" aria-hidden="true"></i>Log Out
+                            </a>
+                        </form>
+                    </li>
+                    @if (currentUser.IsSystemUser || HCF.Web.Base.UserSession.IsSwitchUser)
+                    {
+                        <li class="chkpassword">
+                            <a href="@Url.RouteUrl("switchuser")">
+                                <i class="fa fa-user"></i>View As
+                            </a>
+                        </li>
+                    }
+                    <li class="liprofile">
+                        <a href="@Url.RouteUrl("myprofile")"><i class="fa fa-user"></i>Profile</a>
+                    </li>
+                    <li class="chkpassword">
+                        <a href="/change-password">
+                            <i class="fa fa-key" aria-hidden="true"></i>Change password
+                        </a>
+                    </li>
+                    @*<li class="chkpassword">
+                            <a href="@Url.RouteUrl("generatepin")"><i class="fa fa-key" aria-hidden="true"></i>Generate pin</a>
+                        </li>*@
+                    <li class="chkpassword">
+                        <a href="@Url.RouteUrl("loginhistory")"><i class="fa fa-sign-in" aria-hidden="true"></i>Login history</a>
+                    </li>
+                    @if (currentUser.IsPowerUser || currentUser.IsSystemUser)
+                    {
+                        <li class="chkpassword">
+                            <a href="@Url.RouteUrl("myplan")"><i class="fa fa-key" aria-hidden="true"></i>My Plan</a>
+                        </li>
+                    }
+
+                </ul>
+            </li>
+        }
+    </ul>
+</nav>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#currentpage").val(window.location.pathname);
+    });
+    function showmoreconfigmsg(alias, pageUrl) {
+        var newPageUrl = '@Url.Action("RedirectRoute", "Common",new  { area=""})' + "?routeName=" + pageUrl;
+        if (alias == "setup_more") {
+            swal({
+                title: "Message",
+                type: 'info',
+                text: $.Constants.CHILD_PAGE_ADMIN_CONFIRMATION,
+                confirmButtonColor: "#DD6B55",
+                showCancelButton: true,
+                confirmButtonText: "OK",
+                closeOnConfirm: false
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        console.log(newPageUrl);
+                        window.location.href = newPageUrl;
+                    }
+                });
+        } else {
+            window.location.href = newPageUrl;
+        }
+    }
+    $(".dynamic_menu").click(function () {
+        if ($(this).hasClass('activeMenu')) {
+            $(this).removeClass('activeMenu');
+        } else {
+            $('.dynamic_menu').removeClass('activeMenu');
+            $(this).addClass('activeMenu');
+        }
+    });
+
+    $(".multi-column").mouseleave(function () {
+        $(".dynamic_menu").removeClass("activeMenu");
+    });
+</script>
+
+<style>
+    .tooltipTitle {
+        display: none;
+        position: absolute;
+        bottom: -42px;
+        background-color: #2f2f2f;
+        padding: 4px 15px;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        left: -10px;
+        z-index: 99;
+    }
+
+    .tooltipCus:hover .tooltipTitle {
+        display: block;
+    }
+
+    .tooltipTitle::after {
+        z-index: -1;
+        position: absolute;
+        top: -9px;
+        left: 24px;
+        content: '';
+        width: 0;
+        height: 0;
+        border-top: solid 10px #2f2f2f;
+        border-left: solid 10px transparent;
+        border-right: solid 10px transparent;
+        transform: rotate( 180deg );
+    }
+
+    .menusublist .tooltipTitle {
+        bottom: -28px !important;
+        left: 30% !important;
+    }
+
+    .usertooltop::after {
+        left: inherit;
+        right: 20px;
+    }
+
+    .usertooltop {
+        left: initial;
+        right: 0;
+    }
+</style>

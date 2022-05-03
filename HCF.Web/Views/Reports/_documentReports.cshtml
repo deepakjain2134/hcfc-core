@@ -1,0 +1,103 @@
+﻿@model List<HCF.BDO.EPsDocument>
+
+<table id="c_myTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>
+                Document Type
+            </th>
+            @*<th>
+                    Binder
+                </th>*@
+        <th>
+            @Localizer["Asset"]
+                  
+                </th>
+            <th width="135px">
+                Review/Report Date
+            </th>
+            <th width="115px">
+                Uploaded Date
+            </th>
+            <th>
+                Due Date
+            </th>
+            <th width="115px">
+                Uploaded By
+            </th>
+            <th>
+                @Localizer["StandardEP"]
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var binderDocument in Model)
+        {
+            <tr>
+                <td style="display:none">
+                    @binderDocument.DueWithIn
+                </td>
+                <td class="align-left">
+                    <a href="@commonModelFactory.FilePath(binderDocument.Path)" target="_blank">
+                        <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")">
+                    </a>
+                    <a href="@Url.Action("EpDocs", "Reports", new {epDetailId = binderDocument.EpdetailId})">
+                        <span>@binderDocument.Name</span>
+                    </a>
+                </td>
+                @*<td>@binderDocument.BinderName</td>*@
+                <td>@binderDocument.DeviceNo</td>
+                <td>
+                    @if (binderDocument.DtEffectiveDate.HasValue)
+                    {
+                        @binderDocument.DtEffectiveDate.Value.ToFormatDate()
+                    }
+                </td>
+                <td>@binderDocument.CreatedDate.ToClientTime().ToFormatDate()</td>
+                <td>
+                    @if (binderDocument.DueDate.HasValue)
+                    {
+                        @binderDocument.DueDate.Value.ToClientTime().ToFormatDate()
+                    }
+                </td>
+                <td>@binderDocument.FullName</td>
+                <td>@binderDocument.StandardEp</td>
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+<script>
+    $(document).ready(function () {
+        //localStorage.clear();
+
+        $(".comment").shorten({
+            "showChars": 150,
+            "moreText": "See More",
+        });
+
+        var dtable = $('#c_myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "aaSorting": [],
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+    });
+</script>
+<style>
+    #c_myTable_filter {
+        display: none;
+    }
+</style>

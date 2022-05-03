@@ -1,0 +1,27 @@
+﻿@model List<HCF.BDO.TIcraLog>
+@if (Model.Count > 0)
+{ 
+    foreach (var item in Model)
+    {
+        <tr id="@item.TicraId">
+            <td>@item.Project.ProjectName</td>
+            <td class="permitNo">@item.PermitNo</td>
+            <td>
+                @if (!item.ILSM.Any(x => x.TIlsmId == ViewBag.currentILSMId))
+                {
+                    <input type="button" name="button" class="addICRAToILSM btn btn-primary" icraId="@item.TicraId" value="Add To ILSM" />
+                }
+                else
+                {
+                    <input type="button" name="button" class="btn btn-primary disabled" value="Added" />
+                }
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="3" class="text-center">No record available</td>
+    </tr>
+}

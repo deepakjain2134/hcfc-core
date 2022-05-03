@@ -1,0 +1,91 @@
+﻿@model HCF.Utility.AppException
+@{
+    ViewBag.Title = "Error Page";
+
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Error
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 col-xs-12">
+            <div class="box box-primary text-center">
+                <form asp-action="LogOff" asp-controller="Account"
+                      data-ajax-success="onSuccess"
+                      data-ajax="true" data-ajax-method="POST" id="errorViewForm">
+
+                    @Html.AntiForgeryToken();
+                    <h1 style="text-align:center">Unexpected Error</h1>
+                    <br />
+                    <p style="text-align:center">
+                        The error has been reported to the CRx team.
+                    </p>
+                    <br />
+
+                    <input type="hidden" name="statusCode" value="@Model.StatusCode" />
+                    <input type="hidden" name="message" value="@Model.AppErrorMessage" />
+                    <input type="hidden" name="stackTrace" value="@Model.AppStackTrace" />
+                    <input type="hidden" name="errorPath" value="@Model.ErrorPath" />
+                    <input type="hidden" name="count" value="0" />
+
+                    @*@Html.HiddenFor(x => x.StatusCode)
+                        @Html.HiddenFor(x => x.AppErrorMessage)
+                        @Html.HiddenFor(x => x.AppStackTrace)
+                        @Html.HiddenFor(x => x.ErrorPath)*@
+
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+                    {
+                        <ul>
+                            <li>
+                                <b>Status Code</b>: @Model.StatusCode
+                            </li>
+                            <li>
+                                <b>Error Path</b>: @Model.ErrorPath
+                            </li>
+
+                            <li>
+                                <b>Message</b>: @Model.AppErrorMessage
+                            </li>
+                        </ul>
+                        <p style="text-align:center;" class="showerror">Show Error</p>
+                        <ul id="errorDiv" tyle="text-align:center;" style="display:none;">
+
+                            <li>
+                                <b>Stack Trace</b>: @Model.AppStackTrace
+                            </li>
+
+                        </ul>
+                    }
+                    <input type="submit" value="Okay" class="btn btn-primary hide" id="submitBtn" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script>
+        var errorCount = $("#count");
+        $(".showerror").click(function () {
+            $("#errorDiv").toggle();
+        });
+
+        var onSuccess = function (context) {
+            successAlert("Thanks for the report! We're actively investigating this, and apologize for the trouble.");
+        };
+
+    </script>
+
+    <style>
+        .breadcrumb {
+            display: none;
+        }
+    </style>
+}

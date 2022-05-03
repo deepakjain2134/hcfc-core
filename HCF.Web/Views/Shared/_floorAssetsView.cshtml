@@ -1,0 +1,193 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">
+            Asset
+        </h4>
+    </div>
+    <div class="modal-body">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(modelItem => modelItem.FloorAssetsId)
+                @Html.HiddenFor(x => x.AssetId)
+                @Html.HiddenFor(x => x.FloorId)
+                @Html.Hidden("Xcoordinate", 0)
+                @Html.Hidden("Ycoordinate", 0)          
+                <div class="row">
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.Assets.AssetType.Name):
+                        
+                            @Html.DisplayFor(modelItem => Model.Assets.AssetType.Name)
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                       
+                            @Html.LabelFor(modelItem => Model.Assets.Name):
+                       
+                            @Html.DisplayFor(modelItem => Model.Assets.Name)
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                       
+                            @Html.LabelFor(modelItem => Model.Name):
+                       
+                            @Model.Name.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.BarCodeNo):
+                        
+                            @Model.SerialNo.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.DeviceNo):
+                       
+                            @Model.DeviceNo.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.Description):
+                        
+                            @Model.Description.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.Rating):
+                        
+                            @Model.Rating.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                       
+                            @Html.LabelFor(modelItem => Model.NearBy):
+                       
+                            @Model.NearBy.CastToNA()
+                        
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(modelItem => Model.Model):
+                       
+                            @Model.Model.CastToNA()
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.Label("Location"):
+                       
+                            @commonModelFactory.GetFloorAssetLocation(Model)
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.Label("Status"):
+                       
+                            <assetstatusdropDown name="ddlStatusCode" selectedvalue="@Model.StatusCode" firsttext="Select Status"></assetstatusdropDown>
+                            @*@Html.AssetStatusDropDown("ddlStatusCode", Model.StatusCode, "Select Status", new { @style = "display:none;" })*@
+                            <span id="FAstatus"></span>
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.Label("Make"):
+                       
+                            @commonModelFactory.GetFloorAssetMake(Model.ManufactureId)
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                       
+                            @Html.LabelFor(model => model.WallRating):
+                        
+                            @Model.WallRating
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                       
+                            @Html.LabelFor(model => model.DoorRating):
+                       
+                        
+                            @Model.DoorRating
+                       
+                    </div>
+                    <div class="col-md-4 form-group">
+                        
+                            @Html.LabelFor(model => model.FrameRating):
+                       
+                        
+                            @Model.FrameRating
+                        
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <input type="button" name="button" class="@("comm-button " + (Model.EPDetails.Count ==0 ? "disabled" : ""))" id="btnhistory" value="History" onclick="InspectionRedirect('hist');" />
+                        <input type="button" name="button" class="@("comm-button " + (Model.EPDetails.Count ==0 ? "disabled" : ""))" id="btnInspection" value="Inspect" onclick="InspectionRedirect('insp');" />
+                    </div>
+                </div>
+            
+        }
+    </div>
+</div>
+<div class="modal fade" id="InspectionPopup" role="dialog">
+    @*@await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+    new ViewDataDictionary { { "floorAssetId", Model.FloorAssetsId }, { "viewmode", "insp" } })*@
+
+    @await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "floorAssetId", Model.FloorAssetsId }, { "viewmode", "insp" }}
+                              )
+
+</div>
+<div class="modal fade" id="HistoryPopup" role="dialog">
+    @*@await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml",
+        Model.EPDetails, new ViewDataDictionary { { "floorAssetId", Model.FloorAssetsId }, { "viewmode", "hist" } })*@
+
+    @await Html.PartialAsync("~/Views/Shared/PopUp/_assetepslist.cshtml", Model.EPDetails,
+                              new ViewDataDictionary(
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                              {{ "floorAssetId", Model.FloorAssetsId }, { "viewmode", "hist" }}
+                             )
+</div>
+
+<script>
+
+    $(".comment").shorten({
+        "showChars": 150,
+        "seeMore": false,
+        "moreText": "See More",
+    });
+    $('#FAstatus').text(('@Model.StatusCode' != null)?$('#ddlStatusCode option:selected').text():'NA');
+
+    function InspectionRedirect(mode) {
+        var urlAction = "";
+        var epCount = '@Model.EPDetails.Count';
+        if (epCount ==1) {
+            if (mode === "hist") {
+                var url = CRxUrls.assets_history;
+                urlAction = url + "?epId=0&floorassetId=" + @Model.FloorAssetsId;
+            } else {
+                urlAction = '@Url.Action("AssetEps", "Assets", new { epId = 0, floorassetId = Model.FloorAssetsId })';
+            }
+            location.href = urlAction;
+
+        } else {
+            if (mode == "hist") {
+                $('#HistoryPopup').modal('show')
+            } else {
+                $('#InspectionPopup').modal('show');
+            }
+        }
+    }
+
+</script>

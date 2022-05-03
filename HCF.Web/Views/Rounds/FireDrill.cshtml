@@ -1,0 +1,384 @@
+﻿@model List<HCF.BDO.BuildingType>
+@{
+    ViewBag.Title = "Fire Drill";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool Tdrill = @ViewBag.TDril != null ? @ViewBag.TDril : false;
+    string buildingIds = @ViewBag.buildingIds != null ? @ViewBag.buildingIds : "";
+
+    var buildingTypes = Model;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Fire Drill
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary">
+                <div class="firedrillradioTab">
+                    <input type="radio" name="groupbyfilter" id="groupbyfilter" value="0" checked="checked" />
+                    <label>By Building</label>
+                    <input type="radio" name="groupbyfilter" id="groupbyfilter" value="1" />
+                    <label>By Building Groups</label>
+                </div>
+                <div class="row tablelist-topform">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <input type="hidden" id="timeformat" name="timeformat" value="1" />
+                            <div class="col-lg-3 col-md-3 col-sm-6 form-group groupbybuilding">
+                                <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 form-group groupbybuilding">
+                                @Html.DropDownList("buildingTypes", new SelectList(buildingTypes, "BuildingTypeId", "Name"), new { @class = "form-control" })
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 form-group groupbybuilding">
+                                @Html.DropDownList("BuildingId", new SelectList(""), "All Building", new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 form-group groupbylocation" style="display:none">
+                                @Html.DropDownList("LocationGroupId", new SelectList(ViewBag.locationGroup, "LocationGroupId", "Name"), new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-right">
+                        <div class="row">
+                            <input type="hidden" id="todaydril" value="@Tdrill" />
+                            <div class="col-lg-12 form-group text-right firedrill_filter f-right">
+                                @Html.DropDownList("Year", Enumerable.Range(DateTime.Now.Year - 2, 5).OrderByDescending(x => x.ToString()).Select(x => new SelectListItem { Text = x.ToString() }))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="input-group">
+                        <a url="@Url.RouteUrl("firedrillreport")"
+                           class="comm-bluebutton" id="btngotofiredrillbinder" style="font-size: x-small;">Go To Fire Drill Reports Binder</a>
+                    </div>*@
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="loadpartial">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="hdnIsEdit" value="0" />
+
+<div id="loaderspin"></div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#LocationGroupId").prepend("<option value='-1'>All Locations Group</option>");
+        $('#LocationGroupId').selectpicker('refresh');
+    });
+
+
+    var _todaydrill = '@Tdrill'.toLowerCase();
+
+    function OnFireDrillSuccess(data) {
+        swalalert("Added Successfully!");
+    }
+
+    $(function () {
+
+        var today = new Date();
+        $("#Year").val(today.getFullYear());
+
+        getBuildings();
+
+        $("#buildingTypes").change(function () {
+            getBuildings();
+        });
+
+        $("[name=Year]").on('change', function () {
+
+            var _year = $("#Year").val();
+            if (_year > 0) {
+                getExerciseData(_todaydrill);
+            } else {
+                swalalert("Please select any year")
+            }
+        });
+
+        $(".hasDatepicker").on("blur", function (e) { $(this).datepicker("hide"); });
+    });
+
+    function getExerciseData(_todaydrill) {
+        debugger;
+        $(".loadingModal").show();
+        var _year = $("#Year").val();
+        var _timeformat = $("#timeformat").val();
+        var _buildingIds = $("#BuildingId").val() != null ? $("#BuildingId").val() : 0;
+        var _locationGroupIds = $("#LocationGroupId").val() != null ? $("#LocationGroupId").val() : 0;
+        var drillmode = $('input[name="groupbyfilter"]:checked').val(); // 0 by buildings && 1 by locationGroups
+         if (_todaydrill == "false") { _todaydrill = false }
+         else { _todaydrill = true }
+        url = CRxUrls.Rounds_LoadFireDrill + '?buildingIds=' + _buildingIds + "&locationGroupIds=" + _locationGroupIds + "&mode=" + drillmode + "&year=" + _year + "&timeformat=" + _timeformat + "&todaydrill=" + _todaydrill;
+        $.ajax({
+            url: url,//CRxUrls.Rounds_LoadFireDrill,
+            //data: { buildingIds: _buildingIds, year: _year, todaydrill: _todaydrill },
+            cache: true,
+            type: 'GET',
+            success: function (data) {
+                $("#loadpartial").html("");
+                $("#loadpartial").html(data);
+                debugger;
+                //$(".loadingModal").hide();
+                if ($("#hdnIsEdit").val() == "1") {
+                    $(".editMode").show();
+                    $(".readonly").hide();
+                    $(".edCancel").show();
+                    $("#hdnIsEdit").val("0");
+                    $(".editDrills").addClass("updateDrills");
+                    $(".editDrills").text("Save");
+                }
+                if ($('.update_bt').text() == "CancelEdit Schedule") {
+                    $(".removeNewDrill").hide();
+                    $(".addNewDrill").hide();
+                }
+            }
+        });
+    }
+
+    function getBuildings() {
+        debugger;
+        var buildtypeId = $("#buildingTypes").val();
+        $("#BuildingId").empty();
+        $("#BuildingId").append(
+            $('<option buildtypeid =' + buildtypeId + '></option>').val("-1").html("All"));
+        var floorOptions = {};
+        floorOptions.url = '@Url.Action("GetBuildingAndLocationBySite", "Location", new { area = "" })';//"/Organization/GetFloorByBuilding";
+        floorOptions.type = "POST";
+        floorOptions.data = { sitecode: $("#SiteCode").val() };
+        floorOptions.datatype = "json";
+        /*floorOptions.contentType = "application/json";*/
+        floorOptions.success = function (buildlst) {
+            //console.log(buildlst);
+            debugger;
+            for (var i = 0; i < buildlst.length; i++) {
+                $("#BuildingId").append(
+                    $('<option></option>').val(buildlst[i].BuildingId).html(buildlst[i].BuildingName).attr("buildtypeId", buildlst[i].BuildingTypeId));
+            }
+            $('#BuildingId').selectpicker('refresh');
+            $('#BuildingId option[buildtypeid!="' + buildtypeId + '"]').remove();
+            $("#BuildingId").val('@buildingIds');
+            $("#BuildingId").trigger("change");
+        };
+
+        floorOptions.error = function () { AlertWarningMsg("Error in Getting Buildings!!", ""); };
+        $.ajax(floorOptions);
+    }
+
+    var buildingIndex = 0;
+    $(document).on("change", "#BuildingId", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (buildingIndex == 0) {
+            var lastAllSelected = false;
+            buildingIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+        getExerciseData(_todaydrill);
+    });
+
+    var locationIndex = 0;
+    $(document).on("change", "#LocationGroupId", function () {
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (locationIndex == 0) {
+            var lastAllSelected = false;
+            locationIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+        getExerciseData(_todaydrill);
+    });
+
+
+    $("#SiteCode").change(function () {
+        getBuildings();
+        //var cntrlId = $("#SiteCode").val();
+        //if (cntrlId != "") {
+        //    $('#fire_drill_table .drillrow').hide();
+        //    $('#fire_drill_table tr[siteCode="' + cntrlId + '"]').show();
+        //} else {
+        //    $('#fire_drill_table .drillrow').show();
+        //}
+    });
+
+    //$("#BuildingId").change(function () {
+
+    //    var cntrlId = $("#BuildingId").val();
+    //    if (cntrlId != "") {
+    //        $('#fire_drill_table .drillrow').hide();
+    //        $('#fire_drill_table tr[buildid="' + cntrlId + '"]').show();
+    //    } else {
+    //        var sitecode = $("#SiteCode").val();
+    //        $('#fire_drill_table .drillrow').show();
+    //        $('#fire_drill_table tr[siteCode="' + sitecode + '"]').show();
+    //        //$('#fire_drill_table tr[buildid="' + "" + '"]').show();
+    //    }
+
+    //});
+
+    $('input[type=radio][name=groupbyfilter]').change(function () {
+        //alert("Called");
+        //debugger;
+        if (this.value == '1') {
+            $(".groupbybuilding").hide();
+            $(".groupbylocation").show();
+            $("#BuildingId").val(0);
+            $("#BuildingId").trigger("change");
+        }
+        else if (this.value == '0') {
+            $(".groupbybuilding").show();
+            $(".groupbylocation").hide();
+        }
+    });
+
+    //$('select:visible:enabled:first').addClass("firstAnimat")
+    //window.setTimeout(function () {
+    //    $("select").removeClass('firstAnimat');
+    //}, 10000);
+
+</script>
+<style>
+
+
+
+    /* .firstAnimat {
+        font-size: 18px;
+        border: 3px solid #000;
+        min-height: 48px;
+        border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E %3Cstyle%3Epath%7Banimation:stroke 5s infinite linear%3B%7D%40keyframes stroke%7Bto%7Bstroke-dashoffset:776%3B%7D%7D%3C/style%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232d3561' /%3E%3Cstop offset='25%25' stop-color='%23c05c7e' /%3E%3Cstop offset='50%25' stop-color='%23f3826f' /%3E%3Cstop offset='100%25' stop-color='%23ffb961' /%3E%3C/linearGradient%3E %3Cpath d='M1.5 1.5 l97 0l0 97l-97 0 l0 -97' stroke-linecap='square' stroke='url(%23g)' stroke-width='3' stroke-dasharray='388'/%3E %3C/svg%3E") 1;
+    }*/
+
+    #loadpartial {
+        margin-top: 0;
+    }
+
+    .fire_drill_table {
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .toggleBox {
+        clear: both;
+        display: inline-flex;
+    }
+
+    .toggle-crxbtn {
+        width: 42px;
+        height: 20px;
+        border-radius: 50px;
+        display: inline-block;
+        position: relative;
+        background: url('/dist/Images/Icons/close-toggle.png') no-repeat 26px center #e74c3c;
+        cursor: pointer;
+        -webkit-transition: background-color .40s ease-in-out;
+        -moz-transition: background-color .40s ease-in-out;
+        -o-transition: background-color .40s ease-in-out;
+        transition: background-color .40s ease-in-out;
+        cursor: pointer;
+        background-size: 9px !important;
+        margin-right: 4px;
+    }
+
+        .toggle-crxbtn .round-white {
+            width: 14px;
+            height: 14px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: inline-block;
+            position: absolute;
+            left: 5px;
+            top: 15%;
+            -webkit-transition: all .30s ease-in-out;
+            -moz-transition: all .30s ease-in-out;
+            -o-transition: all .30s ease-in-out;
+            transition: all .30s ease-in-out;
+        }
+
+    .crx-value {
+        margin: 0px 0 0 !important;
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        z-index: 9;
+        cursor: pointer;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    }
+
+    .toggle-crxbtn.active .round-white {
+        left: 22px;
+    }
+
+    .toggle-crxbtn.active {
+        background: url('/dist/Images/Icons/open-toggle.png') no-repeat 6px center #2ecc71;
+        background-size: 12px !important;
+    }
+</style>
+

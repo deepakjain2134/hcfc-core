@@ -1,0 +1,52 @@
+﻿@model HCF.BDO.EPGroups
+@*@using HCF.Web.Heleprs*@
+@{
+
+    ViewBag.Title = "Add EP Group Name";
+}
+
+
+    <section class="content-header">
+        <h1>
+            Add EP Groups Name
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("AddEPGroupsName", "EPGroups", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                       
+                            @Html.HiddenFor(m => m.EPGroupId)
+                            <div class="row">
+                                <div class="col-lg-12 common-formBox">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.EPGroupName)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.EPGroupName, new { @class = "form-control", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.EPGroupName)
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        @*<div class="chk_isactive">*@
+                                            @Html.LabelFor(m => m.IsActive)
+                                            @Html.CheckBoxFor(m => m.IsActive, new { @checked = "checked" })<span></span>
+                                            @Html.ValidationMessageFor(m => m.IsActive)
+                                        @*</div>*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="common-btnBox">
+                                <input type="submit" value='Save' class="comm-button" />
+                                @*@Html.ActionLink("Cancel ", "GetEPGroupsNameList", "EPGroups", new { @class = "comm-button" })*@
+                                @Html.ActionLink("Cancel", "GetEPGroupsNameList", new { controller = "EPGroups" }, new { @class = "comm-Cancelbutton" })
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>

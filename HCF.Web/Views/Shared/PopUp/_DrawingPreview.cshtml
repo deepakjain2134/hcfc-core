@@ -1,0 +1,32 @@
+﻿@model HCF.BDO.DrawingViewer
+<div class="modal-header">
+    <h4 class="modal-title">
+        Drawings
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<div class="modal-body">
+    @await Component.InvokeAsync("DrawingManageDrawings",
+    new
+        {
+            mode = Model.ViewerMode.ToString(),
+            floorPlanId = Model.FloorPlanId,
+            permitId = Convert.ToString(ViewBag.permitId),
+            ispopup = ViewBag.ispopup!=null?Convert.ToInt32(ViewBag.ispopup):0
+    })
+    @*@Html.Action("ManageDrawings", "Drawing", new { mode = Model.ViewerMode, floorPlanId = Model.FloorPlanId, permitId = ViewBag.permitId, ispopup = ViewBag.ispopup })*@
+</div>
+<style>
+    #modal-container {
+        top: 0px !important;
+    }
+
+    .zoomin img {
+        height: 510px;
+        width: 600px;
+        -webkit-transition: all 0.5s ease;
+        -moz-transition: all 0.5s ease;
+        -ms-transition: all 0.5s ease;
+        transition: all 0.5s ease;
+    }
+</style>

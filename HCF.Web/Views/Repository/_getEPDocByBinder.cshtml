@@ -1,0 +1,214 @@
+﻿@model List<HCF.BDO.EPsDocument>
+@{
+    Layout = null;
+    string BinderName = "0";
+    if (ViewBag.BinderName !="ALL"&& ViewBag.BinderName != null)
+        BinderName = ViewBag.BinderName;
+
+}
+@*<span>
+    @ViewBag.BinderName
+</span>*@
+<div class="row">
+    <div class="col-lg-4">
+        <binderlistdropdown name="BinderID" selectedvalue="@(BinderName=="0"?BinderName:Model.FirstOrDefault(x=>x.BinderName==BinderName).BinderId.ToString()==null?"0":Model.FirstOrDefault(x=>x.BinderName==BinderName).BinderId.ToString())" firsttext="All Binders" class="form-control selectpicker"></binderlistdropdown>
+        @*@Html.BinderListDropDown("BinderID", 0, "All Binders", new { @class = "form-control selectpicker" })*@
+    </div>
+    <div class="col-lg-3">
+        @Html.DropDownList("YearFilter",null, new { @class = "form-control" })
+    </div>
+</div>
+
+
+    <table id="c_myTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="max-width:300px;">
+                    File 
+                </th>
+                <th>
+                    CRx Standardized Name
+                </th>
+                <th>
+                    Binder
+                </th>
+                <th>
+                    Review/Report Date
+                </th>
+                <th>
+                    Uploaded Date
+                </th>
+                <th>
+                    Uploaded By
+                </th>
+                <th>
+                    @Localizer["StandardEP"]
+                </th>
+                <th>
+                    Action
+                </th>
+                <th class="hidden"></th>
+                <th class="hidden">
+
+                </th>
+                <th class="hidden"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var binderDocument in Model.OrderByDescending(x => x.CreatedDate))
+            {
+                <tr>
+                    <td class="align-left doctableflex" style="max-width:300px;">
+                        <div class="binderDoc">
+                            <a href="@commonModelFactory.FilePath(binderDocument.Path)" target="_blank">
+                                <img src="@commonModelFactory.UploadDocTypeImagePath(binderDocument.UploadDocTypeId,binderDocument.DocTypeId)" alt="@binderDocument.Name">
+                            </a>
+                            <span class="epdocName-elips" title="@binderDocument.FileName">@binderDocument.FileName</span>
+                        </div>
+                    </td>
+                    <td>
+                        @binderDocument.Name
+                    </td>
+                    <td>@binderDocument.BinderName.CastToNA()</td>
+                    <td data-sort="@binderDocument.DtEffectiveDate.DateSort()">
+                       <span> @binderDocument.DtEffectiveDate.CastLocaleDate()</span>
+                      
+                    </td>
+                    <td data-sort="@binderDocument.CreatedDate.ToClientTime()">
+                        @binderDocument.CreatedDate.ToClientTime().ToFormatDateTime()
+                    </td>
+                    <td>@binderDocument.FullName</td>
+                    <td>
+                        <a href="@Url.Action("EpDocs", "Reports", new {epDetailId = binderDocument.EpdetailId})">
+                            @binderDocument.StandardEp
+                        </a>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("FolderLists", "Documents", new { fileId = binderDocument.FileId })"
+                           class="modal-link binderDocsend-btn" title="Send this item to Survey prep binder.">
+                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                    <td class="hidden">
+                        @System.Text.RegularExpressions.Regex.Replace(binderDocument.StandardEp, "[A-Za-z ]", "").Replace(".","").Replace(",", "")
+                    </td>
+                    <td class="hidden">
+                        @binderDocument.CreatedBy
+                    </td>
+                    <td class="hidden">@binderDocument.BinderId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        var pageType = $("#pageName").val();
+        var userddl = $('#urerList');
+        var yearFilter = $("#YearFilter");
+        var YearValue = $("#YearFilter").val();
+
+
+        var maxLength = 48;
+        $(".epdocName-elips").each(function () {
+            var myStr = $(this).text();
+            if ($.trim(myStr).length > maxLength) {
+                var newStr = myStr.substring(0, maxLength);
+                var removedStr = myStr.substring(maxLength, $.trim(myStr).length);
+                $(this).empty().html(newStr);
+                $(this).append(' <a href="javascript:void(0);" class="read-more">...</a>');
+
+            }
+        });
+
+    //});
+    //$(document).ready(function () {
+        // debugger;
+        $(".comment").shorten({
+            "showChars": 150,
+            "moreText": "See More",
+        });
+
+        var dtable = $('#c_myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "aaSorting": [],
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            dom: "<'row'<'col-sm-12 tableactions'fl <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        });
+
+        yearFilter.on('change', function () {
+            debugger
+            var BinderId = $("#BinderID").val();
+            if ($(this).val() == "All") {
+                //dtable.columns(3).search("").draw();
+                YearValue = $(this).val();
+                GetData(BinderId, YearValue);
+            }
+            else {
+                YearValue = $(this).val();
+                GetData(BinderId, YearValue);
+               // dtable.columns(3).search($(this).val()).draw();
+            }
+        });
+        if (pageType != 0) {
+            debugger
+            var currentYear = '@ViewBag.Year';
+            yearFilter.val(currentYear);
+            YearValue = yearFilter.val();
+            //dtable.columns(3).search(currentYear).draw();
+        } else {
+            dtable.columns(-2).search("^" + '@HCF.Web.Base.UserSession.CurrentUser.UserId' + "$", true, false, true).draw();
+            yearFilter.hide();
+        }
+
+        var ep = getParameterByName('epnumber');
+        if (ep != undefined) {
+
+            $('#urerList').val("")
+            $('#urerList').trigger('change')
+            dtable.columns(-2).search("").draw();
+            dtable.columns(6).search(ep).draw();
+            yearFilter.hide();
+        }
+        userddl.on('change', function () {
+            debugger;
+            if ($(this).val()) {
+                dtable.columns(-2).search("^" + $(this).val() + "$", true, false, true).draw();
+            }
+            else {
+                dtable.columns(-2).search("").draw();
+            }
+        });
+
+        $('#BinderID').on('change', function () {
+            debugger;
+            var value = $(this).val();
+            if (value != "") {
+               // dtable.columns(-1).search("^" + value + "$", true, false, true).draw();
+                GetData(value, YearValue);
+            }
+            else {
+                //dtable.columns(-1).search("").draw();
+                GetData(0, YearValue);
+            }
+        });
+
+        function GetData(BinderId, Year) {
+            debugger
+
+            var Url = '@Url.Action("GetEpDocByBinder", "Repository")';
+         //   $.get(Url + "?id=" + BinderId + '&Year=' + Year + '&DocTypeId='+ 0);
+            window.location.href = Url + "?id=" + BinderId + '&Year=' + Year + '&DocTypeId=' + 0;
+        };
+    });
+
+
+
+    </script>

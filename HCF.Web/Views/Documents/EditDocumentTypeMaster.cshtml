@@ -1,0 +1,119 @@
+﻿@model HCF.BDO.DocumentType
+@*@using HCF.Web.Heleprs*@
+@{
+
+    ViewBag.Title = "Edit Document Type";
+}
+@*@using HCF.Web.Views*@
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Edit Document Type
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        
+                        <div class="col-md-12">
+                            @using (Html.BeginForm("EditDocumentTypeMaster", "Documents", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                             
+                                    <div id="hdn_div">
+                                        <input type="hidden" name="FileName" value="" id="DocFileName" />
+                                        <input type="hidden" name="FileContent" value="" />
+                                        <input type="hidden" name="FilePath" />
+                                        <input type="hidden" name="Path" id="DocPath" value="@Model.Path" />
+                                        <input type="hidden" name="strJson" id="strJson" />
+                                        <input type="hidden" name="OldName" value="@Model.Name" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 col-sm-6">
+                                            @Html.HiddenFor(m => m.DocTypeId)
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required", maxlength = 250 })
+                                                @Html.ValidationMessageFor(model => model.Name)
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Path)
+
+                                                <div>
+                                                    <input type="file" name="file" accept="file/*" id="file" tempname="FileName" tempfileName="FileName" tempfilecontent="FileContent" class="fileUpload" onchange="Uploadfile(this)" />
+                                                </div>
+                                                <div>
+                                                    @if (!String.IsNullOrEmpty(Model.Path))
+                                                    {
+
+                                                        <a href="@commonModelFactory.CommonFilePath(Model.Path)" target="_blank">@*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" />*@</a>
+                                                    }
+                                                    else
+                                                    {
+                                                        @*@Html.DisplayTextFor(model => model.Path)*@
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-sm-6">
+                                            <div class="form-group comman_checkbox">
+                                                @Html.LabelFor(m => m.IsActive)
+                                                @Html.CheckBoxFor(m => m.IsActive, new { @checked = "checked" })<span></span>
+                                                @Html.ValidationMessageFor(m => m.IsActive)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="button_Div">
+                                        <input type="submit" value='@Localizer["Update"]' class="comm-button" />
+                                        @*@Html.ActionLink("Cancel ", "DocumentType", "Documents", new { @class = "comm-button" })*@
+                                        @Html.ActionLink("Cancel", "DocumentType", new { controller = "Documents" }, new { @class = "comm-Cancelbutton" })
+                                    </div>
+                               
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="updatemultipleFloorPlan" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div id="loadpartial" style="margin-top:0;">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('.date').datepicker();
+    $("#file").change(function () {
+        var file = document.getElementById("file").files[0];
+        var readImg = new FileReader();
+        readImg.readAsDataURL(file);
+        readImg.onload = function (e) {
+            $('.img').attr('src', e.target.result).fadeIn();
+
+        }
+    });
+
+    $(".fileUpload").change(function () {
+        console.log($(this))
+        $('#DocPath').val($(this).val().split('\\')[$(this).val().split('\\').length - 1])
+        $('#DocFileName').val($(this).val().split('\\')[$(this).val().split('\\').length - 1])
+    })
+
+</script>  

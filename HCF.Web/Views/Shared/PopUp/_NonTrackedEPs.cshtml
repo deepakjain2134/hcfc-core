@@ -1,0 +1,151 @@
+﻿@model HCF.BDO.EPDetails
+<div class="modal-header">
+    <h4 class="modal-title">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<div class="modal-body">
+
+    <div class="row form-group">
+        <div class="col-md-4 ">
+            <label>Chapter:</label>
+            <span>@Model.Standard.Category.Name</span>
+        </div>
+        <div class="col-md-8">
+            <label>EP Description:</label>
+            @await Html.PartialAsync("_EpDescription", Model.Description,
+                        new ViewDataDictionary(
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                        {{ "standardEp", Model.StandardEp }}
+                       )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label>Standard:</label>
+            <span>@Model.Standard.TJCStandard</span>
+        </div>
+        <div class="col-md-8 form-group">
+            <label>EP:</label>
+            <span>@Model.EPNumber</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-4">
+            <label>Status with TJC:</label>
+        </div>
+        <div class="col-md-8">@(Model.IsActive? "ACTIV": "INACTIV")</div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-4"><label class="control-label" for="Status">Tracked for this facility:</label></div>
+        <div class="col-md-8">
+            <input type="hidden" value="@Model.IsApplicable" id="IsApplicable" name="IsApplicable" />
+            <div class="btn-group btn-group-toggle crxtoggle-btn" data-toggle="buttons">
+                <label class="btn toggleGreenbtn active">
+                    <input type="radio" name="options" class="options" id="option1" checked value="true"> Yes
+                </label>
+                <label class="btn toggleRedbtn">
+                    <input type="radio" name="options" class="options" id="option2" value="false"> No
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row form-group">
+
+        <div class="col-md-4">
+            <label>Reason for Not-tracking  (Optional)</label>
+        </div>
+        <div class="col-md-8">
+            @Html.TextAreaFor(m => m.ReasonforNonTracked, new { @class = "form-control", maxlength = 500, @rows = "2", @cols = "10" })
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right button_Div">
+            <input type="button" value='Update' class="comm-button" id="btnUpdate" />
+            <input type="button" value='Cancel' class="comm-Cancelbutton" id="Cancel" data-dismiss="modal" />
+        </div>
+    </div>
+
+</div>
+<script>
+   // $("#IsApplicable").val(true);
+
+    $(document).ready(function () {
+
+        var currentStatus='@Model.IsApplicable';
+        console.log(currentStatus);
+        var status=(currentStatus=="True")? true:false;
+        console.log(status);
+        $("#IsApplicable").val(status);
+
+        if(status== false)
+        {
+            $( ".options" ).trigger( "click" );
+            //document.getElementById("option2").checked = true;
+        }
+
+
+        $(".options").change(function () {
+            //debugger;
+            if ($(this).val() == "1") {
+                $("#IsApplicable").val(true);
+            } else {
+                $("#IsApplicable").val(false);
+            }
+        });
+    });
+
+    $('#btnUpdate').click(function () {
+        debugger;
+        var checkedValue = $('input[name="IsApplicable"]:checked').val()
+        var htmlTitle = "Confirm Non-Tracked EP";
+        var htmldata = "Are you sure you want to change to non-tracked?"
+        swal({
+            html: true,
+            title: htmlTitle,
+            text: htmldata,
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Continue",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: true,
+            closeOncancel: true
+        },
+            function (isConfirm) {
+                //debugger
+                if (isConfirm) {
+                    SaveEPApplicablestatus()
+                }
+            });
+
+    });
+
+    function SaveEPApplicablestatus() {
+        debugger;
+        var reason = $("#ReasonforNonTracked").val();
+        var epId = '@Model.EPDetailId';
+        var checkedValue =$('input[name="options"]:checked').val(); //$("#IsApplicable").val();
+        $.ajax({
+            url: '@Url.Action("UpdateEPApplicablestatus", "Goal")',
+            type: "POST",
+            data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), newValue: checkedValue, epdetailId: epId, reason: reason },
+            dataType: 'json',
+            success: function (result) {
+                swalalert("Updated Successfully")
+                //$("#chek_" + epId).prop('checked', checkedValue);
+                console.log(checkedValue);
+                var value = (checkedValue == "true") ? "Yes" : "No";
+                console.log(value);
+                $("#divchek_"+ epId).html(value);
+                $('#non-Tracked-eps').modal('hide');
+            }
+        });
+    }
+
+
+
+
+</script>

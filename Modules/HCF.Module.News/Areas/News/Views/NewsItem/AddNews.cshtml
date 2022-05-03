@@ -1,0 +1,144 @@
+﻿@model HCF.BDO.News
+@{
+    ViewBag.Title = "Add News";
+    string pageTitle = (Model != null && Model.Id > 0) ? "Edit News" : "Add News";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @pageTitle
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <form asp-action="AddNews" asp-controller="NewsItem" asp-area="News" method="post" id="saveNewsForm">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <input asp-for="Id" type="hidden" />
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Title)<em class="required-field">*</em>
+                                @Html.TextBoxFor(model => model.Title, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Title)
+                            </div>
+                            <div class="form-group">
+                                @Html.CheckBoxFor(model => model.Published, new { @checked = "checked" })
+                                @Html.ValidationMessageFor(model => model.Published)
+                                @Html.LabelFor(model => model.Published)
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group" style="clear: both;">
+                                @Html.LabelFor(model => model.StartDate)<em class="required-field">*</em>
+                                @Html.TextBoxFor(model => Model.StartDate, "{0:MM/d/yyyy}", new { @class = "form-control", required = "required", @autocomplete = "off" })
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.EndDate)<em class="required-field">*</em>
+                                @Html.TextBoxFor(model => Model.EndDate, "{0:MM/d/yyyy}", new { @class = "form-control", required = "required", @autocomplete = "off", @onselect = "myfunction();" })
+
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Description)<em class="required-field">*</em>
+                                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Description)
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="submit" value='Save' class="comm-button" />
+                            <a asp-controller="NewsItem" asp-action="News" asp-area="News" class="comm-Cancelbutton">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+
+<script type="text/javascript" src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")"></script>
+
+@section Scripts {
+    <script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+    <script>
+
+
+
+        CKEDITOR.replace('Description', {
+            height: 150,
+            toolbar: [
+                { name: 'document', groups: ['mode', 'document', 'doctools'], items: ['-', 'Save', 'NewPage', 'Preview', '-', 'Templates'] },
+                '/',
+                { name: 'basicstyles', groups: ['basicstyles', 'cleanup'], items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi'], items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'] },
+                { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                { name: 'insert', items: ['HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+                { name: 'basicstyles', items: ['Font', 'FontSize'] },
+                { name: 'colors', items: ['TextColor', 'BGColor'] },
+                { name: 'others', items: ['-'] }
+            ]//,
+
+        });
+
+
+
+
+        $(".Spacevalid").on("keypress", function (e) {
+
+            if (e.which === 32 && !this.value.length)
+                e.preventDefault();
+        });
+
+
+
+        $(function () {
+
+            $("#StartDate").datepicker({
+                numberOfMonths: 1, minDate: 0,
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                onSelect: function (selected) {
+                    var dt = new Date(selected);
+                    dt.setDate(dt.getDate() + 1);
+                    $("#EndDate").datepicker("option", "minDate", dt);
+                }
+            });
+            $("#EndDate").datepicker({
+                numberOfMonths: 1, minDate: 0,
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                onSelect: function (selected) {
+                    var dt = new Date(selected);
+                    dt.setDate(dt.getDate() - 1);
+                    $("#StartDate").datepicker("option", "maxDate", dt);
+                }
+            });
+        });
+
+        $(function myfunction() {
+            var dateOne = $("#StartDate").val();
+            var dateTwo = $("#EndDate").val();
+            if (dateOne != "") {
+                if (Date.parse(dateOne) > Date.parse(dateTwo)) {
+                    swalalert("End Date Should Be Greater than Start Date");
+                }
+            }
+        });
+
+
+
+
+    </script>
+}

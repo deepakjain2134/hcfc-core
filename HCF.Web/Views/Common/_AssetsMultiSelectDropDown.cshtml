@@ -1,0 +1,49 @@
+﻿@model List<HCF.BDO.Assets>
+<dl class="dropdown">
+    <dt>
+
+        <a href="#">
+            <span class="multiSelStaus">Select</span> 
+        </a>
+    </dt>
+    <dd>
+        <div class="mutliSelect">
+            <ul class="mutliSelectUl">
+                <li class="comman_checkbox1">
+                    <input type="checkbox" class="selectAll" id="0" value="0" /><span></span>Select All
+                </li>
+
+                @foreach (var item in Model.Where(x => x.IsActive == true).OrderBy(x => x.Name))
+                {
+                    <li class="comman_checkbox1">
+                        <input type="checkbox" class="assetChekcBox" id="@item.AssetId" value="@item.Name" /><span></span>@item.Name
+                    </li>
+                }
+
+            </ul>
+        </div>
+    </dd>
+  
+</dl>
+
+
+
+<script>
+
+    $(".dropdown dt a").on('click', function () {
+        $(".dropdown dd ul").slideToggle('fast');
+    });
+
+    $(".dropdown dd ul li a").on('click', function () {
+        $(".dropdown dd ul").hide();
+    });
+
+    function getSelectedValue(id) {
+        return $("#" + id).find("dt a span.value").html();
+    }
+
+    $(document).bind('click', function (e) {
+        var $clicked = $(e.target);
+        if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
+    }); 
+</script>

@@ -1,0 +1,74 @@
+﻿@model HCF.BDO.TRoundsQuestionnaires
+@{
+    string goalIndex = this.ViewData.ContainsKey("inspStatus") ? this.ViewData["inspStatus"].ToString() : "0";
+}
+
+@if (goalIndex != "2" && string.IsNullOrEmpty(Model.FilePath) && goalIndex.ToLower() == "false")
+{
+    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float: right; margin-right: 5px;" class="commentIcon disable" />
+}
+else
+{
+
+    <input type="hidden" name="fileContent" class="fileContent" value="@Model.FileContent" />
+    <input type="hidden" name="fileName" class="fileName" value="@Model.FileName" />
+    <input type="hidden" name="filePath" class="filePath" value="@Model.FilePath" />
+    <div class="">
+        <div class="img_file_upload @((string.IsNullOrEmpty(Model.FilePath)) ? "show" : "hide")" id="img_file_upload_@Model.RoundsQuestionnaires.RouQuesId">
+            <input class="" name="file_Uploader"
+                   type="file"
+                   onchange="roundInsUploadfile(this, @Model.RoundsQuestionnaires.RouQuesId,'C')"
+                   tempname='fileContent'
+                   filename="fileName"
+                   onclick="this.value=null;"
+                   filepath="filePath" id="fileuploadCtr_@Model.RoundsQuestionnaires.RouQuesId" />
+        </div>
+        <div class="roundpreviewimg">
+            @if (goalIndex == "True")
+            {
+                <img id="deleteimg_@Model.RoundsQuestionnaires.RouQuesId" class="@((!string.IsNullOrEmpty(Model.FilePath)) ? "deleteroundimg" : "hide")" onclick="deleteRoundImg(this,@Model.RoundsQuestionnaires.RouQuesId,'C')" src="~/dist/Images/Icons/red_cross.png" />
+            }
+            <a class="imgView">
+                <img class="@((!string.IsNullOrEmpty(Model.FilePath)) ? "img_prev_upload" : "img_prev")" id="imagePreview_@Model.RoundsQuestionnaires.RouQuesId"
+                     src="@commonModelFactory.FilePath(Model.FilePath)" alt="">
+            </a>
+        </div>
+    </div>
+}
+<style>
+    .roundpreviewimg {
+        width: 20px;
+        height: 20px;
+        margin: 0px auto;
+        position: relative;
+    }
+
+        .roundpreviewimg .img_prev_upload {
+            max-width: 100%;
+        }
+
+    .img_file_upload {
+        position: relative;
+    }
+
+    .deleteroundimg {
+        cursor: pointer;
+        position: absolute;
+        width: 12px;
+        right: -6px;
+        z-index: 999;
+        background-color: #fff;
+    }
+
+    .disabled tr td {
+        cursor: default !important;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+        .disabled tr td:last-child {
+            cursor: pointer !important;
+            pointer-events: auto;
+            opacity: 1;
+        }
+</style>

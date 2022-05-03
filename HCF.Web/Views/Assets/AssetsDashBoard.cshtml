@@ -1,0 +1,319 @@
+﻿@model HCF.Web.ViewModels.AssetsDashboardViewModel
+@{
+    ViewBag.Title = "AssetsDashBoard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var buildings = Model.buildings;
+    var assets = Model.assets;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Asset Dashboard
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="dash-actvity-box">
+                        <div class="input-group" id="dvsearch">
+                            <input type="text" class="form-control" id="inputSuccess2" placeholder="Search" />
+                            <i class="closesearch" id="closesearch">x</i>
+                            <span class="input-group-addon">
+                                <i class="fa fa-search" id="btntxtsearch"></i>
+                            </span>
+                        </div>
+                        <div class="dash_btnfilter" id="dash_btnfilter">
+                            <div class="dropup" style="display: inline-flex;">
+                                <input type="submit" name="button" class="button1 dropdown-toggle assets_with_day" id="btn_assets" value="Assets" data-toggle="dropdown" />
+                                <ul class="dropdown-menu assets-dropdown" id="btn_Assetsboard">
+                                    <li><a href="#" class="filter_btn_assets active" value="">All (@assets.SelectMany(x => x.TFloorAssets).Count())</a></li>
+                                    @foreach (var asset in assets)
+                                    {
+                                        <li>
+                                            <a href="#"
+                                               class="filter_btn_assets @(asset.TFloorAssets.Any() ? "" : "disable")"
+                                               value="@asset.AssetId">
+                                                @($"{asset.Name}({asset.TFloorAssets.Count})")
+                                        </a>
+                                    </li>
+                                }
+                            </div>
+                            <div class="dropup" style="display: inline-flex;">
+                                <input type="submit" name="button" class="button1 dropdown-toggle building_with_day" id="btn_building" value="Buildings" data-toggle="dropdown" />
+                                <ul class="dropdown-menu assets-dropdown" id="btn_buildingsboard">
+                                    <li><a href="#" class="filter_building active" value="">All</a></li>
+                                    @foreach (var item in buildings.Where(x => x.IsActive))
+                                    {
+                                        <li><a href="#" class="filter_building" value="@item.BuildingId">@item.BuildingName</a></li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <div class="dropup" style="display:inline-flex;">
+                                <input type="submit" name="button" class="button1 dropdown-toggle due_with_day" id="btn_dueWithin" value="Due within Days" data-toggle="dropdown" />
+                                <ul class="dropdown-menu assets-dropdown" id="btn_Duewithin">
+                                    <li><a href="#" class="filter_due_within" value="0">1 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="5">5 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="10">10 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="15">15 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="20">20 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="25">25 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="30">30 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="60">60 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="90">90 days</a></li>
+                                    @*<li><a href="#" class="filter_due_within">This Month</a></li>
+                                        <li><a href="#" class="filter_due_within">Next Month</a></li>*@
+                                </ul>
+                            </div>
+                            <input type="submit" name="button" class="button1 btn_pastdue" id="btn_pastdue" value="Deficient" />
+                            <input type="submit" name="button" class="button1 Inprogress" id="btn_Inprogress" value="In Progress" />
+                            <input type="submit" name="button" class="button1 alleps active" id="btn_all" value="Show All " />
+                            <div class="gorefersh-btn">
+                                <button class="comm-button" id="btnloaddata">Go</button>
+                                <button class="comm-Cancelbutton" id="btnrefresh">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="partialContents">
+                        @await Html.PartialAsync("_assetsDashBoard", assets)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+
+   
+
+    <script>
+
+        var btnloaddata = $("#btnloaddata");
+        var btnrefresh = $("#btnrefresh");
+
+        $('#btn_Inprogress').on('click',
+            function () {
+                $(this).toggleClass("active");
+                //filterTblData();
+            });
+
+        $('#button').click(function () {
+            table.row('.selected').remove().draw(false);
+        });
+
+        $('#btn_pastdue').on('click',
+            function () {
+                $(this).toggleClass("active");
+                //filterTblData();
+            });
+
+        //$('#btn_pastdue').on('click', function () {
+        //    $(this).addClass("active");
+        //    filterTblData();
+        //});
+
+
+        $("#closesearch").on('click',
+            function () {
+                $("#inputSuccess2").val("");
+                document.getElementById("btntxtsearch").click();
+            });
+        var inputSeach = document.getElementById("inputSuccess2");
+
+
+        inputSeach.addEventListener("keyup",
+            function (event) {
+                if (event.keyCode === 13) {
+                    event.preventDefault();
+                    document.getElementById("btntxtsearch").click();
+                }
+            });
+
+
+        $("#btntxtsearch").click(function () {
+            var assettable = $('#assetsTable').DataTable();
+            assettable.search($("#inputSuccess2").val()).draw();
+            $(".button1").removeClass("active");
+        });
+
+        $('#btn_all').on('click',
+            function () {
+                $(".button1").removeClass("active");
+                $(this).addClass("active");
+                removeFilter();
+                //rmvFiltes();
+                //filterTblData();
+                //var assettable = $('#assetsTable').DataTable();
+                //assettable.search("").draw();
+            });
+
+        var rmvFiltes = function () {
+            //var assettable = $('#assetsTable').DataTable();
+            //$("#inputSuccess2").val("");
+            //assettable.search("").draw();
+            //assettable.columns(7).search("").draw();
+            //assettable.columns(8).search("").draw();
+            //assettable.columns(10).search("").draw();
+            //assettable.columns(11).search("").draw();
+        }
+
+        $(".filter_btn_assets").click(function () {
+            if ($(this).attr('value') > 0) {
+                if ($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                } else {
+                    $(this).addClass('active');
+                }
+            } else {
+                $(".filter_btn_assets").removeClass('active');
+            }
+            var assetId = GetSelectedAssets();
+            if (assetId.length > 0) {
+                $("#btn_assets").addClass("active");
+            } else
+                $("#btn_assets").removeClass("active");
+            //filterTblData();
+        });
+
+        $(".filter_building").click(function () {
+            if ($(this).attr('value') > 0) {
+                if ($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                } else {
+                    $(this).addClass('active');
+                }
+            } else {
+                $(".filter_building").removeClass('active');
+            }
+
+            var buildingId = GetSelectedbuildings();
+            if (buildingId.length > 0) {
+                $("#btn_building").addClass("active");
+            } else
+                $("#btn_building").removeClass("active");
+
+            //filterTblData();
+        });
+
+        $(".filter_due_within").on('click',
+            function () {
+                var text = $(this).text();
+                if ($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                    $("#btn_dueWithin").removeClass('active');
+                } else {
+                    $(".filter_due_within").removeClass('active');
+                    $(this).addClass('active');
+                    $("#btn_dueWithin").addClass('active');
+                    $("#btn_dueWithin").val("Due within " + text);
+                }
+                //filterTblData();
+            });
+
+        function GetSelectedAssets() {
+            var assetIds = [];
+            $(".filter_btn_assets.active").each(function () {
+                var Id = $(this).attr('value');
+                if (Id > 0) {
+                    assetIds.push(Id);
+                }
+            });
+            return assetIds;
+        }
+
+
+        function GetSelectedbuildings() {
+            var buildingIds = [];
+            $(".filter_building.active").each(function () {
+                var buildId = $(this).attr('value');
+                if (buildId > 0) {
+                    buildingIds.push(buildId);
+                }
+            });
+            return buildingIds;
+        }
+
+
+        function filterTblData() {
+
+            var assetId = GetSelectedAssets();
+            var buildingId = GetSelectedbuildings();
+            // debugger;
+            var inprogress = 0;
+            var pastDue = 0;
+            var dueWithIndays = 0;
+            if ($('#btn_Inprogress').hasClass('active')) {
+                inprogress = 1;
+            }
+            if ($('#btn_pastdue').hasClass('active')) {
+                pastDue = 1;
+            }
+
+            if ($(".filter_due_within").hasClass('active')) {
+                dueWithIndays = $(".filter_due_within.active").attr('value');
+                $("#btn_dueWithin").addClass('active');
+            } else {
+                $("#btn_dueWithin").removeClass('active');
+            }
+
+            if (assetId.length > 0 || buildingId.length > 0 || inprogress > 0 || pastDue > 0 || dueWithIndays > 0) {
+                $("#btn_all").removeClass('active');
+            } else {
+                $("#btn_all").addClass('active');
+            }
+
+            var url = CRxUrls.Assets_PartialAssetsDashBoard;
+            $.get(url +
+                '?Inprogress=' +
+                inprogress +
+                "&pastDue=" +
+                pastDue +
+                "&dueWitndays=" +
+                dueWithIndays +
+                "&assetIds=" +
+                assetId.join(',') +
+                "&buildingIds=" +
+                buildingId.join(','),
+                function (data) {
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                });
+        }
+
+
+        btnloaddata.click(function () {
+            filterTblData();
+        });
+
+        function removeFilter() {
+            $(".button1").removeClass("active");
+            $(".filter_btn_assets.active").each(function () {
+                $(this).removeClass("active");
+            });
+            $("#btn_assets").removeClass("active");
+            $(".filter_building.active").each(function () {
+                $(this).removeClass("active");
+            });
+            $("#btn_building").removeClass("active");
+            $(".filter_due_within").removeClass("active");
+            $("#btn_dueWithin").removeClass('active');
+            $('#btn_all').addClass("active");
+            $("#btn_dueWithin").val("Due within Days");
+            filterTblData();
+        }
+
+
+        btnrefresh.click(function () {
+            removeFilter();
+        });
+
+            
+
+
+    </script>
+}

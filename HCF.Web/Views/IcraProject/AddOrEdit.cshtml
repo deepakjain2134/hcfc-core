@@ -1,0 +1,402 @@
+﻿@model HCF.BDO.TIcraProject
+@{
+    var icraProjectList = Model.icraProjectList;
+    ViewBag.Title = Model.ProjectId > 0 ? "Edit Project" : "Add Project";
+}
+<style>
+    .chkShow {
+        margin-left: 2vw;
+        margin-top: 2vw;
+    }
+</style>
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @ViewBag.Title
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm("AddOrEdit", "IcraProject", FormMethod.Post, new { id = "AddOrEditIcraProject" }))
+                {
+                    @Html.AntiForgeryToken()
+
+
+                    <div class="row">
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(x => x.ProjectId)
+                        @Html.HiddenFor(x => x.CreatedBy)
+                        @Html.HiddenFor(m => Model.TFileIds)
+                        @Html.HiddenFor(m => m.TDrawingFields, new { id = "attachdrawingFiles" })
+                        <input type="hidden" name="AttachFiles" value="" id="attachFiles" />
+                        @{ var projectdisabled = (Model.ParentProjectId == null && Model.ProjectId != 0); }
+                        @if (projectdisabled)
+                        {
+                            <div class="form-group col-md-4 col-sm-6" id="ParentProjectDiv">
+                                <label>Projects</label>
+                                @*@Html.ICRAParentProjectDropDownlist("ParentProjectId", Model.ParentProjectId, "Select Project", new { @class = "form-control", maxlength = 150, disabled = "" })*@
+                                <icra-parent-project-drop-downlist  name="ParentProjectId" selectedvalue="@Model.ParentProjectId" firsttext="Select Project" class="form-control"  maxlength="150" ></icra-parent-project-drop-downlist>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group col-md-4 col-sm-6" id="ParentProjectDiv">
+                                <label>Master Project:</label>
+                                @*@Html.ICRAParentProjectDropDownlist("ParentProjectId", Model.ParentProjectId, "Select Project", new { @class = "form-control", maxlength = 150 })*@
+                                <icra-parent-project-drop-downlist  name="ParentProjectId" selectedvalue="@Model.ParentProjectId" firsttext="Select Project" class="form-control"  maxlength="150"></icra-parent-project-drop-downlist>
+                            </div>
+                        }
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>@((Model.ParentProjectId.HasValue) ? "Sub Project Name" : "Master Project  Name") <em class="required-field"> *</em></label>
+                            @Html.TextBoxFor(x => x.ProjectName, new { @class = "form-control Spacevalid", placeholder = "Enter Project Name", required = "required" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>@((Model.ParentProjectId.HasValue) ? "Sub Project #" : "Master Project #") <em class="required-field"> *</em></label>
+                            @Html.TextBoxFor(x => x.ProjectNumber, new { @class = "form-control Spacevalid", placeholder = "Enter Project #", required = "required" })
+                        </div>
+
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Project Type: <em class="required-field"> *</em></label><span class="tooltipcontent glyphicon glyphicon-info-sign">
+                                <span class="tooltiptextcontent" id="spanprojecttype">
+                                    @*@Html.Action("ProjectTypeDDL","Common")*@
+                                    @await Component.InvokeAsync("CommonProjectTypeDDL")
+
+                                </span>
+                            </span>
+                            @*@Html.ProjectTypeDropDownlist("ProjectType", Model.ProjectType, "Select Project Type",
+                                new { @class = "form-control", required = "required" })*@
+                            <projecttypedropdownlist name="ProjectType" selectedvalue="@Model.ProjectType" firsttext="Select Project Type" class="form-control" required="required"></projecttypedropdownlist>
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Project Start Date:</label><em class="required-field"> *</em>
+                            @Html.TextBoxFor(m => Model.ProjectStartDate, $"{Model.ProjectStartDate:MMM d, yyyy}", new { @class = "form-control startDate", @autocomplete = "off", required = "required" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Project End Date:</label>
+                            @Html.TextBoxFor(m => Model.ProjectEndDate, $"{Model.ProjectEndDate:MMM d, yyyy}", new { @class = "form-control endDate", @onchange = "CheckDate()", @autocomplete = "off" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Location</label><em class="required-field"> *</em>
+                            @Html.TextBoxFor(x => x.ProjectLocation, new { @class = "form-control Spacevalid", placeholder = "Enter Location", required = "required" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Contractor</label>
+                            @Html.TextBoxFor(x => x.ProjectContractor, new { @class = "form-control Spacevalid", placeholder = "Enter Contractor" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6 comman_checkbox1">
+                            <label>Status</label>
+                            <select id="statusDDL" class="form-control">
+                                <option value="1">Open</option>
+                                <option value="0">Closed</option>
+                            </select>
+                            @Html.CheckBoxFor(x => x.Status)<span style="display:none"></span>
+                        </div>
+
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Description</label><em class="required-field"> *</em>
+                            @Html.TextAreaFor(x => x.Description, new { @class = "form-control Spacevalid", placeholder = "Enter Description", required = "required" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Manager</label><em class="required-field"> *</em>
+                            @Html.TextAreaFor(x => x.ProjectManager, new { @class = "form-control Spacevalid", placeholder = "Enter Manager", required = "required" })
+                        </div>
+                        <div class="form-group col-md-4 col-sm-6">
+                            <label>Architect</label><em class="required-field"> *</em><span class="tooltipcontent glyphicon glyphicon-info-sign">
+                                                                                          <span class="tooltiptextcontent" id="spanprojecttype">
+                                                                                              If none, type none
+
+                                                                                          </span>
+</span>
+                            @Html.TextAreaFor(x => x.Architect, new { @class = "form-control Spacevalid", placeholder = "Enter Architect", required = "required" })
+                        </div>
+                        <div class="col-md-12 col-sm-12 divattachment">
+                            <label class="attachedfile-lable">Add Attachments:</label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnuploadfile" data-toggle="modal" data-target="#modal-container" /><sup id="attchFileCount" style="display:none;"></sup>
+                            <div id="file-upload-list">
+                                <div id="file-lists">
+                                    <ul class="col-lg-12 attachfileitems">
+                                        @foreach (var item in Model.Attachments)
+                                        {
+                                            <li class="list-group-item files" id="lidv_@item.TFileId">
+                                                @if (!string.IsNullOrEmpty(item.FileName))
+                                                {
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc =item.FilePath, title = "Preview" })" class="modal-link allowclick">
+                                                        @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FileName" />*@
+                                                        @item.FileName
+                                                    </a>
+                                                    <a data-id="@item.TFileId" class="deletefile allowclick">
+                                                        <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                    </a>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12">
+                            <label class="attachedfile-lable">Attach Drawings:</label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnattachingdrawings" data-toggle="modal" data-target="#modal-container1" />
+
+                            <div id="drawing-upload-list">
+                                <div id="drawing-lists">
+                                    <ul class="col-lg-12 attachdrawingfiles ">
+                                        @foreach (var item in Model.DrawingAttachments)
+                                        {
+                                            <li class="list-group-item files" id="lidrawingdv_@item.FloorPlanId">
+                                                @if (!string.IsNullOrEmpty(item.FullFileName))
+                                                {
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = item.FloorName + " , " + item.BuildingName })" title="@item.FileName" class="modal-link allowclick">
+                                                        @*<a href="@Url.Action("DrawingPreview", "Common", new { floorPlanId = item.FloorPlanId, mode = "drawing" ,permitId = 0})" title="@item.FileName" class="modal-link allowclick">*@
+                                                        @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FullFileName" />*@
+                                                        @item.FullFileName
+                                                    </a>
+                                                    <a data-id="@item.FloorPlanId" class="deletedrawing allowclick">
+                                                        <img id="deletedrawing" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                    </a>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-sm-12 text-right button_Div">
+                            <input type="submit" value='Save' class="comm-button" />
+                            @Html.ActionLink("Cancel", "Index", "IcraProject", null, new { @class = "comm-Cancelbutton" })
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.ckeditor.com/4.8.0/standard-all/ckeditor.js"></script>
+<input type="hidden" />
+<script>
+
+    var startdate;
+                            function CheckDate() {
+                                debugger;
+                                var _date = startdate;
+                                var endate = $('#ProjectEndDate').val()
+                                var newStartdate = $('#ProjectStartDate').val();
+                                if (endate.length > 0 && _date != "") {
+                                    if (newStartdate == "") {
+                $('#ProjectStartDate').val(_date);
+                                    } else {
+                $('#ProjectStartDate').val(newStartdate);
+                                    }
+                                }
+                            }
+
+    $(document).ready(function () {
+                                debugger;
+                                var Start_Date = '@Model.ProjectStartDate';
+                                if (Start_Date != '') {
+                                    startdate = $('#ProjectStartDate').val();
+                                }
+
+        $('.datepicker, .startDate, .endDate, .futuredatepicker').keypress(function (e) { e.preventDefault(); });
+
+
+                                setParentProject();
+                                if ('@Model.ProjectId' == '0') {
+            $('#statusDDL').val("1");
+            $('#Status').prop('checked', true);
+                                }
+                                else {
+                                    var SelectedStatus = $('#Status').is(':checked') ? 1 : 0;
+            $('#statusDDL').val(SelectedStatus);
+                                }
+
+                            })
+
+    $('form').submit(function (e) {
+        $(':disabled').each(function (e) {
+            $(this).removeAttr('disabled');
+                                })
+    });
+
+    $(document).on('change', '#statusDDL', function () {
+                                var StatusVal = $(this).val() == "1" ? true:false;
+        $('#Status').prop('checked', StatusVal)
+    })
+
+    $(".Spacevalid").on("keypress", function (e) {
+                                debugger
+        if (e.which === 32 && !this.value.length)
+                                    e.preventDefault();
+                            });
+
+                            var allProject =  @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(icraProjectList));
+
+
+                            var setParentProject = () => {
+                            try {
+            $('#ParentProjectDiv').hide();
+                                debugger;
+            @*var ParentProjectId = '@Model.ParentProjectId';
+            var parentProjectId = getQueryStringValue(ParentProjectId)*@
+            var parentProjectId = getQueryStringValue('ParentProjectId')
+
+            var parentProject = allProject.find(obj => {
+                return obj.ProjectId == parentProjectId
+            })
+
+            if (parentProject) {
+                $('#ParentProjectDiv').show();
+                var selectedProject = '<option value="' + parentProject.ProjectId + '">' + parentProject.ProjectName + ' (' + parentProject.ProjectNumber + ')' + '</option>'
+
+                $('#ParentProjectId').html(selectedProject);
+
+                if (parentProjectId != 0 && parentProjectId != '') {
+                    $('#ParentProjectId').val(parentProjectId).attr('disabled', true)
+                }
+            }
+        }
+        catch (err) {
+
+        }
+    }
+
+    function getQueryStringValue(key) {
+        return decodeURIComponent(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURIComponent(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));
+    }
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+       $(document).on('click', '#btnattachingdrawings', function () {
+        LoadDrawingPathway();
+        $('#modal-container1').modal('show');
+    });
+    var TDrawingFields = $("#attachdrawingFiles");
+    $(document).on('click', 'a.deletedrawing', function (e) {
+       // TDrawingFields = $("#attachdrawingFiles");
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TDrawingFields.val() != undefined && TDrawingFields.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TDrawingFields.val(), TFileId.toLowerCase(), ",");
+
+                    TDrawingFields.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.ICRAProject_DeleteProjectDrawing + "?ProjectId=" + '@Model.ProjectId' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidrawingdv_" + TFileId).remove();
+                            deletedrawings(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    deletedrawings(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                }
+            });
+    });
+
+       // delete upload documents from permits updated by avinash on 27-04-2020
+    var TFileIds = $("#TFileIds");
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TFileIds.val() != undefined && TFileIds.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TFileIds.val(), TFileId, ",");
+                    TFileIds.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.ICRAProject_DeleteProjectFiles + "?ProjectId=" + '@Model.ProjectId' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidv_" + TFileId).remove();
+                            deleteattachfile(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    debugger;
+                    deleteattachfile(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                    //console.log(ret);
+                }
+            });
+    });
+</script>
+<style>
+    .tooltipcontent {
+        position: relative;
+        display: inline-block;
+       /* border-bottom: 1px dotted black;*/
+    }
+
+        .tooltipcontent .tooltiptextcontent {
+            visibility: hidden;
+            width: 310px;
+            background-color: whitesmoke;
+            color: #000;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            max-height: 250px;
+            overflow: auto;
+            font-size: 13px;
+            border: 1px solid #bfbfbf;
+            font-family: 'Roboto', sans-serif;
+            line-height: 20px;
+            left: 18px;
+            top: -10px;
+        }
+
+    .tooltiptextcontent ul li {
+        margin-bottom: 6px;
+    }
+
+    .tooltipcontent:hover .tooltiptextcontent {
+        visibility: visible;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>

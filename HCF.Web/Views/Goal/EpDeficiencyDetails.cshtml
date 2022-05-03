@@ -1,0 +1,154 @@
+﻿@model List<HCF.BDO.EPDetails>
+<div class="slider_assets">
+
+    <table id="@($"tbl_{Model.FirstOrDefault().EPDetailId}")" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th style="display:none">SubStatus</th>
+                <th>
+                </th>
+                <th style="display:none"></th>
+                <th>
+                    Type
+                </th>
+                <th title=" @Localizer["Asset"]">
+                    @Localizer["Asset"]
+                </th>
+                <th title=" @Localizer["Location"]"> @Localizer["Location"]</th>
+                <th> @Localizer["NearBy"]</th>
+                <th> @Localizer["AssetNo"]</th>
+                <th>Inspection Date</th>
+                <th>@Localizer["WorkOrder"]  </th>
+                <th>Detail</th>
+                <th>History</th>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ep in Model)
+            {
+                foreach (var inspection in ep.Inspections.Where(x => x.IsCurrent == true).ToList())
+                {
+                    foreach (var item in inspection.TInspectionActivity.Where(x => x.ActivityType == 2).OrderByDescending(x => x.SubStatus).ThenByDescending(x => x.ActivityInspectionDate.Value).ToList())
+                    {
+                        <tr>
+                            <td style="display:none">
+                                @item.SubStatus
+                            </td>
+                            <td class="details-control3" rel='@item.ActivityId'></td>
+                            <th style="display:none">@ep.EPDetailId</th>
+                            <td>
+                                @if (item.SubStatus != "NA")
+                                {
+                                    <img src="@Url.Content("~/dist/Images/Icons/" + item.SubStatus + ".png")" class="deficiencyIcons" title="@item.SubStatus" />
+                                }
+                            </td>
+                            <td>
+                                @item.TFloorAssets.Name
+
+                            </td>
+                            <td>
+                                @commonModelFactory.GetFloorAssetLocation(item.TFloorAssets)
+                            </td>
+                            <td>@item.TFloorAssets.NearBy </td>
+                            <td>@item.TFloorAssets.AssetNo </td>
+                            <td>@item.ActivityInspectionDate.Value.ToFormatDate()  </td>
+                            <td>
+
+                                @{
+
+                                    foreach (HCF.BDO.TInspectionDetail detils in item.TInspectionDetail)
+                                    {
+                                        int count = detils.InspectionSteps.Where(x => x.Status == 0 && !x.IssueId.HasValue).Count();
+                                        if (count > 0)
+                                        {
+                                            <a href="@Url.Action("WorkOrderFailSteps", "WorkOrder", new { activityId = item.ActivityId })">
+                                                <span>Create Work Order</span>
+                                            </a>
+                                            break;
+                                        }
+
+                                    }
+
+                                }
+                            </td>
+                            <td>
+                                <img class="hover_sign" onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = item.ActivityId })'"
+                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                            </td>
+                            <td>
+                                <img class="hover_sign" onclick="location.href ='@Url.Action("history", "Assets", new { floorAssetId = item.FloorAssetId, epId = ep.EPDetailId })'"
+                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" />
+                            </td>
+                            <td>
+                                @if (item.SubStatus == "NA")
+                                {
+                                    <img class="hover_sign" onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = item.ActivityId })'"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+
+        </tbody>
+    </table>
+
+    <div style="display:none">
+        <input type="submit" name="button" class="button1 dfilter btn_Deficient" data-type="DE" id="btn_deficient" value="Deficient" />
+        <input type="submit" name="button" class="button1  dfilter riskAssessment" data-type="RA" id="btn_riskAssessment" value="Risk Assessment " />
+        <input type="submit" name="button" class="button1 dfilter showall" data-type="" id="btn_showall" value="Show All " />
+
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var assettable = $('#@($"tbl_{Model.FirstOrDefault().EPDetailId}")').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#myTable2 tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+
+        });
+        $('.dfilter').on('click', function () {
+            $(".filter").removeClass("active");
+            var score = $(this).data("type");
+            $(this).addClass("active");
+            if (score > 0) {
+                assettable.columns(0).search(score).draw();
+            } else {
+                assettable.columns(0).search("").draw();
+            }
+        });
+
+        $('#@($"tbl_{Model.FirstOrDefault().EPDetailId}") tbody').on('click', 'td.details-control3', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var activityId = $(this).attr("rel");
+                var Url = '@Url.Action("FailSteps", "Home")';
+                $.get(Url + "?activityId=" + activityId, function (employees) {
+                    row.child(employees, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    });
+
+</script>
+

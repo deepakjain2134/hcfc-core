@@ -1,0 +1,341 @@
+﻿@model HCF.BDO.TInspectionActivity
+@{
+    var fileid = 0;
+    if (Model.ReportFile != null)
+    {
+        fileid = Model.ReportFile.TFileId;
+    }
+
+}
+
+
+@if (Model.ActivityType == 2)
+{
+    <div class="row assetInfo">
+        <div class="col-md-4"><label> @Localizer["Asset"]:</label> @Model.TFloorAssets.Assets.Name.CastToNA()</div>
+        <div class="col-md-4"><label> @Localizer["AssetNo"] :</label> @Model.TFloorAssets.AssetNo</div>
+        <div class="col-md-4"><label> @Localizer["NearBy"] :</label> @Model.TFloorAssets.NearBy.CastToNA()</div>
+        @if (Model.Frequency != null)
+        {
+            <div class="col-md-4"><strong> @Localizer["Frequency"] :</strong> @Model.Frequency.DisplayName</div>
+        }
+    </div>
+}
+else if (Model.ActivityType == 3 && Model.InspectionEPDocs != null)
+{
+    <div class="assetInfo">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>
+                            Document Type:
+                        </strong>
+                        @if (Model.InspectionEPDocs != null && Model.InspectionEPDocs.DocumentType != null)
+                        {
+                            <span>
+                                @Model.InspectionEPDocs.DocumentType.Name
+                            </span>
+                        }
+                        else
+                        {
+                            <span>NA</span>
+
+                        }
+                    </td>
+                    <td width="30%">
+                        <strong>Uploaded As:</strong>
+                        @if (Model.InspectionEPDocs.UploadDocTypeId.HasValue)
+                        {
+                            <span>
+                                @((HCF.BDO.Enums.UploadDocTypes)Model.InspectionEPDocs.UploadDocTypeId)
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <strong>File Name: </strong>@Model.InspectionEPDocs.DocumentName
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="30%">
+                        <strong>Uploaded Document:</strong>
+                        @if (Model.InspectionEPDocs.IsDeleted)
+                        {
+                            <a class="disable">
+                                <img src="@commonModelFactory.UploadDocTypeImagePath(Model.InspectionEPDocs.UploadDocTypeId,Model.InspectionEPDocs.DocTypeId)" alt="" />
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@commonModelFactory.FilePath(Model.InspectionEPDocs.Path)"
+                               target="_blank">
+                                <img src="@commonModelFactory.UploadDocTypeImagePath(Model.InspectionEPDocs.UploadDocTypeId,Model.InspectionEPDocs.DocTypeId)" alt="" />
+                            </a>
+                        }
+
+
+                    </td>
+                    <td width="30%">
+                        <strong>Binder Name:</strong>
+                        @($"{(Model.InspectionEPDocs.Binder != null ? Model.InspectionEPDocs.Binder.BinderName : "NA")}")
+                    </td>
+                    <td width="40%">
+                        @if (Model.InspectionEPDocs.isShowNextDate)
+                        {
+                            <strong>Review Date:</strong>
+                            @Model.InspectionEPDocs.DtEffectiveDate.CastLocaleDate()
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+<div class="stepsReadOnly">
+
+    @if (Model.InspectionDocs != null && Model.InspectionDocs.Count > 0 && Model.ActivityType == 2)
+    {
+        <div class="reportInfo">
+            <strong>Report is uploaded for this assets</strong>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    @foreach (var item in Model.InspectionDocs)
+                    {
+                        <tr>
+                            <td width="45%"><strong>Name :</strong> @item.DocumentName</td>
+                            <td width="45%"><strong>Uploaded Date :</strong> @item.DtEffectiveDate.ToFormatDate()</td>
+                            <td>
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.Path, title = "Preview" })" class="modal-link">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentBlueIcon)" alt="" style="float:right; margin-right:5px;" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    @foreach (var detail in Model.TInspectionDetail)
+    {
+        <table class="table" id="act_my_Table">
+            <tbody>
+                <tr class="editor-field" >
+                    <td colspan="3" style="width: 100%;"><strong>@detail.MainGoal.Goal</strong></td>
+                </tr>
+                @foreach (var steps in detail.InspectionSteps.ToList())
+                {
+                    <tr class="@(steps.Steps.IsRA ? "editor-field rastep" : "editor-field")" id="Tinssteps_@steps.TInsStepsId">
+                        @Html.HiddenFor(modelItem => steps.Comments)
+
+                        @if (steps.Steps.StepType == 1)
+                        {
+                            <td width="180px">
+
+                                @if (steps.Status == 1)
+                                {
+                                    <span class="complaint"> @Localizer["CompliantText"] </span>
+                                }
+                                else if (steps.Status == 0)
+                                {
+                                    <span class="noncomplaint"> @Localizer["NonCompliantText"] </span>
+                                }
+                                else
+                                {
+                                    <span class="complaint">Pending</span>
+                                }
+                            </td>
+                        }
+                        else
+                        {
+                            <td width="180px">
+                                <div class="dvinputValue">
+                                    @Html.TextBoxFor(modelItem => steps.InputValue, new { @class = "form-control disabled" })
+                                </div>
+                            </td>
+                        }
+
+                        <td width="80%">
+                            @steps.Steps.Step
+
+                        </td>
+                        @if (Model.ActivityType != 3)
+                        {
+                            <td width="200px">
+
+                                @*@await Html.PartialAsync("_inspAttachment", steps)*@
+                                @if (!string.IsNullOrEmpty(steps.Comments))
+                                {
+                                    <a href="@Url.Action("CommentPopUp", "Common", new {Title = "Comment", description = steps.Comments})" class="modal-link">
+                                        <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" tempname='@steps.Comments' class="commentIcon text" style="float: right" />
+                                    </a>
+
+                                }
+                                else
+                                {
+                                    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />
+                                }
+                                @if (!string.IsNullOrEmpty(steps.FilePath))
+                                {
+                                    <a href="@Url.Action("ImagePreview", "Common", new {imgSrc = steps.FilePath, title = "Image Preview"})" class="modal-link">
+                                        <img class="@(steps.FilePath != string.Empty ? "img_prev_upload" : "img_prev")" id="imagePreview_@steps.StepsId"
+                                             src="@commonModelFactory.FilePath(steps.FilePath)" style="float: right; margin-right: 5px;">
+                                    </a>
+                                }
+                                else
+                                {
+                                    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float: right; margin-right: 5px;" class="commentIcon disable" />
+                                }
+                            </td>
+                        }
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+
+    <div id="commentSection">
+
+
+        @await Html.PartialAsync("_InspectionFiles", Model)
+
+    </div>
+
+
+
+
+    <br />
+    <div class="text-right button_Div">
+        @*<button type="submit" class="comm-button" data-dismiss="modal" data-toggle="modal" data-target="#exampleModal" id="Generate-insepction-report">Generate Inspection Report</button>*@
+        <button type="button" class="comm-button" id="Generate-insepction-report" data-toggle="modal" data-target="#confirmationModal">Generate Inspection Report</button>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="max-width: 50%; margin: 0px auto;">
+            <div class="modal-downloadpdf-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <div style="text-align:center;font-size:110px;color:#CBC9C8;">&#x1F6C8;</div>
+                <div style="text-align:center;font-size:25px;margin-bottom: 15px;">What would you like to do?</div>
+
+                <form asp-controller="Pdf" asp-action="CreateTinspectionActivityReports"
+                      data-ajax-success="OnSuccess"
+                      data-ajax="true" data-ajax-method="POST">
+                    <div style="justify-content:center;">
+
+                        @Html.AntiForgeryToken()
+                        @if (Model.TInspectionDetail.Count > 0)
+                        {
+
+                            <input type="hidden" name="activityId" value="@Model.ActivityId" />
+                            if (Model.TFloorAssets != null)
+                            {
+                                <input type="hidden" name="isrouteInsp" value="@Model.TFloorAssets.Assets.IsRouteInsp.ToString()" />
+                            }
+                            <div class="button_Div form-group" style="text-align:center;">
+                                <button type="submit" class="btn"
+                                        style="background-color:#4E37D1 ;color:#fff;border-radius: 10px;width: 55%;"
+                                        id="Generate-insepction-report" value="1" name="submit">
+                                    Download PDF Report
+                                </button>
+                            </div>
+                        }
+
+                    </div>
+                    <div style="justify-content:center;">
+
+                        <input type="hidden" name="activityId" value="@Model.ActivityId" />
+
+
+                        <div class="button_Div form-group" style="text-align:center;">
+                            <button type="submit" class="btn"
+                                    style="background-color:#4E37D1 ;color:#fff;border-radius: 10px;width: 55%;"
+                                    id="send-to-tcj_binder" value="2" name="submit">
+                                Send to TJC Survey Binder
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="form-group" style="justify-content:center;">
+                        <input type="hidden" name="activityId" value="@Model.ActivityId" />
+
+                        <div class="button_Div" style="text-align:center;">
+                            <button type="submit" class="btn"
+                                    style="background-color:#4E37D1 ;color:#fff;border-radius: 10px;width: 55%;"
+                                    id="downloadAndSend-insepction-report" value="3" name="submit">
+                                Download & Send
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stephistory" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $('#act_my_Table tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var tinsstepsId = $(tr).attr('id').split('_')[1];
+            var url = '@Url.Action("StepActivity", "Assets")';
+            $.get(url + '?TinsStepId=' + tinsstepsId, function (data) {
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+                $('#stephistory').modal('show');
+            });
+        });
+
+
+    });
+
+    function OnSuccess(data) {
+
+        if (data.buttonType == 1) {
+            download(data.Result, "report.pdf");
+        } else if (data.buttonType == 2) {
+            Folders(data.tfiles.TFileId);
+        } else if (data.buttonType == 3) {
+            download(data.Result, "report.pdf");
+            Folders(data.tfiles.TFileId);
+        }
+    }
+
+    function download(dataurl, filename) {
+        var a = document.createElement("a");
+        a.href = dataurl; a.target = '_blank';
+        a.download = "report.pdf";
+        a.setAttribute("download", filename);
+        a.click();
+    }
+
+
+    function Folders(fileid) {
+        var modelContainer = $("#modal-container");
+         var url = '@Url.Action("FolderLists", "Documents")';
+        $.get(url + '?fileId=' + fileid, function (data) {
+            modelContainer.html('');
+            modelContainer.html(data);
+            modelContainer.fadeIn('fast');
+            modelContainer.modal('show');
+            $("#confirmationModal").modal('hide');
+        });
+    }
+
+</script>

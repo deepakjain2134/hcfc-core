@@ -1,0 +1,55 @@
+﻿@model HCF.BDO.ModuleTraining.TrainingSessionMaster
+@{
+    ViewBag.Title = "Add  Session Master";
+    string pageTitle = (Model != null && Model.ModuleSessionId > 0) ? "Edit  Session Master" : "Add Session Master";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @pageTitle
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row">
+                    <form asp-action="AddModuleTraining" asp-controller="ModuleTraining" asp-area="ModuleTraining" method="post" id="saveForm">
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+
+                        <div class="col-md-12 form-group">
+                            @Html.HiddenFor(x => x.ModuleSessionId)
+                            @Html.LabelFor(model => model.Name)<em class="required-field">*</em>
+                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                        <div class="col-md-12 form-group">
+                            @Html.LabelFor(model => model.ShortDescription)<em class="required-field">*</em>
+                            @Html.TextAreaFor(model => model.ShortDescription, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.ShortDescription)
+                        </div>
+
+                        <div class="col-md-12 form-group">
+                            @Html.LabelFor(model => model.Description)<em class="required-field">*</em>
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.Description)
+                        </div>
+                        <div class="col-md-12 form-group">
+                            @Html.CheckBoxFor(model => model.IsActive, new { @checked = "checked" })
+                            @Html.ValidationMessageFor(model => model.IsActive)
+                            @Html.LabelFor(model => model.IsActive)
+                        </div>
+
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="submit" value='Save' class="comm-button" />
+                            <a asp-controller="ModuleTraining" asp-action="ModuleTrainingLists" asp-area="ModuleTraining" onClick="history.go(-1); return false;" class="comm-Cancelbutton">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

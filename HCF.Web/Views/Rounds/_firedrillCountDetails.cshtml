@@ -1,0 +1,49 @@
+﻿@model HCF.BDO.QuarterMaster
+<div>
+    <div class="col-xs-12 col-md-6 editModePlannedDrills">
+        <div class="table-responsive">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="table table-bordered table-striped no-footer">
+                <tbody>
+                    <tr>
+                        <td><strong>Planned Drills</strong></td>
+                        <td align="center">Total Drills: @Html.DisplayFor(x => x.TotalPlanned) @Html.HiddenFor(x => x.QuarterId)</td>
+                        @*<td align="center">Total Unannounced: @Html.DisplayFor(x => x.TotalUnAnnounced)</td>*@
+                        <td align="center">
+                            @if (Model.TotalUnAnnounced > 0 && Model.TotalPlanned > 0)
+                            {
+                                var data = Model.TotalUnAnnounced * 100 / Model.TotalPlanned;
+                                <span class="perct">@($"{data}")</span>
+                            }
+                            else
+                            {
+                                <span class="perct"></span>}(%)<img src="@Url.Content("~/dist/Images/Icons/unannounced_icon.png")" title="Un Announced" alt="" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-xs-12 col-md-6 planned_drill">
+        <div class="table-responsive">
+            <table width="100%" cellspacing="0" cellpadding="0" class="table table-bordered table-striped no-footer">
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong> Actual Drills</strong>
+                        </td>
+                        <td align="center">Total Drills: @Html.DisplayFor(x => x.TotalDone)</td>
+                        @*<td align="center">Total Unannounced: @Html.DisplayFor(x => x.TotalUnAnnouncedDone)</td>*@
+                        <td align="center">
+
+                            @if (Model.TotalUnAnnouncedDone > 0 && Model.TotalDone > 0)
+                            {
+                                var donePer = Model.TotalUnAnnouncedDone * 100 / Model.TotalDone;
+                                <span>@($"{donePer}")</span>
+                            } (%)<img src="@Url.Content("~/dist/Images/Icons/unannounced_icon.png")" title="Un Announced" alt="" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

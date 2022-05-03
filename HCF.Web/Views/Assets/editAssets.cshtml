@@ -1,0 +1,91 @@
+﻿@model HCF.BDO.Assets
+
+@{
+    ViewBag.Title =Localizer["UpdateAsset"];
+    var Userid = HCF.Web.Base.UserSession.CurrentUser.UserId;
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @((Model.AssetId > 0) ? Localizer["UpdateAsset"]  : "Add Asset")
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.AssetId)
+                        <input type="hidden" value="@Userid" id="CreatedBy" />
+                       
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.AssetType.Name)<em class="required-field"> *</em>
+                                        @Html.DropDownListFor(model => model.AssetTypeId, new SelectList(ViewBag.AssetsTypes, "TypeId", "Name"),
+         "Select Type",
+       new { @class = "form-control" })
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.AssetCode)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.AssetCode, new { @class = "form-control", @required = "required" })
+                                        @Html.ValidationMessageFor(model => model.AssetCode)
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            @Html.HiddenFor(model => model.IconPath)
+                                            @Html.HiddenFor(model => model.FileContent)
+                                            @Html.HiddenFor(model => model.FileName)
+                                            @{
+                                                string imgPath = (!string.IsNullOrEmpty(Model.IconPath)) ? commonModelFactory.CommonFilePath(Model.IconPath) : Url.Content(HCF.Web.Models.ImagePathModel.AddIcon);
+                                            }
+                                            <div class="floor-galleryBox">
+                                                <div class="col-md-1">
+                                                    <img id="imagePreview_@Model.AssetCode" name="imagePreview" class="img" height="50" width="50"
+                                                         style="border:#ccc solid 1px; margin-top:8px;"
+                                                         src="@imgPath" alt="Upload" />
+                                                </div>
+                                                <div class="col-md-12"></div><div class="col-md-1"></div>
+                                                <div class="col-md-1">
+                                                    <span>
+                                                        <input type="file" name="file" accept="image/*"
+                                                               filename="FileName"
+                                                               tempname="FileContent"
+                                                               filepath=""
+                                                               class=""
+                                                               onchange="InsUploadfile(this,'@Model.AssetCode','C')" />
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Name)
+                                    </div>
+                                    <div class="form-group">
+
+                                        @Html.CheckBoxFor(model => model.IsActive, new { @checked = "checked" })<span></span>
+                                        <label>Status</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="common-btnBox">
+                                <input type="submit" value='@Localizer["Save"]' class="btn comm-button" />
+                                @Html.ActionLink("Cancel", "Assets", "", new { @class = "btn comm-Cancelbutton" })
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+

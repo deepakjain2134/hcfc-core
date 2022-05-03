@@ -1,0 +1,127 @@
+﻿@model List<HCF.BDO.TInspectionActivity>
+@using System.Linq
+@using HCF.BDO
+@using HCF.Utility
+
+
+@{
+
+    var groupData = Model.GroupBy(x => x.EPDetailId).ToList();
+
+    var count = groupData.Count();
+
+    var vhighIsolated = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.VeryHigh && Enumerable.ToList<TInspectionActivity>(x).Count() == 1);
+    var vhighPattern = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.VeryHigh && Enumerable.ToList<TInspectionActivity>(x).Count() == 2);
+    var vhighWidespread = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.VeryHigh && Enumerable.ToList<TInspectionActivity>(x).Count() > 2);
+
+
+    var highIsolated = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.High && Enumerable.ToList<TInspectionActivity>(x).Count() == 1);
+    var highPattern = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.High && Enumerable.ToList<TInspectionActivity>(x).Count() == 2);
+    var highWidespread = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.High && Enumerable.ToList<TInspectionActivity>(x).Count() > 2);
+
+    var mediumIsolated = groupData.Count(x => x.FirstOrDefault<TInspectionActivity>().RiskScore == HCF.BDO.Enums.RiskScore.Medium && Enumerable.ToList<TInspectionActivity>(x).Count() == 1);
+    var mediumPattern = groupData.Count(x => x.FirstOrDefault<TInspectionActivity>().RiskScore == HCF.BDO.Enums.RiskScore.Medium && Enumerable.ToList<TInspectionActivity>(x).Count() == 2);
+    var mediumWidespread = groupData.Count(x => x.FirstOrDefault<TInspectionActivity>().RiskScore == HCF.BDO.Enums.RiskScore.Medium && Enumerable.ToList<TInspectionActivity>(x).Count() > 2);
+
+    var lowIsolated = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.Low && Enumerable.ToList<TInspectionActivity>(x).Count() == 1);
+    var lowPattern = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.Low && x.ToList<TInspectionActivity>().Count() == 2);
+    var lowWidespread = groupData.Count(x => Enumerable.FirstOrDefault<TInspectionActivity>(x).RiskScore == HCF.BDO.Enums.RiskScore.Low && Enumerable.ToList<TInspectionActivity>(x).Count() > 2);
+
+}
+
+<tbody>
+    <tr>
+        <td colspan="2" class="text-center"><h4># of Non-compliant EPs</h4></td>
+    </tr>
+    <tr>
+        <td class="firstRisktd"><p>Likelihood to harm a Patient/Staff/Visitor</p></td>
+        <td>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            Very High<span class="riskLView">
+                                (Immediate harm to resident health or safety)
+                            </span>
+                        </td>
+                        <td height="86" align="center" class="vhighIsolated" style="background-color:rgba(255,0,0)">
+                            <a class="matrixCount">
+                                @((vhighIsolated > 0) ? vhighIsolated.ToString() : "")
+                            </a>
+                        </td>
+                        <td align="center" class="vhighPattern" style="background-color:rgba(223,0,0)"> <a class="matrixCount"> @((vhighPattern > 0) ? vhighPattern.ToString() : "")</a></td>
+                        <td align="center" class="vhighWidespread" style="background-color:rgba(185,0,0)"> <a class="matrixCount"> @((vhighWidespread > 0) ? vhighWidespread.ToString() : "")</a></td>
+                    </tr>
+                    <tr>
+                        <td align="center">High<span class="riskLView">(Actual harm that is not immediate jeopardy)</span></td>
+                        <td height="86" align="center" class="highIsolated">
+                            <a class="matrixCount">
+                                @((highIsolated > 0) ? highIsolated.ToString() : "")
+                            </a>
+                        </td>
+                        <td align="center" class="highPattern"><a class="matrixCount"> @((highPattern > 0) ? highPattern.ToString() : "")</a></td>
+                        <td align="center" class="highWidespread"><a class="matrixCount"> @((highWidespread > 0) ? highWidespread.ToString() : "")</a></td>
+                    </tr>
+                    <tr>
+                        <td align="center">Medium<span class="riskLView">(No actual harm with potential for more than minimal harm that is not immediate jeopardy)</span></td>
+                        <td height="86" align="center" class="mediumIsolated">
+                            <a class="matrixCount">
+                                @((mediumIsolated > 0) ? mediumIsolated.ToString() : "")
+                            </a>
+                        </td>
+                        <td align="center" class="mediumPattern"><a class="matrixCount"> @((mediumPattern > 0) ? mediumPattern.ToString() : "")</a></td>
+                        <td align="center" class="mediumWidespread"><a class="matrixCount"> @((mediumWidespread > 0) ? mediumWidespread.ToString() : "")</a></td>
+                    </tr>
+                    <tr>
+                        <td align="center">Low<span class="riskLView">(No actual harm with potential for minimal harm)</span></td>
+                        <td height="86" align="center" class="lowIsolated">
+                            <a class="matrixCount">
+                                @((lowIsolated > 0) ? lowIsolated.ToString() : "")
+                            </a>
+                        </td>
+                        <td align="center" class="lowPattern"><a class="matrixCount"> @((lowPattern > 0) ? lowPattern.ToString() : "")</a></td>
+                        <td align="center" class="lowWidespread"><a class="matrixCount"> @((lowWidespread > 0) ? lowWidespread.ToString() : "")</a></td>
+                    </tr>
+                    <tr class="matrix-footer">
+                        <td align="center">&nbsp;</td>
+                        <td align="center">
+                            Limited<span class="riskView">
+                                (A unique occurrence that’s not
+                                representative of routine/regular
+                                practice)
+                            </span>
+                        </td>
+                        <td align="center">
+                            Pattern<span class="riskView">
+                                (Multiple occurrence with the
+                                potential to impact a few/some
+                                patients, visitors, staff or settings)
+                            </span>
+                        </td>
+                        <td align="center">
+                            Widespread<span class="riskView">
+                                (Multiple occurrence with the
+                                potential to impact a most/all
+                                patients, visitors, staff or settings)
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center">&nbsp;</td>
+                        <td colspan="3" align="center" style="font-size:17px;"><h4>Scope</h4></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</tbody>
+
+
+
+
+<style>
+    .matrixCount {
+        color: #FFF !important;
+        font-size: 30px;
+    }
+</style>

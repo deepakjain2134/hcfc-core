@@ -1,0 +1,261 @@
+﻿@model IEnumerable<HCF.BDO.Assets>
+@{
+    ViewBag.Title = Localizer["Asset"];
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Assets
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="sitesearch">
+
+                                    <assettypedownlist name="AssetType" firsttext="All Asset Category"
+                                                       selectedvalue="0" class="form-control"
+                                                       required="required">
+                                    </assettypedownlist>
+                                    @*@Html.AssetTypeDownList("AssetType", 0, "All Asset Category ",
+        new { @class = "form-control",
+            required = "required",
+            @onchange = "loadFilteredAssetTypes()" })*@
+                                </div>
+                            </div>
+                            <div class="col-md-9 text-right">
+                                <div class="add_button_comman">
+                                    <a href="@Url.Action("editAssets", "Assets",new { assetId=0})" class="pull-right">
+                                        <img src="/dist/Images/Icons/3d_add_button.png" title="Add Asset" alt="">
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                 
+                        <table id="assetsTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        @Localizer["Asset"]
+                                        
+                                    </th>
+                                    <th>
+                                        Asset Code
+                                    </th>
+                                    <th>
+                                        @Localizer["AssetType"]
+                                       
+                                    </th>
+                                    <th>
+                                        EPs
+                                    </th>
+                                    @*<th>
+                                            Assets Count
+                                        </th>*@
+                                <th>
+                                    @Localizer["Status"]                                  
+                                </th>
+                                <th>
+                                    @Localizer["Action"]
+                                   
+                                </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderBy(x => x.IsActive).OrderBy(x => x.Name))
+                                {
+                                    <tr>
+                                        <td>
+                                            <img src="@Url.Content(commonModelFactory.CommonFilePath(item.IconPath))"
+                                                 alt="Image" title="@item.IconPath"
+                                                 height="25" width="25"
+                                                 onerror="this.onerror=null;this.src='https://s3.amazonaws.com/crximages/images/assets/default.png';" />
+
+                                        </td>
+                                        <td>
+                                            <a href='@(Url.RouteUrl("floorAssets", new { AssetId = item.AssetId }))'>
+                                                @Html.DisplayFor(modelItem => item.Name)
+                                            </a>
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.AssetCode)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.AssetType.Name)
+                                        </td>
+
+                                        <td>
+                                            @foreach (var eps in item.StandardEps)
+                                            {
+                                                <span>@eps.StandardEP </span><br />
+                                            }
+                                        </td>
+                                        @*<td>
+                                                @Html.DisplayFor(modelItem => item.Count)
+                                            </td>*@
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink("Edit", "editAssets", new { AssetId = item.AssetId }) |
+                                            <span>
+                                                @Html.ActionLink("Add EPs", "setGoal", new { id = item.AssetId })
+                                            </span> |
+                                            <span>
+                                                @Html.ActionLink("Check Points", "addMaingoal", "Goal", new { assetId = item.AssetId }, new { })
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                      
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    var dataTables = $('#assetsTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [],
+            "pageLength": 20,
+            "bPaginate": $('#assetTypeTable tbody tr').length > 20,
+            "bInfo": false,
+            "searching": true,
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "Search",
+                "searchPlaceholder":"Filter Assets"
+        },
+        dom: "Blfrtip",
+        buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Asset Type Report',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Asset Type Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                     {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Asset Type Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0, 1,2,3,4],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+    });
+
+    $(document).ready(function () {
+        DisableDefaultDTfp();
+        $("div.dataTables_info#assetsTable_info").css("display", "none");
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+    });
+    function DisableDefaultDTfp() {
+        debugger;
+        const filterEl = $(".dataTables_filter input[type='search']")[1];
+        const paginationEl = $("div.dataTables_paginate.paging_simple_numbers")[1];
+        $(filterEl).css("display", "none");
+        $(paginationEl).css("display", "none");
+    }
+
+    HideTableSorting();
+    $('#assetsTable thead').click(function () {
+        HideTableSorting();
+    });
+
+    function HideTableSorting() {
+        debugger;
+        const el = $('#assetsTable th')[0];
+        $(el).removeClass('sorting');
+        $('#assetsTable th[aria-label*="Status"]').removeClass('sorting');
+        $('#assetsTable th[aria-label*="Action"]').removeClass('sorting');
+    }
+
+
+    function loadFilteredAssetTypes() {
+        debugger;
+        let assetTypeId = $('#AssetType').val();
+        let assetUrl = window.location.href.split('?');
+        let assetNewUrl = assetUrl[0] + "?id=" + assetTypeId
+        window.location.href = assetNewUrl;
+    }
+</script>

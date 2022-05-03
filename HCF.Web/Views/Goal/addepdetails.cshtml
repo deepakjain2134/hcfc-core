@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = Localizer["TitleManageEP"].Value;
+}
+@model HCF.BDO.Standard
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["TitleManageEP"]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                        <div class="row tablelist-topform">
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-group">
+                                    <standarddownlist name="StDescID" selectedvalue="@Model.StDescID" firstvalue="Select Standard"
+                                                      class="form-control selectyear"></standarddownlist>
+                                    @*@Html.StandardDownList("StDescID", Model.StDescID, "Select Standard", new { @class = "form-control selectyear" })*@
+                                </div>
+                            </div>
+
+                            <div class="col-md-8 col-sm-6">
+                                <div class="box-header vender_page">
+                                    <a href="@Url.Action("AddEP", "Goal", new { stdescId = Model.StDescID, epdetailId =0})" class="pull-right">
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add EP" alt="3d_add_button" />
+                                    </a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div id="partialPlaceHolder">
+                                @await Html.PartialAsync("bulkEP", Model)
+                            </div>
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+@section Scripts{
+    <script language="javascript">
+        $(document).ready(function () {
+            var url = '@Url.Action("epbyId", "Goal")';
+            $('#StDescID').change(function () {
+                var id = $(this).val();
+                $('#partialPlaceHolder').html('');
+                if (id != '' || id != null) {
+                    $.get(url + '?id=' + id, function (data) {
+                        $('#partialPlaceHolder').html(data);
+                        $('#partialPlaceHolder').fadeIn('fast');
+                    });
+                }
+            });
+
+            $(document).on("click", "#addNew", function (e) {
+                var result = $('#Ep_detailTable tr:last').hasClass("last");
+                if (result == false) {
+                    e.preventDefault();
+                    var $tableBody = $("#Ep_detailTable");
+                    var $trLast = $tableBody.find("tr:last");
+                    var $trNew = $trLast.clone().find("input").val("").end().find("hidden").val(0).end();
+
+                    $trLast.after($trNew);
+                    $trNew.find("select").val("");
+                    $trNew.find('input[type=checkbox]').prop('checked', false);
+                    $trNew.find(".addGoal").remove();
+                    $trNew.addClass("last");
+                }
+            });
+
+            $(document).on("click", "#Ep_detailTable tr .removetr", function (e) {
+                $(this).parent().parent().remove();
+                e.preventDefault();
+            });
+
+            $(document).on("click", ".AddMoreCp", function (e) {
+                e.preventDefault();
+                var $tableBody = $("#AddCPTbody");
+                var $trLast = $tableBody.find("tr:last");
+                var $trNew = $trLast.clone().find("input:text").val("").end();
+                $trLast.after($trNew);
+                $trLast.find("select").val("");
+            });
+
+            $(document).on("click", "#AddCPTbody tr .removeCp", function (e) {
+                $(this).parent().parent().remove();
+                e.preventDefault();
+            });
+
+        });
+
+    </script>
+}
+

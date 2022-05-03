@@ -1,0 +1,241 @@
+﻿@model IEnumerable<HCF.BDO.Inspection>
+
+@{
+    ViewBag.Title = "Generate Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Generate Reports
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("PreviewReports", "Reports", FormMethod.Post, new { id = "signReportform" }))
+                    {
+                        @Html.AntiForgeryToken()
+                       
+                        
+                            <input type="hidden" name="TInsActivityId" id="TInsActivityId" value="">
+                            <table id="reportTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="10%"></th>
+                                        <th>EPs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Where(x => x.TInspectionActivity.Any(y => y.ActivityType == 2)))
+                                    {
+                                        <tr>
+                                            <td class="details-control" rel='@item.InspectionId'></td>
+                                            <td class="align-left">
+                                                @Html.DisplayFor(modelItem => item.EPDetails.StandardEp)
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        
+                        if (Model.Any(x => x.TInspectionActivity.Any(y => y.ActivityType == 2)))
+                        {
+                            <div class="button_Div">
+                                <input value="Sign & Save" class="comm-button" id="btnsignSubmit" type="button" />
+                                @Html.ActionLink("Cancel" , "", "", new { @class = "comm-Cancelbutton" })
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<div class="modal fade" id="previewReports" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="loadpartial">
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="@Url.Content("~/dist/fonts/signature/stylesheet.css")">
+
+<script>
+
+    $(document).ready(function () {
+        change1();
+        $('#someTextBox').keyup(function () {
+            $('#target').html($(this).val());
+            change1();
+        });
+
+      
+    });
+
+    $('#target').css("font-family", "alluraregular");
+    $(".signature").css("font-family", "alluraregular");
+    $("#fontFaily").change(function () {
+        var style = $(this).val();
+        $('#target').css("font-family", style);
+        $(".signature").css("font-family", style);
+    });
+
+
+    function change1() {
+        $('#target').each(function () {
+            var txt = $(this).html();
+            var img = '<img src="http://i.imgur.com/DWwRx9M.png" alt="' + txt + '" />'
+            var html = txt.replace(/\*/g, img);
+            console.log(html);
+            $(this).html(html);
+        });
+    }
+
+    var table = $('#reportTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [],
+        "bPaginate": $('#reportTable tbody tr').length > 10,
+        "bInfo": false,
+        "searching": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+    });
+
+    $('#reportTable tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            // This row is already open - close it
+            $('div.slider', row.child()).slideUp(function () {
+                row.child.hide();
+                tr.removeClass('shown');
+            });
+        }
+        else {
+            // Open this row
+            //row.child(format(row.data()), 'no-padding').show();
+            // tr.addClass('shown');
+            var _inspectionId = $(this).attr("rel");
+            $.get("Reports/GetInspectionActivity?inspectionId=" + _inspectionId, function (activity) {
+                row.child(activity, 'no-padding').show();
+                tr.addClass('shown');
+            });
+            $('div.slider', row.child()).slideDown();
+        }
+    });
+
+
+    $("#btnsignSubmit").click(function () {
+        debugger
+        var count = 0;
+        var Ids;
+        var valueArray = [];
+        $('input:checkbox[id^="tInsActivityId"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    valueArray.push($(this).val());
+                    count++;
+                }
+            }
+        });
+        if (count > 0) {
+            $('#signAndSave').modal('show');
+            debugger;
+            $("#insactiId").val(valueArray);
+        } else {
+            AlertWarningMsg("Please select at least one asset!");
+           
+        }
+    });
+
+    $("#btnPreview").click(function () {
+        debugger;
+        var valueArray = [];
+        debugger;
+        var data = $("#insactiId").val();
+        var arr = data.split(",");
+        for (var i = 0; i < arr.length; i++) {
+            valueArray.push(arr[i]);
+        }
+        var postData = { _tinsActivityId: valueArray };
+        html2canvas($('#target'), {
+            onrendered: function (canvas) {
+                var myImage = canvas.toDataURL('image/png');
+                debugger;
+                var dataulr = canvas.toDataURL();
+                debugger;
+                var txtvalue = $("#someTextBox").val();
+                var fileName = txtvalue.replace(" ", "") + ".png";
+                debugger;
+                if (txtvalue != null && txtvalue != "") {
+                    $.ajax({
+                        type: "GET",
+                        url: '@Url.Action("PreviewReports", "Reports")',  //"/Assets/FilterFloorAssets",
+                        data: postData,
+                        success: function (data) {
+                            debugger;
+                            $('#signAndSave').modal('hide');
+                            $('#loadpartial').html(data);
+                            $('#previewReports').modal('show');
+                            $('#new_image').attr('src', myImage).fadeIn(200);
+                            var C_fileName = "SignImageName";
+                            var fileContent = "SignContent";
+                            var array = myImage.split(",");
+                            //$("#hdnfileName").val(fileName)
+                            $("input[name='" + C_fileName + "'][type=hidden]").val(fileName);
+                            $("input[name='" + fileContent + "'][type=hidden]").val(array[1]);
+                        },
+                        traditional: true
+                    });
+                }
+                else {
+                    AlertWarningMsg("Please make a signature first!");
+                   
+                }
+            }
+        });
+    })
+</script>
+
+<style>
+    .signature {
+        margin-bottom: 5px;
+    }
+
+        .signature input[type="text"] {
+            font-size: 50px;
+            border: 1px solid rgb(238, 238, 238);
+            padding: 26px 60px;
+            height: 114px;
+            text-align: center;
+            color: #000;
+            background: url("/dist/Images/Icons/Sign_icon.png") no-repeat 0 0;
+            /*background-size: 48px;*/
+        }
+
+    #target {
+        width: auto;
+        clear: both;
+        height: auto;
+        font-size: 50px;
+        padding: 0px;
+        line-height: 37px;
+        display: inline-block;
+        height: 114px;
+        padding: 0 10px;
+        margin-top: -114px;
+    }
+</style>
+

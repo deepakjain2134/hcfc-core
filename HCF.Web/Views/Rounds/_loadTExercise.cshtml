@@ -1,0 +1,72 @@
+﻿@model List<HCF.BDO.TExerciseFiles>
+
+<div class="modal-body">
+    <input type="hidden" id="IsFireDrillReportCreated" value="@ViewBag.IsFireDrillReportCreated" />
+    <table class="table table-bordered table-striped" id="texerciseTable">
+        <thead>
+            <tr>
+                <th style="display:none"></th>
+                <th>
+                    FileName
+                </th>
+                <th>
+                    Uploaded Date
+                </th>
+                @*<th>
+                        Action
+                    </th>*@
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Where(x => x.DocumentType == 0).Count(); i++)
+            {
+                <tr>
+                    <td style="display:none">@(Convert.ToInt32((HCF.BDO.Enums.DrillFileType)Model[i].DrillFileType))</td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model[i].FileName)
+                    </td>
+                    <td>
+                        @Model[i].CreatedDate.ToFormatDate()
+                    </td>
+                    
+                    <td>
+                        <a href="@commonModelFactory.FilePath(Model[i].FilePath)" title="Preview" target="_blank">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentBlueIcon)" class="" title="View" alt="" />
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    var texercisefilesTable = $('#texerciseTable').DataTable({
+        searching: true,
+        pageLength: 20,
+        lengthChange: false,
+        bPaginate: $('#texerciseTable tbody tr').length > 20,
+        bInfo: false,
+        aaSorting: [],
+        aoColumnDefs: [
+            { "bVisible": false, "aTargets": [0] }
+        ],
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+    });
+
+    function filterTexerciseFiles(value) {
+        // debugger;
+        texercisefilesTable.columns(0).search(value).draw();
+    }
+
+    filterTexerciseFiles(1);
+</script>
+<style>
+    .dataTables_filter {
+        display: none;
+    }
+</style>
+

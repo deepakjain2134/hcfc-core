@@ -1,0 +1,205 @@
+﻿@model List<HCF.BDO.Assets>
+
+@{
+    /**/
+
+    ViewBag.Title = "Vendor Configuratons";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader
+{
+        <section class="content-header">
+            <h1>
+                Vendor Configuration
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary " id="Setting_Content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-primary" style="background-color:#C6F7FA;padding: 4px;font-size: 13px;" role="alert">
+                                Configure the responsibilities of vendors by selecting (1) the assets radio button to assign a vendor to an asset type.(2)
+                                The EP Groups radio button to assign a vendor to an EP Group, or (3) The vendor radio button to assign an asset type to a vendor.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 assets_view ddlView" id="assets">
+                            <select id="drpAssets" name="drpAssets" class="form-control">
+                                <option value="">Select Asset</option>
+                                <optgroup label="Assets With EPs">
+                                    @foreach (var item in Model.Where(x => x.EPdetails.Any()).OrderBy(x => x.Name))
+                                    {
+                                        <option value="@item.AssetId">@item.Name</option>
+                                    }
+                                </optgroup>
+
+                                <optgroup label="Assets Without EPs">
+                                    @foreach (var item in Model.Where(x => !x.EPdetails.Any()).OrderBy(x => x.Name))
+                                    {
+                                        <option value="@item.AssetId">@item.Name</option>
+                                    }
+                                </optgroup>
+                            </select>
+                        </div>
+                            <div class="col-md-4 vendor_view ddlView" id="vendor">
+                                @Html.DropDownList("drpVendrs", (SelectList)ViewBag.VendorsSelectList, "--Select--", new { @class = "form-control", @tile = "Vendors", @data_size = "8" })
+                            </div>
+                            <div class="col-md-4 epgroups_view ddlView" id="epgroups">
+                                @Html.DropDownList("drpEpgroups", (SelectList)ViewBag.VendorsSelectList, "--Select--", new { @class = "form-control ddlboxLive" })
+                            </div>
+                            <div class="col-md-8 select_view">
+                                <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                    <label class="btn active">
+                                        @Html.RadioButton("rbVendorAssets", "assets", true)@Html.Label("Assets")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("rbVendorAssets", "vendor")@Html.Label("Vendor")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("rbVendorAssets", "epgroups")@Html.Label("EP Groups")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn float-right hidden">
+                                        <img onclick="location.href ='@Url.Action("AddVendors", "Vendor")'"
+                                             src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Create Vendor" /><span> <br />(Create vendor using add button and then vendors will show up in drop down to select.)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 confi-itembox">
+                            <div class="vendor_view venConView" id="vendor_view">
+                            </div>
+                            <div class="assets_view venConView" id="assets_view">
+                            </div>
+                            <div class="epgroups_view venConView" id="epgroups_view">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var BuildingIdsarr = [];
+    var buildingIds =[];
+    $(".vendor_view").hide(); $(".epgroups_view").hide();
+    $("[name=rbVendorAssets]").on('change', function () {
+        var view = $(this).val();
+        $("#vendor").hide();
+        $("#assets").hide();
+        $("#epgroups").hide();
+        $("#" + view).show();
+        if (view == "assets") {
+            $("#vendor_view").show();
+            $("#assets_view").hide();
+            $("#epgroups_view").hide();
+           // $(".campusmaindiv").addClass("hidden");
+        }
+        else if (view == "epgroups") {
+            $("#epgroups_view").show();
+            $("#vendor_view").hide();
+            $("#assets_view").hide();
+           // $(".campusmaindiv").addClass("hidden");
+        }
+        else {
+            $("#vendor_view").hide();
+            $("#assets_view").show();
+            $("#epgroups_view").hide();
+           // $(".campusmaindiv").removeClass("hidden");
+        }
+    });
+
+    $('#drpAssets').change(function () {
+        debugger;
+        var selectedID = $(this).val();
+        $('#assets_view').hide(); $('#vendor_view').show(); $('#epgroups_view').hide();
+        if (selectedID != "") {
+            $.get(CRxUrls.Vendor_GetData + '?mode=Assets&id=' + selectedID, function (data) {
+                $('#vendor_view').html(data);
+                $('#vendor_view').fadeIn('fast');
+            });
+        } else {
+            $('#vendor_view').html("");
+        }
+    });
+
+    $('#drpVendrs').change(function () {
+        debugger;
+
+        var selectedID = $(this).val();
+        $('#vendor_view').hide();
+        $('#assets_view').show();
+        $('#epgroups_view').hide();
+        if (selectedID != "") {
+            console.log(CRxUrls.Vendor_GetData);
+            //$.get(CRxUrls.Vendor_GetData + '?mode=Vendor&id=' + selectedID, function (data) {
+            //    $('#assets_view').html(data);
+            //    $('#assets_view').fadeIn('fast');
+            //});
+
+            $.ajax({
+                url: CRxUrls.Vendor_GetData + '?mode=Vendor&id=' + selectedID,
+                cache: false,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (data) {
+                    $('#assets_view').html(data);
+                    $('#assets_view').fadeIn('fast');
+                }
+            });
+
+
+            //var selectElement = document.getElementById('drpVendrs');
+            $("#buildingsbadgediv").empty();
+            buildingIds = [];
+            //getCampusSite(selectElement);
+        } else {
+            $('#assets_view').html("");
+           
+            buildingIds = [];
+            
+        }
+    });
+
+    $('#drpEpgroups').change(function () {
+        var selectedID = $(this).val();
+        $('#assets_view').hide();
+        $('#vendor_view').hide();
+        $('#epgroups_view').show();
+        if (selectedID != "") {
+            $.get(CRxUrls.Vendor_GetData + '?mode=epgroups&id=' + selectedID, function (data) {
+                $('#epgroups_view').html(data);
+                $('#epgroups_view').fadeIn('fast');
+            });
+        } else {
+            $('#epgroups_view').html("");
+        }
+       
+    });
+
+   
+
+   
+    
+</script>
+<style>
+    .vendor_view ul li, .assets_view ul li {
+        width: 33.33%;
+        padding: 0 6px;
+    }
+
+    .confi-searchBox .vendor_view ul li,
+    .confi-searchBox .assets_view ul li {
+        width: 100% !important;
+    }
+   
+</style></HCF.BDO.Assets>

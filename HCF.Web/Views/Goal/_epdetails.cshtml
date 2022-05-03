@@ -1,0 +1,86 @@
+﻿@model HCF.BDO.Standard
+<div class="col-lg-12">
+    <div class="TJCDescription">
+        <label><strong>Standard Description :</strong></label>
+        @Model.TJCDescription
+    </div>
+    <table id="EpdetailTable" border="0" cellpadding="0" cellspacing="0" width="100%" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th class="align-center">EP # </th>
+                <th class="align-center">Description</th>
+                <th class="align-center">Inspection Date</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.EPDetails.Count > 0)
+            {
+                int j = 0;
+                foreach (var ep in Model.EPDetails.Where(x => x.IsAssetsRequired = true))
+                {
+                    <tr class="tr_clone">
+                        <td class="align-center">
+                            @Html.HiddenFor(a => a.EPDetails[j].EPDetailId, new { id = "EPDetailId" })
+                            @Html.HiddenFor(a => a.EPDetails[j].StDescID, new { id = "StDescID" })
+                            @commonModelFactory.GetEpStandard(Model.EPDetails[j])
+                        </td>
+                        <td style="text-align:left;">
+                            @Model.EPDetails[j].Description.Substring(0, Math.Min(Model.EPDetails[j].Description.Length, 100))
+                            <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover' data-placement='right' data-original-title='@commonModelFactory.GetEpStandard(Model.EPDetails[j])' data-content='@Model.EPDetails[j].Description'>@($"{"...See More"}")</a>
+                        </td>
+                        <td>
+
+                            @if (Model.EPDetails[j].InspectionDates.Count == 0)
+                            {
+                                Model.EPDetails[j].InspectionDates = new List<HCF.BDO.TInspectionDates>();
+                                var date = new HCF.BDO.TInspectionDates {EpDetailId = Model.EPDetails[j].EPDetailId};
+                                // date.InspectionDate = null;
+                                Model.EPDetails[j].InspectionDates.Add(date);
+                            }
+
+                            @for (int i = 0; i < Model.EPDetails[j].InspectionDates.Count; i++)
+                            {
+                                @Html.TextBoxFor(m => Model.EPDetails[j].InspectionDates[i].InspectionDate, $"{Model.EPDetails[j].InspectionDates[i].InspectionDate:MM/dd/yyyy}", new { @class = "form-control datepicker", @readonly = "readonly" })
+                            }
+                        </td>
+                    </tr>
+                    j++;
+                }
+            }
+        </tbody>
+    </table>
+    <div class="button_Div">
+        <input type="submit" value='@Localizer["Save"]' class="button1" id="btnSubmit" name="submitType" />
+        @Html.ActionLink("Cancel", "", "", new { @class = "comm-Cancelbutton" })
+    </div>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+            buttonImageOnly: true,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker();
+
+        var datatable = $('#EpdetailTable').dataTable({
+            "searching": true,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#EpdetailTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+
+        $('.descriptions').popover({
+            trigger: 'focus'
+        });
+    });
+</script>

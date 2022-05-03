@@ -1,0 +1,83 @@
+﻿@model IEnumerable<HCF.BDO.RoundGroup>
+
+@{
+    ViewBag.Title = "RoundUserGroup";
+}
+
+
+    <section class="content-header">
+        <h1>
+            RoundUserGroup
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href='@(Url.Action("addRoundUserGroup", "Rounds"))' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add RoundUserGroup" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="RoundUserTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Name)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Description)
+                                        </th>
+                                        <th class="no-sorting" style="width:20px;">
+                                            Status
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Name)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Description)
+                                            </td>
+                                            <td class="comman_checkbox1 text-center">
+                                                @*@Html.DisplayFor(modelItem => item.IsActive)<span></span>*@
+
+                                                @if (item.IsActive == 1)
+                                                {
+                                                    <span>Active</span>
+                                                }
+                                                else if (item.IsActive == 0)
+                                                {
+                                                    <span>Inactive</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Archived</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <img onclick="location.href ='@Url.Action("addRoundUserGroup", "Rounds", new { roundUserGroupId = item.RoundGroupId })'"
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" />
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+

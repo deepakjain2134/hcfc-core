@@ -1,0 +1,138 @@
+﻿@model HCF.BDO.SearchFilter
+<input type="hidden" value="4" name="SearchType" id="SearchType" />
+
+
+<div class="col-lg-12 test">
+
+
+    <div class="searchbtnBox">
+        <div id="assets_search_view" class="searchDiv">
+
+
+        </div>
+        <div id="common_view" class="searchDiv row">
+            <div class="col-lg-4">
+                <div class="search_options">
+                    <commonseachdropdown name="SearchField" selectedvalue="0" class="form-control"
+                                         firstvalue="" firsttext="Select">
+                    </commonseachdropdown>
+                    @*@Html.CommonSeachDropDown("SearchField", 0, "Select", new { @class = "form-control" })*@
+                </div>
+            </div>
+            <div class="col-lg-8" style="padding-left:0px;">
+                <div class="search_options">
+                    @Html.TextBoxFor(m => m.SearchTerm, new { @class = "form-control", maxlength = 200, @placeholder = "Search" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div id="scanContainer">
+
+</div>
+
+<script>
+    $(".start").click(function () {
+        $(this).toggleClass("isScanOpen");
+        if ($(this).hasClass("isScanOpen")) {
+            var url = '@Url.Action("ScanPopUp", "Common")';
+            var keyWord = $('#Keyword').val();
+            $('#scanContainer').load(url);
+            $(this).html("Hide Scan");
+        } else {
+            window.Quagga.stop();
+            $('#scanContainer').empty();
+            $(this).html("Scan");
+
+        }
+    });
+
+
+
+    function ShowActiveDiv() {
+        //$(".searchDiv").hide();
+        var divId = parseInt($("input[name='SearchType']:checked").val());
+        var currentDivId = $("input[name='SearchType']:checked").attr("nameid") + "_view";
+        if (divId == 4) {
+            $("#SearchTerm").attr("required", "required");
+        } else {
+           $("#SearchTerm").removeAttr("required", "required");
+        }
+        $('#' + currentDivId).show();
+    }
+
+    $(document).ready(function () {
+       // ShowActiveDiv();
+
+    });
+
+    $(".searchDiv").show();
+    $("#common_view").show();
+    $("input[name='SearchType']").change(function () {
+        ShowActiveDiv();
+    });
+
+    $("#StdescId").change(function () {
+        var stdescId = $(this).val();
+        BindEPs(stdescId);
+    });
+
+
+    $("#SearchFilterName").change(function () {
+        var filterId = $(this).val();
+        if (filterId) {
+            var url = '@Url.Action("BindSeachFilter", "Search")';
+            $.ajax({
+                url: url + "?filterId=" + filterId,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    console.log(data);
+                    debugger;
+                    $("#DeviceNo").val(data.DeviceNo);
+                    $("#SerialNo").val(data.SerialNo);
+                    $("#SearchTerm").val(data.SearchTerm);
+                    var $radios = $('input:radio[name=SearchType]');
+                    $radios.filter("[value='" + data.SearchType + "']").prop('checked', true);
+                    ShowActiveDiv();
+                }
+            });
+        }
+    });
+
+    $("#IsSaveSearchData").click(function () {
+        if ($(this).is(':checked')) {
+            $("#FilterName").attr("required", "required");
+            $("#dvfiltername").show();
+        } else {
+            $("#FilterName").removeAttr("required", "required");
+            $("#dvfiltername").hide();
+        }
+    });
+
+
+
+</script>
+<style>
+    fieldset {
+        margin: 8px;
+        border: 1px solid silver;
+        padding: 8px;
+        border-radius: 4px;
+    }
+
+    legend {
+        display: block !important;
+        width: initial !important;
+        padding: 0px !important;
+        margin-bottom: 0 !important;
+        font-size: 14px !important;
+        line-height: inherit;
+        color: #333 !important;
+        border: 0 !important;
+        border-bottom: none !important;
+    }
+</style>

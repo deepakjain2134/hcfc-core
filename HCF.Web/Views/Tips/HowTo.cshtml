@@ -1,0 +1,314 @@
+﻿@using HCF.Utility;
+@model HCF.Web.ViewModels.TipsViewModel
+@{
+    ViewBag.Title = "HowTo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var menus = Model.Menus;
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                How To
+            </h1>
+        </section>
+    }
+   
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="row">
+                            <div class="col-md-12 faqHowtos-panel">
+                                <div id="tabs" class="collapse-row">
+                                    <div class="help-tabRow">
+                                        <ul class="helptab-btn">
+                                            <li id="tabsFAQ"><a href="#tabs-2">FAQs/How-Tos</a></li>
+                                            <li id="tabscrx"><a href="#tabs-1" class="help-active">CRx Help</a></li>
+                                        </ul>
+                                    </div>
+                                    <div id="tabs-1">
+                                        <div class="input-group help-search">
+                                            <div class="search-searchicon">
+                                                <input type="text" class="search-query form-control" id="inputSuccess1" placeholder="Search..." />
+                                                <i class="closesearch" id="close_search">X</i>
+                                                @*<i class="fa fa-search" id="btncrxsearch" aria-hidden="true"></i>*@
+                                            </div>
+                                        </div>
+                                        <div class="howto-panelsRow">
+                                            @if (Model.Tips.Count != 0)
+                                            {
+                                                <div class="howto-3">
+                                                    <div class="left-panel-howto">
+                                                        <ul class="leftul-list">
+                                                            <li id="crx_0" class="allselect active" rel="All" mode="CrxHelp">
+                                                                <a href="#" onclick="crxhelp(0,'All','CrxHelp');">All</a>
+                                                            </li>
+
+                                                            @foreach (var menu in menus.Where(x => x.ParentId == 0).OrderBy(x => x.Seq))
+                                                            {
+                                                                var counts = Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu.Name.Trim());
+                                                                if (counts != 0)
+                                                                {
+                                                                    var name = menus.Where(x => x.ParentId != 0 && x.Name == menu.Name).Select(x => x.Name).FirstOrDefault();
+                                                                    if (name != menu.Name)
+                                                                    {
+                                                                        <li id="crx_@menu.Alias.Trim()" class="allselect" rel="@menu.Name.Trim()" mode="CrxHelp">
+                                                                            <a href="#" onclick="crxhelp(@menu.Id,'@menu.Name.Trim()','CrxHelp');">
+                                                                                @menu.Name
+                                                                            </a>
+                                                                        </li>
+                                                                    }
+                                                                }
+                                                                foreach (var menu2 in menus.Where(x => x.ParentId == menu.Id).OrderBy(x => x.Seq))
+                                                                {
+                                                                    var counts2 = (menu2.Name != menu.Name) ? Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu2.Name.Trim()) :
+                                                                        Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu2.Name.Trim());
+                                                                    if (counts2 != 0)
+                                                                    {
+
+                                                                        <li id="crx_@menu2.Alias.Trim()" class="allselect" rel="@menu2.Name.Trim()" mode="CrxHelp">
+                                                                            <a href="#" onclick="crxhelp(@menu2.Id,'@menu2.Name.Trim()','CrxHelp');">
+
+                                                                                @menu2.Name
+                                                                            </a>
+                                                                        </li>
+
+                                                                    }
+                                                                    foreach (var menu3 in menus.Where(x => x.ParentId == menu2.Id).OrderBy(x => x.Seq))
+                                                                    {
+                                                                        var counts3 = (menu3.Name != menu2.Name) ? Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu3.Name.Trim()) :
+                                                                            Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1 && x.RouteUrl.ToString() == menu3.Alias.Trim());
+                                                                        if (counts3 != 0)
+                                                                        {
+                                                                            <li id="crx_@menu3.Alias.Trim()" class="allselect" rel="@menu3.Name.Trim()" mode="CrxHelp">
+                                                                                <a href="#" onclick="crxhelp(@menu3.Id,'@menu3.Name.Trim()','CrxHelp');">
+                                                                                    @menu3.Name
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="howto-9">
+                                                <div id="crxhelp">
+                                                    @await Html.PartialAsync("_crxhelp", Model.Tips.Where(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1).ToList())
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="howto-panelsRow" id="tabs-2">
+                                        <div class="input-group help-search">
+                                            <div class="search-searchicon">
+                                                <input type="text" class="search-query form-control" id="inputSuccess2" placeholder="Search..." />
+                                                <i class="closesearch" id="closesearch">X</i>
+                                                @*<i class="fa fa-search" id="btntxtsearch" aria-hidden="true"></i>*@
+                                            </div>
+                                        </div>
+                                        <div class="howto-panelsRow">
+                                            <div class="howto-3">
+                                                @if (Model.Tips.Count != 0)
+                                                {
+                                                    <div class="left-panel-howto">
+                                                        <ul class="leftul-list faq-list">
+                                                            <li id="FAQ_0" class="selectall active" rel="All" mode="FAQsHowto">
+                                                                <a href="#" onclick="crxhelp(0,'All','FAQsHowto');">
+                                                                    All
+                                                                </a>
+                                                            </li>
+                                                            @foreach (var menu in menus.Where(x => x.ParentId == 0).OrderBy(x => x.Seq))
+                                                            {
+                                                                var counts = Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu.Name.Trim());
+                                                                if (counts != 0)
+                                                                {
+                                                                    var name = menus.Where(x => x.ParentId != 0 && x.Name == menu.Name).Select(x => x.Name).FirstOrDefault();
+                                                                    if (name != menu.Name)
+                                                                    {
+                                                                        <li id="crx_@menu.Alias" class="selectall" rel="@menu.Name.Trim()" mode="FAQsHowto">
+                                                                            <a href="#" onclick="crxhelp(@menu.Id,'@menu.Name.Trim()','FAQsHowto');">
+                                                                                @menu.Name <span>@counts</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    }
+                                                                }
+                                                                foreach (var menu2 in menus.Where(x => x.ParentId == menu.Id).OrderBy(x => x.Seq))
+                                                                {
+                                                                    var counts2 = (menu2.Name != menu.Name) ? Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu2.Name.Trim()) :
+                                                                        Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu2.Name.Trim());
+                                                                    if (counts2 != 0)
+                                                                    {
+                                                                        <li id="crx_@menu2.Alias" class="selectall" rel="@menu2.Name.Trim()" mode="FAQsHowto">
+                                                                            <a href="#" onclick="crxhelp(@menu2.Id,'@menu2.Name.Trim()','FAQsHowto');">
+                                                                                @menu2.Name <span> @counts2</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    }
+                                                                    foreach (var menu3 in menus.Where(x => x.ParentId == menu2.Id).OrderBy(x => x.Seq))
+                                                                    {
+                                                                        var counts3 = (menu3.Name != menu2.Name) ? Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1 && x.RouteName.ToString() == menu3.Name.Trim()) :
+                                                                                                                                           Model.Tips.Count(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1 && x.RouteUrl.ToString() == menu3.Alias.Trim());
+                                                                        if (counts3 != 0)
+                                                                        {
+                                                                            <li id="crx_@menu3.Alias" class="selectall" rel="@menu3.Name.Trim()" mode="FAQsHowto">
+                                                                                <a href="#" onclick="crxhelp(@menu3.Id,'@menu3.Name.Trim()','FAQsHowto');">
+                                                                                    @menu3.Name <span> @counts3</span>
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="howto-9">
+                                                <div id="FAQshowto">
+                                                    @await Html.PartialAsync("_FAQsHowto", Model.Tips.Where(x => x.TipType == HCF.BDO.Enums.TipTypes.FAQHowTo && x.IsActive && x.IsApproved == 1).ToList())
+                                                </div>
+                                            </div>
+                                        </div>                                       
+
+                                    </div>
+                                    <div class="bottom">
+                                        <div class="howto-panelsRow faq-bottom">
+                                            <div class="howto-3"></div>
+                                            <div class="howto-9">
+                                                <div class="howto-help">
+                                                    <h4>Need Support?</h4>
+                                                    <p>Can't find the answer you're looking for? Don't worry we're here to help!</p>
+                                                </div>
+                                                <div class="howto-help-bution">
+                                                    <a href="mailto:crxsupport@hcfcompliance.com" class="button1" target="_blank">Contact Support</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+<link href="@Url.Content("~/dist/css/howto.css")" rel="stylesheet" />
+
+<script>  
+
+    function crxhelp(id,routeurl, mode) {
+        if (id > 0) {
+            $('div.help-panellist').hide().filter(function () {
+                var d = $(this).data();
+                console.log(d.menuid);
+                return d.menuid === id;
+            }).show();
+        } else {
+            $('div.help-panellist').show()
+        }     
+    } 
+
+    $("#closesearch").off().on('click', function () {
+       // debugger;
+        closesearch();
+    })
+
+    function closesearch() {
+        $("#inputSuccess2").val('');
+        $("#inputSuccess1").val('');
+        $(".howto-3").show();
+        $('div.help-panellist').show()
+       // $(".accodian-helpBox").show();
+        filterData('');
+    }
+
+    
+
+    $("#close_search").off().on('click', function () {
+       // debugger;
+        closesearch();
+    })
+
+    
+
+    $(function () {
+        $("#tabs").tabs({
+            activate: function (event, ui) {
+                closesearch();
+            }
+        });
+    });
+
+    
+    $('.help-panelHeading').click(function () {
+        debugger;
+        $(this).closest('.help-panellist').toggleClass('panel-active');
+        $(this).closest('.help-panellist').siblings().each(function () {
+            $(this).closest('.help-panellist').removeClass('panel-active');
+        });
+    });
+
+
+    $('#inputSuccess2, #inputSuccess1').bind('keyup', function () {
+        var searchString = $(this).val();
+        filterData(searchString);
+    });
+
+
+    var filterData = function (searchString) {
+        $("ul.leftul-list li").each(function (index, value) {
+            $(".howto-3").show();
+            $(".accodian-helpBox").show();          
+            currentName = $(value).text()
+            if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                $(value).show();
+              
+            } else {
+                $(value).hide();                
+            }
+
+            var hiddenLiCounts = $('li.selectall[style*="display: none"]').length;
+            var totalLi = $('li.selectall').length;
+            var helpPanellist = $('div.help-panellist[style*="display: none"]').length;
+            var helpPanellistTotal = $('div.help-panellist').length;
+            if (hiddenLiCounts == totalLi) {
+                $(".howto-3").hide();
+            }
+            if (helpPanellist == helpPanellistTotal) {
+                $(".accodian-helpBox").hide();
+            }
+            if (hiddenLiCounts == totalLi && helpPanellist == helpPanellistTotal) {
+                console.log("no records found");
+            }
+        });
+
+        $(".help-panellist .help-panelHeading h3").each(function (index, value) {
+            currentName = $(value).text()
+            if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                $(value).closest(".help-panellist").show();
+            } else {
+                $(value).closest(".help-panellist").hide();
+
+            }
+
+        });
+    }
+
+    
+
+    $(document).on('click', '.allselect', function () {
+       //debugger
+        $('.allselect').not(this).removeClass('active');
+        $(this).toggleClass('active');
+    });
+
+</script>

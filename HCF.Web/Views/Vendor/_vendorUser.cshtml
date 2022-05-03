@@ -1,0 +1,49 @@
+﻿@model IEnumerable<HCF.BDO.UserProfile>
+
+<div class="slider">
+    <table class="table accodian_table table-striped">
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td class="mask-phone-div">
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                </td>
+                <td>
+                    @if (item.UserCertificates.Any())
+                    {
+                        <img onclick="location.href ='@Url.Action("UserCertificates", "User", new { userId=item.UserId})'" 
+                             src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                    }
+                </td>
+                <td>
+                    @*@Html.DisplayFor(modelItem => item.UserGroup)*@
+                </td>
+                <td style="width:101px;">
+                    <img onclick="location.href ='@Url.Action("Register", "User", new { userId = item.UserId, vendorId = item.VendorId })'" 
+                         src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" />
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+        debugger;
+        $(".mask-phone-div").each(function (index) {
+            if ($(this).html().trim().length > 0) {
+                $(this).mask("(000) 000-0000");
+            }
+        });
+    });
+</script>

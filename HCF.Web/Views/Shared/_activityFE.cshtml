@@ -1,0 +1,33 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="fireTable-row">
+    @if (Model.TInspectionActivity.Count > 0)
+    {
+        foreach (var inspectionActivity in Model.TInspectionActivity.OrderByDescending(x => x.ActivityInspectionDate))
+        {
+            <div class="tble_shadow">
+                
+                    <div class="row">
+                        <div class="col-md-4"><label> Inspection Date/Time : </label>@inspectionActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()</div>
+                        <div class="col-md-4"><label>Inspected by: </label>@inspectionActivity.UserProfile.FullName</div>
+                        <div class="col-md-4"><label>Frequency: </label>@inspectionActivity.Frequency.DisplayName</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4"><label>Result: </label>@inspectionActivity.InspResult.ResultName</div>
+                        <div class="col-md-4"><label>Status: </label>@((inspectionActivity.InspStatusCode== "RE") ? "Recharge" : "Operational")</div>
+                        <div class="col-md-4 comment"><label>Comment: </label> @inspectionActivity.Comment</div>
+                    </div>
+                    <div class="row hislistBordered">
+                        <div class="col-md-12">
+                            <label>Details: </label>
+                            <img class="details" onclick="location.href = '@Url.Action("ActivityHistoryDetails", "FireExtinguisher", new {activityId = inspectionActivity.ActivityId,area = "RoundInsp"})'" src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                        </div>
+                    </div>
+                
+            </div>
+        }
+    }
+    else
+    {
+        <div class="tble_shadow text-center">No data available in table</div>
+    }
+</div>

@@ -1,0 +1,43 @@
+﻿@model HCF.Web.ViewModels.DigitalSignatureViewModel
+@{
+    var digitalSign = Model.signs;
+}
+
+
+@*<input type="hidden" id="@string.Format("{0}.FileName ",Model.HiddenFileControl)" name="@string.Format("{0}.FileName ",Model.HiddenFileControl)" value="" />
+    <input type="hidden" id="@string.Format("{0}.FileContent ",Model.HiddenFileControl)" name="@string.Format("{0}.FileContent ",Model.HiddenFileControl)" value="" />
+    <input type="hidden" id="@string.Format("{0}.DigSignatureId ",Model.HiddenFileControl)" name="@string.Format("{0}.DigSignatureId ",Model.HiddenFileControl)" value="" />
+    <input type="hidden" id="@string.Format("hdn_{0}_LocalSignDateTime",Model.HiddenFileControl)" name="@string.Format("{0}.LocalSignDateTime",Model.HiddenFileControl)" />
+    <input type="hidden" id="@string.Format("hdn_{0}_CreatedBy",Model.HiddenFileControl)" name="@string.Format("{0}.CreatedBy",Model.HiddenFileControl)" />*@
+<div>&nbsp;</div>
+@if (Model.signs.DigSignatureId > 0)
+{
+    <a class="@string.Format("allowclick {0} ",Model.MainSignatureClass) positionsign">
+        <img id="DigSignatureId_@digitalSign.DigSignatureId" signclass="@Model.HiddenFileControl" signname="contractorsign" signctrlid="@Model.SignatureControlId"
+             src="@commonModelFactory.FilePath(digitalSign.FilePath)"
+             class="showSignPopUp" sequence="@(Model.SignSequence.HasValue && Model.SignSequence.Value>0?Convert.ToInt32(Model.SignSequence):0)" signindex="@(Model.SignIndex.HasValue && Model.SignIndex.Value>0?Convert.ToInt32(Model.SignIndex):0)" />
+        <div>
+            <p class="signaturebyName">@digitalSign.SignByUserName</p>
+            <p class="signaturelocaltime">(@digitalSign.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</p>
+        </div>
+        @if (HCF.Web.Base.UserSession.CurrentUser?.UserId == Model.signs.CreatedBy && Model.ApprovalStatus != 1)
+        {
+            <span data-id="@digitalSign.DigSignatureId" data-signclass="@Model.HiddenFileControl" data-signctrlid="@Model.SignatureControlId" class="deleteSignaturepermit"> <img id="deleteimg" alt="Delete" title="Delete file" src="/dist/Images/Icons/red_cross.png"> </span>
+        }
+
+    </a>
+}
+else
+{
+    <a class="@string.Format("allowclick {0} ",Model.MainSignatureClass)">
+        <img src="~/dist/Images/Icons/sign.png" id="btnSign2Name" class="showSignPopUp" signname="contractorsign" signclass="@Model.HiddenFileControl" signctrlid="@Model.SignatureControlId" sequence="@(Model.SignSequence.HasValue && Model.SignSequence.Value>0?Convert.ToInt32(Model.SignSequence):0)" signindex="@(Model.SignIndex.HasValue && Model.SignIndex.Value>0?Convert.ToInt32(Model.SignIndex):0)" />
+        <div>
+            <p class="signaturebyName"></p>
+            <p class="signaturelocaltime"></p>
+        </div>
+    </a>
+}
+
+<script>
+
+</script>

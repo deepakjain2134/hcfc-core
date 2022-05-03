@@ -1,0 +1,339 @@
+﻿@model HCF.BDO.Standard
+@{
+    if (Model != null && Model.EPDetails != null && !HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+    {
+        Model.EPDetails = Model.EPDetails.Where(x => x.IsActive).ToList();
+    }
+}
+
+<div class="col-lg-12">
+    @if (Model.StDescID > 0)
+    {
+        <div class="TJCDescription">
+            <label><strong>Standard Description :</strong></label>
+            @Model.TJCDescription
+        </div>
+        <table id="Ep_detailTable" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th class="align-left">EP # </th>
+                    <th class="align-center">@Localizer["Description"]</th>
+                    <th class="align-center">@Localizer["Score"]</th>
+                    <th class="align-center">TJC Freq</th>
+                    <th class="align-center">CRx Rec Freq</th>
+                    <th class="align-center">Doc</th>
+                    <th class="align-center">Asset</th>
+                    <th class="align-center">TJCActive</th>
+                    <th class="align-center">Tracked?</th>
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsCRxUser && HCF.Web.Base.UserSession.CurrentUser.UserId==4)
+                    {
+                        <th class="align-center">Action</th>
+                        <th class="align-center">Main Goal</th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var ep in Model.EPDetails.Where(x => x.IsCurrent == true).OrderBy(x => x.Sequence))
+                {
+
+                    <tr class="tr_clone">
+                        <td class="align-left">
+                            @ep.EPNumber
+                        </td>
+                        <td>
+                            @await Html.PartialAsync("_EpDescription", ep.Description,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "minLength", "80" }, { "standardEp", "Description" }}
+                              )
+                        </td>
+                        <td class="align-center">
+                            @if (!string.IsNullOrEmpty(ep.Scores.Name))
+                            {
+                                @ep.Scores.Name.Replace("Risk", "")
+                            }
+
+                        </td>
+                        <td class="align-center">
+                            @foreach (HCF.BDO.EPFrequency frequency in ep.EPFrequency.Where(x => x.IsActive == true))
+                            {
+                                <span> @frequency.TjcFrequency.DisplayName</span>
+                            }
+                        </td>
+                        <td class="align-center">
+                            @foreach (HCF.BDO.EPFrequency frequency in ep.EPFrequency.Where(x => x.IsActive == true && x.RecFrequency != null))
+                            {
+                                <span>@frequency.RecFrequency.DisplayName</span>
+                            }
+                        </td>
+                        <td class="align-center comman_checkbox disabled">
+                            @if (ep.IsDocRequired)
+                            {
+                                <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="Document Required" />
+                            }
+                        </td>
+
+                        <td class="align-center comman_checkbox disabled assetsIconstd">
+                            @if (ep.Assets.Count > 0)
+                            {
+                                <img src="@Url.Content("~/dist/Images/Icons/default.png")"
+                                     title="Assets: @string.Join(",",ep.Assets.Select(x=>x.Name))" alt="@string.Join(",",ep.Assets.Select(x=>x.Name))" />
+                            }
+                        </td>
+                        <td class="align-center comman_checkbox disable ">
+                            @Html.CheckBoxFor(a => ep.IsActive, new { @checked = ep.IsActive })<span></span>
+                        </td>
+                        <td class="align-center comman_checkbox">
+                           @* <input type="checkbox" class="isApplicable" id="chek_@ep.EPDetailId" epDetailId="@ep.EPDetailId" checked="@ep.IsApplicable"
+                                   title="@ep.StandardEp" />
+                            <input type="hidden">
+                            <span></span>*@
+                            <div id="divchek_@ep.EPDetailId" class="isApplicable" epDetailId="@ep.EPDetailId" checked="@ep.IsApplicable"
+                                   title="@ep.StandardEp">
+                                @if (ep.IsApplicable)
+                                {
+                                    <span style="cursor: pointer;">Yes</span>
+                                }
+                                else
+                                {
+                                    <span style="cursor: pointer;">No</span>
+                                }
+
+                            </div>
+                            
+
+                        </td>
+                        @if (HCF.Web.Base.UserSession.CurrentUser.IsCRxUser && HCF.Web.Base.UserSession.CurrentUser.UserId==4)
+                        {
+                            <td class="align-center">
+                                <a id="UpgradeEp" onclick="UgradeEP(this)" stdescId="@ep.StDescID" epdetailId="@ep.EPDetailId">Upgrade</a>|
+                                @Html.ActionLink("Edit", "addep", new { stdescId = ep.StDescID, epdetailId = ep.EPDetailId })
+                            </td>
+                            <td class="align-center">
+                                @Html.ActionLink("Add Steps", "addMaingoal", new { epdetailid = ep.EPDetailId })
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+        <div class="button_DivEP">
+            <a class="comm-Cancelbutton" href="@Url.Action("Index", "Goal")" style="float: right;">Go Back</a>
+        </div>
+    }
+</div>
+<div class="modal fade" id="non-Tracked-eps" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="loadpartial">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).on("click", ".open-AddDialog", function () {
+        $(':checkbox').prop('checked', false);
+
+        var frequencyid = $(this).data('frequencyid');
+        var epFrequencyId = $(this).data('epfrequencyid');
+        var epdetailid = $(this).data('epdetailid');
+        var epNumber = $(this).data('epnumber');
+        var days = $(this).data('days');
+        $(".popupTitle").text(epNumber);
+
+        $('<input>').attr({
+            type: 'hidden',
+            id: 'epFrqDays',
+            name: 'bar',
+            val: days
+        }).appendTo('body');
+        $("#saveEP").attr('epdetailid', epdetailid);
+        $("#saveEP").attr('epdays', epdetailid);
+        $("#saveEP").attr('epFrequencyId', epFrequencyId);
+        $('input[data-frequencyid="' + frequencyid + '"]').prop('checked', true);
+        $("input:checkbox").each(function () {
+            var checkDays = $(this).data('days');
+            if (checkDays > days)
+                $(this).attr("disabled", "disabled");
+        });
+
+
+    });
+
+    $('input[type="checkbox"]').on('change', function () {
+        $('input[name="' + this.name + '"]').not(this).prop('checked', false);
+    });
+
+    $(document).on("click", "#saveEP", function () {
+        var selectedDays = $("#epFrqDays").val();
+        console.log(selectedDays);
+        var epdetailid = $(this).attr('epdetailid');
+        var frequencyid = 0;
+        var days = 0;
+        var EpFrequencyId = $(this).attr('epFrequencyId');
+        var txt = "";
+        $("input:checkbox:checked").each(function () {
+            frequencyid = $(this).data('frequencyid');
+            days = $(this).data('days');
+            txt = $(this).val();
+        });
+        if (days > selectedDays) {
+            swal("Warning", "The frequency must be less than TJC Frequency.", "error");
+            return false;
+        } else {
+            if (frequencyid > 0) {
+                $.ajax({
+                    url: '@Url.Action("UpdateEpFrequency", "Goal")',
+                    type: "POST",
+                    data: { epdetailId: epdetailid, frequencyId: frequencyid },
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result > 0) {
+                            var control = $("#" + EpFrequencyId);
+                            control.text(txt);
+                            control.data('epfrequencyid', result);
+                            control.data('frequencyid', frequencyid);
+                            control.attr("id", result);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+
+    $(document).ready(function () {
+
+        $('.descriptions').popover({
+            trigger: 'focus'
+        });
+
+        $.ajaxSetup({ cache: false });
+        $('#Ep_detailTable').dataTable({
+            "searching": false,
+            "pageLength": 40,
+            "lengthChange": false,
+            "bPaginate": $('#Ep_detailTable tbody tr').length > 30,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+        });
+
+        @*$(".isApplicable").change(function () {
+            debugger
+            var control = $(this);
+            var orgValue = !(control.is(':checked'));
+            var checkedValue = control.is(':checked');
+            var epId = control.attr('epDetailId');
+            var epName = control.attr('title');
+
+            var htmlTitle = "Confirm Non-Tracked EP";
+            var htmldata = "By unchecking this box, " + epName + " will be untracked and not appear in the Compliance Dashboard.  Any previous EP inspections and uploaded documents will be stored in Binders. Do you want to continue?"
+            //var htmldata = "By unchecking this box, c will be untracked and not appear in the Compliance Dashboard. Any previous EP inspections will be archived.  Do you want to continue?";
+            if (checkedValue) {
+                htmldata = "By checking EPs and saving, these EPs will be tracked and appear on the Compliance Dashboard.  Do you want to continue?"
+                htmlTitle = "Confirm Tracked EP";
+            }
+            swal({
+                html: true,
+                title: htmlTitle,
+                text: htmldata,
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Continue",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOncancel: true
+            },
+                function (isConfirm) {
+                    //debugger
+                    if (isConfirm) {
+                        $.ajax({
+                            url: '@Url.Action("UpdateEPApplicablestatus", "Goal")',
+                            type: "POST",
+                            data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), newValue: checkedValue, epdetailId: epId },
+                            dataType: 'json',
+                            success: function (result) {
+
+                            }
+                        });
+                    } else {
+                        control.prop('checked', orgValue);
+                    }
+                });
+        });*@
+
+        $(".isApplicable").click(function () {
+            $(this).prop("chekced",$(this).is(":checked"));
+            var control = $(this);
+            var epId = control.attr('epDetailId');
+            var epName = control.attr('title');
+            var url = CRxUrls.Goal_NonTrackedEPsPopup;
+            $.get(url + '?epdetailId=' + epId, function (data) {
+                $('#loadpartial').html(data);
+                $('#non-Tracked-eps').modal('show');
+            });
+        });
+
+    });
+
+    function AddNewEP() {
+        var urlAction = '@Url.Action("addep", "Goal")';
+        window.location.href = urlAction + "?stdescId=" + '@ViewBag.StdescId';
+    }
+
+    var UgradeEP = function (e) {
+
+
+        swal({
+                html: true,
+                title: "Upgrade EP",
+                text: "Upgrading Ep will create a New Ep and In-Active Current EP. If You want to upgrade selected Ep then please click on Uprade.",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Upgrade",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOncancel: true
+            },
+                function (isConfirm) {
+                    //debugger
+                    if (isConfirm) {
+                        debugger
+                        var stdescId = e.getAttribute('stdescId');
+                        var epdetailId = e.getAttribute('epdetailId');
+                         $.ajax({
+                            url: '@Url.Action("UpgradeEP", "Goal")',
+                            type: "GET",
+                             data: { stdescId: stdescId, epdetailId: epdetailId},
+                             dataType: 'json',
+                             contentType: "application/json; charset=utf-8",
+                             success: function (result) {
+                                 debugger
+                                 console.log(result);
+                                 if (result > 0) {
+                                     swalalert("EP Upgraded Successfully")
+                                     location.reload()
+                                 }
+                             }
+                        });
+                    } else {
+
+
+                    }
+                });
+    }
+
+</script>

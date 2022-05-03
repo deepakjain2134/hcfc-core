@@ -1,0 +1,83 @@
+﻿@model List<HCF.BDO.Buildings>
+@{
+    Layout = null;
+    var buildings = Model;
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+}
+@{ var checkListClass = !string.IsNullOrEmpty(ViewBag.type) && ViewBag.type == "single" ? "chkBuildSigleSelect"+ sequence : "chkBuildMultiSelect"+ sequence;
+    var UncheckBuilding = "UncheckBuilding" + sequence;
+    }
+
+<div class="selectList" id="ullistitem">
+    <label>--Select Building--</label>
+    <ul class="ullistitem">
+        @foreach (var build in buildings.OrderBy(x => x.SiteCode).ThenBy(x => x.BuildingName))
+        {
+
+            <li sequence="@sequence" class="@checkListClass" >
+                <input sequence="@sequence" classtext="@checkListClass"   checkboxtype="@ViewBag.type"   onchange="checkedBuilding(this)" type="checkbox" value="@build.BuildingId" data-text="@build.BuildingName" data-sitebuildingname="@string.Format("{0} - {1} [{2}] ", build.SiteCode, build.BuildingName, build.BuildingCode)" /><span></span> @string.Format("{0} - {1} [{2}] ", build.SiteCode, build.BuildingName, build.BuildingCode)
+            </li>
+        }
+    </ul>
+</div>
+<input type="hidden" name="@UncheckBuilding" id="@UncheckBuilding" />
+<script>
+    $(document).ready(function () {
+        $(".ullistitem").hide();
+      
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+    });
+    
+
+   
+    
+</script>
+<style>
+    .selectList li, .selectList ul {
+        list-style-type: none;
+        text-decoration: none;
+    }
+
+    .selectList {
+        width: 70%;
+        display: inline-block;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .ullistitem {
+        display: none;
+        z-index: 99;
+        position: absolute;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .ddlproject {
+        width: 0;
+        border-color: transparent;
+    }
+</style>

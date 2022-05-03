@@ -1,0 +1,54 @@
+﻿@model List<HCF.BDO.EPsDocument>
+@{
+    ViewBag.Title = "Recent Files";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var data = Model; //new List<HCF.BDO.EPsDocument>();
+
+    if (!HCF.Web.Base.UserSession.CurrentUser.UserGroups.Any(x => x.GroupId == 1 || x.GroupId == 4))
+    {
+        data = Model.Where(x => x.CreatedBy == HCF.Web.Base.UserSession.CurrentUser.UserId).ToList();
+    }
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Recent Files
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-4">
+                        @if (HCF.Web.Base.UserSession.CurrentUser.UserGroups.Any(x => x.GroupId == 1 || x.GroupId == 4))
+                        {
+                            <userepsdropdownlist class="form-control selectpicker" firsttext="All Users" name="urerList" selectedvalue="@HCF.Web.Base.UserSession.CurrentUser.UserId"></userepsdropdownlist>
+                            
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="getEPDocByBinder">
+                            <input type="hidden" name="pageName" id="pageName" value="0" />
+                            @await Html.PartialAsync("~/Views/Repository/_getEPDocByBinder.cshtml", data)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #YearFilter {
+        margin-bottom: 0px !important;
+        padding: 7px !important;
+    }
+    .search_options.col-xs-4 {
+        padding-left: 0px;
+    }
+</style>

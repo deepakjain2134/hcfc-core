@@ -1,0 +1,14 @@
+﻿@model HCF.BDO.News
+
+@if (Model != null)
+{
+    <div>
+        <h1>
+            @Model.Title
+        </h1>
+        <p>
+            @Html.Raw(Model.Description)
+        </p>
+    </div>
+}
+

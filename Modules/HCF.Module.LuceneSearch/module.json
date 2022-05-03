@@ -1,0 +1,6 @@
+{
+  "id": "HCF.Module.LuceneSearch",
+  "name": "LuceneSearch",
+  "isBundledWithHost": true,
+  "version": "1.0.0"
+}

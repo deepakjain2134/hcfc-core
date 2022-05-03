@@ -1,0 +1,95 @@
+﻿@model List<HCF.BDO.ModuleMaster>
+<div class="UserMenu-row">
+    <div class="panel-group panel-crxMenu" id="accordion" role="tablist" aria-multiselectable="true">
+        @foreach (var item in Model.OrderBy(x => x.ModuleName))
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="@string.Format("{0}{1}", "#collapseOne", item.ModuleId)" aria-expanded="true" aria-controls="collapseOne" moduleid="@item.ModuleId">
+                            @item.ModuleName
+                        </a>
+                        @if (item.OrgServiceMode == 2 || item.OrgServiceMode == 5)
+                        {
+                            if (item.RemainingTrialDays > 0)
+                            {
+                                <p class="trialDesciption">
+                                    @string.Format("Trial period will be expired in {0} days", item.RemainingTrialDays)
+                                </p>
+                            }
+                            else
+                            { <p class="trialDesciption">Trial period is expired</p>}
+                        }
+
+                        <div id="@string.Format("{0}{1}", "div_myonoffswitch", item.ModuleId)">
+
+                            <button type="button" value="test" id="btnServiceMode_@item.ModuleId" orgmodulestatus="@(item.OrgModuleStatus == true ? 1 : 0)" class="@(item.OrgModuleStatus == true ? "btnServiceMode active" : "btnServiceMode")" orgservicemode="@item.OrgServiceMode" moduleId="@item.ModuleId" modulecode="@item.ModuleCode">
+                                @if (ViewBag.IsShowOnOff != null && ViewBag.IsShowOnOff == true && (item.OrgServiceMode == 1 || item.OrgServiceMode == -3))
+                                {
+                                    @(item.OrgModuleStatus == true ? "ON" : "OFF")
+                                }
+                                else
+                                {
+                                    HCF.BDO.Enums.ModuleServiceMode enums = (HCF.BDO.Enums.ModuleServiceMode)item.OrgServiceMode;
+                                    @enums.GetDescription()
+                                }
+                            </button>
+                        </div>
+                    </h4>
+                </div>
+                <div id="@string.Format("{0}{1}","collapseOne",item.ModuleId)" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <div class="crxMenulist-box">
+                            @foreach (var menu in item.Menus.Where(x => x.ParentId > 0).OrderBy(x => x.Name))
+                            {
+                                <div class="crxMenulist-item">
+                                    @menu.Name
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<style>
+    .btnServiceMode {
+        font-size: 12px;
+        border: 1px solid #8e8e8e;
+        white-space: nowrap;
+        padding: 8px 8px;
+        color: #999999;
+        background-color: #EEEEEE;
+        border-radius: 20px;
+        position: relative;
+        width: 120px;
+    }
+
+        .btnServiceMode.active {
+            border: 1px solid #1ca51c;
+            color: #fff;
+            background-color: #1ca51c;
+            opacity: 1;
+        }
+
+        .btnServiceMode:after {
+            display: block;
+            width: 10px;
+            margin: 6px 2px;
+            background: #FFFFFF;
+            top: 0;
+            bottom: 0;
+            left: 3px;
+            border: 2px solid #999999;
+            border-radius: 20px;
+            transition: all 0.3s ease-in 0s;
+            position: absolute;
+            content: "";
+        }
+
+        .btnServiceMode.active:after {
+            right: 6px;
+            left: auto;
+        }
+</style>

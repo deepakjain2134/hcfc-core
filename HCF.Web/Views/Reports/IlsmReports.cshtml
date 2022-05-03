@@ -1,0 +1,206 @@
+﻿@model IEnumerable<HCF.BDO.TIlsm>
+@{
+    ViewBag.Title = "IlsmReports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            ILSM Reports
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12 form-inline">
+                                <div class="form-group">
+                                    <label>From</label>
+                                    <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                                </div>
+                                <div class="form-group">
+                                    <label>To</label>
+                                    <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                                </div>
+
+                                <div class="form-group">
+                                    <button class="comm-button" id="btnrunreport" onclick="loadData();">Run Report</button>
+                                    <button class="comm-button" id="btnrefresh">Refresh</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="partialContents">
+                                </div>
+                            </div>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+
+    $(document).ready(function () {
+        //alert("call");
+        debugger;
+        var li = $("ul.Ilsmrpeorts_list li").first();
+        var certId = li.attr("id");
+        var path = li.attr("tempname");
+       // SetDefaultDate();
+        // loadData();
+        if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+            $("#divnopreview").hide();
+            $("#divdocpreview").show();
+        }
+        else {
+            $("#divnopreview").show();
+            $("#divdocpreview").hide();
+        }
+
+        debugger
+        var fromdate = localStorage.getItem("fromDate");
+        var toDate = localStorage.getItem("toDate");
+        var ilsmdata = localStorage.getItem("IlsmData");
+        
+        if (fromdate != "" && toDate != null) {
+            $("#from").val(fromdate);
+            $("#todate").val(toDate);
+            if (ilsmdata != null) {
+                $('#partialContents').html(ilsmdata);
+                $('#partialContents').fadeIn('fast');
+            }
+            //loadData();
+        } else {
+            SetDefaultDate();
+        }
+        //Opendiv(certId, path, li);
+
+        
+    });
+
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        var startDate = new Date(currentTime.setMonth(currentTime.getMonth() - 3));
+        var dateFormat = "mm/d/yy",
+            from = $("#from")
+                .datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    dateFormat: 'M d, yy',
+                    maxDate: new Date(new Date().setMonth(12)),
+                    //minDate: new Date(2016, 0, 1),
+                    numberOfMonths: 1,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    //to.datepicker("option", "minDate", getDate(this));
+                    $("#todate").datepicker("option", "minDate", $("#from").datepicker("getDate"));
+                    $("#from").datepicker("option", "maxDate", $("#todate").datepicker("getDate"));
+                }),
+            to = $("#todate").datepicker({
+                changeMonth: true,
+                numberOfMonths: 1,
+                changeYear: true,
+                dateFormat: 'M d, yy',
+                maxDate: new Date(new Date().setMonth(12)),
+                minDate: startDate,
+                buttonImage: ImgUrls.datepicker_calendar,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+    function Opendiv(tilsmId, src, li) {
+
+        $("ul.Ilsmrpeorts_list li").removeClass('active');
+        $(li).addClass('active');
+        $(li).addClass('divselected');
+        var _tilsmId = tilsmId;
+        $('.tableRow').hide(); // hide all rows
+        $("#div_" + _tilsmId).show();
+        document.getElementById("ilsmframe").setAttribute("src", getfileUrl(src));
+        if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+            $("#divnopreview").hide();
+            $("#divdocpreview").show();
+        }
+        else {
+            $("#divnopreview").show();
+            $("#divdocpreview").hide();
+        }
+        
+    }
+
+    
+    var firstload = 0;
+    function loadData() {
+
+        var from = $("#from").val();
+        var todate = $("#todate").val();
+        localStorage.setItem("fromDate", from);
+        localStorage.setItem("toDate", todate);
+
+        $.ajax({
+            url: CRxUrls.Reports_IlsmReportsPartial + '?fromdate=' + from + "&todate=" + todate,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                localStorage.setItem("IlsmData", data);
+                $('#partialContents').html(data);
+                $('#partialContents').fadeIn('fast');
+                if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+                    $("#divnopreview").hide();
+                    $("#divdocpreview").show();
+                }
+                else {
+                    $("#divnopreview").show();
+                    $("#divdocpreview").hide();
+                }
+            }
+        });
+    }
+   
+
+    $("#btnrefresh").click(function () {
+        ClearAllFields();
+    });
+
+    function ClearAllFields() {
+        SetDefaultDate();
+        loadData();
+    }
+</script>
+
+
+<style>
+    .divselected {
+        background: #f5f5f5 !important;
+        border-top: 1px solid #b1b1b1 !important;
+    }
+    div#divdocpreview {
+        border: 1px solid transparent;
+    }
+</style>

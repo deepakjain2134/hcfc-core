@@ -1,0 +1,140 @@
+﻿
+@model List<HCF.BDO.PermitSetting>
+ @{var rownum = 0; }
+<div class="notification-menubox">
+    <ul class="notfi-menuSubmenulist">
+
+        @foreach (var permittype in Enum.GetValues(typeof(HCF.BDO.Enums.PermitType)))
+        {
+            <li style="@(Convert.ToInt32(permittype)==1 || Convert.ToInt32(permittype)==8 || Convert.ToInt32(permittype)==10 || Convert.ToInt32(permittype)==11?"display:block;":"display:none;")">
+                
+                    <span class="noti-icon-details">
+                        <i class="notification-icon" aria-hidden="true" title="Details"></i>
+                        <h4>
+
+                            <span style="display:inline;">@permittype.GetDescription() <span class="tooltipcontent">@permittype.GetDescription()</span> </span>
+
+
+                        </h4>
+
+                    </span>
+                    <div class="notification-ulitems innerBoxNoti" style="padding-top:0px;">
+                        <ul class="addnotificationEmails">
+                            <li style="width:100%;">
+                                @using (Html.BeginForm("PermitFormSettingsSave", "Permit", FormMethod.Post, new { id = Convert.ToInt32(@permittype) }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="workflow-actionbtn">
+
+                                        <input type="button" class="btnsettings button1" permittype="@Convert.ToInt32(@permittype)" value="Add Role" id="btnAddSettings_@permittype.ToString()" />
+
+                                        <input type="submit" class="btnSave button1" permittype="@Convert.ToInt32(@permittype)" value="Save" id="btnSaveettings_@permittype.ToString()" />
+                                    </div>
+                                    <div class="workflowpermit-table">
+                                        <table class="table table-bordered table-striped" id="deviceTbl_@Convert.ToInt32(@permittype)">
+                                            <thead>
+                                                <tr>
+
+                                                    <th>Sequence</th>
+                                                    <th>Required</th>
+                                                    <th>Role</th>
+                                                    <th>Label</th>
+                                                    <th>Delete</th>
+
+
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @if (Model.Count > 0)
+                                                {
+                                                    var Matrixrecord = Model.Where(x => x.PermitType == Convert.ToInt32(@permittype)).ToList();
+                                                    for (int i = 0; i < Matrixrecord.Count; i++)
+                                                    {
+
+                                                        @*@await Html.PartialAsync("_PermitWorkFlow", Matrixrecord[i], new ViewDataDictionary { { "type", Convert.ToInt32(Matrixrecord[i].PermitType) }, { "sequence", i } })*@
+                                                        @await Html.PartialAsync("_PermitWorkFlow", Matrixrecord[i],
+                      new ViewDataDictionary(
+                      new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                      new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                      {{ "type", Convert.ToInt32(Matrixrecord[i].PermitType) }, { "sequence", i }}
+                     )
+
+
+
+
+                                                    }
+
+                                                }
+
+
+                                                @{rownum++; }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                            </li>
+                        </ul>
+
+                    </div>
+            </li>
+                  }
+
+       
+    </ul>
+</div>
+
+<div class="modal fade" id="addEmailModel" role="dialog">
+    <div class="modal-dialog toemails-popup" id="modelContent">
+    </div>
+</div>
+
+<style>
+   
+
+    .notfi-menuSubmenulist li h4 {
+        position: relative;
+    }
+
+        .notfi-menuSubmenulist li h4 .tooltipcontent {
+            visibility: hidden;
+            min-width: 260px;
+            background-color: #464646;
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 110%;
+            left: 0;
+            text-align: center;
+            display: block;
+            line-height: 18px;
+            right: 0;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+            .notfi-menuSubmenulist li h4 .tooltipcontent::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 12%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: #464646 transparent transparent transparent;
+            }
+
+        .notfi-menuSubmenulist li h4:hover .tooltipcontent {
+            visibility: visible;
+        }
+    .notfi-menuSubmenulist li span {
+        padding: 4px 0;
+        align-items: center;
+    }
+    .notfi-menuSubmenulist li {
+        padding: 0 12px 0px;
+    }
+</style>

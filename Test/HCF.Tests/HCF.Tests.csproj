@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetSeleniumExtras.PageObjects.Core" Version="3.12.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="coverlet.collector" Version="3.0.2" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0" />
+    <PackageReference Include="Selenium.Support" Version="4.0.1" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\HCF.BAL\HCF.BAL.csproj" />
+    <ProjectReference Include="..\..\HCF.Web\HCF.Web.csproj" />
+    <ProjectReference Include="..\..\TMS\TMS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="HCF.Web.Tests\Public\Validators\User\" />
+  </ItemGroup>
+
+</Project>

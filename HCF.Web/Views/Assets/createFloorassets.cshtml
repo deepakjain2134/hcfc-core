@@ -1,0 +1,481 @@
+﻿@model HCF.BDO.TFloorAssets
+@using HCF.Web.Helpers;
+@{
+    ViewBag.Title = "Manage Asset";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Manage Asset
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+
+                        <form asp-controller="Assets" asp-action="CreateFloorAssets"
+                              data-ajax-success="AssetsOnSuccess"
+                              data-ajax="true" data-ajax-method="POST">
+                            @*@using (Ajax.BeginForm("CreateFloorAssets", "Assets", FormMethod.Post, new  { OnSuccess = "AssetsOnSuccess" },
+                                     new { id = "Assetsform" }))
+                                {*@
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+
+                            <div class="row">
+
+                                @Html.HiddenFor(x => x.FloorAssetsId)
+                                <input type="hidden" id="Source" name="Source" value="5" />
+                                <div class="col-md-4 form-group">
+                                    <label for="Assets Category">Assets Category<em class="required-field"> *</em></label>
+                                    @*@Html.AssetTypeDownList("AssetTypeId",
+                                        (Model.Assets != null ? Model.Assets.AssetTypeId : 0),
+                                        "Select Asset Type",
+                                        new { @class = "form-control",
+                                            required = "required" })*@
+                                    <assettypedownlist firsttext="Select Asset Type"
+                                                       required="required"
+                                                       class="form-control"
+                                                       selectedvalue="@(Model.Assets != null ? Model.Assets.AssetTypeId : 0)"
+                                                       name="AssetTypeId">
+                                    </assettypedownlist>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Assets Sub Category">Assets Sub Category<em class="required-field "> *</em></label>
+                                    <select id="AssetId" name="AssetId" class="form-control floor_tab required" required="required"></select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.Name)<em class="required-field hide"> *</em>
+                                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Name)
+                                </div>
+                                <div class="col-md-4 form-group feView">
+                                    <label for="Type">Type <em class="required-field hide"> *</em></label>
+                                    <select id="AscId" class="form-control non-visible" name="AscId"></select>
+                                </div>
+                                <div class="col-md-4 form-group feView">
+                                    <label for="Size">Size <em class="required-field hide"> *</em></label>
+                                    <select id="FETypeId" class="form-control non-visible" name="FETypeId"></select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Asset"> @Localizer["AssetNo"] <em class="required-field"> *</em></label>
+                                    @Html.TextBoxFor(model => model.DeviceNo, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.SerialNo)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Asset">Barcode #</label>
+                                    @Html.TextBoxFor(model => model.SerialNo, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.SerialNo)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.Rating)
+                                    @Html.TextBoxFor(model => model.Rating, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Rating)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.Model)
+                                    @Html.TextBoxFor(model => model.Model, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Model)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.NearBy)
+                                    @Html.TextBoxFor(model => model.NearBy, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.NearBy)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.Description)
+                                    @Html.TextBoxFor(model => model.Description, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Description)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.Make)
+                                    @*@Html.ManufacturerDropDown("ManufactureId", Model.ManufactureId, "Select", new { @class = "form-control" })*@
+                                    <manufacturerdropdown firsttext="Select"
+                                                          class="form-control"
+                                                          selectedvalue="@Model.ManufactureId"
+                                                          name="ManufactureId">
+                                    </manufacturerdropdown>
+                                    @Html.ValidationMessageFor(model => model.Name)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="FloorAsset">Building</label>
+                                    <buildingdropdownList firsttext="Select Building"
+                                                          firstvalue=""
+                                                          class="form-control"
+                                                          selectedvalue="@((Model.Floor != null) ? Model.Floor.BuildingId : 0)"
+                                                          name="BuildingID">
+                                    </buildingdropdownList>
+
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Floors">Floor</label>
+                                    <select id="FloorId" name="FloorId" class="form-control"></select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="stops">Stops</label>
+                                    <select id="StopId" name="StopId" class="form-control">
+                                        <option value="">Select Stop</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Status">Active <em class="required-field"> *</em></label>
+                                    @*@Html.AssetStatusDropDown("StatusCode", Model.StatusCode, "Select Status", new { @class = "form-control", required = "required" })*@
+                                    <assetstatusdropDown firsttext="Select Status"
+                                                         required="required"
+                                                         class="form-control"
+                                                         selectedvalue=""
+                                                         name="StatusCode">
+                                    </assetstatusdropDown>
+
+                                    @Html.ValidationMessageFor(model => model.Name)
+                                </div>
+
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.WallRating)
+                                    @Html.TextBoxFor(model => model.WallRating, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.WallRating)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.DoorRating)
+                                    @Html.TextBoxFor(model => model.DoorRating, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.DoorRating)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    @Html.LabelFor(model => model.FrameRating)
+                                    @Html.TextBoxFor(model => model.FrameRating, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.FrameRating)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label for="Area/Department">Area/Department</label>
+                                    @*@Html.RiskAreaDropDown("AreaId", (Model.AreaId != null && Model.AreaId > 0 ? Model.AreaId : 0),
+                                        "Select Department", new { @class = "form-control" })*@
+                                    <riskareadropdown firsttext="Select Department"
+                                                      class="form-control"
+                                                      selectedvalue="@((Model.AreaId != null && Model.AreaId > 0 ? Model.AreaId : 0))"
+                                                      name="AreaId">
+                                    </riskareadropdown>
+
+                                </div>
+                                <div class="col-md-4 form-group" style="@( UserSession.CurrentOrg != null && UserSession.CurrentOrg.ClientNo > 0 && (UserSession.CurrentOrg.ClientNo.ToString() == "111347" || UserSession.CurrentOrg.ClientNo.ToString() == "13478" || UserSession.CurrentOrg.ClientNo.ToString() == "13460" ||  UserSession.CurrentOrg.ClientNo.ToString() == "13469")?"display:block;":"display:none;")">
+                                    @Html.LabelFor(model => model.Path)
+                                    <select id="Path" name="Path" class="form-control">
+                                        <option value="0">Select</option>
+                                        <option value="1">Path A (Non Fire Alarm Device)</option>
+                                        <option value="2">Path B (Fire Alarm NonAddressable Device)</option>
+                                        <option value="3">Path C (Fire Alarm Addressable Device)</option>
+                                    </select>
+                                    @Html.ValidationMessageFor(model => model.Path)
+                                </div>
+                                <div class="col-md-4 form-group" style="@( UserSession.CurrentOrg != null && UserSession.CurrentOrg.ClientNo > 0 && (UserSession.CurrentOrg.ClientNo.ToString() == "111347" || UserSession.CurrentOrg.ClientNo.ToString() == "13478" || UserSession.CurrentOrg.ClientNo.ToString() == "13460" ||  UserSession.CurrentOrg.ClientNo.ToString() == "13469")?"display:block;":"display:none;")">
+                                    @Html.LabelFor(model => model.AssetChangeDeviceType)
+                                    <select id="AssetChangeDeviceType" name="AssetChangeDeviceType" class="form-control">
+                                        @*<option value="0">Other Device</option>*@
+                                        <option value="0">Select Device</option>
+                                        <option value="1">Life Safety Device</option>
+                                        <option value="2">Facility Device</option>
+
+                                    </select>
+                                    @Html.ValidationMessageFor(model => model.AssetChangeDeviceType)
+                                </div>
+
+                                <div class="col-md-12 text-right button_Div">
+                                    <button type="submit" id="submit" class="comm-button" title="Save">Save</button>
+                                    @*@Html.ActionLink("Cancel ", "FloorAssets", "Assets", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "FloorAssets", new { controller = "Assets" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+                            @*}*@
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var assetddl = $("#AssetId");
+    var buildingdddlCtr = $("#BuildingID");
+    var floorsddlCtr = $("#FloorId");
+    var stopddlCtr = $("#StopId");
+    var ascId = $("#AscId");
+    var FETypeId = $("#FETypeId");
+    var Path = $("#Path");
+    var DeviceType = $("#AssetChangeDeviceType");
+    var mngfloorAsset = {
+        FloorId: '@Model.FloorId',
+        AssetId: '@Model.AssetId',
+        StopId: '@Model.StopId',
+        AscId: '@Model.AscId',
+        FETypeId: '@Model.FETypeId',
+        FloorAssetsId: '@Model.FloorAssetsId',
+        StatusCode: '@Model.StatusCode',
+        AssetTypeId:@((Model.Assets !=null)? Model.Assets.AssetTypeId : 0),
+        BuildingId: @((Model.Floor != null)?Model.Floor.BuildingId: 0),
+    };
+
+    $(document).ready(function () {
+
+        $("#AssetTypeId").attr("required", true)
+        $("#StatusCode").attr("required", true)
+
+        $(".feView ").hide()
+        console.log(mngfloorAsset);
+        //$("#Assets_AssetTypeId").change(function () {
+        //    changeTypes();
+        //});
+        var buildingId = mngfloorAsset.BuildingId > 0 ? mngfloorAsset.BuildingId : "";
+        var assettypeId = mngfloorAsset.AssetTypeId > 0 ? mngfloorAsset.AssetTypeId : "";
+        $("#AssetTypeId").val(assettypeId);
+        buildingdddlCtr.val(buildingId);
+
+        $("#AssetTypeId").change(function () {
+            changeTypes();
+        });
+
+        assetddl.change(function () {
+            ResetAssetDropdown(buildingdddlCtr,floorsddlCtr,stopddlCtr);
+            if ($(this).val() == 123) {
+                BindFEFields($(this).val());
+            } else {
+                hideFEFields();
+            }
+        });
+        changeTypes();
+        var selectedFloorID = parseInt(mngfloorAsset.FloorId);
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, selectedFloorID);
+        var selectedStopId = parseInt(mngfloorAsset.StopId);
+        bindStopddl(stopddlCtr, selectedFloorID, selectedStopId, "", 'Select Stop');
+        if ($('#BuildingID').val() != "") {
+            $('#FloorId').attr('required', 'required');
+        }
+        var Pathval = '@Model.Path';
+        var DeviceTypeval = parseInt('@Model.AssetChangeDeviceType');
+        if (Pathval>0) {
+            Path.val(Pathval);
+        }
+
+        if (DeviceTypeval > 0) {
+            DeviceType.val(DeviceTypeval);
+        }
+
+        setPathValues();
+    });
+
+    DeviceType.change(function () {
+        setPathValues();
+    });
+
+
+    function setPathValues() {
+        debugger;
+        if (DeviceType.val() > 0) {
+            if (DeviceType.val() == '2') {
+                $("#Path").val(0);
+                $("#Path option[value=2]").prop("disabled", true);
+                $("#Path option[value=3]").prop("disabled", true);
+            } else {
+                $("#Path  option").attr("disabled", false);
+            }
+        } else {
+            $("#Path option").attr("disabled", true);
+            $("#Path").val(0);
+        }
+    }
+
+    var hideFEFields = function() {
+        $(".feView").hide();
+        ascId.val("");
+        $("#FETypeId").val("");
+        ascId.removeAttr("required");
+        $("#FETypeId").removeAttr("required");
+    }
+
+    var BindFEFields=function(assetId) {
+        $(".feView").show();
+      //  ascId.attr("required", "required");
+      //  $("#FETypeId").attr("required", "required");
+        bindAssetsSubCat(assetId);
+    }
+
+    var bindAssetsSubCat = function (value) {
+        if (value != "") {
+            //ShowHidecntrl();
+            ascId.empty();
+            ascId.append(
+                $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = CRxUrls.Assets_GetAssetSubCategory;
+            floorOptions.type = "POST";
+            floorOptions.data = { assetId: value };
+            floorOptions.datatype = "json";
+            /*floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    ascId.append(
+                        $('<option></option>').val(lists[i].AscId).html(lists[i].AscName));
+                }
+                ascId.prop("disabled", false);
+
+                if (mngfloorAsset.AscId) {
+                    ascId.val(mngfloorAsset.AscId);
+                }
+                loadFESize(1);
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting data!!", ""); };
+            $.ajax(floorOptions);
+        }
+        else {
+            ascId.empty();
+            ascId.append(
+                $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    var loadFESize = function (ascId) {
+         if (ascId != "") {
+            FETypeId.empty();
+            FETypeId.append(
+               $('<option></option>').val("").html("Select"));
+             var floorOptions = {};
+             floorOptions.url = CRxUrls.Assets_GetAssetSubCategorySize;
+            floorOptions.type = "POST";
+            floorOptions.data = { ascId: 0 };
+            floorOptions.datatype = "json";
+           /* floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    FETypeId.append(
+                        $('<option></option>').val(lists[i].FETypeId).html(lists[i].FeType));
+                }
+
+                if (mngfloorAsset.FETypeId > 0) {
+                    FETypeId.val(mngfloorAsset.FETypeId);
+                }
+            };
+             floorOptions.error = function () { AlertWarningMsg("Error in Getting data!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            FETypeId.empty();
+            FETypeId.append(
+              $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    var changeTypes = function () {
+        //ResetAssetDropdown(buildingdddlCtr, floorsddlCtr, stopddlCtr);
+        debugger;
+        if ($("#AssetTypeId").val() != "") {
+            hideFEFields();
+            assetddl.empty();
+            assetddl.append(
+                $('<option></option>').val("").html("Select Sub Category"));
+            var floorOptions = {};
+            floorOptions.url = CRxUrls.Assets_GetAssets;
+            floorOptions.type = "POST";
+            floorOptions.data = { assetTypeId: $("#AssetTypeId").val() };
+            floorOptions.datatype = "json";
+           /* floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (floorList) {
+                for (var i = 0; i < floorList.length; i++) {
+                    assetddl.append(
+                        $('<option></option>').val(floorList[i].AssetId).html(floorList[i].Name));
+                }
+
+                if (mngfloorAsset.FloorAssetsId > 0) {
+                    assetddl.val(mngfloorAsset.AssetId);
+                    $("#StatusCode").val(mngfloorAsset.StatusCode);
+                    if (mngfloorAsset.AssetId == 123) {
+                        BindFEFields(123);
+                    }
+                }
+
+                assetddl.prop("disabled", false);
+            };
+            floorOptions.error = function () { AlertWarningMsg("Please select Assets Category!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            assetddl.empty();
+            $(".feView").hide();
+            assetddl.append(
+                $('<option></option>').val("").html("Select Sub Category"));
+        }
+    }
+
+    buildingdddlCtr.change(function () {
+        debugger;
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+        stopddlCtr.empty();
+        stopddlCtr.append(
+            $('<option></option>').val("").html("Select Stop"));
+
+        if ($('#BuildingID').val() != "") {
+            $('#FloorId').attr('required', 'required');
+        }
+
+    });
+
+    floorsddlCtr.change(function () {
+        stopddlCtr.empty();
+        var selectedStopId = parseInt(mngfloorAsset.StopId);
+        var assetval = $("#AssetId").val();
+        if (assetval == 123) {
+            BindStopNotInFE(stopddlCtr, assetval , $(this).val());
+        }
+        else {
+            bindStopddl(stopddlCtr, $(this).val(), selectedStopId, "", 'Select Stop');
+        }
+    });
+
+
+    //$('#submit').click(function () {
+    //    debugger;
+    //    $('#Assetsform').submit();
+    //});
+
+    function AssetsOnSuccess(data) {
+        debugger;
+        if (data != null) {
+            AlertSuccessMsg(data);
+            window.location.href = '@Url.RouteUrl("floorAssets")';
+        }
+    }
+
+
+    $("#DeviceNo").focusout(function () {
+        debugger
+        CheckExistingAssets();
+    });
+
+
+    function CheckExistingAssets() {
+        debugger;
+        var Deviceno = $("#DeviceNo").val();
+
+        if (Deviceno !== "") {
+            $.get('@Url.Action("CheckExistingAssets", "Assets")' + '?Deviceno=' + Deviceno, function (data) {
+                if (data == true) {
+                    $('#submit').addClass('disable');
+                    debugger
+                    if ($('.assetsExists').length == 0) {
+                        $("#DeviceNo").after("<div class='validation assetsExists' style='color:red;margin-bottom: 20px;'>This asset " + Deviceno + " already exists.</div>");
+                    }
+
+                } else {
+                    $('#submit').removeClass('disable');
+                    $('.assetsExists').remove();
+                }
+            });
+        }
+    }
+</script>

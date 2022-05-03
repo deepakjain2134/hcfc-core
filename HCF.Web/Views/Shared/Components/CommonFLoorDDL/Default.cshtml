@@ -1,0 +1,8 @@
+﻿@model List<SelectListItem>
+@{
+
+    Layout = null;
+}
+
+Floors @Html.DropDownList("floors", Model, new { @class = "form-control selectyear floor_dropdown" })
+

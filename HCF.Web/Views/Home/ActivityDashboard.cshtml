@@ -1,0 +1,349 @@
+﻿@model List<HCF.BDO.UserProfile>
+
+
+@{
+    ViewBag.Title = "Activity Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var users = Model; //Users.GetUsers().Where(x => (x.IsActive && !string.IsNullOrEmpty(x.Email) && x.EpsCount > 0) || x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId).OrderBy(x => x.FullName).ToList();
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Compliance Dashboard
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+
+                <div class="message" style="display: none">
+                    <p>Search with suggestion is supported for devices with width larger than 600px. You can click on the search icon to show the search bar.</p>
+                </div>
+
+
+                <div id="catfilter" class="dashboard_filter activityFilters" style="display:none;">
+                    <div class="input-group" id="dvsearch">
+                        <div class="input-sublist">
+                            <input type="text" class="form-control" id="inputSuccess2" placeholder="Search" />
+                            <div class="input-sublistItems">
+                                <ul>
+                                    <li><a href="#" class="input_search" data-value="">In All </a></li>
+                                    <li><a href="#" class="input_search" data-value="1">In Completed </a></li>
+                                    <li><a href="#" class="input_search" data-value="2">In In Progress</a></li>
+                                    <li><a href="#" class="input_search" data-value="0">In Past Due</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <i class="closesearch" id="closesearch">x</i>
+                        <span class="input-group-addon">
+                            <i class="fa fa-search" id="btntxtsearch"></i>
+                        </span>
+                    </div>
+                    <div class="dash_btnfilter" id="dash_btnfilter">
+                        <input type="submit" name="button" class="button1 alleps" id="btn_all" value="Show All " />
+                        <input type="submit" name="button" class="button1 btn_pastdue" id="btn_pastdue" value="Past Due" />
+                        <input type="submit" name="button" class="button1 Inprogress" id="btn_Inprogress" value="In Progress" />
+                        <input type="submit" name="button" class="button1 CompletedEp" id="btn_Completed" value="Completed" />
+                        <div class="dropup" style="display: inline-flex;">
+                            <input type="submit" name="button" class="button1 dropdown-toggle due_with_day" id="btn_dueWithin"
+                                   value="Due within Days" data-toggle="dropdown" />
+                            <ul class="dropdown-menu assets-dropdown" id="btn_Duewithin">
+                                <li><a href="#" class="filter_due_within">1 days</a></li>
+                                <li><a href="#" class="filter_due_within">5 days</a></li>
+                                <li><a href="#" class="filter_due_within">10 days</a></li>
+                                <li><a href="#" class="filter_due_within">15 days</a></li>
+                                <li><a href="#" class="filter_due_within">20 days</a></li>
+                                <li><a href="#" class="filter_due_within">25 days</a></li>
+                                <li><a href="#" class="filter_due_within">30 days</a></li>
+                                <li><a href="#" class="filter_due_within">60 days</a></li>
+                                <li><a href="#" class="filter_due_within">90 days</a></li>
+                                <li><a href="#" class="filter_due_within">This Month</a></li>
+                                <li><a href="#" class="filter_due_within">Next Month</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assetDeficienciesleg" style="display:none;">
+                    <ul class="legand">
+                        <li><img src="@Url.Content("~/dist/Images/Icons/RA.png")" class="deficiencyIcons" title="RA" /> Deficient with risk</li>
+                        <li><img src="@Url.Content("~/dist/Images/Icons/DE.png")" class="deficiencyIcons" title="DE" /> Deficient</li>
+                    </ul>
+                </div>
+                <div class="tabbable" id="tabbable">
+                    <ul class="nav nav-tabs">
+                        <li id="activitytab" title="Dashboard" class="active parentTab">
+                            <a href="#tab1" data-info="tab1" data-toggle="tab" class="tab">
+                                <img src="@Url.Content("~/dist/Images/Icons/activity_icon.png")" />
+                                @Localizer["ActivityDashboard_Dashboard"]
+
+                            </a>
+                        </li>
+                        <li id="defeciencytab" title="Deficiencies" class="parentTab">
+                            <a href="#tab2" data-toggle="tab" data-info="tab2" class="tbs" load="0">
+                                <img src="@Url.Content("~/dist/Images/Icons/deficiencies_icon.png")" />
+                                @*@Html.StaticImage(new { @src = @Url.Content("~/dist/Images/Icons/deficiencies_icon.png") })*@
+                                Deficiencies
+                            </a>
+                        </li>
+                        <li id="inspCalendartab" title="Inspection Calendar" class="parentTab">
+                            <a href="#tab10" data-toggle="tab" data-info="tab10" class="tbs">
+                                <img src="@Url.Content("~/dist/Images/Icons/activity_icon.png")" />
+                                Inspection Calendar
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content activity-contentBox">
+                        <div class="tab-pane active" id="tab1">
+                            <div class="dash-actvity-box">
+                                <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                                    <div class="dropup dash_btnfilter" style="display: inline-block; float:left;margin-right: 18px;">
+                                        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                        {
+                                            <select name="ddlUsers" id="ddlUsers" class="form-control">
+                                                <option value=""> All Users</option>
+                                                @foreach (var data in users)
+                                                {
+                                                    <option value="@data.UserId">
+                                                        @($"{data.FullName} ({((data.IsPowerUser == true) ? "PU " + data.EpsCount.ToString() : data.EpsCount.ToString())})")
+                                                    </option>
+
+                                                }
+
+                                            </select>
+                                        }
+                                    </div>
+
+                                    <label class="btn active">
+                                        @Html.RadioButton("dashEPCat", 1)<label for="EC">EC <span class="countec" id="txtEpEcCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("dashEPCat", 2)<label for="LS">LS <span class="countec" id="txtEpLsCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("dashEPCat", 3)<label for="EM">EM <span class="countec" id="txtEpEmCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("dashEPCat", 0, true)<label for="ALL">All <span class="countec" id="txtEpAllCount"></span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="dvScroll" class="table-responsive activityminWidth">
+                                        <table id="c_myTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr id="trSorting">
+                                                    <th style="display:none">Status</th>
+                                                    <th style="display:none">CategoryId</th>
+                                                    <th style="width:176px;" title="@Localizer["StandardEP"]" onclick="SetSortingOrder('StandardEP')" class="sorting1" id="StandardEP">
+
+                                                        @Localizer["StandardEP"]
+                                                    </th>
+                                                    <th style="width:105px;">CoP</th>
+                                                    <th title="@Localizer["Score"]" onclick="SetSortingOrder('Name')" class="sorting1" id="Name">
+                                                        @Localizer["Score"]
+                                                    </th>
+
+                                                    <th title="@Localizer["Binder"]" onclick="SetSortingOrder('Binder')" class="sorting1" id="Binder" width="100px">
+                                                        @Localizer["Binder"]
+                                                    </th>
+                                                    <th title="@Localizer["Asset"]" onclick="SetSortingOrder('IsAssetsRequired')" class="sorting1" id="IsAssetsRequired">
+                                                        @Localizer["Asset"]
+                                                    </th>
+                                                    <th title="@Localizer["Description"]" onclick="SetSortingOrder('Description')" class="sorting1" id="Description" width="400px">
+                                                        @Localizer["Description"]
+                                                    </th>
+                                                    <th style="min-width:124px;" title="@Localizer["InspectionDate"]" onclick="SetSortingOrder('DueDate')" class="sorting1" id="CreatedDate" width="150px">
+                                                        <img alt="@Localizer["InspectionDate"]" src="@Url.Content(HCF.Web.Models.ImagePathModel.CalendarIcon)"
+                                                             title="Next Inspection Date" />
+                                                    </th>
+                                                    <th style="min-width:124px;" title="@Localizer["Users"]">
+                                                        <img alt="@Localizer["Users"]" src="@Url.Content("~/dist/Images/Icons/dashboard_user_icon.png")" title="@Localizer["Users"]">
+                                                    </th>
+                                                    <th style="width:120px;" title="@Localizer["Frequency"]" onclick="SetSortingOrder('DisplayName')" class="sorting1" id="DisplayName">
+                                                        <img alt="@Localizer["Frequency"]" src="@Url.Content("~/dist/Images/Icons/dashboard_clock.png")" title="@Localizer["Frequency"]" />
+                                                    </th>
+                                                    <th title="@Localizer["DocRequired"]" class="doc-name sorting1" onclick="SetSortingOrder('DOC')" id="DOC">
+                                                        <img alt="@Localizer["DocRequired"]" src="@Url.Content("~/dist/Images/Icons/dashboard_doc_icon.png")" title="@Localizer["DocRequired"]" />
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="partialContents">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab2" load="0">
+                            <div class="span8">
+                                <div class="tabbable tabs-left">
+                                    <ul class="nav nav-tabs">
+                                        <li id="li_tab3" class="active"><a href="#tab3" data-info="tab3" class="tbs" data-toggle="tab">Asset Deficiencies</a></li>
+                                        <li id="li_tab4"><a href="#tab4" data-info="tab4" class="tbs" data-toggle="tab" load="0">Round Deficiencies</a></li>
+                                        <li id="li_tab34"><a href="#tab34" data-info="tab34" class="tbs" data-toggle="tab" load="0">Siemens Deficiencies</a></li>
+                                    </ul>
+                                    <div class="tab-content ">
+                                        <div class="tab-pane active assetsdeficiency" id="tab3">
+                                            @*@{Html.RenderAction("Assetsdeficiency", "Home", new { type = 0 }); }*@
+                                        </div>
+                                        <div class="tab-pane roundDeficiency" id="tab4">
+                                            @*@{Html.RenderAction("RoundDeficiency", "Home"); }*@
+                                        </div>
+                                        <div class="tab-pane" id="tab34">
+                                            @await Component.InvokeAsync("HomeDeviceDeficiency")
+                                            @*@Html.Action("DeviceDeficiency", "Home")*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab10">
+                            <div id="loadpartial">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <link rel="stylesheet" href="@Url.Content("~/dist/plugins/fullcalendar/fullcalendar.min.css")">
+    <script src="@Url.Content("~/dist/plugins/fullcalendar/moment.min.js")"></script>
+    <script src="@Url.Content("~/dist/plugins/fullcalendar/fullcalendar.min.js")"></script>
+
+    <script src="@Url.Content("~/dist/Scripts/jquery.scrollTo.js")"></script>
+    <script src="@Url.Content("~/dist/js/jQuery.tagify.min.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/dist/css/tagify.css")" rel="stylesheet">
+    <script>
+
+        $(function () { $(".ddlboxLive").selectpicker('render'); });
+
+        $(document).ready(function () {
+            $("#inputSuccess2").mouseover(function () {
+                $(".input-sublistItems").addClass('input-active');
+            });
+
+            $("#closesearch").click(function () {
+                $(".input-sublistItems").removeClass('input-active');
+            });
+
+
+            $("#dvsearch").mouseleave(function () {
+                $(".input-sublistItems").removeClass('input-active');
+            });
+
+            $('.nav-tabs a[data-info="tab10"]').on('shown.bs.tab',
+                function() {
+                    loadInspCalender();
+                });
+
+            $('.nav-tabs a[data-info="tab2"]').on('shown.bs.tab',
+                function () {
+                    if ($(this).attr('load') == 0) {
+                        loadAssetsdeficiency();
+                    }
+                });
+
+
+            $('.nav-tabs a[data-info="tab4"]').on('shown.bs.tab',
+                function() {
+                    if ($(this).attr('load') == 0) {
+                        loadRoundDeficiency();
+                    }
+                });
+            // loadAssetsdeficiency();
+
+            $("#PrintPage").show();
+            $("#PrintPage").attr("onclick", "");
+            $('#PrintPage').click(function () {
+                var catId = localStorage.getItem("dashCatId");
+                var userId = $("#ddlUsers").val();
+                var status = localStorage.getItem("btnValue");
+                var noofdays = localStorage.getItem("Datein");
+                var sortOrder = localStorage.getItem("SortOrder");
+                var orderbySort = localStorage.getItem("OrderbySort");
+                var duemonth = localStorage.getItem("DueMonth");
+                var dueyear = localStorage.getItem("DueYear");
+                var searchText = $("#inputSuccess2").val();
+                var isScroll = localStorage.getItem("isScroll");
+                if (sortOrder == null) {
+                    sortOrder = "StandardEP";
+                } if (orderbySort == null) {
+                    orderbySort = "ASC";
+                }
+
+                if (noofdays === -1) {
+                    noofdays = null;
+                } else if (noofdays > 0) {
+                    noofdays = noofdays;
+                }
+                else { noofdays = 0; }
+                var url = '@Url.Action("CreateCompilanceDashBoardReport", "Pdf")';
+
+                $("#PrintPage").attr('href', url + '?userid=' + userId + "&sortOrder=" + sortOrder + "&OrderbySort=" + orderbySort + "&categoryId=" + catId + "&status=" + status + "&noofdays=" + noofdays + "&duemonth=" + duemonth + "&dueyear=" + dueyear + "&searchtext=" + searchText + "&isScroll=" + isScroll);
+
+            });
+
+        });
+
+        var loadAssetsdeficiency = function() {
+            var urlAction = '@Url.Action("Assetsdeficiency", "Home")';
+            $.ajax({
+                url: urlAction + "?type=0",
+                type: "GET",
+                success: function(data) {
+                    $('.assetsdeficiency').empty();
+                    $('.assetsdeficiency').html(data);
+                    $('.nav-tabs a[data-info="tab3"]').add("load", 1);
+                }
+            });
+        };
+
+        var loadRoundDeficiency = function() {
+            var urlAction = '@Url.Action("RoundDeficiency", "Home")';
+            $.ajax({
+                url: urlAction,
+                type: "GET",
+                success: function(data) {
+                    $('.roundDeficiency').empty();
+                    $('.roundDeficiency').html(data);
+                    $('.nav-tabs a[data-info="tab4"]').add("load", 1);
+                }
+            });
+        };
+
+        var loadInspCalender = function() {
+            var urlAction = '@Url.Action("PartialInspCalendar", "Inspection")';
+            $.ajax({
+                url: urlAction,
+                type: "GET",
+                //global: false,
+                success: function(data) {
+                    $('#loadpartial').empty();
+                    $('#loadpartial').html(data);
+                }
+            });
+        };
+    </script>
+
+    <script src='@Url.Content($"~/dist/Scripts/page_scripts/Home/ActivityDashboard.js?v={DateTime.Now.DayOfYear}")' type="text/javascript"></script>
+}
+
+@*<style>
+    .assetDeficienciesleg {
+        display: inline-block;
+        position: absolute;
+        right: 15px;
+        top: 6px;
+    }
+</style>*@

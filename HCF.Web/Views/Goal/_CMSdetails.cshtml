@@ -1,0 +1,46 @@
+﻿@model List<HCF.BDO.CopDetails>
+
+<div class="cmsCol2">
+   
+
+    @foreach (var item in Model)
+    {
+        <div class="search-searchicon">
+            <input type="text" id="@item.CopDetailsId" rel="cmsval_@item.CopDetailsId" value="@item.RequirementName" />
+            <i class="closesearch" rel="@item.CopDetailsId" id="closesearch_@item.CopDetailsId">X</i>
+        </div>
+    }
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        Array.prototype.Remove = function () {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+
+        $(".closesearch").off().on('click', function () {
+            debugger;
+            var value = $(this).attr("rel");
+            if (value != "") {
+                cmsvalue.Remove(value);
+                $("#UncheckCMS").val(cmsvalue);
+                $('.cmsCol2').find("[id=" + value + "]").remove();
+                $('.cmsCol2').find("[id=" + "closesearch_"+ value + "]").remove();
+                $('.ulcmslistitem').find("[value=" + value + "]").attr('checked', false); 
+                 $.get('@Url.Action("DeleteCMSEpMapping","Goal")' + '?id=' + value + '&view=cmstext', function () {
+
+                });
+            }
+        })
+
+
+    });
+</script>

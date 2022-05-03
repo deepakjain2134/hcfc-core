@@ -1,0 +1,123 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var userlist = Model.roundGroup.GroupUsers;
+}
+<div class="table-responsive round-steptable" id="round_view">
+    @if (userlist.Count != 0)
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    @foreach (var item in Model.roundGroup.RoundCategory.OrderBy(x => x.CategoryName))
+                    {
+                        <th>@item.CategoryName </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var data in userlist.Where(x => x.IsVendorUser == false && !string.IsNullOrEmpty(x.FirstName) && x.UserAdditionalRoleIds.Contains("1")).OrderBy(x => x.FullName))
+                {
+                    <tr>
+                        <td>@data.FullName <br />(@data.Email)</td>
+
+                        @foreach (var item1 in Model.roundGroup.RoundCategory.OrderBy(x => x.CategoryName))
+                        {
+                            bool isChecked = false;
+                            var roundCategories = Model.roundGroup.RoundGroupUsers.FirstOrDefault(x => x.UserId == data.UserId)?.RoundCategories;
+                            if (!string.IsNullOrEmpty(roundCategories))
+                            {
+                                List<int> catArray = roundCategories.Split(',').Select(x => int.Parse(x)).ToList();
+
+                                if (catArray.Any(x => x == item1.RoundCatId))
+                                {
+                                    isChecked = true;
+                                }
+                            }
+                            <td style="position:relative;">
+                                <input type="checkbox" value='@data.UserId' rel="@item1.RoundCatId" @((isChecked == true) ? "checked='checked'" : "") />
+                                <span></span>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center">
+            <h4>Please select the volunteers for current location group</h4>
+        </div>
+    }
+
+
+
+</div>
+<br />
+<div class="row">
+    <div class="col-md-12 text-right">
+        <input id="btnCancel" onclick='openStep3()' type="button" value='@Localizer["Back"]' class="comm-Cancelbutton" />
+        <input id="btnNext" onclick='openStep5()' type="button" value=' @Localizer["Next"] ' class="comm-button" />
+    </div>
+</div>
+<script>
+    $("[type=checkbox]").on('change', function () {
+       // debugger;
+        var IsActive = $(this).is(':checked');
+        var UserID = $(this).val();
+        var RoundcatId = $(this).attr("rel");
+        var RoundGroupId = $("#drpGroup").val();
+        var url = '@Url.Action("SaveUserCategories", "Round")';
+         $.get(url + '?RoundcatId=' + RoundcatId + '&RoundGroupId=' + RoundGroupId + '&IsActive=' + IsActive + '&UserID=' + UserID, function (data) {
+             //successAlert('Saved Successfully');
+        });
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('tbody').scroll(function (e) {
+            $('thead').css("left", -$("tbody").scrollLeft());
+            $('thead th:nth-child(1)').css("left", $("tbody").scrollLeft());
+            $('tbody td:nth-child(1)').css("left", $("tbody").scrollLeft());
+        });
+    });
+</script>
+<style type="text/css">
+
+
+
+
+
+
+
+
+    .round-steptable tbody tr td:first-child,
+    .round-steptable thead tr th:first-child {
+        min-width: 180px;
+        position: sticky;
+        left: -2px;
+        background-color: #fbfbfb;
+        z-index: 99;
+        text-align: left;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+    }
+
+    .round-steptable td {
+        min-width: 56px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .round-steptable th {
+        position: sticky;
+        top: -1px;
+        background-color: #fbfbfb;
+        z-index: 9;
+        vertical-align: bottom !important;
+    }
+</style>

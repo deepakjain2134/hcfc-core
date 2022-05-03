@@ -1,0 +1,35 @@
+﻿@model IEnumerable<HCF.BDO.RolesInGroups>
+@{
+    var roles = Model;
+}
+
+@foreach (var foo in roles
+    .OrderBy(x => x.Roles.DisplayText).GroupBy(p => new { p.RoleId }).Select(g => g.First()).ToList())
+{
+    var dataList = Model.Select(x => x.Roles).ToList();
+
+    var levelNo = HCF.Web.Controllers.UserController.FindAllParents(dataList, foo.Roles).Count();
+
+    <tr class="@string.Format("class{0}", levelNo)">
+        <td>
+            <span class="n" style='padding-left:@(levelNo * 10)px'>
+                @foo.Roles.DisplayText
+            </span>
+        </td>
+
+        @foreach (var role in Model.Where(x => x.RoleId == foo.RoleId).ToList())
+        {
+            <td align="center">
+                @if (foo.Roles.IsChild)
+                {
+                    @Html.CheckBoxFor(modelItem => role.Status, new { @roleId = role.RoleId, @groupId = role.GroupId, @class = "FlagT" })<span></span>
+                }
+            </td>
+        }
+    </tr>
+
+    if (Model.Where(x => x.Roles.ParentId == foo.RoleId).Any())
+    {
+        @await Html.PartialAsync("_PermissionTr", Model.Where(x => x.Roles.ParentId == foo.RoleId).ToList())       
+    }
+}

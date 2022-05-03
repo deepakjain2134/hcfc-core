@@ -1,0 +1,460 @@
+﻿@model HCF.BDO.RoundGroup
+
+@{ var frequency = this.ViewData.ContainsKey("frequency") ? this.ViewData["frequency"].ToString() : string.Empty; }
+<div class="pattern-col2">
+    <div class="reoccuevery">
+        <div class="reoccueveryday">
+
+            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+
+                @foreach (var value in Enum.GetValues(typeof(HCF.BDO.Enums.RecurrencePattern)))
+                {
+
+                    HCF.BDO.Enums.RecurrencePattern RecurrencePattern = (HCF.BDO.Enums.RecurrencePattern)value;
+                    if (Convert.ToInt32(frequency) == Convert.ToInt32(value))
+                    {
+
+    <div id="divrecur_@Convert.ToInt32(value)" class="recur">
+
+        @foreach (var otherrecurvalue in Enum.GetValues(typeof(HCF.BDO.Enums.OtherRecurrencePattern)))
+        {
+            HCF.BDO.Enums.OtherRecurrencePattern OtherRecurrencePattern = (HCF.BDO.Enums.OtherRecurrencePattern)otherrecurvalue;
+            //recur every common to all frequency except monthy as outlook mail
+            if ((Convert.ToInt32(value) != 7) && Convert.ToInt32(otherrecurvalue) == 1)
+            {
+<div id="divforrecur_@Convert.ToInt32(otherrecurvalue)" style="display: flex; padding-left: 8px;">
+
+    <input id="RecurFor" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+    <label for="RecurFor">  @OtherRecurrencePattern.GetDescription() </label>
+
+
+    @Html.TextBoxFor(model => model.ReoccurEvery, new { @class = "form-reccur numberonly", maxlength = "2", @id = string.Format("txtrecurevery_{0}", @Convert.ToInt32(otherrecurvalue)) })
+    <span>&nbsp; @RecurrencePattern.GetDescription()</span>
+</div> }
+
+                        //Yearly condition starts****
+                        if (Convert.ToInt32(value) == 1 && Convert.ToInt32(otherrecurvalue) == 4)
+                        {
+
+<div style="display: flex; padding-left: 8px; ">
+    <input id="RecurFor" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+    <label for="RecurFor">  @OtherRecurrencePattern.GetDescription() </label>
+</div>
+
+                            <div id="divforrecur_@Convert.ToInt32(otherrecurvalue)">
+                                @Html.DropDownListFor(
+         m => m.The,
+         new SelectList(Model.SequenceOcuurence, "Key", "Value", "-- Select--")
+         )
+                                @Html.DropDownListFor(
+         m => m.Weekno,
+         new SelectList(Model.DayName, "Key", "Value", "-- Select Day--")
+         )
+                                <span> of</span>
+                                @Html.DropDownListFor(
+         m => m.Monthno,
+         new SelectList(Model.Months, "Key", "Value", "-- Select Month--"), new { @class = "selectmonth" }
+         )
+                            </div> }
+
+                                                    if (Convert.ToInt32(value) == 1 && Convert.ToInt32(otherrecurvalue) == 5)
+                                                    {
+
+
+                            <div style="display: flex; padding-left: 8px;">
+                                <input id="RecurFor" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+                                <label for="RecurFor">  @OtherRecurrencePattern.GetDescription() </label>
+                            </div>
+                                                        <div id="divforrecur_@Convert.ToInt32(otherrecurvalue)">
+                                                            @Html.DropDownListFor(
+                                     m => m.Monthno,
+                                     new SelectList(Model.Months, "Key", "Value", "-- Select Month--"), new { @class = "selectmonth" }
+                                     )
+                                                            <span>&nbsp;</span>
+                                                            @Html.TextBoxFor(model => model.Dayno, new { @class = "form-reccur numberonly", maxlength = "2" })
+
+                                                        </div> }
+                                                                                //Yearly condition ends****
+
+
+                                                                                //Daily condition starts****
+
+
+                                                                                if (Convert.ToInt32(value) == 2 && Convert.ToInt32(otherrecurvalue) == 2)
+                                                                                {
+
+                                                        <div id="divforrecur_@Convert.ToInt32(otherrecurvalue)" class="divrecur btn-group btn-group-vertical" data-toggle="buttons">
+                                                            <label class="btn">
+                                                                <input id="ForWeekday" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+                                                                <label for="RecurFor">@OtherRecurrencePattern.GetDescription()</label><i class="fa fa-circle-o fa-2x"></i>
+                                                                <i class="fa fa-dot-circle-o fa-2x"></i>
+                                                            </label>
+
+
+
+                                                        </div> }
+                                                                                //Daily condition ends****
+
+                                                                                //Monthly condition starts****
+                                                                                if (Convert.ToInt32(value) == 7 && Convert.ToInt32(otherrecurvalue) == 3)
+                                                                                {
+
+                                                        <div style="display:flex;">
+                                                            <input id="RecurFor" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+                                                            <label for="RecurFor">  @OtherRecurrencePattern.GetDescription() </label>
+                                                        </div>
+
+                                                                                    <div id="divforrecur_@Convert.ToInt32(otherrecurvalue)">
+                                                                                        @Html.TextBoxFor(model => model.Dayno, new { @class = "form-reccur numberonly monthday" })
+
+                                                                                        <span> of every</span>
+
+                                                                                        @Html.TextBoxFor(model => model.ReoccurEvery, new { @class = "form-reccur numberonly", maxlength = "2", @id = string.Format("txtrecurevery_{0}", @Convert.ToInt32(otherrecurvalue)) })
+                                                                                        <span>&nbsp; @RecurrencePattern.GetDescription()</span>
+                                                                                    </div> }
+                                                                                                            if (Convert.ToInt32(value) == 7 && Convert.ToInt32(otherrecurvalue) == 4)
+                                                                                                            {
+
+                                                                                    <div style="display:flex;">
+                                                                                        <input id="RecurFor" name="RecurFor" type="radio" value="@Convert.ToInt32(otherrecurvalue)">
+                                                                                        <label for="RecurFor">  @OtherRecurrencePattern.GetDescription() </label>
+                                                                                    </div>
+                                                                                                                <div id="divforrecur_@Convert.ToInt32(otherrecurvalue)">
+                                                                                                                    @Html.DropDownListFor(
+                                                                                              m => m.The,
+                                                                                              new SelectList(Model.SequenceOcuurence, "Key", "Value", "-- Select--")
+                                                                                              )
+
+                                                                                                                    @Html.DropDownListFor(
+                                                                                             m => m.Weekno,
+                                                                                             new SelectList(Model.DayName, "Key", "Value", "-- Select Day--")
+                                                                                             )
+
+                                                                                                                    <span> of every</span>
+                                                                                                                    @Html.TextBoxFor(model => model.ReoccurEvery, new { @class = "form-reccur numberonly monthday", maxlength = "2", @id = string.Format("txtrecurevery_{0}", @Convert.ToInt32(otherrecurvalue)) })
+                                                                                                                    <span>&nbsp; @RecurrencePattern.GetDescription()</span>
+                                                                                                                </div>}
+
+                                                                                                                                        //Monthly condition ends****
+
+
+                                                                                                                                    }
+
+
+
+
+    </div>}
+
+                }
+            </div>
+
+
+
+        </div>
+
+    </div>
+    <ul class="patternList">
+       @* <li class="hide">
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="0">
+            <span></span>
+            <a> Sunday</a>
+        </li>*@
+        <li>
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="1">
+            <span></span>
+            <a> Monday</a>
+        </li>
+        <li>
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="2">
+            <span></span>
+            <a> Tuesday</a>
+        </li>
+        <li>
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="3">
+            <span></span>
+            <a> Wednesday</a>
+        </li>
+        <li>
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="4">
+            <span></span>
+            <a> Thursday</a>
+        </li>
+        <li>
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="5">
+            <span></span>
+            <a> Friday</a>
+        </li>
+       @* <li class="hide">
+            <input name="DaySelection" class="" data-val="true" type="checkbox" value="6">
+            <span></span>
+            <a> Saturday</a>
+        </li>*@
+
+    </ul>
+</div>
+
+<script>
+
+
+    $("#Dayno").not(".monthday").bind('input', function (e) {
+            //debugger;
+            if (this.value.charAt(0) === '0')
+                this.value = this.value.slice(1);
+
+            if ($("#hdnMonthno").val() == '') {
+                $("#hdnMonthno").val("1")
+            }
+            var currentdate = new Date();
+            var month = $("#hdnMonthno").val();
+            var year = currentdate.getFullYear();
+            var daysInMonth = new Date(year, month, 0).getDate();
+        if ($(this).val() != '') {
+            if ($(this).val() <= daysInMonth) {
+
+                    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+                    var monthno = $("#hdnMonthno").val()-1;
+                    var date = new Date(currentdate.getFullYear(), monthno, $("#Dayno").val());
+                    var datetime =
+                        (months[date.getMonth()]) + " " +
+                        date.getDate() + ", "
+                        + date.getFullYear();
+                    var futuredate =
+                        (months[date.getMonth()]) + " " +
+                        date.getDate() + ", "
+                        + (date.getFullYear()+10);
+
+
+                    $(".startDate").val(datetime);
+                    var setdate = $(".startDate").datepicker("getDate");
+                    $(".startDate").datepicker("option", "minDate", setdate);
+                   // $(".startDate").datepicker("option", "maxDate", 0);
+                    $(".startDate").datepicker("option", "maxDate", futuredate);
+                    $('.startDate').datepicker('setDate', setdate);
+
+                    if ($('input[type=radio][name=IsNoEndDate]:checked').val() == 2) {
+                        $(".endDate").val(datetime);
+                        $('.endDate').datepicker('setDate', setdate);
+                        $(".endDate").datepicker("option", "minDate", setdate);
+                        //$(".endDate").datepicker("option", "maxDate", 0);
+                        $(".endDate").datepicker("option", "maxDate", futuredate);
+                    }
+                    else {
+                        $(".endDate").val("");
+                    }
+                   /* $('.startDate').datepicker().val(datetime).trigger('change')*/
+
+                }
+                else {
+                $(this).val($(this).val().substr(0, $(this).val().length - 1))
+                }
+
+            }
+
+        });
+
+
+    $(".monthday").bind('input', function (e) {
+        //debugger;
+        if (this.value.charAt(0) === '0')
+            this.value = this.value.slice(1);
+
+  
+        var currentdate = new Date();
+        var month = $("#hdnMonthno").val();
+        var year = currentdate.getFullYear();
+        var daysInMonth = new Date(year, month, 0).getDate();
+        if ($(this).val() != '') {
+            if ($(this).val() <= daysInMonth) {
+            }
+            else {
+                $(this).val($(this).val().substr(0, $(this).val().length - 1))
+            }
+
+        }
+
+    });
+    $('.numberonly').keypress(function (e) {
+        //debugger;
+        var charCode = (e.which) ? e.which : event.keyCode
+
+        if (String.fromCharCode(charCode).match(/[^0-9]/g))
+
+            return false;
+
+    });
+
+    $(document).ready(function () {      
+        if ($('#IsRecurringRound:checked').length > 0) {
+            $(".patternRow").show();
+            $(".patternList").hide();
+            $(".recur").hide();
+            $("#divrecur_" + $("#hdnFrequency").val()).show();
+            if ($("#ReoccurEvery").val() == null || $("#ReoccurEvery").val() == "") {
+                $("#ReoccurEvery").val("1");
+            }
+
+            if ($("#hdnRecurFor").val() != null && $("#hdnRecurFor").val() != "0") {
+                $('input[name=RecurFor][value="' + $("#hdnRecurFor").val() + '"]').prop('checked', true);
+
+            }
+            else {
+                $('input[name=RecurFor][value="1"]').prop('checked', true);
+
+                $("#hdnRecurFor").val("1");
+            }
+
+            $('input[type=radio][name=pattern][value="' + $("#hdnFrequency").val() + '"]').prop('checked', true);
+            $("input[name=ReoccurEvery]").attr("name", "");
+            if ($("#hdnRecurFor").val() != null && $("#hdnRecurFor").val() != "") {
+                $("#txtrecurevery_" + $("#hdnRecurFor").val()).attr("name", "ReoccurEvery");
+            }
+            else {
+                $("#txtrecurevery_1").attr("name", "ReoccurEvery");
+            }
+
+            if ($("#hdnFrequency").val() == '8') {
+                if ('@Model.Ocurrence' == '') {
+
+                    if ($("#hdnOcurrence").val() == "") {
+                        var n = new Date($('#StartDate').val()).getDay();
+                        $("#hdnOcurrence").val(n);
+                    }
+
+                }
+                $(".patternList").show();
+                var str = $("#hdnOcurrence").val();
+                var str_array = str.split(',');
+
+                for (var i = 0; i < str_array.length; i++) {
+                    // Trim the excess whitespace.
+                    str_array[i] = str_array[i].replace(/^\s*/, "").replace(/\s*$/, "");
+                    // Add additional code here, such as:
+                    $('input[name = DaySelection][value="' + str_array[i] + '"]').prop('checked', true);
+                }
+            }
+            setrecurencefield();
+
+            var currentdate = new Date();
+            var month = currentdate.getMonth();
+            if ($("#hdnMonthno").val() == '') {
+
+                $("#hdnMonthno").val(currentdate.getMonth() + 1)
+                $(".selectmonth").val($("#hdnMonthno").val())
+            }
+
+        }
+    });
+
+
+    $('input[name=DaySelection]').change(function () {
+        //debugger;
+        if (this.checked) {
+            var occu = $("#hdnOcurrence").val().replace(/,\s*$/, "");
+            var occurence = occu + "," + $(this).val() + ",";
+            $("#hdnOcurrence").val(occurence);
+
+        }
+        else {
+
+            var occu = $("#hdnOcurrence").val().replace(/,\s*$/, "");
+            occu = occu + ",";
+            occu = occu.replace($(this).val() + ",", "");
+            $("#hdnOcurrence").val(occu);
+        }
+    });
+
+    $('input[name=RecurFor]').change(function () {
+       // debugger;
+
+        $(".form-reccur").addClass("disable");
+        $("select[name=The]").addClass("disable");
+        $("select[name=Weekno]").addClass("disable");
+        $("select[name=Monthno]").addClass("disable");
+
+        $("#divforrecur_" + $(this).val()).find("input[type=text]").removeClass("disable");
+        $("#divforrecur_" + $(this).val()).find("select[name=The]").removeClass("disable");
+        $("#divforrecur_" + $(this).val()).find("select[name=Weekno]").removeClass("disable");
+        $("#divforrecur_" + $(this).val()).find("select[name=Monthno]").removeClass("disable");
+        $("input[name=ReoccurEvery]").attr("name", "");
+        $("#txtrecurevery_" + $(this).val()).attr("name", "ReoccurEvery");
+        if (this.checked) {
+
+            $("#hdnRecurFor").val($(this).val());
+        }
+        else {
+
+            $("#hdnRecurFor").val(1);
+
+        }
+
+        var currentdate = new Date();
+        var month = currentdate.getMonth();
+        if ($("#hdnMonthno").val() == '') {
+
+            $("#hdnMonthno").val(currentdate.getMonth()+1)
+            $(".selectmonth").val($("#hdnMonthno").val())
+        }
+        $(".selectmonth").val($("#hdnMonthno").val())
+
+    });
+    $('.selectmonth').change(function () {
+        //debugger;
+        $("#hdnMonthno").val($(this).val());
+    });
+</script>
+
+<style>
+    .pattern-Box {
+        display: flex;
+        width: 100%;
+    }
+
+    .pattern-col1 {
+        width: 180px;
+        border-right: 1px solid #ddd;
+    }
+
+    .pattern-col2 {
+        width: calc(100% - 180px);
+    }
+
+    .patternList {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .pattern-col1 .btn-group-vertical {
+        display: table;
+    }
+
+    .patternList li {
+        min-width: 180px;
+    }
+
+        .patternList li a {
+            color: #333;
+        }
+
+    .patternRow {
+        border: 1px solid #ddd;
+        background-color: #eee;
+        padding: 22px 15px 15px;
+        position: relative;
+        margin-top: 25px;
+    }
+
+    .RecuPattern {
+        position: absolute;
+        left: 15px;
+        top: -25px;
+        font-size: 15px;
+        color: #333;
+        background-color: #eee;
+        padding: 4px 15px;
+        border-radius: 7px;
+        border-top: 1px solid #ddd;
+        min-width: 180px;
+    }
+</style>

@@ -1,0 +1,196 @@
+﻿@model List<HCF.BDO.TRounds>
+
+@{
+    ViewBag.Title = "Round History Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            History Details
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12 ">
+                <div class="box box-primary">
+                    <div class="tble_shadow">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Inspection Date: </strong> @Model.FirstOrDefault().StartDate.CastDate()</td>
+                                    <td><strong>Inspector Name: </strong> @Model.FirstOrDefault().UserProfile.FullName</td>
+                                    <td><strong>Category: </strong> @Model.FirstOrDefault().CategoryName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Location: </strong> @($"{Model.FirstOrDefault().Floors.FloorName}, {Model.FirstOrDefault().Floors.Building.BuildingName}")</td>
+                                    <td><strong>Wing: </strong>@($"{(Model.FirstOrDefault().Floors.Wing != null ? Model.FirstOrDefault().Floors.Wing.WingName.CastToNA() : "NA")}")</td>
+                                    <td>
+                                        <strong>Signed:</strong>
+                                        @if (Model.FirstOrDefault().DigitalSignature != null)
+                                        {
+                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = Model.FirstOrDefault().DigitalSignature.FilePath, title = "Sign Preview" })" class="modal-link">
+                                                <img style="height: 50px; width: 150px; padding-top: 20px;" id="DigSignatureId_@Model.FirstOrDefault().DigitalSignature.DigSignatureId"
+                                                     src="@commonModelFactory.FilePath(Model.FirstOrDefault().DigitalSignature.FilePath)" />
+                                            </a>
+                                        }
+                                    </td>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <table class="table">
+                        @for (var i = 0; i < Model.FirstOrDefault().TRoundsQuestionnaires.Count(); i++)
+                        {
+                            <tr>
+                                <td width="10%">
+                                    @if (Model.FirstOrDefault().TRoundsQuestionnaires[i].Status == 1)
+                                    {
+                                        <span class="complaint"> @Localizer["CompliantText"] </span>
+                                    }
+                                    else if (Model.FirstOrDefault().TRoundsQuestionnaires[i].Status == 0)
+                                    {
+                                        <span class="noncomplaint"> @Localizer["NonCompliantText"] </span>
+                                    }
+
+                                </td>
+                                <td width="60%">
+                                    @Html.DisplayFor(modelItem => Model.FirstOrDefault().TRoundsQuestionnaires[i].RoundsQuestionnaires.RoundStep)
+                                </td>
+                                <td></td>
+                                <td style="vertical-align:middle;" width="30%">
+                                    @Html.TextBoxFor(modelItem => Model.FirstOrDefault().TRoundsQuestionnaires[i].Comment, null, new { @class = "form-control trigger", @readonly = "readonly" })
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="3">
+                                <b>Comment</b>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3">
+                                @Html.DisplayFor(modelItem => Model.FirstOrDefault().Comment)
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+    .floorRoundshi input#cb2 {
+        pointer-events: none;
+    }
+
+    input.checked[type="radio"] {
+        visibility: hidden;
+    }
+
+    input[type ="radio" ][value="text" ]:checked {
+        visibility: hidden;
+    }
+</style>
+
+
+<script type="text/javascript">
+    $(function () {
+        var moveLeft = -250;
+        //var moveDown = 20;
+        var moveDown = -50;
+
+        $('.trigger').hover(function (e) {
+            var id = $(this).attr('id');
+            var desc = $(this).val();
+            if (desc.length > 0) {
+                $('div#pop-up').text(desc).show();
+            }
+        }, function () {
+            $('div#pop-up').hide();
+        });
+
+        $('.trigger').mousemove(function (e) {
+            console.log(e.pageX);
+            console.log(e.pageY);
+            $("div#pop-up").css('top', e.pageY + moveDown).css('left', e.pageX + moveLeft);
+        });
+
+    });
+</script>
+
+<div id="pop-up">
+
+</div>
+
+<style>
+    /* HOVER STYLES */
+    div#pop-up {
+        display: none;
+        position: absolute;
+        width: 280px;
+        padding: 14px;
+        background: #f3f3f3;
+        color: #000;
+        border: 1px solid #cccccc;
+        font-size: 14px;
+    }
+
+        div#pop-up:after, div#pop-up:before {
+            bottom: 100%;
+            left: 82%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        div#pop-up:after {
+            border-color: rgba(238, 238, 238, 0);
+            border-bottom-color: #eee;
+            border-width: 11px;
+            margin-left: -11px;
+        }
+
+        div#pop-up:before {
+            border-color: rgba(204, 204, 204, 0);
+            border-bottom-color: #ccc;
+            border-width: 12px;
+            margin-left: -12px;
+        }
+
+
+
+
+    .dataTables_info {
+        display: none;
+    }
+
+    .sweet-alert h2 {
+        color: rgb(87, 87, 87);
+        font-size: 16px;
+        text-align: center;
+        font-weight: normal;
+        text-transform: none;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        line-height: 22px;
+        display: block;
+    }
+
+    .comman_checkbox1 {
+        position: relative;
+    }
+
+    .maingoaltr td {
+        background: #ccc;
+    }
+</style>

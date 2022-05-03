@@ -1,0 +1,402 @@
+﻿@model IEnumerable<HCF.BDO.TPCRAQuestion>
+
+@{
+    ViewBag.Title = "CRA";
+    int index = 0;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Localizer["TitleGetTCRA"]
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="" id="questtblediv">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12 form-inline">
+                                <div class="form-group">
+                                    <label>Project:</label>
+                                    <icraprojectdropdown name="SelProjectId" firsttext="-- All Project --" selectedvalue="-2" class="form-control"></icraprojectdropdown>
+                                    @*@Html.ICRAProjectDropDown("SelProjectId", 0, "-- All Project --", new { @class = "form-control" })*@
+                                </div>
+                                <div class="form-group">
+                                    <label>Status:</label>
+                                    <approvalstatusdropdownlist name="statusId" selectedvalue="-2" class="form-control"></approvalstatusdropdownlist>
+                                    @*@Html.ApprovalStatusDropDownList("statusId", -2, new { @class = "form-control" })*@
+                                </div>
+                            </div>
+                        </div>
+
+                        @*<div class="add_button_comman">
+                            <a href='@(Url.RouteUrl("addTCRA"))' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add CRA" alt="3d_add_button" />
+                            </a>
+                        </div>*@
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="questtbl" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>CRA #</th>
+                                            <th>Project Name</th>
+                                            @*<th>@Html.DisplayName("Sign1 Date")</th>
+                        <th>@Html.DisplayName("Sign2 Date")</th>*@
+                                            <th>Location</th>
+                                            <th>Scope</th>
+                                            <th style="width: 83px;">
+                                                @Html.DisplayNameFor(model => model.TIcraLog.StartDate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.TIcraLog.CompletionDate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.TIcraLog.IsICRA)
+                                            </th>
+                                            <th>
+                                                @Localizer["Type"]
+                                            </th>
+                                            <th>
+                                                @Localizer["Risk"]
+                                            </th>
+                                            <th>
+                                                @Localizer["Class"]
+                                            </th>
+                                            <th>
+                                                @Localizer["Status"]
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.TIcraLog.Comment)
+                                            </th>
+                                            <th>Action</th>
+                                            <th>
+                                                More
+                                            </th>
+                                            <th style="display:none"></th>
+                                            <th style="display:none"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Where(x => x.IsActive).OrderByDescending(x => x.CreatedDate))
+                                        {
+                                            <tr id="trPermit_@item.TPCRAQuesNumber">
+                                                <TD>@item.PCRANumber</TD>
+                                                <td>@((item.Project != null) ? item.Project.ProjectName : "")</td>
+                                                <td>@item.TIcraLog.Location</td>
+                                                <td>@item.TIcraLog.Scope</td>
+                                                <td data-sort="@item.TIcraLog.StartDate.DateSort()">
+                                                    @item.TIcraLog.StartDate.CastLocaleDate()
+                                                </td>
+                                                <td data-sort="@item.TIcraLog.CompletionDate.DateSort()">
+                                                    @item.TIcraLog.CompletionDate.CastLocaleDate()
+                                                </td>
+                                                <td>
+                                                    @if (item.TIcraLog.IsICRA)
+                                                    {<span>Y</span>}
+                                                    else
+                                                    {<span>N</span>}
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.TIcraLog.ConstructionType.TypeName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.TIcraLog.ConstructionRisk.RiskName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.TIcraLog.ConstructionClass.ClassName)
+                                                </td>
+                                                <td>
+                                                    @*@item.TIcraLog.Status*@
+                                                    @*@($"{@Enum.GetName(typeof(HCF.Utility.Enums.ICRAStatus), item.TIcraLog.Status)} {(item.TIcraLog.ClosedDate.HasValue ? $"({item.TIcraLog.ClosedDate.CastLocaleDate()})" : string.Empty)}")*@
+                                                    @{
+                                                        HCF.BDO.Enums.ApprovalStatus enums = (HCF.BDO.Enums.ApprovalStatus)item.TIcraLog.Status;
+                                                    }
+                                                    <p>@(item.TIcraLog.Status == 3 ? "Hold" : enums.GetDescription())</p>
+
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.TIcraLog.Comment)
+                                                </td>
+                                                @*<td>
+                                @item.Sign1Date.ToFormatDate()<span></span>
+                            </td>
+                            <td>
+                                @item.Sign2Date.ToFormatDate()<span></span>
+                            </td>*@
+                                                @*<td data-sort="@item.CreatedDate.Ticks">
+                                @item.CreatedDate.ToFormatDate()
+                            </td>*@
+                                                <td>
+                                                    @*<a href="@Url.Action("AddPCRA", "PCRA",new {projectId=item.ProjectId, tpcraquestid = item.TPCRAQuesId, mode="edit"})">
+                                    <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Question PCRA" alt="3d_add_button" /></span>
+                                </a>
+
+                                <a style="display:none;" href="@Url.Action("PrintPCRAPdf", "PDF",new {projectId=item.ProjectId, tPCRAQuesId = item.TPCRAQuesId})">
+                                    <span>
+                                        <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                    </span>
+                                </a>*@
+
+
+                                                    <div class="icra_action">
+                                                        <img onclick="location.href ='@Url.Action("AddCRA", "PCRA", new {projectId=item.ProjectId, tpcraquestid = item.TPCRAQuesId, mode="edit"})'" src="@Url.Content("~/dist/Images/Icons/edit_button2.png")" title="Edit" alt="Edit" />
+                                                        <img onclick="location.href ='@Url.Action("AddCRA", "PCRA",  new {projectId=item.ProjectId, tpcraquestid = item.TPCRAQuesId, mode="view"})'" src="@Url.Content("~/dist/Images/Icons/view_icon.png")" title="View" alt="View" />
+                                                        <a data-id="@item.TPCRAQuesNumber" class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "deletepermit" :"deletepermit hide")">
+                                                            <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete Permit" alt="3d_add_button" /></span>
+                                                        </a>
+                                                        <img onclick="location.href ='@Url.Action("TICRAProjectObservationReport", "ICRA", new { modulename="cra",projectId = item.ProjectId,icraid=item.TicraId,permitnumber=item.PCRANumber  })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="Observation Report" alt="Observation Report" />
+                                                        <a href="@Url.Action("ICRASignedReport", "ICRA", new { ticraId = item.TicraId,permitType="1" })" class="modal-link" title="Submit Signed CRA">
+                                                            <img src="@Url.Content("~/dist/Images/Icons/icra_sign.png")" />
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown icratable-drop">
+                                                        <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown">
+                                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                        </button>
+                                                        @{ index = index + 1;}
+                                                        @await Html.PartialAsync("~/Views/Shared/_pcramoreoption.cshtml", new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                                        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "icraId", item.TicraId }, { "ProjectId", item.ProjectId }, { "TPCRAQuesId", item.TPCRAQuesId }, { "permitno", item.PCRANumber }, { "index", index } })
+                                                        @*@Html.Partial("~/Views/Shared/_pcramoreoption.cshtml", new ViewDataDictionary { { "icraId", item.TicraId }, { "ProjectId", item.ProjectId }, { "TPCRAQuesId", item.TPCRAQuesId }, { "permitno", item.PCRANumber }, { "index", index } })*@
+                                                    </div>
+                                                </td>
+                                                <td style="display:none">@item.TIcraLog.Status</td>
+                                                <td style="display:none">@item.ProjectId</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var selprojectId = $("#SelProjectId");
+    $(document).ready(function () {
+        var projectId = parseInt(getParameterByName('ProjectId'));
+        var status = getParameterByName('Status');
+        if (projectId != undefined && projectId > 0) {
+            selprojectId.val(projectId);
+            filterRecords(projectId);
+        }
+        if (status != undefined) {
+            $("#statusId").val(status);
+            filterRecordsbyStatus(status);
+        }
+        $("#statusId").prepend("<option selected='selected' value='-2' >Select All</option>");
+        $("#statusId>option[value=4]").hide();
+        //$("#statusId>option[value=5]").hide();
+        $("#statusId>option[value=6]").hide();
+        $("#statusId>option[value=3]").text("Hold");
+    });
+    selprojectId.change(function () {
+        var projectId = selprojectId.val();
+        filterRecords(projectId);
+    })
+
+    function filterRecords(projectId) {
+        if (projectId > 0) {
+            //alert("Call " + projectId);
+            dataTables.column(-1).search("^" + projectId + "$", true, true, false).draw();
+        } else {
+            dataTables.columns(-1).search("").columns(-2).search("").draw();
+        }
+    }
+    $("#statusId").change(function () {
+        filterRecordsbyStatus($("#statusId").val());
+    });
+    function filterRecordsbyStatus(status) {
+        if (status != undefined) {
+            if (status != -2) {
+                //alert("Call " + projectId);
+                dataTables.column(-2).search("^" + status + "$", true, true, false).draw();
+            } else {
+                dataTables.columns(-1).search("").columns(-2).search("").draw();
+
+
+            }
+        }
+    }
+    var dataTables = $('#questtbl').DataTable({
+            "lengthChange": false,
+            "aaSorting": [],
+            "pageLength": 20,
+            "bPaginate": $('#questtbl tbody tr').length > 20,
+            "bInfo": false,
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+        },
+        aoColumnDefs: [
+            {
+                "orderable": false, "targets": [5]
+            }
+        ],
+
+
+
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'p>>" +
+            //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            //"<'row'<'col-sm-5'i>>" + "Blfrtip",
+
+
+
+         initComplete: function () {
+             $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("addtcra", "cra"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add CRA" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive tableHeight'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    //pageSize:'LEGAL',
+                    title: 'CRA Report',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 8, 9, 10, 11],
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        //genereateRpeort(doc)
+                        //Remove the title created by datatTables
+                        doc.content.splice(0, 1);
+                        //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                        // Logo converted to base64
+                        //var logo = $("#logoimgbase64").val();
+                        debugger;
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        //console.log(logo);
+                        // The above call should work, but not when called from codepen.io
+                        // So we use a online converter and paste the string in.
+                        // Done on http://codebeautify.org/image-to-base64-converter
+                        // It's a LONG string scroll down to see the rest of the code !!!
+                        //var logo = '';
+                        // A documentation reference can be found at
+                        // https://github.com/bpampuch/pdfmake#getting-started
+                        // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                        // or one number for equal spread
+                        // It's important to create enough space at the top for a header !!!
+                        doc.pageMargins = [20, 60, 20, 30];
+                        // Set the font size fot the entire document
+                        doc.defaultStyle.fontSize = 8;
+                        // Set the fontsize for the table header
+                        doc.styles.tableHeader.fontSize = 7;
+                        // Create a header object with 3 columns
+                        // Left side: Logo
+                        // Middle: brandname
+                        // Right side: A document title
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: ('@HCF.Web.Base.UserSession.CurrentOrg'!=null ?getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'):""), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'CRA Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: ('@HCF.Web.Base.UserSession.CurrentUser'!=null ?'@HCF.Web.Base.UserSession.CurrentUser.Name':"")} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'CRA Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4,5,8,9,10,11],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+    });
+
+
+    $(document).on('click', 'a.deletepermit', function (e) {
+        debugger;
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to delete this permit?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Permit_Delete + "?id=" + Id + "&permittype=8",
+                    success: function (data) {
+                        $("#trPermit_" + Id).remove();
+                        swal("Deleted!", "Your permit has been deleted.", "success");
+                        location.reload();
+
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+    </script>

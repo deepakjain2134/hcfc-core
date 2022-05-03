@@ -1,0 +1,517 @@
+﻿@model HCF.BDO.ScheduledLogs
+@{
+    ViewBag.Title = "Manage Fire Watch Schedules";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var InitNotificationDate = string.Empty;
+    var EndNotificationDate = string.Empty;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Manage Fire Watch Schedules
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary fire_watch_section">
+                    @using (Html.BeginForm("ManageFireWatchSchedules", "FireWatch", FormMethod.Post, new { enctype = "multipart/form-data", id = "firewatchschedulesform" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                   
+                        @Html.HiddenFor(m => m.Id)
+                        <input type="hidden" id="PermitNo" name="PermitNo" value="@Model.PermitNo" />
+                        <input type="hidden" id="PermitType" name="PermitType" value="@Model.PermitType" />
+                        <input type="hidden" id="InitiatedBy" name="InitiatedBy" value="@Model.InitiatedBy" />
+                        <input type="hidden" id="mode" value="@ViewBag.mode" />
+                        <input type="hidden" id="DSSign2Signature.DigSignatureId" name="DSSign2Signature.DigSignatureId" />
+                        <input type="hidden" id="DSSign1Signature.DigSignatureId" name="DSSign1Signature.DigSignatureId"  />
+                        <input type="hidden" id="hdn_DSSign1Signature_LocalSignDateTime" name="DSSign1Signature.LocalSignDateTime" />
+                        <input type="hidden" id="hdn_DSSign1Signature_CreatedBy" name="DSSign1Signature.CreatedBy" />
+                        <input type="hidden" id="hdn_DSSign2Signature_LocalSignDateTime" name="DSSign2Signature.LocalSignDateTime" />
+                        <input type="hidden" id="hdn_DSSign2Signature_CreatedBy" name="DSSign2Signature.CreatedBy" />
+                        @Html.HiddenFor(m => m.Signature1Id)
+                        @Html.HiddenFor(m => m.Signature2Id)
+
+                        <div class="row">
+                            <div class="col-lg-4 form-group">
+
+                                <label>Building Name <em class="required-field"> *</em></label>
+                                @*@Html.BuildingDropDownList("BuildingId", (Model.BuildingId.HasValue) ? Model.BuildingId.Value : 0, "Select Building", new { @class = "form-control", required = "required" })*@
+                                <buildingdropdownlist firsttext="Select Building"
+                                                      required="required"
+                                                      class="form-control"
+                                                      selectedvalue="@((Model.BuildingId.HasValue) ? Model.BuildingId.Value : 0)"
+                                                      name="BuildingId">
+                                </buildingdropdownlist>
+                                @Html.ValidationMessageFor(model => model.BuildingId, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-2 form-group">
+                                @Html.LabelFor(model => model.StartDate)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(x => Model.StartDate, $"{Model.StartDate:MMM d, yyyy}", new { @class = "form-control discopy", @autocomplete = "off", required = "required" })
+
+                            </div>
+                            <div class="col-md-2 form-group">
+                                @Html.LabelFor(model => model.EffectiveTime)<em class="required-field"> *</em>
+                                <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                                    @if (ViewBag.mode != null)
+                                    {
+                                        <input type="text" name="EfTime" id="EfTime" class="EffectiveTime timepicker form-control discopy timeset" autocomplete="off" required="required" value="@commonModelFactory.ConvertToAMPM(Model.EffectiveTime)" />
+                                    }
+                                    else
+                                    {<input type="text" name="EfTime" id="EfTime" class="EffectiveTime timepicker form-control discopy timeset" autocomplete="off" required="required" value="@commonModelFactory.ConvertToAMPM(Model.StartDate)" />
+                                    }
+                                </div>
+
+                            </div>
+                            <div class="col-md-2 form-group">
+                                @Html.LabelFor(model => model.Enddate)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(x => Model.Enddate, $"{Model.Enddate:MMM d, yyyy}", new { @class = "form-control discopy", required = "required", @autocomplete = "off" })
+                                @Html.ValidationMessageFor(model => Model.Enddate, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-2 form-group">
+                                @Html.LabelFor(model => model.UntilTime)<em class="required-field"> *</em>
+                                <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                                    @if (ViewBag.mode != null)
+                                    {
+                                        <input type="text" name="UtTime" id="UtTime" class="timepicker form-control discopy timeset" required="required" autocomplete="off" 
+                                               value="@commonModelFactory.ConvertToAMPM(Model.UntilTime)" />
+                                    }
+                                    else
+                                    {<input type="text" name="UtTime" id="UtTime" 
+                                            class="timepicker form-control discopy timeset" autocomplete="off" value="@commonModelFactory.ConvertToAMPM(Model.Enddate)" />}
+
+
+                                </div>
+                                @Html.ValidationMessageFor(model => model.UntilTime, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.Area)<em class="required-field"> *</em>
+                                @Html.TextAreaFor(m => Model.Area, new { @class = "form-control", maxlength = 50, oninput = "validate(this)", required = "required" })
+                                @Html.ValidationMessageFor(model => Model.Area, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.Comment)<em class="required-field"> *</em>
+                                @Html.TextAreaFor(m => Model.Comment, new { @class = "form-control", maxlength = 50 , oninput = "validate(this)" ,required = "required" })
+                                @Html.ValidationMessageFor(model => Model.Comment, "", new { @class = "text-danger" })
+                            </div>
+
+                            @for (var i = 0; i < Model.TFirewatchNotificationType.Count(); i++)
+                            {
+                                if (Model.TFirewatchNotificationType != null)
+                                {
+                                    <div class="col-md-4 form-group">
+                                        <label> @Html.DisplayFor(m => Model.TFirewatchNotificationType[i].FirewatchNotificationName) </label>
+                                        @Html.HiddenFor(m => Model.TFirewatchNotificationType[i].ID)
+                                        @Html.HiddenFor(m => Model.TFirewatchNotificationType[i].FirewatchNotificationName)
+                                        @Html.HiddenFor(m => Model.TFirewatchNotificationType[i].IsActive)
+                                        @{
+
+                                            if (!string.IsNullOrEmpty(Model.TFirewatchNotificationType[i].InitNotificationTime.ToString()))
+                                            {
+                                                Model.TFirewatchNotificationType[i].InitTime = TimeSpan.Parse(Model.TFirewatchNotificationType[i].InitNotificationTime.ToString());
+                                            }
+
+                                            Model.TFirewatchNotificationType[i].InitNotificationTime = Model.TFirewatchNotificationType[i].InitTime.ToString();
+                                            if (Model.TFirewatchNotificationType[i].InitTime.HasValue)
+                                            {
+                                                DateTime inittime = DateTime.Today.Add(Model.TFirewatchNotificationType[i].InitTime.Value);
+                                                Model.TFirewatchNotificationType[i].InitNotificationTime = inittime.ToString("hh:mm tt");
+
+                                            }
+
+
+
+                                            if (!string.IsNullOrEmpty(Model.TFirewatchNotificationType[i].EndNotificationTime.ToString()))
+                                            {
+                                                Model.TFirewatchNotificationType[i].EndTime = TimeSpan.Parse(Model.TFirewatchNotificationType[i].EndNotificationTime.ToString());
+                                            }
+
+                                            Model.TFirewatchNotificationType[i].EndNotificationTime = Model.TFirewatchNotificationType[i].EndTime.ToString();
+                                            if (Model.TFirewatchNotificationType[i].EndTime.HasValue)
+                                            {
+                                                DateTime endtime = DateTime.Today.Add(Model.TFirewatchNotificationType[i].EndTime.Value);
+                                                Model.TFirewatchNotificationType[i].EndNotificationTime = endtime.ToString("hh:mm tt");
+
+                                            }
+
+                                            InitNotificationDate = string.Empty;
+                                            EndNotificationDate = string.Empty;
+                                            if (Model.TFirewatchNotificationType[i].InitNotificationDate.HasValue && Model.TFirewatchNotificationType[i].InitNotificationDate != null)
+                                            {
+                                                InitNotificationDate = Model.TFirewatchNotificationType[i].InitNotificationDate.Value.ToString("MM/dd/yyyy");
+                                            }
+
+                                            if (Model.TFirewatchNotificationType[i].EndNotificationDate.HasValue && Model.TFirewatchNotificationType[i].EndNotificationDate != null)
+                                            {
+                                                EndNotificationDate = Model.TFirewatchNotificationType[i].EndNotificationDate.Value.ToString("MM/dd/yyyy");
+                                            }
+
+                                        }
+                                        <input type="text" class="form-control" name="TFirewatchNotificationType[@i].Name" value="@Model.TFirewatchNotificationType[i].Name" />
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        @Html.LabelFor(m => @Model.TFirewatchNotificationType[i].InitNotificationDate)
+
+                                        <input type="text" id="startdatepicker_@i" name="TFirewatchNotificationType[@i].InitNotificationDate" class="sdatepicker1 startdatepicker form-control readonly" autocomplete="off" readonly="readonly" value="@InitNotificationDate" />
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        @Html.LabelFor(m => @Model.TFirewatchNotificationType[i].EndNotificationDate)
+                                        <input type="text" id="enddatetimepicker_@i" name="TFirewatchNotificationType[@i].EndNotificationDate" class="sdatepicker1  enddatetimepicker form-control readonly" autocomplete="off" readonly="readonly" value="@EndNotificationDate" />
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        @Html.LabelFor(m => @Model.TFirewatchNotificationType[i].InitNotificationTime)
+                                        <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                                            <input type="text" name="TFirewatchNotificationType[@i].InitNotificationTime" id="starttime_@i" class="InitNotificationTime timepicker form-control readonly timeset" autocomplete="off" readonly="readonly" value=" @Model.TFirewatchNotificationType[i].InitNotificationTime" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        @Html.LabelFor(m => @Model.TFirewatchNotificationType[i].EndNotificationTime)
+                                        <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                                            <input type="text" name="TFirewatchNotificationType[@i].EndNotificationTime" id="endtime_@i" class="EndNotificationTime timepicker form-control readonly timeset" autocomplete="off" readonly="readonly" value="@Model.TFirewatchNotificationType[i].EndNotificationTime" />
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group"><label>Public Safety personnel INITIALLY filling out form</label></div>
+                            <div class="col-md-6 form-group"><label>Public Safety personnel FINALIZING form</label></div>
+                            <div class="col-md-6 form-group">
+                                <label>Print Initial :</label>
+                                @Html.TextBoxFor(x => Model.PrintInitial, new { @class = "form-control ", @autocomplete = "off" })
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Print Final :</label>
+                                @Html.TextBoxFor(x => Model.PrintFinal, new { @class = "form-control", @autocomplete = "off" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                @if (Model.DSSign1Signature != null && Model.DSSign1Signature.DigSignatureId > 0)
+                                {
+                                <a class="imgDSSign1Signature">
+                                    <img id="DigSignatureId_@Model.DSSign1Signature.DigSignatureId"
+                                         src="@commonModelFactory.FilePath(Model.DSSign1Signature.FilePath)" class="sign1name" />
+                                    <div>
+                                        <span class="signaturebyName">@Model.DSSign1Signature.SignByUserName</span>
+                                        <span class="signaturelocaltime">(@Model.DSSign1Signature.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</span>
+                                    </div>
+                                </a>
+                                }
+                                else
+                                {
+                            <a class="imgDSSign1Signature">
+                                <img src="~/dist/Images/Icons/sign.png" id="btnSign1Name" class="sign1name" />
+                                <div>
+                                    <span class="signaturebyName"></span>
+                                    <span class="signaturelocaltime"></span>
+                                </div>
+                            </a>
+                                }
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @if (Model.DSSign2Signature != null && Model.DSSign2Signature.DigSignatureId > 0)
+                                {
+                                <a class="imgDSSign2Signature">
+                                    <img id="DigSignatureId_@Model.DSSign2Signature.DigSignatureId"
+                                         src="@commonModelFactory.FilePath(Model.DSSign2Signature.FilePath)" class="sign2name" />
+                                    <div>
+                                        <span class="signaturebyName">@Model.DSSign2Signature.SignByUserName</span>
+                                        <span class="signaturelocaltime">(@Model.DSSign2Signature.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</span>
+                                    </div>
+                                </a>
+                                }
+                                else
+                                {
+                            <a class="imgDSSign2Signature">
+                                <img src="~/dist/Images/Icons/sign.png" id="btnSign2Name" class="sign2name" />
+                                <div>
+                                    <span class="signaturebyName"></span>
+                                    <span class="signaturelocaltime"></span>
+                                </div>
+                            </a>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-right button_Div">
+                                <button type="submit" class="comm-button" title="Save" id="saveSchedulesLogs"
+                                        data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                                    @Localizer["Save"]
+                                </button>                              
+                                @Html.ActionLink("Cancel", "FireWatch", new { controller = "FireWatch" }, new { @class = "comm-Cancelbutton" })
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+
+@section scripts{
+    <script>
+
+
+    $(".readonly").on('keydown paste', function (e) {
+        e.preventDefault();
+    });
+
+    $("#saveSchedulesLogs").click(function () {
+        debugger;
+
+        if ($("#Area").val().length == 0) {
+            setTimeout(function () {
+                swalalert("Please enter Area");
+            },500)
+            return false;
+        }
+
+        if ($("#BuildingId").val().length == 0) {
+            setTimeout(function () {
+                swalalert("Please select Building");
+            }, 500)
+            return false;
+        }
+
+
+        if ($("#Comment").val().length == 0) {
+            setTimeout(function () {
+                swalalert("Please enter Comment");
+            }, 500)
+            return false;
+        }
+        var unEnddate = $('#Enddate').val();
+        var untillTime = $('#UtTime').val();
+
+
+        if (unEnddate == '')
+        {
+            setTimeout(function () {
+                swalalert("Please enter Continue Until Date");
+            }, 500)
+            return false;
+
+        }
+
+        if (untillTime == '') {
+            setTimeout(function () {
+                swalalert("Please enter Continue until time");
+            }, 500)
+            return false;
+
+        }
+        
+        if (unEnddate.length> 0  && untillTime.length == 0)
+        {
+            swalalert("Continue until time");
+            return false;
+        }
+
+
+        var effectiveDate = getEffectiveDate();
+        var untilTime = getUntillDate();
+        //var currentTime = new Date();
+
+            if (untilTime == 0)
+            {
+                $("#firewatchschedulesform").submit();
+            }
+            else if (untilTime < effectiveDate) {
+                swalalert("Continue Until Time should be greater than Effective Time!");
+                return false;
+            } else {
+               // $("#firewatchschedulesform").submit();
+            }
+
+    });
+
+    var input = $('.timepicker');
+    input.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+            console.log("after done");
+        }
+
+    });
+
+
+    var effectiveTimePicker = $('.EffectiveTime');
+    effectiveTimePicker.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+            debugger;
+
+        }
+    });
+
+
+    function getUntillDate() {
+        if ($('#Enddate').val().length > 0 && $('#UtTime').val().length > 0) {
+            var date = new Date($('#Enddate').val());
+            var time = $('#UtTime').val();
+            return ConvertToDateTime(date, time);
+        } else {
+            return 0;
+        }
+    }
+
+    function getEffectiveDate() {
+        var date = new Date($('#StartDate').val());
+        var time = $('.EffectiveTime').val();
+        return ConvertToDateTime(date, time);
+    }
+
+        var enableDate = new Date();
+
+        if ('@commonModelFactory.IsFireWatchSupervisorUser()'.toLowerCase() == "true") {
+            var now = new Date();
+            enableDate = new Date(now.getFullYear() - 2, now.getMonth(), now.getDay());
+        }
+
+
+  $('.sdatepicker1').datepicker({
+        showOn: "both",
+        buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+        buttonImageOnly: true
+        //minDate: enableDate,
+    }).datepicker();
+
+
+        var end_date;
+        var start_date;
+        var id;
+        var from = $(".startdatepicker").datepicker({
+        }).on("change", function () {
+            debugger;
+            id = $(this).attr("id").split("_").pop();
+            $("#enddatetimepicker_" + id).datepicker("option", "minDate", $(this).val());
+        }),
+            to = $(".enddatetimepicker").datepicker({
+            }).on("change", function () {
+                debugger;
+                var id = $(this).attr("id").split("_").pop();
+                $("#startdatepicker_" + id).datepicker("option", "maxDate", $(this).val());
+                end_date = $(this).val();
+                start_date = $("#startdatepicker_" + id).val();
+               
+
+            });
+
+        function getTwentyFourHourTime(amPmString) {
+            //var d = new Date("1/1/2020 " + amPmString);
+            var d = new Date(new Date().getMonth() + "/" + new Date().getDate() + "/" + new Date().getFullYear() + " " + amPmString);// pick date from date field
+            //console.log(d);
+            return d;
+            // return ("0" + d.getHours()).slice(-2)  + ':' + ("0" + d.getMinutes()).slice(-2) + ':00';
+        }
+
+
+        var endtime = $(".EndNotificationTime").on("change", function () {
+            debugger;
+            var EndTimeId = $(this).attr("id").split("_").pop();
+            var endTime = $(this).val();
+            endTime = getTwentyFourHourTime(endTime);
+            var starttime = $("#starttime_" + EndTimeId).val();
+            starttime = getTwentyFourHourTime(starttime);
+            if (start_date == end_date) {
+                if (starttime >= endTime) {
+                    swalalert("End Notification Time should be greater than Initial Notification Time!")
+                    $(this).val('');
+                    $("#starttime_" + id).val('');
+                }
+            }
+        })
+
+
+
+    var fromStartDate = $("#StartDate").datepicker({
+        showOn: "both",
+        numberOfMonths: 1,
+        buttonImageOnly: true,
+        dateFormat: "MM d, yy",
+    }).on("change", function () {
+        $("#Enddate").datepicker("option", "minDate", $("#StartDate").datepicker("getDate"));
+        $("#StartDate").datepicker("option", "maxDate", $("#Enddate").datepicker("getDate"));
+    }).datepicker('setDate', new Date($("#StartDate").val())),
+        toDate = $("#Enddate").datepicker({
+            showOn: "both",
+            numberOfMonths: 1,
+            buttonImageOnly: true,
+            dateFormat: "MM d, yy",
+        }).on("change", function () {
+            $("#Enddate").datepicker("option", "minDate", $("#StartDate").datepicker("getDate"));
+            $("#StartDate").datepicker("option", "maxDate", $("#Enddate").datepicker("getDate"));
+
+        }).datepicker('setDate', new Date($("#Enddate").val()));
+
+
+    $(document).ready(function () {
+        debugger
+        var untileTile = '@Model.Enddate'//$("#UtTime").val();
+        var EfTime = $("#EfTime").val();
+
+      
+        if (untileTile == '') {
+            $("#Enddate").val("");
+        }
+
+    });
+
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+    $(".sign1name").click(function () {
+        loadSignView('DSSign1Signature.FileName', 'DSSign1Signature.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+    $(".sign2name").click(function () {
+        loadSignView('DSSign2Signature.FileName', 'DSSign2Signature.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+        //onchange Continue Ef Time 
+        var starttime = $("#EfTime").on("change", function () {
+            var endTime = $("#UtTime").val();
+            var starttime = $("#EfTime").val();
+            var end_date = Date.parse($("#Enddate").val())
+            var start_date = Date.parse($("#StartDate").val())
+            if (start_date == end_date && endTime != '') {
+                if (starttime >= endTime) {
+                    swalalert("Continue Until Time Should Be Greater Than Effective Time!")
+                    $(this).val('');
+                }
+            }
+        })
+
+        //onchange Continue until time
+        var endtime = $("#UtTime").on("change", function () {
+            var endTime = $(this).val();
+            var starttime = $("#EfTime").val();
+            var end_date = Date.parse($("#Enddate").val())
+            var start_date = Date.parse($("#StartDate").val())
+            if (start_date == end_date && endTime != '' && starttime != '') {
+                if (starttime >= endTime) {
+                    swalalert("Continue Until Time Should Be Greater Than Effective Time!")
+                    $(this).val('');
+                }
+            }
+        })
+
+
+    </script>
+   
+}

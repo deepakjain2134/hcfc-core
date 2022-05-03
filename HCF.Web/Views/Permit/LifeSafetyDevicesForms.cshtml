@@ -1,0 +1,315 @@
+﻿@model List<HCF.BDO.TLifeSafetyDevicesForms>
+@{
+    ViewBag.Title = "LifeSafetyDevicesForms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+            <h1>
+                @Localizer["TitleLifeSafetyDeviceList"]
+               
+            </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="" id="questtblediv">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-4">
+                                <icraprojectdropdown name="SelProjectId" selectedvalue="0"
+                                                     class="form-control" firsttext="-- All Project --"></icraprojectdropdown>
+                                @*@Html.ICRAProjectDropDown("SelProjectId", 0, "-- All Project --", new { @class = "form-control" })*@
+                            </div>
+                            <div class="col-md-8">
+                                <a class="formIcons" formType="1"><img src="@Url.Content("~/dist/Images/Icons/life_safety_device_addition.png")" title="Addition Form" alt="" /> Addition Form</a>
+                                <a class="formIcons" formType="0"><img src="@Url.Content("~/dist/Images/Icons/life_safety_device_removal.png")" title=" Removal Form " alt="" /> Removal Form</a>
+                            </div>
+                        </div>
+                       
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="add_button_comman">
+                                    <div class="dropup" style="display: inline-block;">
+                                        @*<img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Select Form" alt="3d_add_button" />*@
+                                        <input type="submit" name="button" class="button1 dropdown-toggle btn_users lsdform_button" id="btn_users" title="New Form"
+                                               value="" data-toggle="dropdown" />
+                                        <ul class="dropdown-menu" id="btn_user_ddl">
+                                            <li>
+
+                                                <a href="@(Url.RouteUrl("newLsdformadd",new { sformType="addition"}))" class="">
+                                                    Addition Form
+                                                </a>
+                                                <a href="@(Url.RouteUrl("newLsdformadd",new { sformType="removal"}))" class="">
+                                                    Removal Form
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <table id="lsdTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <td></td>
+                                            <th>Permit #</th>
+                                            <th>Project Name</th>
+                                            <th>Contractor</th>
+                                            <th>Start Date</th>
+                                            <th>Date [of Request]</th>
+                                            <th>Requestor</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                            <th style="display:none"></th>
+                                            <th style="display:none"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Where(x => x.IsActive).OrderByDescending(x => x.DateOfRequest).ThenByDescending(x => x.CreatedDate))
+                                        {
+                                            var img = (item.FormType == 1) ? "life_safety_device_addition.png" : "life_safety_device_removal.png";
+                                        <tr id="trRow_@item.LsdFormNo">
+                                            <td style="display:none">@item.FormType</td>
+                                            <td>
+                                                <img src="@Url.Content("~/dist/Images/Icons/" + img )" class="deficiencyIcons"
+                                                     title="@((item.FormType == 1) ? "Addition Form" : "Removal Form")" alt="" />
+                                            </td>
+
+                                            <td>@item.PermitNo</td>
+                                            <td>
+                                                @item.ProjectName
+                                            </td>
+                                            <td>@item.Contractor</td>
+                                            @if (item.LifeSafetyDeviceList.Count > 0)
+                                            {
+                                                <td data-sort=" @((item.FormType == 1) ? item.LifeSafetyDeviceList.OrderByDescending(x => x.DateAdded).FirstOrDefault().DateAdded.ToFormatDate() : item.LifeSafetyDeviceList.OrderByDescending(x => x.DateRemoved).FirstOrDefault().DateRemoved.ToFormatDate())">
+
+
+
+                                                    @((item.FormType == 1) ? item.LifeSafetyDeviceList.OrderByDescending(x => x.DateAdded).FirstOrDefault().DateAdded.ToFormatDate() : item.LifeSafetyDeviceList.OrderByDescending(x => x.DateRemoved).FirstOrDefault().DateRemoved.ToFormatDate())
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            <td data-sort="@item.DateOfRequest.Ticks">
+                                                @item.DateOfRequest.ToFormatDate()
+                                            </td>
+                                            @*<td>
+                                                @item.RequestorUser.Name
+                                            </td>*@
+                                            <td>@(item.RequestorUser != null && !string.IsNullOrEmpty(item.RequestorUser.Name)? item.RequestorUser.Name:string.Empty)</td>
+                                            
+
+                                            @*<td>
+            @item.PhoneNumber
+        </td>
+        <td>
+            @item.EmailAddress
+        </td>*@
+                                            <td>
+                                                <input type="hidden" value="@item.Status" />
+                                                @{
+                                                    HCF.BDO.Enums.ApprovalStatus enums = (HCF.BDO.Enums.ApprovalStatus)item.Status;
+                                                }
+                                                <p>@enums.GetDescription()</p>
+
+                                            </td>
+                                            <td class="mopmoredot" style="display:flex;justify-content: space-around;">
+                                                <a href="@Url.RouteUrl("newLsdformadd",new { formId=item.LsdFormId ,formType=(item.FormType==1)?"addition":"removal"})">
+                                                    <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Permit" alt="3d_add_button" /></span>
+                                                </a>
+                                                <a data-id="@item.LsdFormNo" class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "deletepermit" :"deletepermit hide")">
+                                                    <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete Permit" alt="3d_add_button" /></span>
+                                                </a>
+                                                @*<a href="@Url.Action("LifeSafetyFormPdf", "PDF",new {formId=item.LsdFormId})">
+                <span>
+                    <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                </span>
+            </a>*@
+
+                                                <div class="dropdown icratable-drop icondpwnload">
+                                                    <button class="dropdown-toggle" type="button" data-toggle="dropdown">
+                                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                        <span>
+                                                            <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                                        </span>
+                                                    </button>
+                                                    <ul class="dropdown-menu ctmenu">
+
+                                                        <li data-action="icrapermit">
+                                                            <a href="@Url.Action("LifeSafetyFormPdf", "Pdf", new { formId = item.LsdFormId,IsAttachmentIncluded=false})">
+                                                                <span>
+                                                                    Export permit as PDF
+                                                                </span>
+                                                            </a>
+
+                                                        </li>
+
+                                                        <li data-action="icrapermit">
+                                                            <a href="@Url.Action("DownloadLSDAttachments", "Permit", new { formId = item.LsdFormId})">
+                                                                <span>
+                                                                    Export permit as PDF w/ attachments
+                                                                </span>
+                                                            </a>
+
+                                                        </li>
+
+
+                                                    </ul>
+
+                                                </div>
+                                            </td>
+                                            <td style="display:none">@item.Status</td>
+                                            <td style="display:none">@item.ProjectId</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var selprojectId = $("#SelProjectId");
+    var lsdTable = $('#lsdTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('#lsdTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "order": [[6, "desc"]],
+        language: {
+            emptyTable: "No data available in table",
+            search: "_INPUT_", //To remove Search Label
+            searchPlaceholder: "Search..."
+        },
+
+
+        //dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'fp>>" +
+        //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+        //    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+
+         @*initComplete: function () {
+            $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("AddOrEdit", "IcraProject"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add New Project" alt="3d_add_button"></a></div >');
+        },*@
+        dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive tableHeight'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+    });
+
+    $(document).ready(function () {
+
+        var projectId = parseInt(getParameterByName('ProjectId'));
+        var status = getParameterByName('Status');
+        if (projectId != undefined && projectId > 0) {
+            selprojectId.val(projectId);
+            filterRecords(projectId);
+        }
+        if (status != undefined) {
+            filterRecordsbyStatus(status);
+        }
+
+        $('.formIcons').click(function () {
+            $(this).toggleClass("active");
+            var formType = $(this).attr("formType");
+            $('.formIcons').removeClass('active');
+            var array = [];
+            $('.formIcons').each(function () {
+                if ($(this).attr("formType") == formType) {
+                    array.push($(this).attr("formType"));
+                    $(this).addClass("active")
+
+                }
+
+
+            });
+            console.log(array.join('|'));
+            if (array.length == 0) {
+                array.push(2);
+            }
+            lsdTable.column(0).search(array.join('|'), true, false, true).draw();
+
+        });
+    });
+
+
+    selprojectId.change(function () {
+        var projectId = selprojectId.val();
+        filterRecords(projectId);
+    })
+
+    function filterRecords(projectId) {
+        if (projectId > 0) {
+            //alert("Call " + projectId);
+            lsdTable.column(-1).search("^" + projectId + "$", true, true, false).draw();
+        } else {
+            lsdTable.columns(-1).search("").columns(-2).search("").draw();
+        }
+    }
+
+    function filterRecordsbyStatus(status) {
+        if (status != undefined) {
+            lsdTable.column(-2).search("^" + status + "$", true, true, false).draw();
+        }
+    }
+
+    $(document).on('click', 'a.deletepermit', function (e) {
+        debugger;
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to delete this permit?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Permit_Delete + "?id=" + Id + "&permittype=5",
+                    success: function (data) {
+                        $("#trRow_" + Id).remove();
+                        swal("Deleted!", "Your permit has been deleted.", "success");
+                        location.reload();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+    </script>
+<style>
+    .add_button_comman {
+        position: absolute;
+        right: 22px;
+        top: -1px;
+        z-index: 9;
+    }
+    .tableactions {
+        padding-right: 56px;
+    }
+    .lsdform_button {
+        background: url(/dist/Images/Icons/3d_add_button.png) 5px 3px no-repeat #fff;
+        padding: 10px 10px 10px 22px;
+        border-radius: 20px;
+    }
+    #questtblediv ul#btn_user_ddl {
+        min-height: 62px;
+        max-height: 62px;
+    }
+</style>

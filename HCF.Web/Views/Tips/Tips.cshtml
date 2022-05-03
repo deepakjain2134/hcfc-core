@@ -1,0 +1,196 @@
+﻿@model IEnumerable<HCF.BDO.Tips>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Tips
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="row tablelist-topform">
+                            <div class="col-lg-5 form-inline">
+                                <label><b>Tip Type</b></label>
+                                <tiptypesdropdownlist name="TipType" selectedvalue="0" firsttext="All" class="form-control"></tiptypesdropdownlist>
+                                @*@Html.TipTypesDropDownList("TipType", 0, "All", true, new { @class = "form-control" })*@
+                            </div>
+                            <input type="hidden" value='@TempData["SelectedTip"]' id="tip_id" />
+                            @*<div class="add_button_comman">
+                                <a href='@(Url.Action("AddOrEditTips", "Tips"))' class="pull-right">
+                                    <img src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" title="Add Tips" alt="3d_add_button" />
+                                </a>
+                            </div>*@
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="mytipTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Title
+                                            </th>
+                                            <th>Module</th>
+                                            <th width="10%">Tip Type</th>
+                                            <th>Active</th>
+                                            <th> Approval Status</th>
+                                            <th width="10%">Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td style="width: 200px">
+                                                    @Html.DisplayFor(modelItem => item.Title)
+                                                </td>
+                                                <td style="width: 200px">
+                                                    @Html.DisplayFor(modelItem => item.RouteName)
+                                                </td>
+                                                <td style="width: 200px">
+                                                    @item.TipType.GetDescription()
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                                </td>
+                                                <td class="comman_checkbox1 approvetd" style="width: 200px">
+                                                    <input id="chkapprovalstatus" class="tips_check_btn" type="button" value="@Convert.ToInt32(item.IsApproved)" tempname="ApprovalStatus" />
+                                                    <span></span>
+                                                </td>
+                                                <td style="width: 100px">
+                                                    @if (item.IsApproved != 0)
+                                                    {
+                                                        <img onclick="location.href ='@Url.Action("AddOrEditTips", "Tips", new { Id = item.TipId })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" class="tipedit" alt="" />
+                                                        if (item.IsApproved == 2 && HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+                                                        {
+                                                            <img id="@($"btn_{item.TipId}")" tipId="@item.TipId" src="@Url.Content("~/dist/Images/Icons/approve_icon.png")" title="Approve" class="approveBtn" alt="" />
+                                                            <img id="@($"btn_reject_{item.TipId}")" tipId="@item.TipId" src="@Url.Content("~/dist/Images/Icons/reject_icon_red.png")" title="Reject" class="approveBtn rejectbtn" alt="" />
+                                                        }
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+    $(document).ready(function () {
+        debugger;
+
+        var mytipTable = $('#mytipTable').DataTable({
+            searching: true,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#mytipTable tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            /*dom: "Blftip",*/
+
+           
+
+            initComplete: function () {
+           $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("AddOrEditTips", "Tips"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Question PCRA" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+           buttons: [
+
+            ]
+        });
+        HideTableSorting();
+
+        function HideTableSorting() {
+            debugger;
+            var selected_tipid = $('#tip_id').val();
+            var tiptypetext = null;
+            if (selected_tipid == 3) { tiptypetext = "Help Page Text" }
+            else if (selected_tipid == 2) { tiptypetext = "CRx Crowdsourced" }
+            else if (selected_tipid == 1) { tiptypetext = "Crowdsourced" }
+            else if (selected_tipid == 4) { tiptypetext = "FAQs/How-Tos" }
+            else if (selected_tipid == 5) { tiptypetext = "CRX Improvement Suggestion" }
+            else { tiptypetext = "Select" }
+            if (selected_tipid > 0) {
+                $("#TipType").val(selected_tipid);
+                mytipTable.column(2).search("^" + tiptypetext + "$", true, true, false).draw();
+            }
+        }
+
+
+        $('#TipType').on('change', function () {
+            debugger;
+            var tiptypetext = null;
+            var tipTypeId = $(this).val();
+            if (tipTypeId == 3) { tiptypetext = "Help Page Text" }
+            else if (tipTypeId == 2) { tiptypetext = "CRx Crowdsourced" }
+            else if (tipTypeId == 1) { tiptypetext = "Crowdsourced" }
+            else if (tipTypeId == 4) { tiptypetext = "FAQs/How-Tos" }
+            else if (tipTypeId == 5) { tiptypetext = "CRX Improvement Suggestion" }
+              else { tiptypetext = "Select"}
+            if (tipTypeId > 0) {
+                mytipTable.column(2).search("^" + tiptypetext + "$", true, true, false).draw();
+
+                $.get('@Url.Action("GetTipType", "Tips")' + "?TipId=" + tipTypeId, function () { });
+            } else {
+                mytipTable.columns(2).search("").draw();
+            }
+        });
+    });
+
+
+
+    $(".approveBtn").click(function () {
+        var control = $(this);
+        var status = $(this).hasClass('rejectbtn') ? 0 : 1;
+        var tipId = $(this).attr("tipId");
+        var url = '@Url.Action("ApproveTip","Tips")';
+        $.get(url + "?TipId=" + tipId + "&ApproveStatus=" + status, function (data) {
+            if (data.success == true) {
+                var message = status == 0 ? 'Tip is rejected successfully!!' : 'Tip is approved successfully!!';
+                swal(message);
+                $(control).parent().children('.approveBtn').hide();
+                if (status == 0)
+                {
+                    $(control).parent().children().hide()
+                }
+                control.parent("td").parent("tr").find("td.approvetd").find("#chkapprovalstatus").val(status);
+                window.location.reload()
+            }
+        });
+    });
+    </script>

@@ -1,0 +1,66 @@
+﻿@model HCF.BDO.QuestionPCRA
+@{
+    ViewBag.Title = Localizer["TitleAddQuestionPCRA"];
+}
+@*test*@
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Localizer["TitleAddQuestionPCRA"]
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+               
+                        <div class="box box-primary">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                               
+                                    @Html.HiddenFor(x => x.QuesPCRAId)
+                                   
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    @Html.LabelFor(model => model.Questions)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.Questions, new { @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.Questions)
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    @Html.LabelFor(model => model.Notes)<em></em>
+                                    @Html.TextAreaFor(model => model.Notes, new { @class = "form-control" })
+                                </div>
+                                <div class="col-md-12 form-group">
+
+                                    @Html.CheckBoxFor(m => m.IsOption)<span></span>
+                                    <label class="attachedfile-lable">Is Optional</label>
+                                </div>
+                                <div class="col-md-12 form-group">
+
+                                    @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                                    <label class="attachedfile-lable">Active</label>
+                                </div>
+                                <div class="col-md-12 form-group">
+
+                                    @Html.CheckBoxFor(m => m.CanComment)<span></span>
+                                    <label class="attachedfile-lable">Comment</label>
+                                </div>
+
+                                <div class="col-md-12 text-right button_Div">
+                                    <input type="submit" value='@Localizer["Save"]' class="comm-button" />
+                                    @*@Html.ActionLink("Cancel ", "QuestionPCRA", "PCRA", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "QuestionPCRA", new { controller = "PCRA" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+                                
+                            }
+                        </div>
+                   
+            </div>
+        </div>
+    </div>
+
+

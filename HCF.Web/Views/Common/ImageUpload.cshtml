@@ -1,0 +1,140 @@
+﻿@model Dictionary<string, string>
+@{
+    Layout = null;
+}
+
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title"></h4>
+</div>
+
+<div class="modal-body">
+    <div class="row">
+        <div class="col-lg-6">
+            <input type="radio" name="fileUplad" value="1" checked="checked">Browse <br>
+        </div>
+        <div class="col-lg-6">
+            <input type="radio" name="fileUplad" value="2">Camara<br>
+        </div>
+    </div>
+
+
+    <div id="BrowseDiv">
+        <div class="img_file_upload">
+            <input name="file_Uploader"
+                   type="file"
+                   onchange="BrowseImg(this)"
+                   filecontent='@Model["fileContent"]'
+                   filename="@Model["fileName"]" />
+        </div>
+    </div>
+    <div class="mainDiv camerabtn" id="CamaraDiv hide">
+        <div id="my_camera" class="childDivone camerabtn"></div>
+        <div id="results" class="childDivtwo">Your captured image will appear here...</div>
+    </div>
+    <script type="text/javascript" src="@Url.Content("~/dist/Scripts/webcam/webcam.js")"></script>
+
+    <!-- Configure a few settings and attach camera -->
+    <script language="JavaScript">
+
+        ///$("#my_camera").hide();
+        $(".camerabtn").hide();
+        Webcam.reset();
+
+             @if (Model != null)
+      {
+        @:var fileName = '@Model["fileName"]';
+        @:var fileContent = '@Model["fileContent"]';
+        @:var imgPreviewCtr = '@Model["imgPreviewCtr"]';
+    }
+
+        console.log(fileName);
+
+            Webcam.set({
+                width: 320,
+                height: 240,
+                image_format: 'jpeg',
+                jpeg_quality: 90
+            });
+
+
+            function take_snapshot() {
+                Webcam.snap(function (data_uri) {
+                    console.log(data_uri);
+                    var array = data_uri.split(",");
+                    $("#" + imgPreviewCtr).attr("src", data_uri);
+                    $("#" + imgPreviewCtr).removeClass("img_prev");
+                    $("#" + imgPreviewCtr).addClass("img_prev_upload");
+                    $("input[name='" + fileContent + "'][type=hidden]").val(array[1]);
+                    $("input[name='" + fileName + "'][type=hidden]").val("camera_img.jpeg");
+                    $('#modal-container').modal('hide');
+                    Webcam.reset();
+                });
+        }
+
+
+        $('input[type=radio][name=fileUplad]').change(function () {
+            if (this.value == '1') {
+                //$("#CamaraDiv").hide();
+                //$("#my_camera").hide();
+                $(".camerabtn").hide();
+                $("#BrowseDiv").show();
+                Webcam.reset();
+            }
+            else if (this.value == '2') {
+                //$("#CamaraDiv").show(); $("#my_camera").show();
+                Webcam.attach('#my_camera');
+                $("#BrowseDiv").hide();
+                $(".camerabtn").show();
+            }
+        });
+
+        function BrowseImg(file) {
+            var thisfile = $(file);
+            var fileExtensionas = ['png', 'jpg', 'jpeg'];
+            var fileContent = file.getAttribute("filecontent");
+            var filename = file.getAttribute("filename");
+            if (file.files.length > 0) {
+                var file = file.files[0];
+                var fileName = file.name;
+                var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                if ($.inArray(fileExtension.toLowerCase(), fileExtensionas) == -1) {
+                    $(thisfile).val("")
+                    swal("Only formats are allowed : " + fileExtensionas.join(', '));
+                    return false;
+                } else {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function () {
+                        // console.log(reader.result);
+                        var array = reader.result.split(",");
+                        $("input[name='" + fileContent + "'][type=hidden]").val(array[1]);
+                        $("input[name='" + filename + "'][type=hidden]").val(fileName);
+                        /// $("input[name='" + filepath + "'][type=hidden]").val("");
+                    };
+                    reader.onloadend = function () {
+                        $("#" + imgPreviewCtr).attr('src', this.result);
+                        $("#" + imgPreviewCtr).removeClass("img_prev");
+                        $("#" + imgPreviewCtr).addClass("img_prev_upload");
+                        $('#modal-container').modal('hide');
+                    };
+                    reader.onerror = function (error) {
+                        $("input[name='" + fileContent + "'][type=hidden]").val("");
+                        console.log(error);
+                        $('#modal-container').modal('hide');
+                    };
+                    //$(".part1").hide();
+                    //$(".part2").show();
+                }
+            }
+        }
+    </script>
+
+</div>
+
+<div class="modal-footer">
+    <form>
+        <input type=button value="Take Snapshot" class="button camerabtn"  onClick="take_snapshot()">
+    </form>
+</div>

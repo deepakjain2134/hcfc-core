@@ -1,0 +1,15 @@
+﻿@model HCF.BDO.TInspectionFiles
+@{
+    Layout = null;
+}
+<li class="list-group-item ilsmfiles" id="lidv_@Model.TInsFileId">
+    @if (!string.IsNullOrEmpty(Model.FileName))
+    {
+        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = Model.FilePath, title = "Preview" })" class="modal-link" , required="required">
+            <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@Model.FileName" />
+        </a>
+        <a data-id="@Model.TInsFileId" class="delete" data-stepid="@Model.StepsId">
+            <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+        </a>
+    }
+</li>

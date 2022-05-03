@@ -1,0 +1,406 @@
+﻿@model HCF.BDO.TFloorAssets
+
+@{
+    ViewBag.Title = "Inspectionbybarcode";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //if(ViewBag.OsName !=null &&  ViewBag.BrowserName !=null && ViewBag.DeviceType !=null )
+    //{
+    //    var OsName = ViewBag.OsName;
+    //    var BrowserName = ViewBag.BrowserName;
+    //    var DeviceType = ViewBag.DeviceType;
+    //}
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Inspection by barcode
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="barcode-row">
+                            <div class="barcode-heading">
+                                <h4>Search by assetid / barcode</h4>
+                            </div>
+                            <!-- <div>
+                                    <p class="barcodeor">OR</p>
+                                </div>-->
+                            <div class="codeSearch clearable">
+                                <input type="text" placeholder="Please enter Asset # /Tag #:" id="txtdeviceno" class="form-control barcode-control" maxlength="50" />
+                                <span class="barcodebtn">
+                                    <a href="#" class="clearable__clear"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></a>
+                                    @if (ViewBag.OsName != null && ViewBag.OsName != "IOS")
+                                    {
+                                        <a href="#" id="btnbarcode"></a>
+                                    }
+                                    <a href="#" id="txtSearch"><i class="fa fa-search" id=""></i></a>
+                                </span>
+                                <p id="empty-message"></p>
+                            </div>
+                        </div>
+                        <section id="container" class="" style="width: 100% !important;display:none">
+                            <div class="controls">
+                                <fieldset class="reader-config-group"></fieldset>
+                            </div>
+                            <div id="interactive" class="viewport barcodesearch1"></div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="tfloorAssetinfo" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+@section scripts{
+
+    <script type="text/javascript" src="@Url.Content("~/dist/Scripts/quagga.js")"></script>
+    <script>
+        $(".clearable").each(function () {
+            const $inp = $(this).find("input:text"),
+                $cle = $(this).find(".clearable__clear");
+            $inp.on("input", function () {
+                $cle.toggle(!!this.value);
+            });
+            $cle.on("touchstart click", function (e) {
+                e.preventDefault();
+                $inp.val("").trigger("input");
+            });
+        });
+
+        $(function () {
+
+            $("#txtdeviceno").keyup(function (event) {
+                if (event.keyCode === 13) {
+                    //alert("Call");
+                    $("#txtSearch").click();
+                }
+            });
+
+
+
+            $("#txtdeviceno").autocomplete({
+                minLength: 0,
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Assets/GetAssetsByPrefix",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        global: false,
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return {
+                                    value: item.FloorAssetsId,
+                                    label: item.AssetNo,
+                                    AssetName: item.Assets.Name,
+                                    Location: (item.Floor) ? item.Floor.FloorLocation : "NA",
+                                    FloorId: item.FloorId,
+                                    SerialNo: (item.SerialNo) ? item.SerialNo :" "
+                                };
+                            }))
+                        }
+                    })
+                },
+                search: function (e, u) {
+                    $(this).addClass('loader');
+                },
+                response: function (e, ui) {
+                    $(this).removeClass('loader');
+                    if (ui.content.length === 0) {
+                        $("#empty-message").text("No results found");
+                    } else {
+                        $("#empty-message").empty();
+                    }
+                },
+                //focus: function (event, ui) {
+                //    $("#txtdeviceno").val(ui.item.label);
+                //    return false;
+                //},
+                select: function (event, ui) {
+                    //$("#project").val(ui.item.label);
+                    //$("#project-id").val(ui.item.value);
+                    //$("#project-description").html(ui.item.desc);
+                    //$("#project-icon").attr("src", "images/" + ui.item.icon);
+                    $("#txtdeviceno").val(ui.item.label);
+                    return false;
+                }
+            })
+                .autocomplete("instance")._renderItem = function (ul, item) {                   
+                    var newClass = (item.FloorId > 0 && item.FloorId != undefined) ? "" : "disable";
+                    return $("<li>")
+                        .append("<div><div><span>AssetId : " + item.label + "</span><span> Barcode : "+ item.SerialNo + "</span><span> Asset Name : " + item.AssetName + "</span><span> Location : " + item.Location + "</span></div>" +
+                            "<div class='barcodeiconbox'><a href=/inspection/assets?floorId=" + item.FloorId + "&type=1" + " class=" + newClass+"><img style='cursor: pointer' src='@Url.Content(HCF.Web.Models.ImagePathModel.searchInsp)' title='Floor Plan' /></a>" +
+                        "<a href='/asset/eps/" + item.value + "/0'" + "><img style='cursor: pointer' src='@Url.Content(HCF.Web.Models.ImagePathModel.InspectSearchIcon)' title='Inspection' /></a></div></div>")
+                        .appendTo(ul);
+                };
+
+            var value;
+            var App = {
+                init: function () {
+                    Quagga.init(this.state, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        App.attachListeners();
+                        Quagga.start();
+                    });
+                },
+                initCameraSelection: function () {
+                    var streamLabel = Quagga.CameraAccess.getActiveStreamLabel();
+
+                    return Quagga.CameraAccess.enumerateVideoDevices()
+                        .then(function (devices) {
+                            function pruneText(text) {
+                                return text.length > 30 ? text.substr(0, 30) : text;
+                            }
+                            var $deviceSelection = document.getElementById("deviceSelection");
+                            while ($deviceSelection.firstChild) {
+                                $deviceSelection.removeChild($deviceSelection.firstChild);
+                            }
+                            devices.forEach(function (device) {
+                                var $option = document.createElement("option");
+                                $option.value = device.deviceId || device.id;
+                                $option.appendChild(document.createTextNode(pruneText(device.label || device.deviceId || device.id)));
+                                $option.selected = streamLabel === device.label;
+                                $deviceSelection.appendChild($option);
+                            });
+                        });
+                },
+                querySelectedReaders: function () {
+                    return Array.prototype.slice.call(document.querySelectorAll('.readers input[type=checkbox]'))
+                        .filter(function (element) {
+                            return !!element.checked;
+                        })
+                        .map(function (element) {
+                            return element.getAttribute("name");
+                        });
+                },
+                attachListeners: function () {
+                    var self = this;
+
+                    self.initCameraSelection();
+                    $(".controls").on("click", "button.stop", function (e) {
+                        e.preventDefault();
+                        Quagga.stop();
+                    });
+
+                    $(".controls .reader-config-group").on("change", "input, select", function (e) {
+                        e.preventDefault();
+                        var $target = $(e.target);
+                        value = $target.attr("type") === "checkbox" ? this.querySelectedReaders() : $target.val();
+                        var name = $target.attr("name"),
+                            state = self._convertNameToState(name);
+
+                        console.log("Value of " + state + " changed to " + value);
+                        self.setState(state, value);
+                    });
+                },
+                _accessByPath: function (obj, path, val) {
+                    var parts = path.split('.'),
+                        depth = parts.length,
+                        setter = (typeof val !== "undefined") ? true : false;
+
+                    return parts.reduce(function (o, key, i) {
+                        if (setter && (i + 1) === depth) {
+                            if (typeof o[key] === "object" && typeof val === "object") {
+                                Object.assign(o[key], val);
+                            } else {
+                                o[key] = val;
+                            }
+                        }
+                        return key in o ? o[key] : {};
+                    }, obj);
+                },
+                _convertNameToState: function (name) {
+                    return name.replace("_", ".").split("-").reduce(function (result, value) {
+                        return result + value.charAt(0).toUpperCase() + value.substring(1);
+                    });
+                },
+                detachListeners: function () {
+                    $(".controls").off("click", "button.stop");
+                    $(".controls .reader-config-group").off("change", "input, select");
+                },
+                setState: function (path, value) {
+                    var self = this;
+
+                    if (typeof self._accessByPath(self.inputMapper, path) === "function") {
+                        value = self._accessByPath(self.inputMapper, path)(value);
+                    }
+
+                    self._accessByPath(self.state, path, value);
+
+                    console.log(JSON.stringify(self.state));
+                    App.detachListeners();
+                    Quagga.stop();
+                    App.init();
+                },
+                inputMapper: {
+                    inputStream: {
+                        constraints: function (value) {
+                            if (/^(\d+)x(\d+)$/.test(value)) {
+                                var values = value.split('x');
+                                return {
+                                    width: { min: parseInt(values[0]) },
+                                    height: { min: parseInt(values[1]) }
+                                };
+                            }
+                            return {
+                                deviceId: value
+                            };
+                        }
+                    },
+                    numOfWorkers: function (value) {
+                        return parseInt(value);
+                    },
+                    decoder: {
+                        readers: function (value) {
+                            if (value === 'ean_extended') {
+                                return [{
+                                    format: "ean_reader",
+                                    config: {
+                                        supplements: [
+                                            'ean_5_reader', 'ean_2_reader'
+                                        ]
+                                    }
+                                }];
+                            }
+                            console.log("value before format :" + value);
+                            return [{
+                                format: value + "_reader",
+                                config: {}
+                            }];
+                        }
+                    }
+                },
+                state: {
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        constraints: {
+                            //width: { min: 640 },
+                            //height: { min: 480 },
+                            zoom:0,
+                            aspectRatio: { min: 1, max: 100 },
+                            facingMode: "environment" // or user
+                        }
+                    },
+                    locator: {
+                        patchSize: "large",
+                        halfSample: true
+                    },
+                    numOfWorkers: 4,
+                    decoder: {
+                        readers: [
+                            "code_39_reader",
+                            "code_128_reader"
+                        ]
+                    },
+                    locate: true,
+                    multiple: true
+                },
+                lastResult: null
+            };
+
+            //value =  App.querySelectedReaders() ;
+            //App.init();
+
+            Quagga.onProcessed(function (result) {
+
+                var drawingCtx = Quagga.canvas.ctx.overlay,
+                    drawingCanvas = Quagga.canvas.dom.overlay;
+
+                if (result) {
+                    if (result.boxes) {
+                        drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                        result.boxes.filter(function (box) {
+                            return box !== result.box;
+                        }).forEach(function (box) {
+                            Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
+                        });
+                    }
+
+                    if (result.box) {
+                        Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#00F", lineWidth: 2 });
+                    }
+
+                    if (result.codeResult && result.codeResult.code) {
+                        Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: 'red', lineWidth: 3 });
+                    }
+                }
+            });
+
+            Quagga.onDetected(function (result) {
+                debugger
+                console.log(result);
+                var code = result.codeResult.code;
+                $("#txtdeviceno").val(code);
+                $("#txtSearch").trigger("click");
+                $("#container").hide();
+                //alert(code);
+                if (App.lastResult !== code) {
+                    App.lastResult = code;
+                    var $node = null, canvas = Quagga.canvas.dom.image;
+
+                    $node = $('<li><div class="thumbnail"><div class="imgWrapper"><img /></div><div class="caption"><h4 class="code"></h4></div></div></li>');
+                    $node.find("img").attr("src", canvas.toDataURL());
+                    $node.find("h4.code").html(code);
+                    $("#result_strip ul.thumbnails").prepend($node);
+                    Quagga.stop();
+                }
+            });
+
+
+            $("#txtSearch").click(function () {
+                var isValid = true;
+                var deviceno = $("#txtdeviceno").val();
+                if ($.trim($("#txtdeviceno").val()) == '') {
+                    isValid = false;
+                    $("#txtdeviceno").css({ "border": "1px solid red" });
+                } else {
+                    $("#txtdeviceno").css({ "border": "" });
+                }
+                if (isValid == false)
+                    e.preventDefault();
+                else {
+                    var url = '@Url.Action("GetFloorAssetsbyBarcode", "Assets")';
+                    $.get(url + '?deviceno=' + deviceno, function (data) {
+                        $('#loadpartial').html(data);
+                        $('#loadpartial').fadeIn('fast');
+                        $('#tfloorAssetinfo').modal('show');
+                    });
+                }
+            });
+
+
+            $("#btnbarcode").click(function () {
+                $("#txtdeviceno").val('');
+                $("#container").toggle();
+                App.init();
+            });
+        });
+
+        //$("#btnbarcode").click(function () {
+        //    $(this).toggleClass("highlight");
+        //});
+    </script>
+    <style>
+        .ui-autocomplete.ui-front {
+            overflow-x: hidden;
+        }
+        .drawingBuffer{
+            display:none;
+        }
+    </style>
+}

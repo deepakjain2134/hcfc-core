@@ -1,0 +1,210 @@
+﻿@model IEnumerable<HCF.BDO.Documents>
+<div class="row tablelist-topform linkattach">
+    <div class="col-md-8 inbox-heading">
+        <p>
+            <label>@Localizer["CRxInboxTitle"]:</label> Address of this Inbox is <label>@HCF.Web.Base.UserSession.CurrentOrg.CRxInboxMailId</label>
+       <br />
+            "Tip: Before using Attachments, first select and drag the Attachment to: Report, Misc.Doc, Policy or Sample Doc column."
+        </p>
+    </div>
+    <div class="col-lg-4 text-right" id="vendorReport">
+        <br />
+        <a href="@Url.Action("VendorReports", "EPGroups")" class="btn button1">
+            Link attachment to Vendor
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table id="inboxTable" class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th style="display:none"></th>
+                    <th>
+                    </th>
+                    <th>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ReceivedDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Sender)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Subject)
+                    </th>
+                    <th title="Attachments">
+                        <i class="fa fa-lg fa-paperclip" aria-hidden="true"></i>
+                    </th>
+                    <th title="Report">Report</th>
+                    <th title="Misc.Doc">Misc.Doc</th>
+                    <th title="Policy">Policy</th>
+                    <th title="Sample Doc">Sample Doc</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Where(x => x.Attachments.Count > 0 && x.DocumentRepoId > 0)
+                  .OrderByDescending(x => x.ReceivedDate))
+                {
+                    <tr id=@($"tr{item.DocumentRepoId}")>
+                        <td style="display:none">
+                            @($"{item.DocumentRepoId}")
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" onclick="OpenReplyDocModal('@item.DocumentRepoId')"
+                               class="btn btn-primary" title="Reply" data-toggle="modal">
+                                <i class="fa fa-mail-reply"></i>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="" data-id="@item.DocumentRepoId" class="delete">
+                                <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" />
+                            </a>
+                        </td>
+                        <td data-sort="@item.ReceivedDate.Ticks">
+                            @($"{item.ReceivedDate.ToClientTime().ToFormatDateTime()}")
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Sender)
+                        </td>
+                        <td data-sort="@item.Subject">
+                            <span class="description" text='@item.Details'>
+                                <img alt="" src="@Url.Content("~/dist/Images/Icons/detail_icon.png")" />
+                            </span>
+
+                            @Html.DisplayFor(modelItem => item.Subject)
+                        </td>
+                        <td>
+                            <span style="display:none">@string.Join(",", item.Attachments.Select(x => x.FileName))</span>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in item.Attachments.Where(x => !x.DocTypeId.HasValue))
+                                {
+                                    <li class="list" title="@attachment.FileName">
+                                        <div fileId="@attachment.Id"
+                                             class="inbox_file"
+                                             draggable="true"
+                                             ondragstart="fileDragStart(event)"
+                                             mailid="@item.DocumentRepoId"
+                                             fileUrl="@attachment.FilePath"
+                                             filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             alt="@attachment.FileName"
+                                             documentId="@attachment.DocumentId"
+                                             href="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             id='@($"file{attachment.Id}")'>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                        <td id=@($"tdr{item.DocumentRepoId}") title="Report"
+                            type="107"
+                            trId='@($"tr{item.DocumentRepoId}")'
+                            class="dropInbox" ondragover="inboxdragOver(event)" ondragleave="inboxdragleave(event)" ondrop="inboxdrop(event)">
+                            <span style="display:none">@string.Join(",", item.Attachments.Select(x => x.FileName))</span>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in item.Attachments.Where(x => x.DocTypeId.HasValue && x.DocTypeId.Value == 107))
+                                {
+                                    <li class="list" title="@attachment.FileName">
+                                        <div fileId="@attachment.Id"
+                                             class="inbox_file report_file"
+                                             draggable="true" fileUrl="@attachment.FilePath"
+                                             ondragstart="fileDragStart(event)"
+                                             mailid="@item.DocumentRepoId"
+                                             filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             doctypeid="@Convert.ToUInt32(HCF.BDO.Enums.UploadDocTypes.Report)"
+                                             documentId="@attachment.DocumentId"
+                                             alt="@attachment.FileName" href="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             id='@($"file{attachment.Id}")'>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+
+                        <td id=@($"tdm{item.DocumentRepoId}") title="Misc.Docs"
+                            type="108"
+                            trId='@($"tr{item.DocumentRepoId}")'
+                            class="dropInbox" ondragover="inboxdragOver(event)" ondragleave="inboxdragleave(event)" ondrop="inboxdrop(event)">
+                            <span style="display:none">@string.Join(",", item.Attachments.Select(x => x.FileName))</span>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in item.Attachments.Where(x => x.DocTypeId.HasValue && x.DocTypeId.Value == 108))
+                                {
+                                    <li class="list" title="@attachment.FileName">
+                                        <div fileId="@attachment.Id"
+                                             class="inbox_file miscdocs_file"
+                                             draggable="true" fileUrl="@attachment.FilePath"
+                                             ondragstart="fileDragStart(event)"
+                                             mailid="@item.DocumentRepoId"
+                                             filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             doctypeid="@Convert.ToUInt32(HCF.BDO.Enums.UploadDocTypes.MiscDocuments)"
+                                             documentId="@attachment.DocumentId"
+                                             alt="@attachment.FileName" href="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             id='@($"file{attachment.Id}")'>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+
+                        <td id=@($"tdp{item.DocumentRepoId}") title="Policy"
+                            type="106" trId='@($"tr{item.DocumentRepoId}")'
+                            class="dropInbox" ondragover="inboxdragOver(event)" ondragleave="inboxdragleave(event)" ondrop="inboxdrop(event)">
+                            <span style="display:none">@string.Join(",", item.Attachments.Select(x => x.FileName))</span>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in item.Attachments.Where(x => x.DocTypeId.HasValue && x.DocTypeId.Value == 106))
+                                {
+                                    <li class="list" title="@attachment.FileName">
+                                        <div fileId="@attachment.Id"
+                                             class="inbox_file policy_file"
+                                             draggable="true" fileUrl="@attachment.FilePath"
+                                             ondragstart="fileDragStart(event)"
+                                             mailid="@item.DocumentRepoId"
+                                             filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             doctypeid="@Convert.ToUInt32(HCF.BDO.Enums.UploadDocTypes.Policy)"
+                                             documentId="@attachment.DocumentId"
+                                             alt="@attachment.FileName" href="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             id='@($"file{attachment.Id}")'>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+
+                        <td id=@($"tds{item.DocumentRepoId}") title="Sample Docs"
+                            type="-1"
+                            trId='@($"tr{item.DocumentRepoId}")'
+                            class="dropInbox" ondragover="inboxdragOver(event)" ondragleave="inboxdragleave(event)" ondrop="inboxdrop(event)">
+                            <ul class="doc_listing">
+                                @foreach (var attachment in item.Attachments.Where(x => x.DocTypeId.HasValue &&
+                               x.DocTypeId.Value == -1))
+                                {
+                                    <li class="list" title="@attachment.FileName">
+                                        <div fileId="@attachment.Id"
+                                             class="inbox_file sampledocs_file"
+                                             draggable="true"
+                                             ondragstart="fileDragStart(event)"
+                                             mailid="@item.DocumentRepoId"
+                                             filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             doctypeid="-1"
+                                             documentId="@attachment.DocumentId"
+                                             alt="@attachment.FileName" href="@commonModelFactory.FilePath(attachment.FilePath)"
+                                             id='@($"file{attachment.Id}")'>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/inbox.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<style>
+    .inboxlistAction {
+        display: flex;
+        align-items: center;
+        justify-content: right;
+    }
+</style>

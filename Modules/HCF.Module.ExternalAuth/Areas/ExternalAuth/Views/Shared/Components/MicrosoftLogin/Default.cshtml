@@ -1,0 +1,33 @@
+﻿@*@inject SignInManager<HCF.BDO.UserProfile> SignInManager
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.OpenIdConnect
+
+@{
+    var schemes = await SignInManager.GetExternalAuthenticationSchemesAsync();
+    var loginProviders = schemes.Where(scheme => scheme.DisplayName != OpenIdConnectDefaults.AuthenticationScheme).ToList();
+    if (loginProviders != null)
+    {
+        <form asp-controller="Auth" asp-action="ExternalOpenIdLogin" asp-route-returnurl="@ViewData["ReturnUrl"]"
+              id="microsoft_ext_Form"
+              method="post" class="form-horizontal">
+            <input type="hidden" name="provider" value="AzureAD"/>
+            <a class="microsoft-loginbtn" href="javascript:document.getElementById('microsoft_ext_Form').submit()">
+                <img src="/dist/Images/Icons/microsoft-logo.png" />
+                Sign in with Microsoft
+            </a>
+        </form>
+    }
+}*@
+
+
+
+
+<a class="microsoft-loginbtn" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">
+        <img src="/dist/Images/Icons/microsoft-logo.png" />
+        Sign in with Microsoft
+    </a>
+    <script>
+        $(function () {
+            setTimeout(function () { $(".alert-danger").fadeOut(1500); }, 5000)
+        });
+</script>

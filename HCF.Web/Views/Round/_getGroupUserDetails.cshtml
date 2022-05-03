@@ -1,0 +1,61 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var allUsers = Model.userList;
+}
+<div class="@(Model.rounds.Inspections.Any(x=>x.Status ==1 && x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId) ? "disable" : "")">
+    <table class="table table-bordered table-striped" id="myTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th style="width:150px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @*@foreach (var user in Model.TroundGroup)
+            {
+                foreach (var item in allUsers.Where(x => x.UserId == user.UserId))
+                {
+                    <tr>
+                        <td>@item.FullName</td>
+                        <td>@item.Email</td>
+                        <td class="@(Model.rounds.TRoundUsers.Any(x => x.RoundUserId == item.UserId && x.IsCreator) ? "disable": "")">
+                            <a class="@((item.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId) ? "disable": "foo roundUser")" userid="@item.UserId">
+                                @(Model.rounds.TRoundUsers.Any(x => x.RoundUserId == item.UserId && x.IsActive) ? "Remove" : "Add")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }*@
+        </tbody>
+    </table>
+</div>
+<script>
+
+    $(".roundUser").click(function () {
+       // debugger;
+        var cntrol = $(this);
+        var userId = cntrol.attr("userid");
+        var roundId = $("#TRoundId").val();
+        var status = cntrol.html().trim() == "Add" ? true : false;
+       // debugger;
+        console.log(userId, roundId);
+       // debugger;
+        swal({
+            title: "Are you sure? ",
+            text: "Do you want to " + cntrol.html().trim().toLowerCase() + " this user from this round!",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                cntrol.html(cntrol.html().trim() == "Add" ? 'Remove' : 'Add');
+                saveAndLoadUser(roundId, userId, status);
+            }
+        });
+    });
+</script>

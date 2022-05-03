@@ -1,0 +1,581 @@
+﻿@{
+    ViewBag.Title = ViewBag.PageTitle;
+}
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        @ViewBag.PageTitle
+    </h1>
+
+</section>
+    }
+<div class="container-fluid">
+   
+        <div class="row">
+            <div class="col-md-3 col-sm-4 col-left asset_list_view">
+                <div class="box box-primary">
+                    @await Html.PartialAsync("_assetsType", (List<HCF.BDO.AssetType>)ViewBag.SetUpAssetsType)
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-8">
+                <div class="box box-primary">
+
+                    <div class="row tablelist-topform">
+                        <div class="col-md-12">
+                            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                <div class="sitelocationhide">
+                                    @await Html.PartialAsync("_site", (List<HCF.BDO.Site>)ViewBag.SiteData)
+
+                                    <div id="divRegion" class="row" style="display:none;">
+                                        <div class="col-md-2 location-Box">
+                                            <h4>Locations:</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <statedropdownlist firsttext="All State"
+                                                               required="required"
+                                                               class="form-control"
+                                                               selectedvalue="0"
+                                                               name="State"
+                                                               asp-for-onchange="loadCities()">
+                                            </statedropdownlist>
+                                            @*@Html.StateDropDownList("State", 0, "All State", new { @class = "form-control", required = "required", @onchange = "loadCities()" })*@
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <citydropdownlist firsttext="All City"
+                                                              required="required"
+                                                              class="form-control"
+                                                              selectedvalue="0"
+                                                              stateId="0"
+                                                              name="City">
+                                            </citydropdownlist>
+
+                                            @*@Html.CityDropDownList("City", 0, 0, "All City", new { @class = "form-control", @onchange = "SetCityId()" })*@
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="submit" id="btnSiteSearch" class="comm-button">Filter</button>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <img src="/dist/images/arrow_icon.png" class="siteshide" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 asstabBox-btn btn-group btn-group-vertical" data-toggle="buttons">
+                            <label class="btn active">
+                                @Html.RadioButton("pageView", 1, true)@Html.Label("Assets with floor plan")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("pageView", 2)@Html.Label("Assets without floor")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn" style="display:none">
+                                @Html.RadioButton("pageView", 3)@Html.Label("Asset in area")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-12 views" id="view1" style="padding-top:0px !important;clear:both">
+                            <div class="row floorsPlan-head">
+
+                                <div class="col-lg-4"><h4 class="headings">Buildings</h4></div>
+                                <div class="col-lg-8">
+                                    <div class="BuildingsLengedBox">
+                                        <h4 class="headings">Floors</h4> 
+                                        <div class="trackingAssets-lenged">
+                                            <ul class="legand">
+                                                <li><span class="box_noplan"></span> No floor plan</li>
+                                                <li><span class="box_assetsfloor"></span>Floor with assets</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" value="@ViewBag.AssetId" id="assetId" />
+                            <div id="divbuildingfloor"> @await Html.PartialAsync("_buildingfloors", (List<HCF.BDO.Buildings>)ViewBag.BuildingFloors)</div>
+                        </div>
+                        <div class="col-lg-12 views" id="view2" style="display:none" ondragover="dragOver(event);" ondrop="drop(event);">
+                        </div>
+                        <div class="col-lg-12 views" id="view3" style="display:none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+</div>
+<input type="hidden" value="0" id="viewRefresh" />
+
+<div class="modal fade" id="EditAssetsPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var pageMode = '@ViewBag.PageTitle';
+
+    $(document).ready(function () {
+        if (pageMode == "Inspection") {
+            $('.list li').removeAttr("draggable");
+            $('.list li').removeAttr("ondragstart");
+            $('img').removeAttr("draggable");
+            $('img').removeAttr("ondragstart");
+        }
+        debugger
+        SelectCheckedView();
+        pageLoad();
+        $('#SitecheckAll').prop('checked', true);
+        $("#SitecheckAll").click();
+        LoadRegion();
+        if ($("[SiteTypeID=2]:checked").length > 0) {
+            $("#divRegion").show();
+        }
+        else {
+            $("#divRegion").hide();
+        }
+
+    });
+
+    function SelectCheckedView() {
+        debugger
+        $('.views').hide();
+        var checkedViewId = $('input[type="radio"][name="pageView"]:checked').val();
+
+        if (checkedViewId == 2) {
+            loadVIew2()
+        }
+        $('#view' + checkedViewId).show();
+    }
+
+    function loadVIew2() {
+        $("#view2").empty();
+        $.get(CRxUrls.assets_floorassetswithoutfloor, function (data) {
+            $('#view2').html(data);
+            $('#view2').fadeIn('fast');
+            $("#viewRefresh").val("0");
+        });
+    }
+
+    $('#EditAssetsPopup').on('hidden.bs.modal', function () {
+         var refresh=$("#viewRefresh").val();
+         if (refresh == 1)
+             loadVIew2();
+    });
+
+    $('body').on('click', '.assetsPopUp', function () {
+        var floorAssetId = $(this).attr("id");
+        debugger
+        $.get(CRxUrls.Assets_tfloorAssetEdit + '?mode=' + pageMode + '&tfloorAssetId=' + floorAssetId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#EditAssetsPopup').modal('show');
+        });
+    });
+
+    $("input[name=pageView]").on('change', function () {
+        $("#view1").hide();
+        $("#view2").hide();
+        $("#view3").hide();
+        var view = $(this).val();
+        $("#view" + view).show();
+        if (view == 2) {
+            var rowCount = $('#myTable3 tr').length;
+            if (rowCount == 0) {
+                loadVIew2();
+            }
+        }
+    });
+
+    $('.assets').click(function () {
+        var floorAssetId = $(this).attr("id");
+        var url = CRxUrls.Assets_tfloorAssetEdit;
+        $.get(url + '?mode=' + pageMode + '&tfloorAssetId=' + floorAssetId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#EditAssetsPopup').modal('show');
+        });
+    });
+
+    $("#checkAll").click(function () {
+        var isChecked = $(this).prop('checked');
+        $('#assetsList').find('input[type="checkbox"]').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+        filterFloorAssets();
+    });
+
+    $(".parentCheck").click(function () {
+        var divId = $(this).attr("assetid");
+        var isChecked = $(this).prop('checked');
+        $('#ulassets_' + divId).find('input[type="checkbox"]').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+
+
+        if ($(this).prop("checked")) {
+            $(this).parent().find('ul').show();
+        } else {
+            $(this).parent().find('ul').hide();
+        }
+
+
+        var totalnumberOfChecked = $('input.ChildCheck:checkbox:checked').length;
+        var totalNoCheckboxes = $('input.ChildCheck:checkbox').length;
+        if (totalnumberOfChecked === totalNoCheckboxes) {
+            $("#checkAll").prop("checked", true)
+        } else {
+            $("#checkAll").prop("checked", false)
+        }
+        filterFloorAssets();
+    });
+
+    $(".ChildCheck").click(function () {
+        var parentUl = $(this).parent("li").parent("ul");
+        var parentUlId = parentUl.attr("id");
+        var numberOfChecked = $("#" + parentUlId).find('input:checkbox:checked').length;
+        var totalCheckboxes = $("#" + parentUlId).find('input:checkbox').length;
+        if (numberOfChecked === totalCheckboxes) {
+            $("#" + parentUlId).parent("li").find('input.parentCheck:checkbox').prop("checked", true)
+        } else {
+            $("#" + parentUlId).parent("li").find('input.parentCheck:checkbox').prop("checked", false)
+        }
+
+        var totalnumberOfChecked = $('input.ChildCheck:checkbox:checked').length;
+        var totalNoCheckboxes = $('input.ChildCheck:checkbox').length;
+        if (totalnumberOfChecked === totalNoCheckboxes) {
+            $("#checkAll").prop("checked", true)
+        } else {
+            $("#checkAll").prop("checked", false)
+        }
+        filterFloorAssets();
+    });
+
+    $('.list > li a').click(function () {
+        $(this).parent().find('ul').toggle();
+    });
+
+    function pageLoad() {
+        if ($("#assetId").val().length > 0) {
+            $('.asset_list_view input[value=' + $("#assetId").val() + ']').prop('checked', true);
+            $('.asset_list_view input[value=' + $("#assetId").val() + ']').closest('ul.sublist').show()
+        }
+        var assetid = getParameterByName('assetsid');
+        if (assetid != undefined && assetid > 0) {
+            $('.asset_list_view input[value=' + assetid + ']').prop('checked', true);
+            $('.asset_list_view input[value=' + assetid + ']').closest('ul.sublist').show()
+
+        }
+        filterFloorAssets();
+    }
+
+    function filterFloorAssets() {
+        var valueArray = [];
+        $("ul.floor_no li").removeClass("isFloorAssets");
+        $('input[type="checkbox"]:checked').each(function () {
+            if (this.value > 0) {
+                valueArray.push(this.value);
+            }
+        });
+        var postData = { values: valueArray };
+        $.ajax({
+            type: "GET",
+            url: CRxUrls.Assets_FilterFloorAssets,
+            data: postData,
+            success: function (datas) {
+                for (i = 0; i < datas.Result.length; i++) {
+                    $("li#" + datas.Result[i]).addClass("isFloorAssets");
+                }
+                if (datas != null) {
+
+                    if (datas.AssetsId != null) {
+                        for (i = 0; i < datas.AssetsId.length; i++) {
+                            //$('.asset_list_view input[assetid=' + datas.AssetsId[i] + ']').prop('checked', true);
+                            $('.asset_list_view input[value=' + datas.AssetsId[i] + ']').prop('checked', true);
+                            $('.asset_list_view input[value=' + datas.AssetsId[i] + ']').closest('ul.sublist').show();
+                           // $('#cb2' + datas.AssetsId[i]).click();
+
+                            var parentUl = $('#cb2' + datas.AssetsId[i]).parent("li").parent("ul");
+                            var parentUlId = parentUl.attr("id");
+                            var numberOfChecked = $("#" + parentUlId).find('input:checkbox:checked').length;
+                            var totalCheckboxes = $("#" + parentUlId).find('input:checkbox').length;
+                            if (numberOfChecked === totalCheckboxes) {
+                                $("#" + parentUlId).parent("li").find('input.parentCheck:checkbox').prop("checked", true)
+                            } else {
+                                $("#" + parentUlId).parent("li").find('input.parentCheck:checkbox').prop("checked", false)
+                            }
+
+                            var totalnumberOfChecked = $('input.ChildCheck:checkbox:checked').length;
+                            var totalNoCheckboxes = $('input.ChildCheck:checkbox').length;
+                            if (totalnumberOfChecked === totalNoCheckboxes) {
+                                $("#checkAll").prop("checked", true)
+                            } else {
+                                $("#checkAll").prop("checked", false)
+                            }
+                        }
+                    }
+
+
+                }
+
+            },
+            dataType: "json",
+            traditional: true
+        });
+    }
+
+    function goToPage(floorId, control) {
+        var li = control.parentNode.id;
+        var ishave = true;
+       // debugger;
+        if (ishave) {
+            var status = true;
+            if (status) {
+                var UrlAction = CRxUrls.Assets_GetTfloorAssets;
+                var url = "";
+                if (pageMode == "Inspection") {
+                    var assetsCount = $('#assetsList').find('input[type="checkbox"]:checked').length;
+                    var epdetailid = getParameterByName('epdetailid');
+                    if (epdetailid != undefined && epdetailid > 0) {
+                        if (assetsCount > 0) {
+                            url = UrlAction + '?floorId=' + floorId + "&type=1" + "&epdetailid=" + epdetailid;
+                        } else {
+                            warningAlert("Please select an asset type from the list on the left");
+                            return false;
+                        }
+                    }
+                    else {
+                        if (assetsCount > 0) {
+                            url = UrlAction + '?floorId=' + floorId + "&type=1";
+                        } else {
+                            warningAlert("Please select an asset type from the list on the left");
+                            return false;
+                        }
+                    }
+                } else {
+                    url = UrlAction + '?floorId=' + floorId + "&type=0";
+                }
+                window.location.href = url;
+            } else {
+                swalalert("please select floor with assets.");
+            }
+        } else {
+            AlertWarningMsg("No floor plan!", "");
+        }
+    }
+
+    function dragStart(e) {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("Text", e.target.getAttribute("id"));
+    }
+
+    function dragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var id = e.target.id;
+        $("#" + id).addClass("hover");
+    }
+
+    function dragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $("li").removeClass("hover");
+    }
+
+    function drop(e) {
+        $("li").removeClass("hover");
+        e.stopPropagation();
+        e.preventDefault();
+        var assetID = e.dataTransfer.getData("Text");
+        if (assetID > 0) {
+            var Url = CRxUrls.Assets_tfloorAssetEdit;
+            $.get(Url + '?assetID=' + assetID, function (data) {
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+                $('#EditAssetsPopup').modal('show');
+            });
+        }
+    }
+
+
+    var perfEntries = performance.getEntriesByType("navigation");
+
+    if (perfEntries[0].type === "back_forward") {
+        location.reload(true);
+    }
+
+
+    $(".sitecheck").click(function () {
+        var divId = $(this).attr("siteid");
+        var isChecked = $(this).prop('checked');
+        $('#ulsites_' + divId).find('input[type="checkbox"]').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+
+
+        if ($(this).prop("checked")) {
+            $(this).parent().find('ul').show();
+        } else {
+            $(this).parent().find('ul').hide();
+        }
+
+    });
+    $("#SitecheckAll").click(function () {
+        var isChecked = $(this).prop('checked');
+        $('.siteinnerlist').find('input[type="checkbox"]').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+    });
+    function loadCities() {
+        let stateId = $('#State').val();
+        stateId = stateId != null ? parseInt(stateId) : 0;
+        let url = CRxUrls.Common_GetCities;
+        let htmlData = '<option value="">All City</option>';
+        $.get(url + "?stateId=" + stateId, function (data) {
+            for (var item of data) {
+                htmlData += '<option style="display:none;" value="' + item.CityId + '">' + item.CityName + '</option>';
+            }
+            $('#City').html(htmlData);
+
+            var CityAvailable = @Html.Raw(ViewBag.DistinctCities);
+        $.each(CityAvailable, function (value) {
+
+            $("#City").find("option[value=" + CityAvailable[value] + "]").show();
+            console.log(CityAvailable[value]);
+        });
+        });
+
+
+    }
+
+    function LoadRegion() {
+        $("#divRegion").hide();
+        $("#State").find("option").hide();
+        $("#State").find("option[value='']").show();
+        $("#City").find("option").hide();
+        $("#City").find("option[value='']").show();
+        var showRegiondiv = false;
+        var statesAvailable = @Html.Raw(ViewBag.DistinctStates);
+        $.each(statesAvailable, function (value) {
+            $("#State").find("option[value=" + statesAvailable[value] + "]").show();
+            showRegiondiv = true;
+            console.log(statesAvailable[value]);
+        });
+    }
+
+    $(".siteCheck").click(function () {
+        var divId = $(this).attr("SiteTypeID");
+        if (divId == 2) {
+            $("#divRegion").show();
+        }
+
+        if ($("[SiteTypeID=2]:checked").length > 0) {
+            $("#divRegion").show();
+        }
+        else {
+            $("#divRegion").hide();
+        }
+    });
+
+
+    $("#btnSiteSearch").click(function () {
+        debugger;
+        if ($('#sitecheck:checked').length > 0) {
+            var SiteCode = "";
+
+            var StateId = 0;
+            StateId = parseInt($("#State").val());
+            var CityId = 0;
+            CityId = parseInt($("#City").val());
+
+            if (isNaN(StateId)) {
+                StateId = 0;
+
+            }
+            if (isNaN(CityId)) {
+                CityId = 0;
+            }
+            var SiteType = 1;
+            if ($("[SiteTypeID=2]:checked").length > 0) {
+                SiteType = 2;
+                if (StateId != "" && CityId == 0) {
+                    StateId = 0;
+                    CityId = 0;
+                    swalalert("Please Select City");
+                    return;
+                }
+            }
+
+            $('#sitecheck:checked').each(function () {
+                SiteCode = SiteCode + $(this).attr('sitecode') + ",";
+               // Siteid = $(this).attr('siteid') + ",";
+            });
+            SiteCode = SiteCode.replace(/,\s*$/, "");
+
+            console.log(SiteCode);
+
+            var url = CRxUrls.Assets_BuildingFloors;
+            $.get(url + "?SiteCode=" + SiteCode + "&StateId=" + StateId + "&CityId=" + CityId + "&SiteType=" + SiteType, function (data) {
+                if (data != null) {
+                    $("#divbuildingfloor").html(data);
+                }
+                else {
+                    $("#divbuildingfloor").html("");
+                }
+
+            });
+        }
+        else {
+            swalalert("Please select atleast one site");
+        }
+    });
+
+    $(document).ready(function () {
+        debugger;
+        $('.siteshide').click(function () {
+            debugger;
+            $(this).siblings(".sitelocationhide").toggle(600);
+        });
+        $(".siteshide").click(function () {
+            debugger;
+            $(".siteshide").toggleClass("sitesicon-rotated", 600);
+        });
+    });
+
+    $(function() {
+        var offset = $("#assetsList").offset();
+        var topPadding = 15;
+        $(window).scroll(function() {
+            if ($(window).scrollTop() > offset.top) {
+                $("#assetsList").stop().animate({
+                   // marginTop: $(window).scrollTop() - offset.top + topPadding
+                });
+            } else {
+                $("#assetsList").stop().animate({
+                    marginTop: 0
+                });
+            };
+        });
+    });
+</script>
+
+@*<style>
+    .trackingAssets-lenged ul li {
+        display: flex;
+        align-items: center;
+    }
+    .btn-group-vertical {
+        position: initial;
+    }
+    .siteshide.sitesicon-rotated {
+        transform: rotate( 270deg);
+    }
+    .sitelocationhide ul.list li {
+        padding: 0 0px 0px !important;
+    }
+</style>*@

@@ -1,0 +1,77 @@
+﻿@model HCF.BDO.DocumentSpaceStatus
+@if (Model != null)
+{
+
+    int percentComplete = (int)Math.Round((double)(100 * Model.UsedSpace) / Model.TotalSpace);
+    if (percentComplete > 100)
+    {
+        percentComplete = 100;
+    }
+
+    <div class="progressRow" style="display:none;">
+        <div class="col-md-8">
+        </div>
+        <div class="col-md-4">
+            <div class="documentProgressbar">
+                <h3 class="progress-title">@commonModelFactory.SizeSuffix(Model.UsedSpace * 1000)  of @commonModelFactory.SizeSuffix(Model.TotalSpace * 1000, 0) <span>(@string.Format("{0}%", percentComplete)) <i class="fa fa-info-circle" aria-hidden="true" data-toggle="modal" data-target="#freeSpacepopup"></i></span></h3>
+                <div class="progress green">
+                    <div class="progress-bar" style="width: @string.Format("{0}%", percentComplete);"
+                     aria-valuenow="@Model.UsedSpace"
+                     aria-valuemin="0"
+                     value="@string.Format("{0}%", percentComplete)"
+                     aria-valuemax="@Model.TotalSpace">
+                        <div class="progress-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="freeSpacepopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 moredetails-progress">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <div class="storagedetailsBox">
+                                <h4>Total storage</h4>
+                                <div class="storageRow">
+                                    <div class="storageCol1">Your plan</div>
+                                    <div class="storageCol1">5 GB</div>
+                                </div>
+                                <div class="storageRow">
+                                    <div class="storageCol1"><label>Total</label></div>
+                                    <div class="storageCol1">5 GB</div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <h4>More information about your storage</h4>
+                            <p>Your CRx Account automatically starts with 5 GB of free storage.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var documentvalue = $(".progress-bar").val();
+
+            if (documentvalue < 90) {
+                $('.progress-bar').css('background-color', 'red');
+            }
+            else if (documentvalue >= 90) {
+                $('.progress-bar').css('background-color', 'green');
+            }
+            else {
+                $('.progress-bar').css('background-color', 'lightskyblue');
+            }
+        });
+
+    </script>
+}

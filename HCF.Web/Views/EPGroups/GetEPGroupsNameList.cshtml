@@ -1,0 +1,88 @@
+﻿@model IEnumerable<HCF.BDO.EPGroups>
+@{
+    ViewBag.Title = "GetEPGroupsList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Groups
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary general_menu">
+                    @await Html.PartialAsync("_MoreConfig")
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <div class="add_button_comman">
+                        <a href='@(Url.RouteUrl("createepgroupsname"))' class="pull-right">
+                            <img src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" title="Add EPGroup" alt="3d_add_button" />
+                        </a>
+                    </div>
+                    
+                        <table id="myTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        EP Group Name
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.EPGroupName)
+                                        </td>
+                                        <td class="comman_checkbox1">
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink("Edit", "AddEPGroupsName", new { epgroupId = item.EPGroupId }, new { @class = "button1" })
+                                            <a data-toggle="modal"
+                                               data-target="#addEPsModel"
+                                               class="addEPs button1"
+                                               title="Assign EPs"
+                                               id="@item.EPGroupId" href="javascript:void(0);">Assign EPs</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="addEPsModel" role="dialog">
+    <div class="modal-dialog model_big" id="modelContent">
+    </div>
+</div>
+
+<script>
+    $('body').on('click', '.addEPs', function () {
+        debugger
+        var eplurl = CRxUrls.EPGroups_AsignEPs;
+        var epgroupId = $(this).attr("id")
+        $.ajax({
+            url: eplurl + "?epgroupId=" + epgroupId,
+            method: "GET",
+            success: function (data) {
+                $('#modelContent').html($(data));
+            }
+        })
+    });
+</script>

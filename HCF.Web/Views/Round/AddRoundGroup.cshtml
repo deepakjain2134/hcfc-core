@@ -1,0 +1,144 @@
+﻿@model HCF.BDO.RoundGroup
+@*@{
+        ViewBag.Title = "Add Location Group";
+    }*@
+@*@using (Ajax.BeginForm("AddRoundGroup", "Round", FormMethod.Post, new AjaxOptions { OnSuccess = "OnSuccess" }))
+{*@
+<form asp-controller="Round" asp-action="AddRoundGroup"
+      id="RoundAddRoundGroup"
+      data-ajax-success="OnSuccess"
+      data-ajax="true" data-ajax-method="POST"  autocomplete="off">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle">Add Location Group</span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <input type="hidden" id="mode" value="@ViewBag.mode" />
+            <input type="hidden" name="IsRoundlistRequest" id="IsRoundlistRequest" value="@ViewBag.IsRoundlistRequest" />
+            <input type="hidden" id="hdnRestrict" value="0" />
+            <input type="hidden" id="hdnRoundStatus" value="@Model.IsActive" />
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="col-md-12">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <div class="form-horizontal">
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.RoundGroupId)
+                <input type="hidden" id="RoundType" name="RoundType" value="1" />
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.Name)
+                </div>
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                        @Html.TextBoxFor(model => model.Description, new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Description)
+                    </div>*@
+            <div class="form-group comman_checkbox">
+
+
+                @*@Html.EditorFor(model => model.IsActive)<span></span>
+        @Html.ValidationMessageFor(model => model.IsActive)*@
+                <label>Status</label>
+
+                <select id="IsActive" name="IsActive" class="form-control">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                    <option value="2">Archived</option>
+                </select>
+
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="col-md-12">
+            <input type="submit" id="saveround" value=' @Localizer["Save"] ' class="comm-button" />
+            <input type="button" value=' @Localizer["Cancel"] ' class="comm-Cancelbutton" data-dismiss="modal" />
+            @*@Html.ActionLink("Cancel ", "RoundScheduler", "Round", new { @class = "comm-button" })*@
+        </div>
+    </div>
+</form>
+<script>
+    $(document).off("click", "#saveround").on("click", "#saveround", function () {
+        //debugger;
+
+        if ($('#RoundAddRoundGroup')[0].checkValidity()) {
+            $("#saveround").addClass("disable");
+            $("#RoundAddRoundGroup").submit();
+        }
+        else {
+            $("#saveround").removeClass("disable");
+        }
+        return false;
+    });
+    $(document).ready(function () {
+        $("#saveround").removeClass("disable");
+        if (@Model.RoundGroupId == 0) {
+              $('#IsActive').val('1');
+        }
+        else {
+              $('#IsActive').val('@Model.IsActive');
+        }
+    });
+    function OnSuccess(data) {
+        //debugger;
+        $("#modal-container").modal('toggle');
+        var mode = $('#mode').val();
+        if (data.IsExists == 1) {
+            $("#saverounds").removeClass("disable");
+            warningAlert("Round already exist!");
+            return false;
+        }
+        if ($("#IsRoundlistRequest").val() == 1) {
+            //debugger;
+            $("#hdn_locationgroupId").val(data.Result);
+            if ($("#hdn_locationgroupId").val() != null && $("#hdn_locationgroupId").val() != '0') {
+                successAlert("Saved Successfully");
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").show();
+                }, 1000);
+               
+                $("#step2").click();
+               
+                return false;
+            }
+            else {
+                openStep9();
+            }
+
+
+        }
+        else {
+         
+              if (mode != "Edit") {
+                var url = '@Url.Action("RoundSchedulerLocation", "Round")'
+                $.get(url + '?RoundType=' + 1, function (data) {
+                   // debugger;
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $(".step3").hide();
+                    $(".step2").show();
+                    //if (roundgroupId > 0) {
+                    //    $("#ddlroundgroup").val(roundgroupId);
+                    //}
+                });
+            } else {
+                var url = '@Url.Action("UserGroup", "Round")'
+                $.get(url + '?RoundType=' + 1, function (data) {
+                    //debugger;
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $("#issavedata").val(0);
+                    $("#btnbacklst").hide();
+                    $(".step3").hide();
+                    $(".step1").show();
+                });
+            }
+        }
+        
+    }
+</script>

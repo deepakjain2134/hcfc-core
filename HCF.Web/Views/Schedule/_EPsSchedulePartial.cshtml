@@ -1,0 +1,192 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+<div class="col-lg-3 col-xs-3" style='margin: 12px 0 0 0;'>
+    Select Frequency:&nbsp;
+    <frequencydropdownlist name="frequencypDownList" firsttext="All" class="form-control"></frequencydropdownlist>
+    @*@Html.FrequencypDownList("frequencypDownList", null, "All", new { @class = "form-control" })*@
+</div>
+<div class="col-lg-12">
+    <table id="eps_Table" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="display:none">FrequencyId</th>
+                <th>
+                    <input name="select_all" value="0" id="select-all" type="checkbox" /><span></span>
+                </th>
+                <th width="135">
+                    Standard, EP
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    TJCFrequency
+                </th>
+                <th>
+                    Custom Frequency
+                </th>
+                <th>
+                    Schedule #
+                </th>               
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderBy(x => x.IsAssetsRequired == true))
+            {
+                <tr>                          
+                    <td style="display:none">                        
+                        @foreach (var ePFrequency in item.EPFrequency)
+                        {
+                            @ePFrequency.Frequency.FrequencyId
+                        }
+                    </td>
+                    <td class="@((item.Schedules.GroupBy(x => x.ScheduleId).Select(x => x.First()).ToList().Count()) > 0 ? "disable" :"")">
+                        <input type="checkbox" class="checkEpDetails" value="@item.EPDetailId" /><span></span>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StandardEp)
+                    </td>
+                    <td class="align-left">
+                        @await Html.PartialAsync("_EpDescription", item.Description,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "minLength", "100" }, { "standardEp", @item.StandardEp }}
+                              )
+                        @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.StandardEp } })*@
+                    </td>
+                    <td>
+                        @foreach (var ePFrequency in item.EPFrequency)
+                        {
+                            <span>
+                                @ePFrequency.TjcFrequency.DisplayName
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var ePFrequency in item.EPFrequency)
+                        {
+                            <span>
+                                @ePFrequency.Frequency.DisplayName
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var schedules in item.Schedules.GroupBy(x => x.ScheduleId).Select(x => x.First()).ToList())
+                        {
+                            <span>@schedules.ReferenceName</span>
+                        }
+                    </td>
+                    @*<td>
+                            @if (item.DocumentType.Count > 0)
+                            {
+                                <span>@string.Join(" , ", item.DocumentType.Where(x => x.IsActive).Select(x => x.Name))</span>
+                            }
+                        </td>*@
+                    @*@if (item.EPUsers.Count > 1)
+                        {
+                            <td data-toggle="modal" data-target="#addEpAssigneeModel"
+                                class="addEpAssignee" title="Assign User"
+                                id="EPDetailId_@item.EPDetailId"
+                                data-userlist="@string.Join(",", item.EPUsers.Select(x => x.UserId))">
+                                <a href="javascript:void(0);">@string.Format("{0}{1}{2}{3}", item.EPUsers[0].FullName, " + ", item.EPUsers.Count - 1, " More")</a>
+                            </td>
+                        }
+                        else if (item.EPUsers.Count > 0)
+                        {
+                            <td data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@item.EPDetailId" data-userlist="@string.Join(",", item.EPUsers.Select(x => x.UserId))">
+                                <a href="javascript:void(0);">@item.EPUsers[0].FullName</a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }*@
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+<script>
+
+    var eps_Table = $("#eps_Table");
+    var drpSchedule = $("#drpSchedule");
+
+    var dTable = eps_Table.DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('#eps_Table tbody tr').length > 20,
+        "bSort": false,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        'order': [1, 'asc']
+    });
+
+    $('#frequencypDownList').on('change', function () {
+        var val = $(this).val();
+        console.log(val);
+        if (val > 0) {
+            dTable.columns(0).search("^" + val + "$", true, false, true).draw();
+        } else {
+            dTable.columns(0).search("").draw();
+        }
+    });
+
+    $('#select-all').on('click', function () {
+        var status = $(this).is(":checked");
+        var rows = dTable.rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+        saveEpSchedule(0, status, $(this));
+    });
+
+    eps_Table.on('change', 'input[type="checkbox"]', function () {
+        var status = this.checked;
+        var epId = $(this).val();
+        if (!this.checked) {
+            var el = $('#select-all').get(0);
+            if (el && el.checked && ('indeterminate' in el)) {
+                el.indeterminate = true;
+            }
+        }
+        saveEpSchedule(epId, status, this);
+
+    });
+
+    function saveEpSchedule(epId, status, ctr) {
+        var scheduleId = drpSchedule.val();
+        if (scheduleId > 0) {
+            saveSchedule(epId, scheduleId, status);
+        } else {
+            $(ctr).prop('checked', false);
+            swalalert("Select first Schedule.");
+        }
+    }
+
+    function saveSchedule(epId, scheduleId, status) {
+        var scheduleEPAssets = {
+            ScheduleId: scheduleId,
+            ActiviityType: 1,
+            EPDetailId: parseInt(epId),
+            FloorAssetId: 0,
+            IsActive: status
+        };
+        var scheduleEPAssetslist = [];
+        scheduleEPAssetslist.push(scheduleEPAssets);
+        if (epId > 0 && scheduleId > 0) {
+            $.ajax({
+                contentType: 'application/json',
+                dataType: 'json',
+                type: 'POST',
+                url: CRxUrls.Schedule_SaveAssetsSchedule,
+                data: JSON.stringify(scheduleEPAssetslist),
+                success: function (resultData) {
+                }
+            });
+        }
+    }
+
+</script>

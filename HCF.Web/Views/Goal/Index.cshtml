@@ -1,0 +1,234 @@
+﻿@model IEnumerable<HCF.BDO.Standard>
+
+@{
+    ViewBag.Title = Localizer["Standard"].Value;
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Setup Master EP
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="box-header standcatbox">
+                                    @using (Html.BeginForm())
+                                    {
+                                        <div class="form-group">
+                                            @Html.AntiForgeryToken()
+                                            @Html.DropDownList("CategoryId", new SelectList(ViewBag.Category, "CategoryId", "Name"),
+                                                        "Select Category",
+                                                                   new { @class = "form-control selectyear" })
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="box-header vender_page add_button_comman">
+                                    <a href='@(Url.RouteUrl("addgoal"))' class="pull-right">
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Standard" alt="3d_add_button" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <table id="goal_myTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.TJCStandard)
+                                    </th>
+                                    <th>
+                                        @*@Html.DisplayNameFor(model => model.TJCDescription)*@
+                                        @Html.DisplayName("Description")
+                                    </th>
+                                    <th style="display:none">
+                                        @Html.DisplayNameFor(model => model.TJCDescription)
+                                    </th>
+                                    <th>TJC Active</th>
+                                    @if (HCF.Web.Base.UserSession.CurrentUser.IsCRxUser && HCF.Web.Base.UserSession.CurrentUser.UserId == 4)
+                                    {
+                                        <th>Action</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.RouteLink(item.TJCStandard, "epadd", new { StDescID = item.StDescID })
+                                        </td>
+                                        <td class="align-left">
+                                            @await Html.PartialAsync("_EpDescription", item.TJCDescription,
+                                                new ViewDataDictionary(
+                                                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                                {{ "minLength", "100" }, { "standardEp", @item.TJCStandard }}
+                                               )
+                                            @*@await Html.PartialAsync("_EpDescription", item.TJCDescription, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.TJCStandard } })*@
+
+                                        </td>
+                                        <td style="display:none">
+                                            @item.TJCDescription      @*this td has been used only for exporting to reports*@
+                                        </td>
+                                        <td class="comman_checkbox1 disable">
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+
+                                        @if (HCF.Web.Base.UserSession.CurrentUser.IsCRxUser && HCF.Web.Base.UserSession.CurrentUser.UserId == 4)
+                                        {
+                                            <td title="Edit">
+                                                <img onclick="location.href = '@Url.Action("editstandard", "Goal", new {gid = item.StDescID})'"
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $("#CategoryId").change(function () {
+            var CategoryId = this.value;
+            var data = { CategoryId: CategoryId };
+            var url = '@Url.Action("Index", "Goal")';
+            location.href = url + "?CategoryId=" + CategoryId;
+        });
+
+        $('#goal_myTable').dataTable({
+            "searching": false,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#goal_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            columnDefs: [
+                {
+                    targets: [],
+                    visible: (@HCF.Web.Base.UserSession.CurrentUser.IsSystemUser) @*|| @HCF.Web.Base.UserSession.CurrentUser.UserTypeId == 2*@
+                }
+            ],
+            dom: "<'row'<'col-sm-3'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>Blfrtip",
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'EP Standards Report',
+                    exportOptions: {
+                        columns: [0, 2]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'EP Standards Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                     {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'EP Standards Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0, 2],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+        HideTableSorting();
+        $('#goal_myTable thead').click(function (){
+            HideTableSorting();
+        });
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+        function HideTableSorting() {
+            $('#goal_myTable th[aria-label="Status: activate to sort column ascending"]').removeClass('sorting');
+            $('#goal_myTable th[aria-label="Action: activate to sort column ascending"]').removeClass('sorting');
+        }
+
+
+    </script>
+}
+

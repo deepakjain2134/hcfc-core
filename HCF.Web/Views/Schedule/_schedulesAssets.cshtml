@@ -1,0 +1,669 @@
+﻿@model List<HCF.BDO.Assets>
+
+<div class="rbn_container">
+    <div id="exTab1" class="container">
+
+        @foreach (var asset in Model)
+        {
+            <ul class="nav nav-pills">
+                @foreach (var ep in asset.EPdetails)
+                {
+                    <li id="@ep.EPDetailId">
+                        <a href="@string.Format("#{0}a",ep.EPDetailId)" data-toggle="tab">
+                            <input type="radio" name="epdetail" value="@ep.EPDetailId" />@ep.StandardEp
+                        </a>
+                    </li>
+                }
+            </ul>
+            <div class="tab-content clearfix" style="width:72%;margin: 0 0 6px 0">
+                @foreach (var ep in asset.EPdetails)
+                {
+                    <div class="tab-pane" id="@string.Format("{0}a",ep.EPDetailId)">
+                        <div class="epDescription" id="@string.Format("divEp{0}",ep.EPDetailId)">
+                            @ep.Description
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<table class="table inpetion_table" id="myTable">
+    <thead>
+        <tr>
+            <th style="display:none">
+                Inspection Group
+            </th>
+            <th style="display:none">
+                EPDetailId
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Asset
+            </th>
+            <th>
+                Location
+            </th>
+            <th>
+                @Localizer["NearBy"]
+            </th>
+            <th>
+                @Localizer["AssetNo"]
+            </th>
+            <th>
+                @Localizer["LastInspectionDate"]
+            </th>
+            <th>
+                @Localizer["StandardEP"]
+            </th>
+            <th>
+                History
+            </th>
+            <th>
+                Resume
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model)
+        {
+            foreach (var floorasset in asset.TFloorAssets)
+            {
+                <tr>
+                    <td style="display:none">
+                        Inspection Group
+                    </td>
+                    <td style="display:none">
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                @fep.EPDetailId
+                            </div>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                @{
+                                    var status = "-1";
+                                    var inspectionActivity = floorasset.TInspectionActivity.Where(x => x.EPDetailId == fep.EPDetailId && x.Status != 2).FirstOrDefault();
+                                    if (inspectionActivity != null)
+                                    {
+                                        status = Convert.ToString(inspectionActivity.Status);
+                                    }
+                                    <span>
+                                        @await Html.PartialAsync("_InspectionBtn",
+                              new ViewDataDictionary(
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                              new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                              {{ "status", status },
+{ "floorAssetsId", floorasset.FloorAssetsId }, { "ePDetailId", fep.EPDetailId }}
+                             )
+
+                                        @*@await Html.PartialAsync("_InspectionBtn", new ViewDataDictionary { { "status", status },
+                                        { "floorAssetsId", floorasset.FloorAssetsId }, { "ePDetailId", fep.EPDetailId } })*@
+                                    </span>
+
+                                }
+                            </div>
+                        }
+                    </td>
+                    <td>
+                        @asset.Name
+                    </td>
+                    <td>
+                        @commonModelFactory.GetFloorAssetLocation(floorasset)
+                    </td>
+                    <td>
+                        @floorasset.NearBy
+                    </td>
+                    <td>
+                        @floorasset.AssetNo
+                    </td>
+                    <td>
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                @{
+
+                                    var inspectionActivity = floorasset.TInspectionActivity.Where(x => x.EPDetailId == fep.EPDetailId && x.Status != 2).FirstOrDefault();
+                                    if (inspectionActivity != null)
+                                    {
+                                        <span>@inspectionActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDate()</span>
+                                    }
+                                    else
+                                    {
+                                        <span>NA</span>
+                                    }
+
+                                }
+                            </div>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                @fep.StandardEp
+                            </div>
+                        }
+                    </td>
+                    <td>
+
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                <img onclick="location.href ='@Url.Action("history", "Assets", new { floorAssetId = floorasset.FloorAssetsId, epId = fep.EPDetailId })'"
+                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="History" />
+                            </div>
+                        }
+
+
+                    </td>
+                    <td>
+                        @foreach (var fep in asset.EPdetails)
+                        {
+                            <div class="@string.Format("epsection eps{0}",fep.EPDetailId)">
+                                @{
+                                    var inspectionActivity = floorasset.TInspectionActivity.Where(x => x.EPDetailId == fep.EPDetailId).FirstOrDefault();
+                                    if (inspectionActivity != null && inspectionActivity.Status == 2)
+                                    {
+                                        <span>
+                                            <input type="submit" name="button" class="button1" value="Resume"
+                                                   onclick="location.href='@Url.Action("EPstate", "Goal", new { floorAssetId = floorasset.FloorAssetsId, epId = fep.EPDetailId, inspectionId =inspectionActivity.InspectionId, frequencyId = inspectionActivity.FrequencyId })'" />
+                                        </span>
+                                    }
+                                }
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+
+
+        @*@if (Model.Count > 0)
+        {
+            for (var i = 0; i < Model.Count(); i++)
+            {
+                if (Model[i].IsDeleted == false)
+                {
+                    for (var j = 0; j < Model[i].EPDetails.Count(); j++)
+                    {
+                        <tr>
+                            <td style="display:none">
+                                @Model[i].InspectionGroup.GroupName
+                            </td>
+                            <td style="display:none">
+                                @Model[i].EPDetails[j].EPDetailId
+                            </td>
+                            <td>
+                                @if (Model[i].InspectionGroupId > 0)
+                                {
+                                    if (Model[i].EPDetails[j].Inspections.Count > 0)
+                                    {
+                                        if (Model[i].EPDetails[j].Inspections[0].TInspectionActivity.Where(x => x.FloorAssetId == Model[i].FloorAssetsId).Any())
+                                        {
+
+                                            var status = Model[i].EPDetails[j].Inspections[0].TInspectionActivity.FirstOrDefault(x => x.FloorAssetId == Model[i].FloorAssetsId && x.IsCurrent == true).Status;
+                                            if (status == 1)
+                                            {
+                                                <input id="chkbtn" class="ins_check3_Ins_btn disabled compliant" type="button" value="@status" data-orgvalue="@status"
+                                                       data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                       tempname='@Model[i].EPDetails[j].EPDetailId' title="Inspection complete" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                            }
+                                            else if (status == 2)
+                                            {
+                                                <input id="chkbtn" class="ins_check3_Ins_btn" type="button" value="-1" onclick="tristateForIns1(this)" data-orgvalue="-1"
+                                                       data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                       tempname='@Model[i].EPDetails[j].EPDetailId' title="Inspection inprogress" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                            }
+                                            else
+                                            {
+                                                <input id="chkbtn" class="ins_check3_Ins_btn" type="button" value="@status" onclick="tristateForIns1(this)" data-orgvalue="@status"
+                                                       data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                       tempname='@Model[i].EPDetails[j].EPDetailId' title="Inspection complete with fail status" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (Model[i].EPDetails[j].IsAssetSteps == 0 || Model[i].IsInspReady != 1)
+                                            {
+                                                <input id="chkbtn_disabled" class="ins_check3_Ins_btn disabled" type="button" value="-1" data-orgvalue="-1"
+                                                       data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                       tempname='@Model[i].EPDetails[j].EPDetailId' title="No steps for this asset or resolve deficiency of Asset" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                            }
+                                            else
+                                            {
+                                                <input id="chkbtn" class="ins_check3_Ins_btn" type="button" onclick="tristateForIns1(this)" value="-1" data-orgvalue="-1"
+                                                       data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId' tempname='@Model[i].EPDetails[j].EPDetailId' data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Model[i].EPDetails[j].IsAssetSteps == 0 || Model[i].IsInspReady != 1)
+                                        {
+                                            <input id="chkbtn_disabled" class="ins_check3_Ins_btn disabled" type="button" value="-1" data-orgvalue="-1"
+                                                   data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                                   tempname='@Model[i].EPDetails[j].EPDetailId' title="No steps for this asset or resolve deficiency of Asset" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                        }
+                                        else
+                                        {
+                                            <input id="chkbtn" class="ins_check3_Ins_btn" type="button" onclick="tristateForIns1(this)" value="-1" data-orgvalue="-1"
+                                                   data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId' tempname='@Model[i].EPDetails[j].EPDetailId' data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <input id="chkbtn_disabled" class="ins_check3_Ins_btn disabled" type="button" value="-1" data-orgvalue="-1"
+                                           data-floorassetid='@Model[i].FloorAssetsId' data-epid='@Model[i].EPDetails[j].EPDetailId'
+                                           tempname='@Model[i].EPDetails[j].EPDetailId' title="No inspection group assigned to this asset" data-inspectiongroupid="@Model[i].InspectionGroupId" />
+                                }
+                                <label for="thing">@Model[i].EPDetails[j].Standard.TJCStandard,@Model[i].EPDetails[j].EPNumber</label>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model[i].Assets.Name)
+                            </td>
+                            <td>
+                                @commonModelFactory.GetFloorAssetLocation(Model[i])
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model[i].NearBy)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model[i].AssetNo)
+                            </td>
+                            <td>
+                                @commonModelFactory.GetFloorAssetLastInspectionDate(Model[i].EPDetails[j], Model[i].FloorAssetsId)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model[i].EPDetails[j].StandardEp)
+                            </td>
+                            <td>
+                                <img onclick="location.href ='@Url.Action("history", "Assets", new { floorAssetId = Model[i].FloorAssetsId, epId = Model[i].EPDetails[j].EPDetailId })'"
+                                     src="@Url.Content("~/dist/Images/Icons/history_icon.png")" title="History" />
+                            </td>
+                            <td>
+                                @if (Model[i].EPDetails[j].Inspections.Count > 0)
+                                {
+                                    if (Model[i].EPDetails[j].Inspections[0].TInspectionActivity.Where(x => x.FloorAssetId == Model[i].FloorAssetsId).Any())
+                                    {
+
+                                        var status = Model[i].EPDetails[j].Inspections[0].TInspectionActivity.FirstOrDefault(x => x.FloorAssetId == Model[i].FloorAssetsId && x.IsCurrent == true).Status;
+                                        var freqId = Model[i].EPDetails[j].Inspections[0].TInspectionActivity.FirstOrDefault(x => x.FloorAssetId == Model[i].FloorAssetsId && x.IsCurrent == true).FrequencyId;
+                                        if (status == 2)
+                                        {
+                                            <input type="submit" name="button" class="button1" value="Resume"
+                                                   onclick="location.href='@Url.Action("EPstate", "Goal", new { floorAssetId = Model[i].FloorAssetsId, epId = Model[i].EPDetails[j].EPDetailId, inspectionId = Model[i].EPDetails[j].Inspections[0].InspectionId, frequencyId = freqId })'" />
+
+                                        }
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        }*@
+    </tbody>
+</table>
+@if (Model.Count > 0 && Model[0].TFloorAssets.Count > 0)
+{
+    <div class="align-right">
+        <input type="submit" value="Save" class="button1" id="btnSubmit" />
+    </div>
+
+    <script>
+
+        $("#dateBox").show();
+
+    </script>
+}
+
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="FailStepsPopup" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="loadpartial">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+        var table = $('#myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "bPaginate": false,
+            "bSort": false,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+        });
+
+    var ShowActiveEpDetails = function (epId) {
+        $(".epsection").hide();
+        $(".eps" + epId).show();
+    }
+
+    $(document).ready(function (e) {
+            //$(".epsection").hide();
+            $("input:radio[name=epdetail]:first").attr('checked', true);
+            var value = $("input[name=epdetail]:radio:checked").val();
+        ShowActiveEpDetails(value);
+            //$(".epDescription").hide();
+            $("#divEp" + value).show()
+
+            //$(document).on("click", ".open-FailStepsPopup", function () {
+
+            //});
+            activeTab(value + "a");
+
+
+            function activeTab(tab) {
+                $('.nav-pills a[href="#' + tab + '"]').tab('show');
+            };
+
+            //$("input[name=epdetail]:radio").change(function () {
+
+            //    var value = $("input[name=epdetail]:radio:checked").val();
+            //    $(".epDescription").hide();
+            //    $("#divEp" + value).show();
+
+            //    filterAssetbyEP();
+            //    //var values = $(this).val();
+            //    //table.columns(1).search($(this).val()).draw();
+            //});
+
+            $('.nav-pills li').click(function () {
+                var value = $(this).attr("id");
+                $(this).focusout();
+                //e.preventDefault();
+                activeTab(value + "a");
+                $("input[name=epdetail][value=" + value + "]").prop('checked', true);
+                $(".epDescription").hide();
+                $("#divEp" + value).show();
+                ShowActiveEpDetails(value);
+                filterAssetbyEP();
+            });
+
+            $("#inspectiongroup").append(
+                 $('<option></option>').val("").html("Select"));
+            //var tabledata = $('#myTable').DataTable();
+            var dtValues = table.rows().data();
+            var arrDistinct = new Array();
+            $(dtValues).each(function (index, item) {
+                if ($.inArray(item[0], arrDistinct) == -1)
+                    if (item[0] != null && item[0] != "") {
+                        arrDistinct.push(item[0]);
+                    }
+            });
+
+            $(arrDistinct).each(function (index, item) {
+                $("#inspectiongroup").append(
+                      $('<option></option>').val(item).html(item));
+            });
+
+            $("#inspectiongroup").change(function () {
+                var values = $(this).val();
+                table.columns(0).search($(this).val()).draw();
+            });
+
+
+            $(document).on("click", "#saveComment", function () {
+                var control = $("#setpId").val();
+                var text = $("#Commenttxt").val();
+                $("input[name='" + control + "'][type=hidden]").val(text);
+            });
+
+        $('#btnSubmit').click(function () {
+
+            //var distinctRec = new Array();
+            //$('input:button[id^="chkbtn"]').each(function () {
+            //    debugger;
+            //    var cntrol = $(this).parent().parent().children()[0].innerHTML;
+            //    if ($.inArray(cntrol, distinctRec) == -1)
+            //        if (cntrol != null && cntrol != "") {
+            //            distinctRec.push(cntrol);
+            //        }
+            //});
+            //if (distinctRec.length == 1) {
+            var totalnumbercompliant = $('input#chkbtn.compliant').length;
+            var totalNoAssets = $('input:button[id^="chkbtn"]').length;
+            var isSelectAllChecked = $("#selectAll").prop('checked');
+
+            if (totalnumbercompliant == totalNoAssets) {
+                var buttons = "<div><button id='btnyes' class='button1'>Yes</button><button  id ='btnNo' class='button1'>No</button></div>"
+                WarningAlert(buttons, "All assets are already compliant do you want to proceed?");
+                //swal({
+                //    html: true,
+                //    title: "All assets are already compliant do you want to proceed?",
+                //    text: buttons,
+                //    type: "warning",
+                //    showConfirmButton: false,
+                //    showCancelButton: false
+                //});
+            }
+            else if (isSelectAllChecked == true || parseInt(totalnumbercompliant) > 0) {
+                var buttons = "<div><button id='btnyes' class='button1'>Yes</button><button  id ='btnNo' class='button1'>No</button><button id='btnRemove' class='button1'>Yes with remove compliant assets</button></div>"
+                swal({
+                    html: true,
+                    title: "Some of assets are already compliant do you want to proceed?",
+                    text: buttons,
+                    type: "warning",
+                    showConfirmButton: false,
+                    showCancelButton: false
+                });
+            }
+            else {
+                SaveInspections(0);
+            }
+            //} else {
+            //    swal({
+            //        html: true,
+            //        title: "Asset should be same group please select one group",
+            //        text: buttons,
+            //        type: "warning",
+            //        showConfirmButton: false,
+            //        showCancelButton: true
+            //    });
+            //}
+        });
+
+
+            $(document).on("click", "#btnyes", function () {
+                SaveInspections(0);
+            });
+
+            $(document).on("click", "#btnNo", function () {
+                $('input:button[id^="chkbtn"]').each(function () {
+                    var control = $(this).data("orgvalue");
+                    $('#selectAll').attr('checked', false);
+                    $(this).val(control);
+                });
+            });
+
+            $(document).on("click", "#btnRemove", function () {
+                SaveInspections(1);
+            });
+
+        });
+
+    function SaveInspections(isRemovecompliant) {
+        //debugger;
+            var queryArr = [];
+            var i = 0;
+            if (isRemovecompliant == 1) {
+                $('input:button[id^="chkbtn"]').each(function () {
+                    var hascompliantClass = $(this).hasClass("compliant");
+
+                    if (hascompliantClass == false) {
+                        var btnval = $(this).val();
+                        var fileContent = $("#fileContent").val();
+                        var fileName = $("#fileName").val();
+                        if (i > 0) {
+                            fileContent = "";
+                            fileName = "";
+                        }
+                        if (btnval == 1) {
+                            var queryStr = {
+                                floorAssetId: $(this).data('floorassetid'),
+                                ePDetailId: $(this).data('epid'),
+                                InspectionDate: $("#inspectiondate").val(),
+                                inspectionId: 0,
+                                InspectionGroupId: $(this).data('inspectiongroupid'),
+                                Comment: $("#inspectionComment").val(),
+                                FileContent: fileContent, //$("#fileContent").val(),
+                                FileName: fileName
+                            }
+                            queryArr.push(queryStr);
+                        }
+                    }
+                    i++;
+                });
+            }
+            else {
+                $('input:button[id^="chkbtn"]').each(function () {
+
+                    var btnval = $(this).val();
+                    var fileContent = $("#fileContent").val();
+                    var fileName = $("#fileName").val();
+                    if (i > 0) {
+                        fileContent = "";
+                        fileName = "";
+                    }
+                    if (btnval == 1) {
+                        var queryStr = {
+                            floorAssetId: $(this).data('floorassetid'),
+                            ePDetailId: $(this).data('epid'),
+                            InspectionDate: $("#inspectiondate").val(),
+                            inspectionId: 0,
+                            InspectionGroupId: 1,//$(this).data('inspectiongroupid'),
+                            Comment: $("#inspectionComment").val(),
+                            FileContent: fileContent, //$("#fileContent").val(),
+                            FileName: fileName
+                        }
+                        queryArr.push(queryStr);
+                    }
+                    i++;
+                });
+            }
+            if (queryArr.length > 0) {
+                queryArr = JSON.stringify({ 'objAssetList': queryArr });
+                var UrlAction = CRxUrls.assets_getfloorassetsforins;//'@Url.Action("GetFloorAssetsForIns", "Assets")';
+                $.ajax({
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    type: 'POST',
+                    url: UrlAction, //'/Assets/GetFloorAssetsForIns',
+                    data: queryArr,
+                    success: function (resultData) {
+                        var epId = resultData.EPDetailId;
+                        var inspectiongroupId = 0;
+                        if ($("#inspectiongroup").val() > 0) {
+                            inspectiongroupId = $("#inspectiongroup").val();
+                        } else { inspectiongroupId = 1; }
+                        if (resultData.Result) {
+                            if (resultData.IsInspReady) {
+                                swal({
+                                    title: "Inspection",
+                                    text: $.Constants.Alert_Msg_After_InsGrop_Completed, //"This inspection is not complete untill inspection is completed",
+                                    type: "info",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#DD6B55",
+                                    confirmButtonText: "GO TO EP",
+                                    cancelButtonText: "Cancel",
+                                    closeOnConfirm: true,
+                                    closeOnCancel: true
+                                }, function (isConfirm) {
+                                    if (isConfirm) {
+                                        var Url = '@Url.Action("EPstate", "Goal")';
+                                        window.location.href = Url + "?epId=" + epId + "&inspectionGroupId=" + inspectiongroupId;
+                                    } else {
+                                        RedirectToPage();
+                                    }
+                                });
+                            } else {
+                                RedirectToPage();
+                            }
+                        }
+                    },
+                    failure: function (response) {
+                        alert("Error is occured");
+                    }
+                });
+            } else {
+                swal({
+                    title: "Message",
+                    text: "Please select at least one asset!",
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: true,
+                });
+                //alert("Please select at least one asset!");
+            }
+        }
+
+        function RedirectToPage() {
+            swal({
+                html: true,
+                title: "Message",
+                text: "Inspection Added Successfully",
+                type: "success",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "OK",
+                closeOnConfirm: true
+            },
+              function (isConfirm) {
+                  if (isConfirm) {
+                      window.location.reload();
+                  }
+              });
+        }
+
+
+</script>
+<style>
+    .button1 {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    #exTab1 .tab-content {
+        color: black;
+        border: 1px solid #777;
+        padding: 5px 15px;
+    }
+
+    #exTab1 .nav-pills > li > a {
+        border-radius: 0;
+    }
+
+    .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+        color: #337ab7;
+        background-color: white;
+        /*border-top-color: none !important;*/
+    }
+
+    .nav > li > a:focus, .nav > li > a:hover {
+        color: #337ab7;
+    }
+</style>
+

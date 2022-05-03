@@ -1,0 +1,477 @@
+﻿@{
+    ViewBag.Title = "RoundScheduler";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+           Individual Round Scheduler
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        @*<div class="settingnewBox">
+            @await Html.PartialAsync("_MoreConfig")
+            <div class="rightcol-setting">*@
+
+        <div class="col-lg-2 col-xs-4 col-left">
+            <div class="box box-primary asset_list_view">
+                <div class="adduserlistBox">
+                    <input type="hidden" name="volunteerIds" id="volunteerIds" />
+                    <ul class="roundschedular roundleftpanel">
+                        <li id="step1">
+                            <a  class="roundActive">
+                                Volunteers
+                            </a>
+                        </li>
+
+                        <li id="step2">
+                            <a>
+                                <span>Step 1</span><br />
+                                Select Location Groups
+                            </a>
+                        </li>
+
+                        <li id="step3">
+                            <a >
+                                <span>Step 2</span><br />
+                                Assign Volunteers to Location Group
+                            </a>
+                        </li>
+
+                        <li id="step4">
+                            <a >
+                                <span>Step 3</span><br />
+                                Assign Volunteers to Round Type
+                            </a>
+                        </li>
+
+                        <li id="step5">
+                            <a >
+                                <span>Step 4</span><br />
+                                Schedule Rounds
+                            </a>
+                        </li>
+
+                        <li id="step6">
+                            <a >
+                                <span>Step 5</span><br />
+                                View Assignments
+                            </a>
+                        </li>
+
+                        <li id="step7">
+                            <a class="stepsButton" >
+                                Recent Changes
+                            </a>
+                        </li>
+
+                        <li id="step8">
+                            <a class="stepsButton" >
+                                Notify Volunteers
+                            </a>
+                        </li>
+                        <li id="step9">
+                            <a class="stepsButton">
+                                Rounds List
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-10 col-xs-8">
+            <div class="box box-primary" id="roundgroup">
+
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hdn_locationgroupId" value="0" />
+</div>
+
+
+@section scripts
+{
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.1/fullcalendar.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.16.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.1/fullcalendar.min.js"></script>
+
+    <script>
+
+        var roundSchedule = {};
+        var selectedUser = [];
+        roundSchedule.SelectedUser = selectedUser;
+
+
+
+        var selectVolunteer = $("#SelectVolunteer");
+        var particleView = $('#roundgroup');
+
+        $('body').on('click',
+            '#SelectVolunteer',
+            function() {
+                $('input[type="checkbox"]').each(function() {
+                    if ($(this).is(":checked")) {
+                        selectedUser.push($(this).val());
+                    }
+                });
+            });
+
+
+        $(document).ready(() => {
+            openStep1();
+        });
+
+
+        $('.roundschedular a').click(function() {
+            $('.roundschedular a.roundActive').removeClass('roundActive');
+            $(this).addClass('roundActive');
+        });
+        $(document).off("click", "#step2").on("click", "#step2", function () {
+            $(".loadingModal").show();
+                openStep2();
+            });
+
+        $('#step1').on('click',
+            function() {
+                openStep1();
+            });
+
+        $('#step3').on('click',
+            function() {
+                openStep3();
+            });
+        $('#step4').on('click',
+            function() {
+                openStep4();
+            });
+        $('#step5').on('click',
+            function() {
+                openStep5();
+            });
+        $('#step6').on('click',
+            function() {
+                openStep6();
+            });
+
+        $('#step7').on('click', function () {
+            openStep7();
+        });
+
+        $('#step8').on('click', function () {
+            openStep8();
+        });
+        $('#step9').on('click', function () {
+            openStep9();
+        });
+
+
+        function openStep1() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+            var url = '@Url.Action("UserGroup", "Round")'
+            $.get(url + '?RoundType=' + 1, function (data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $("#issavedata").val(0);
+                    $("#btnbacklst").hide();
+                    $(".step3").hide();
+                $(".step1").show();
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").hide();
+                }, 1000);
+                });
+        }
+
+        function openStep2(roundgroupId) {
+
+            if (roundgroupId == null) {
+                roundgroupId = $("#hdn_locationgroupId").val();
+            }
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+
+            //debugger;
+             var url = '@Url.Action("RoundSchedulerLocation", "Round")'
+            $.get(url + '?RoundType=1',async=true, function (data) {
+
+               // debugger;
+                if (roundgroupId > 0) {
+                    $("#ddlroundgroup").val(roundgroupId);
+                    $("#hdn_locationgroupId").val(roundgroupId)
+                }
+                $("li a").removeClass("roundActive");
+                $("li[id=step2] a").addClass("roundActive");
+                    particleView.html(data);
+                particleView.fadeIn('fast');
+
+                    $(".step3").hide();
+                    $(".step2").show();
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").hide();
+                }, 1000);
+                });
+        }
+
+        function openStep3(roundgroupId) {
+            if (roundgroupId == null) {
+                roundgroupId = $("#hdn_locationgroupId").val();
+            }
+
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+            $("li a").removeClass("roundActive");
+            $("li[id=step3] a").addClass("roundActive");
+           var url = '@Url.Action("UserGroup", "Round")'
+            $.get(url + '?RoundType=1', function (data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+
+                    $(".livvolunteers").hide();
+                    var volunteerIds = $("#volunteerIds").val();
+                    var arr = volunteerIds.split(",");
+                    for (var i = 0; i < arr.length; i++) {
+                        $("#liuserId_" + arr[i]).show();
+                    }
+                    $("#issavedata").val(1);
+                    $(".step1").hide();
+                    $(".step3").show();
+                    if (roundgroupId > 0) {
+                        //debugger;
+                        $("#ddlroundgroup").val(roundgroupId);
+                        getGroupUsers()
+                }
+
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").hide();
+                }, 1000);
+                });
+        }
+
+        function openStep4() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+            $.get('@Url.Action("UserRoundType", "Round")' + '?id=',
+                function(data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $("li a").removeClass("roundActive");
+                    $("li[id=step4] a").addClass("roundActive");
+                    setTimeout(function () {
+                        // doing async stuff
+                        $(".loadingModal").hide();
+                    }, 1000);
+                });
+        }
+
+        function openStep5() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+            $.get('@Url.Action("Group_RoundType", "Round")',
+                function(data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $("li a").removeClass("roundActive");
+                    $("li[id=step5] a").addClass("roundActive");
+                    setTimeout(function () {
+                        // doing async stuff
+                        $(".loadingModal").hide();
+                    }, 1000);
+                });
+        }
+
+        function openStep6() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+            $.get('@Url.Action("ViewAssignment", "Round")',
+                function(data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    $("li a").removeClass("roundActive");
+                    $("li[id=step6] a").addClass("roundActive");
+                    $("#ddlusers").val(@HCF.Web.Base.UserSession.GetUserId());
+                    setTimeout(function () {
+                        // doing async stuff
+                        $(".loadingModal").hide();
+                    }, 1000);
+                });
+        }
+
+        function openStep7() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+             $.get('@Url.Action("RecentChangeLog", "Round")',
+                function(data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    setTimeout(function () {
+                        // doing async stuff
+                        $(".loadingModal").hide();
+                    }, 1000);
+                });
+        }
+
+        function openStep8() {
+            setTimeout(function () {
+                // doing async stuff
+                $(".loadingModal").show();
+            }, 1000);
+             $.get('@Url.Action("NotifyVolunteer", "Round")',
+                function(data) {
+                    particleView.html(data);
+                    particleView.fadeIn('fast');
+                    setTimeout(function () {
+                        // doing async stuff
+                        $(".loadingModal").hide();
+                    }, 1000);
+                });
+        }
+        function openStep9() {
+           // debugger;
+
+               setTimeout(function () {
+                   // doing async stuff
+                   $(".loadingModal").show();
+               }, 1000);
+            var url = '@Url.Action("RoundGroupLists", "Round")';
+            $.get(url + '?roundType=1', function (data) {
+                particleView.html(data);
+                particleView.fadeIn('fast');
+                $("li a").removeClass("roundActive");
+                $("li[id=step9] a").addClass("roundActive");
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").hide();
+                }, 1000);
+            });
+        }
+
+    $(document).on("click", ".replaceRoundUser", function () {
+       // debugger
+        var userid = $(this).attr("userid");
+        var username = $(this).attr("username");
+        //console.log(userid);
+        var groupid = $("#ddlroundgroup").val();
+        if (groupid > 0 && userid > 0) {
+            var url = '@Url.Action("OpenReplacePopup", "Round")';
+            $.get(url + '?roundGroupId=' + groupid + '&userid=' + userid + '&username=' + username, function (data) {
+
+                $('#replaceUserRounds').html(data);
+                $('#replaceUserRounds').fadeIn('fast');
+                $('#OpenReplaceUsersPopup').modal('show');
+                //debugger
+                getGroupUsers();
+                VolunteerDetails(userid);
+            });
+        }
+    });
+
+
+        $(document).on("click", ".removeReplacevolunteers", function () {
+          //  debugger
+            var userid = $(this).attr("userid");
+            var groupid = $("#ddlroundgroup").val();
+
+            swal({
+                html: true,
+                title: "Message",
+                text: "<label> Do you want to remove volunteer? </label>",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    if (groupid > 0 && userid > 0) {
+                        var url = '@Url.Action("RemoveReplaceVolunteer", "Round")';
+                        $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&isActive=false', function (data) {
+
+                            successAlert('Removed Successfully');
+                            $("#user_" + userid).removeClass("disable");
+                         //   debugger
+                            getGroupUsers();
+                        });
+                    }
+                } else { }
+            });
+        });
+
+
+
+
+        $(document).on("click", ".removevolunteers", function () {
+          //  debugger
+            var userid = $(this).attr("userid");
+            var groupid = $("#ddlroundgroup").val();
+
+
+            swal({
+                html: true,
+                title: "Message",
+                text: "<label> Do you want to remove volunteer? </label>",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    if (groupid > 0 && userid > 0) {
+                        var url = '@Url.Action("UpdateandSaveGroup", "Round")';
+                        $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&isActive=false', function (data) {
+                            successAlert('Removed Successfully');
+                            $("#user_" + userid).removeClass("disable");
+                          //  debugger
+                            getGroupUsers();
+                        });
+                    }
+                } else { }
+            });
+        });
+
+
+        $(document).on('click', '.round-groupname', function () {
+            //debugger;
+            $('.round-groupname').not(this).removeClass('panel-active');
+            $(this).toggleClass('panel-active');
+        });
+
+
+        $(body).on("click", ".volunteers", function () {
+            var userid = $(this).attr("id").split("_")[1];
+            var groupid = $("#ddlroundgroup").val();
+            if (groupid > 0 && userid > 0) {
+                var url = '@Url.Action("UpdateandSaveGroup", "Round")';
+                $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&IsActive=true', function (data) {
+                    successAlert('Saved Successfully');
+                    $(this).addClass("disable");
+                    getGroupUsers();
+                });
+            }
+            else {
+                AlertWarningMsg("Select a location group prior to selecting a volunteer.");
+            }
+        });
+
+    </script>
+}

@@ -1,0 +1,42 @@
+﻿@if (HCF.Web.Base.UserSession.IsInRole("users_user"))
+{
+    var currentUrl = ViewContext.RouteData.Values["Action"].ToString().ToLower();
+
+
+    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+        <label class="btn active">
+            @Html.RadioButton("users", "user", (currentUrl == "users"), new { onchange = "location.href='" + Url.RouteUrl("users") + "'", id = "user" })@Html.Label("Users")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+        </label>
+        <label class="btn">
+            @Html.RadioButton("users", "vendor", (currentUrl == "vendors"), new { onchange = "location.href='" + Url.RouteUrl("vendors") + "'" })@Html.Label("Vendors")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+        </label>
+
+        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+        {
+            <label class="btn">
+                @Html.RadioButton("users", "UserSites", (currentUrl == "usersites"), new { onchange = "location.href='" + Url.RouteUrl("usersitemapping") + "'", id = "campus" })@Html.Label("Campus Assignment")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+
+            <label class="btn">
+                @Html.RadioButton("users", "UserDrawings", (currentUrl == "userdrawings"), new { onchange = "location.href='" + Url.RouteUrl("userdrawings") + "'" })@Html.Label("Drawing Assignment")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+        }
+    </div>
+
+}
+
+
+
+<style>
+    .Spinner {
+        position: fixed;
+        z-index: auto;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background: url('file:///D:\CRXNEW\HCF.Web\wwwroot\dist\Images\loader.gif'), radial-gradient(ellipse at center,rgba(255,255,255,1)0%,rgba(255,255,255,1)20%,rgba(255,255,255,0)153%);
+    }
+</style>

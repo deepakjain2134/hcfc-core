@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = Localizer["TitleDeficiencies"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Deficiencies Dashboard
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="comman_checkbox1">
+                    <div class="tab-pane" id="tab1">
+                        <div class="span8">
+                            <div class="tabbable tabs-left">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#tab2" data-info="tab2" class="tbs" data-toggle="tab">Asset Deficiencies</a></li>
+                                    @if (!HCF.Web.Base.UserSession.CurrentUser.IsVendorUser)
+                                    {
+                                        <li><a href="#tab3" data-info="tab3" class="tbs" data-toggle="tab">Round Deficiencies</a></li>
+                                    }
+                                    @if (!HCF.Web.Base.UserSession.CurrentOrg.IsTmsWo)
+                                    {
+                                        <li><a href="#tabSimense" data-info="tabSimense" class="tbs" data-toggle="tab">Siemens Deficiencies</a></li>
+
+                                    }
+                                </ul>
+                                <div class="tab-content ">
+                                    <div class="tab-pane active" id="tab2">
+                                        @await Component.InvokeAsync("HomeAssetsdeficiency", new { Taggedid = ViewBag.DeficiencyTaggedid, orgId = ViewBag.OrganizationID })                                      
+                                    </div>
+                                    @if (ViewBag.ShowOnlyAssetDeficiences != true)
+                                    {
+                                        if (!HCF.Web.Base.UserSession.CurrentUser.IsVendorUser)
+                                        {
+                                            <div class="tab-pane" id="tab3">                                              
+                                                @await Component.InvokeAsync("HomeRoundDeficiency")
+                                            </div>
+                                        }
+                                        if (!HCF.Web.Base.UserSession.CurrentOrg.IsTmsWo)
+                                        {
+                                            <div class="tab-pane" id="tabSimense">
+                                                @await Component.InvokeAsync("HomeDeviceDeficiency")                                               
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="@Url.Content("~/dist/js/jQuery.tagify.min.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/dist/css/tagify.css")" rel="stylesheet">
+}

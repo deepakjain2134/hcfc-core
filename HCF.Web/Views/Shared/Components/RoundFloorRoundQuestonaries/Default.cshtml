@@ -1,0 +1,128 @@
+﻿@model HCF.BDO.TRounds
+@{
+
+    List<int> stepsWorders = Model.RoundWorkOrders.Where(x => x.TRoundId == Model.TRoundId && x.FloorId == Model.Inspections.FirstOrDefault().Floor.FloorId).SelectMany(x => x.StepId).ToList();
+    List<int> compstepsWorders = Model.RoundWorkOrders.Where(x => x.TRoundId == Model.TRoundId && x.StatusCode == "CMPLT" && x.FloorId == Model.Inspections.FirstOrDefault().Floor.FloorId).SelectMany(x => x.StepId).ToList();
+
+}
+
+<div class="tble_shadow">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr>
+                <td>
+                    @if (Model.Inspections.Count > 0)
+                    {
+                        <strong>Location: </strong>
+                        @Model.Inspections.FirstOrDefault().Floor.FloorBuildingLocation
+                        <input type="hidden" id="hdn_floorId" value="@Model.Inspections.FirstOrDefault().Floor.FloorId" />
+                        <input type="hidden" id="hdn_tRoundId" value="@Model.TRoundId" />
+                    }
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+@if (Model.Inspections.Any() && Model.Inspections.FirstOrDefault().Questionnaires.Any())
+{
+    foreach (var item in Model.Inspections.SelectMany(x => x.Questionnaires).GroupBy(x => x.RouQuesId).Select(x => x.First()).ToList())
+    {
+        <table class="table floortblborder floorRoundtbl comman_checkbox">
+            <tr id=@($"tr_{item.RouQuesId}")
+        class="details">
+                <td>
+                    @{
+                        var className = "";
+                        if (Model.Inspections.SelectMany(x => x.Questionnaires.Where(a => a.RouQuesId == item.RouQuesId)).Any(y => y.Status == 0))
+                        {
+                            className = "error";
+
+                            @*<input id="InsStatus" class="round_check_btn" type="button" value="0" />*@
+                        }
+                        else
+                        {
+                            @*<input id="InsStatus" class="round_check_btn" type="button" value="1" />*@
+
+                        }
+                        <span class="@(compstepsWorders.IndexOf(item.RouQuesId) > -1 ? $"{"strike"} {className}" : $"{"redStep"} {className}")">
+                            <b> @item.RoundsQuestionnaires.RoundStep </b>
+                        </span>
+                    }
+                </td>
+
+            </tr>
+
+            @foreach (var item3 in Model.Inspections)
+            {
+                foreach (var item2 in item3.Questionnaires.Where(x => x.RouQuesId == item.RouQuesId))
+                {
+                    <tr id="@($"user_{item3.UserId}")">
+                        <td>
+                            <input id="InsStatus" type="button" class="ins_check3_btn" value="@item2.Status" />
+                            @($"Added by {item3.User.FullName}")
+                            @if (!string.IsNullOrEmpty(item2.Comment))
+                            {
+                                <span>Comment: @($"{item2.Comment}")</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    }
+
+    foreach (var Inspection in Model.Inspections.Where(x => !string.IsNullOrEmpty(x.Comment)))
+    {
+        <table class="table floortblborder floorRoundtbl comman_checkbox">
+            <tr>
+                <td colspan="3">Comment by: @Inspection.User.FullName</td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p>@Inspection.Comment</p>
+                    @*@Html.TextAreaFor(x => Inspection.Comment, new { @class = "disabled" })*@
+                </td>
+            </tr>
+        </table>
+    }
+
+}
+else
+{
+    <div class="tble_shadow text-center anoinspection">
+        <h4>No Inspection Started!</h4>
+        <a href='@(Url.RouteUrl("roundinsp", new { rid = Model.TRoundId }))' class="comm-button align-right">
+            Back To Inspection
+        </a>
+    </div>
+}
+<script>
+    var btnCreateWO = $("#btnCreateWO");
+
+    $(document).ready(function () {
+        var faillength = $(".chkStep").length;
+        if (faillength != undefined && faillength > 0) {
+            btnCreateWO.show();
+
+        }
+        else { btnCreateWO.hide(); }
+    });
+
+    btnCreateWO.click(function () {
+        var checked = []
+        $(".chkStep:checked").each(function () {
+            checked.push(parseInt($(this).attr('stepId')));
+        });
+
+        if (checked.length == 0) {
+            swalalert('select atleast one fail step to create work order.');
+            return false;
+        }
+
+        var tRoundWorkOrders = {
+            TRoundId: $("#hdn_tRoundId").val(),
+            FloorId: $("#hdn_floorId").val(),
+            StepsId: checked.join(",")
+        };
+    });
+</script>

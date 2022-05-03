@@ -1,0 +1,213 @@
+﻿@model HCF.Web.ViewModels.Dashboard.VendorDashboardViewModel
+@{
+
+    var data = Model.VendorRecordsCount;
+    var vendorRes = Model.vendorRes;
+}
+
+<div class="row">
+    <div class="topBanner-listbox">
+        <div class="col-md-6">
+            <div class="vendor-banner">
+                <image class="img"
+                       title="@HCF.Web.Base.UserSession.CurrentOrg.Name"
+                       src="@HCF.Web.Base.UserSession.CurrentOrg.DashBoadImagePath">
+                </image> @*@Html.Image(HCF.Web.Base.UserSession.CurrentOrg.DashBoadImagePath, HCF.Web.Base.UserSession.CurrentOrg.Name, "img" )*@
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="pendingAssets vendor-captionsBox">
+                <h4>@($"Welcome {HCF.Web.Base.UserSession.CurrentUser.Name} ({HCF.Web.Base.UserSession.CurrentUser.Vendor.Name})") </h4>
+                <p>Permits must be submitted through this portal. You will receive an email notification when permit is approved. Permits must be submitted at least 24 hours before work is to begin</p>
+                <h4>Your Permits</h4>
+                <ul class="verndorBanner-caption">
+                    <li>
+                        <div class="homeul-col1">
+                            <span>@data.TotalPendingSubmission</span>
+                        </div>
+                        <div class="homeul-col2">
+                            <a href="#"><p>Pending submission</p></a>
+                        </div>
+                        <div class="permitlist-btn">
+                            @if (data.CAPPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("Index","Permit",new {Status = -1 })" class="vendor-listBtn">@($"CAP ({data.CAPPendingSubmission})")</a>
+                            }
+                            @if (data.HWPPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("GetAllHotWorkPermit","HotWorkPermit",new {Status = -1 })" class="vendor-listBtn">@($"HWP ({data.HWPPendingSubmission})")</a>
+                            }
+                            @if (data.MOPPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("MethodofProcedure","Permit",new {Status = -1 })" class="vendor-listBtn">@($"MOP ({data.MOPPendingSubmission})")</a>
+                            }
+                            @if (data.FSBPPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("FSBPermit","Permit",new {Status = -1 })" class="vendor-listBtn">@($"FSBP ({data.FSBPPendingSubmission})")</a>
+                            }
+                            @if (data.LSDPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("LifeSafetyDevicesForms","Permit",new {Status = -1 })" class="vendor-listBtn">@($"LSD ({data.LSDPendingSubmission})")</a>
+                            }
+                            @if (data.PCRAPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("pcra","Permit",new {Status = -1 })" class="vendor-listBtn vendor-pcra">@($"PCRA ({data.PCRAPendingSubmission})")</a>
+                            }
+                            @if (data.CRAPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("cra","Permit",new {Status = -1 })" class="vendor-listBtn vendor-cra">@($"CRA ({data.CRAPendingSubmission})")</a>
+                            }
+                            @if (data.ICRAPendingSubmission > 0)
+                            {
+                                <a href="@Url.Action("inspectionicra","ICRA",new {Status = -1 })" class="vendor-listBtn vendor-icra">@($"ICRA ({data.ICRAPendingSubmission})")</a>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        <div class="homeul-col1">
+                            <span>@data.TotalSubmittedPermits</span>
+                        </div>
+                        <div class="homeul-col2">
+                            <a href="#"><p>Submitted-awaiting approval</p></a>
+                        </div>
+                        <div class="permitlist-btn">
+                            @if (data.CAPSubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("Index","Permit",new {Status = 2 })" class="vendor-listBtn">@($"CAP ({data.CAPSubmittedPermits})")</a>
+                            }
+                            @if (data.HWPSubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("GetAllHotWorkPermit","HotWorkPermit",new {Status = 2 })" class="vendor-listBtn">@($"HWP ({data.HWPSubmittedPermits})")</a>
+                            }
+                            @if (data.MOPSubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("MethodofProcedure","Permit",new {Status = 2})" class="vendor-listBtn">@($"MOP ({data.MOPSubmittedPermits})")</a>
+                            }
+                            @if (data.FSBPSubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("FSBPermit","Permit",new {Status = 2})" class="vendor-listBtn">@($"FSBP ({data.FSBPSubmittedPermits})")</a>
+                            }
+                            @if (data.LSDSubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("LifeSafetyDevicesForms","Permit",new {Status = 2})" class="vendor-listBtn">@($"LSD ({data.LSDSubmittedPermits})")</a>
+                            }
+                            @if (data.PCRASubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("pcra","Permit",new {Status = 2 })" class="vendor-listBtn vendor-pcra">@($"PCRA ({data.PCRASubmittedPermits})")</a>
+                            }
+                            @if (data.CRASubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("cra","Permit",new {Status = 2 })" class="vendor-listBtn vendor-cra">@($"CRA ({data.CRASubmittedPermits})")</a>
+                            }
+                            @if (data.ICRASubmittedPermits > 0)
+                            {
+                                <a href="@Url.Action("inspectionicra","ICRA",new {Status = 2 })" class="vendor-listBtn venddor-icra">@($"ICRA ({data.ICRASubmittedPermits})")</a>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        <div class="homeul-col1">
+                            <span>@data.TotalApprovedPermits</span>
+                        </div>
+                        <div class="homeul-col2">
+                            <a href="#"><p>Approved and open</p></a>
+                        </div>
+                        <div class="permitlist-btn">
+                            @if (data.CAPApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("Index","Permit",new {Status = 1 })" class="vendor-listBtn">@($"CAP ({data.CAPApprovedPermits})")</a>
+                            }
+                            @if (data.HWPApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("GetAllHotWorkPermit","HotWorkPermit",new {Status = 1 })" class="vendor-listBtn">@($"HWP ({data.HWPApprovedPermits})")</a>
+                            }
+                            @if (data.MOPApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("MethodofProcedure","Permit",new {Status = 1 })" class="vendor-listBtn">@($"MOP ({data.MOPApprovedPermits})")</a>
+                            }
+                            @if (data.FSBPApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("FSBPermit","Permit",new {Status = 1 })" class="vendor-listBtn">@($"FSBP ({data.FSBPApprovedPermits})")</a>
+                            }
+                            @if (data.LSDApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("LifeSafetyDevicesForms","Permit",new {Status = 1 })" class="vendor-listBtn">@($"LSD ({data.LSDApprovedPermits})")</a>
+                            }
+
+                            @if (data.PCRAApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("pcra","Permit",new {Status = 1 })" class="vendor-listBtn vendor-pcra">@($"PCRA ({data.PCRAApprovedPermits})")</a>
+                            }
+                            @if (data.CRAApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("cra","Permit",new {Status = 1 })" class="vendor-listBtn vendor-cra">@($"CRA ({data.CRAApprovedPermits})")</a>
+                            }
+                            @if (data.ICRAApprovedPermits > 0)
+                            {
+                                <a href="@Url.Action("inspectionicra","ICRA",new {Status = 1 })" class="vendor-listBtn vendor-icra">@($"ICRA ({data.ICRAApprovedPermits})")</a>
+                            }
+                        </div>
+                    </li>
+                </ul>
+                <h4>EP Assigned</h4>
+                <p>For EPs assigned to your organization, click on dashboard icon above, When sending inspection reports related to an EP, please cc this email:@(HCF.Web.Base.UserSession.CurrentOrg.PopEmails!=null && HCF.Web.Base.UserSession.CurrentOrg.PopEmails.Count>0? @String.Join(",", HCF.Web.Base.UserSession.CurrentOrg.PopEmails.Where(x => x.IsActive).Select(x => x.EmailId)):string.Empty)</p>
+                <h4>Message To Contractor From Facility</h4>
+                <p>@data.MessageToContractor</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row verndor-border">
+    <div class="col-md-6">
+        <div class="contacts-editBox">
+            <h5>Contacts</h5>
+        </div>
+        @Html.Raw(data.ContactDetails)
+    </div>
+    <div class="col-md-6">
+        <div class="contacts-editBox">
+            <h5>Resources</h5>
+
+        </div>
+        <table id="vendorResourceTable" class="display table table-bordered table-striped comman_checkbox1">
+            <tbody>
+                @foreach (var item in vendorRes)
+                {
+                    <tr>
+                        <td>
+                            @if (item.UploadLink == "" || String.IsNullOrEmpty(item.UploadLink))
+                            {
+                                <a>
+                                    @Html.DisplayFor(modelItem => item.CustomName)
+                                </a>
+                                <br />
+                                <p style="color:#bc3c42;">[No Link Uploaded]</p>
+                            }
+                            else
+                            {
+                                <a href="@item.UploadLink" target="_blank">
+                                    @Html.DisplayFor(modelItem => item.CustomName)
+                                </a>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var tfile in item.File)
+                            {
+                                <span>
+
+                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = @tfile.FilePath, title = "Preview" })" class="modal-link" title="View">
+                                        <img src="~/dist/Images/Icons/document_icon.png" alt="@tfile.FileName" title="@tfile.FileName">
+                                    </a>
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @item.EffectiveDate.ToFormatDate()
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

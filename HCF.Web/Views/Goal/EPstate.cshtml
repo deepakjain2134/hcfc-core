@@ -1,0 +1,107 @@
+﻿@model HCF.BDO.EPSteps
+
+@{
+    ViewBag.Title = "Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1 id="heading">
+                @(Model?.ActivityType == 2 ? "Inspection" : "Review")
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        @if (Model != null && Model.IsAllowed)
+        {
+            <div class="row">
+                <div class="col-lg-3 col-xs-3 col-left">
+                    <div class="box box-primary col-lg-12 assetsInspection" style="overflow:auto" id="goal_assetsInspection">
+                        @*@AsyncLoader.Render("Goal", "AssetsInspection", "goal_assetsInspection", new { inspectionId = 0, epId = Model?.EPDetailId, floorAssetId = Model.FloorAssetId })*@
+                        @await Component.InvokeAsync("GoalAssetsInspection", new { inspectionId = 0, epId = Model?.EPDetailId, floorAssetId = Model.FloorAssetId })
+                    </div>
+                </div>
+                <div class="col-lg-9 col-xs-9">
+                    <div class="box box-primary goal_assetssteps">
+                       
+                        @await Component.InvokeAsync("GoalAssetsSteps", new { showEp = true, isPopUp = false, epId = Model?.EPDetailId, floorAssetId=Model?.FloorAssetId, frequencyId=Model?.FrequencyId, inspectionid = Model?.InspectionId })
+                        @*@Html.Action("AssetsSteps", "Goal", new { showEp = true, isPopUp = false })*@
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+@section scripts{
+
+
+
+    <script>
+
+    $(document).ready(function () {
+
+
+            RedirectToPageUrl = 1;
+
+
+            @if (Model != null && Model.IsAllowed == false )
+{
+    @:var inspType = '@((Model.ActivityType == 2) ? "asset" : "EP")';
+               if(Model.FloorAssetId==null && Model.ActivityType==2)
+                {
+                     <text>
+
+            swal({
+    html: true,
+                title: "Link Asset",
+                text: "Please link this " + inspType+" to EP  for inspection.",
+                type: "info",
+                showCancelButton: false,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Back",
+                onOpen: function () {
+            swal.disableConfirmButton();
+        }
+
+    }, function (isConfirm) {
+        debugger;
+        if (isConfirm) {
+            history.go(-1);
+        } else {
+            history.go(-1);
+        }
+    });
+                </text>
+                }
+                else
+                {
+                     <text>
+
+            swal({
+    html: true,
+                title: "Unauthorized",
+                text: "You don't have permission to inspect this " + inspType+". Please contact your CRx administrator",
+                type: "info",
+                showCancelButton: false,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Back",
+                onOpen: function () {
+            swal.disableConfirmButton();
+        }
+
+    }, function (isConfirm) {
+        debugger;
+        if (isConfirm) {
+            history.go(-1);
+        } else {
+            history.go(-1);
+        }
+    });
+                </text>
+                }
+
+            }
+        });
+    </script>
+}

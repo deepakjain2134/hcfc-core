@@ -1,0 +1,77 @@
+﻿@model HCF.BDO.MainGoal
+<div class="slider">
+    @*<h4>Steps</h4>*@
+    <table id="TableCl" class="table table-bordered">
+        <thead>
+            <tr>
+                <th><label id="rowHeader">Steps</label> </th>
+                <th style="width:100px;">Status</th>
+                <th>Type</th>
+                <th style="width:100px;">IsRA</th>
+                <th style="width:100px;">RAScore</th>
+                <th style="width:86px;">Action</th>
+            </tr>
+        </thead>
+        @foreach (var m in Model.Steps.Where(x => x.IsCurrent))
+        {
+            <tr class="clonecp">
+                <td>
+                    <input type="hidden" id="MaingoalId" value="@Model.MainGoalId" />
+                    @*<input type="hidden" id="EPdetailId" value="@ViewBag.EPdetailId" />*@
+                    <input value="@m.StepsId" class="cpId" hidden />
+                    @m.Step
+                </td>
+                <td class="comman_checkboxStatus">
+                    @Html.DisplayFor(a => m.IsActive, new { @checked = m.IsActive })<span></span>
+                </td>
+                <td>
+                    @((m.StepType == 2) ? "Numerical" : "Compliant/NonCompliant/NA")
+                </td>
+                <td class="comman_checkbox1">
+                    <input type="checkbox" checked="@m.IsRA" /><span></span>
+                </td>
+                <td>
+                    <input id="RAScore" class="cpText checkPointText form-control score_input disabled" value="@m.RAScore" maxlength="2" />
+                </td>
+                <td>
+                    <input class="addSteps button1" type="button" value="Edit" mgid="@m.MainGoalId" stid="@m.StepsId" />
+
+                </td>
+            </tr>
+        }
+        @*}*@
+    </table>
+</div>
+<script>
+
+    $(document).ready(function () {
+        debugger;
+        if (window.location.href.indexOf("configurefloorassets") > -1) {            
+            $("#rowHeader").html("ATS Name");
+            $('#TableCl').DataTable({
+                "lengthChange": false,
+                "bInfo": false,
+                "aaSorting": [],
+                "searching": false,
+                "columnDefs": [
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    }
+                ]
+            });
+        }
+    });
+
+   
+
+</script>
+

@@ -1,0 +1,81 @@
+﻿@model List<SelectListItem>
+
+@{
+    ViewBag.Title = "VendorReports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Vendor Reports
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div id="part1">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12">
+                                <p>
+                                    <label>For linking inbox attachment to a single EP, go to Dashboard, Identify EP and then click on document icon in last column.</label>
+                                </p>
+                                <div class="verndor-select-box form-inline">
+                                    @*@Html.VendorDropDownlist("VendorId", 0, "-- Select Vendor --", new { @class = "form-control" })*@
+                                    <label>Select Vendor:</label>
+                                    @Html.DropDownList("VendorId",
+                                        new SelectList(Model, "Value", "Text", 0),
+                                        "Select Vendor", new { @class = "selectpicker form-control", required = "required" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-xs-12 drag-padding" id="myHeader">
+                                <div id="loadpartial">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#vendorReport").hide();
+        });
+
+
+        $("#VendorId").change(function () {
+            loadvendorEPgroups();
+        });
+
+        function loadvendorEPgroups() {
+            var vendorId = 0;
+            if ($("#VendorId").val() > 0) {
+                vendorId = $("#VendorId").val()
+            }
+            var url = CRxUrls.EPGroups_GetVendorEPGroups;
+            $.get(url + "?vendorId=" + vendorId,
+                function (data) {
+                    $("#loadpartial").html('');
+                    $('#loadpartial').html(data);
+                    $('#loadpartial').fadeIn('fast');
+                });
+        }
+        
+    </script>
+
+   
+}
+
+<style>
+    button.btn.dropdown-toggle.btn-default {
+        min-width: 240px;
+    }
+</style>

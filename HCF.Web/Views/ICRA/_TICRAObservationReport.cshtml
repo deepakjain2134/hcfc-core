@@ -1,0 +1,161 @@
+﻿@model HCF.BDO.TICRAReports
+@Html.HiddenFor(m => m.TICRAId)
+@Html.HiddenFor(m => m.TICRAReportId)
+
+<div class="row" id="tblreportinfo">
+    <div class="form-group">
+        <label>Report Name:</label>
+        <input type="text" name="ReportName" id="ReportName" maxlength="150" class="form-control" value="@Model.ReportName">
+    </div>
+    <div class="form-group">
+        <label>Observation Report Date:</label>
+        <input type="text" id="reportdatetime" name="reportdatetime" readonly class="form-control readonly" value="@($"{(Model.ReportDate != default(DateTime) ? Model.ReportDate.ToFormatDate() : DateTime.Now.ToFormatDate())}")" />
+    </div>
+    <div class="form-group">
+        <a href='@Url.Action("ObservationReports", "ICRA", new { icraId = Model.TICRAId })' class="observationicons">
+            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="Observation Report" />
+        </a>
+    </div>
+</div>
+<div class="ObserSheet table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th class="ysenona">Yes</th>
+                <th class="ysenona">No</th>
+                <th class="ysenona">N/A </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @for (int i = 0; i < Model.CheckPoints.Count(); i++)
+            {
+                <tr>
+                    <td class="ysenona">
+                        @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 0, Model.CheckPoints[i].Status == 0 ? new { @checked = "checked" } : null)
+                    </td>
+                    <td class="ysenona">
+                        @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 1, Model.CheckPoints[i].Status == 1 ? new { @checked = "checked" } : null)
+                    </td>
+                    <td class="ysenona">
+                        @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 2, Model.CheckPoints[i].Status == 2 ? new { @checked = "checked" } : null)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.CheckPoints[i].CheckPoints.CheckPoints)
+                        @Html.HiddenFor(modelItem => Model.CheckPoints[i].ICRAReportPointId)
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+<div class="obser_bottomform-nouse">
+        <div class="form-group" style="width:100%;">
+            Comments: @Html.TextAreaFor(m => m.Comment, new { @class = "form-control" })
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label>Contractor Sign :</label> @Html.TextBoxFor(m => m.ContractorSign, new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-4">
+               <label>Sign Date :</label> @Html.TextBoxFor(m => m.ContractorSignDate, $"{Model.ContractorSignDate:MM/dd/yyyy}", new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly", @id = "obser" })
+            </div>
+            <div class="form-group col-md-4">
+                <label>Sign Time :</label>
+                <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                    @Html.TextBoxFor(m => m.ContractorSignTime, new { @class = "form-control timepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label>Observer Sign :</label> @Html.TextBoxFor(m => m.ObserverSign, new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-4">
+                <label>Sign Date :</label> @Html.TextBoxFor(m => m.ObserverSignDate, $"{Model.ObserverSignDate:MM/dd/yyyy}", new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+            </div>
+            <div class="form-group col-md-4">
+                <label>Sign Time :</label>
+                <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                    @Html.TextBoxFor(m => m.ObserverSignTime, new { @class = "form-control timepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+                </div>
+            </div>
+            @*<input type="text" name="UtTime" id="UtTime" class="timepicker form-control" autocomplete="off" value="@HCF.Web.Base.Common.ConvertToAMPM(Model.ObserverSignTime)" />*@
+        </div>
+</div>
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+<script>
+    @*if ('@Model.ReportStatus' == 1)
+    {
+       $("#btnSave").remove();
+    }*@
+
+    $(document).ready(function () {
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            maxDate: 0,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker();
+
+        var input = $('.timepicker');
+        input.clockpicker({
+            autoclose: false,
+            twelvehour: true,
+            donetext: "Done",
+            afterDone: function () {
+            }
+        });
+    });
+
+</script>
+<style>
+   
+
+    .ui-datepicker-trigger {
+        bottom: 9px;
+        right: 8px;
+    }
+
+    td .form-group {
+        margin-bottom: 0px !important;
+    }
+
+    .input-group {
+        display: flex;
+    }
+
+    .datepicker {
+        border-radius: 0px;
+    }
+
+    .ysenona {
+        width: 50px;
+        text-align: center;
+    }
+    .ul_list li {
+        margin-bottom: 0px;
+        cursor: pointer;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        float: left;
+        padding: 6px 0 0 2px;
+        font-size: 14px;
+        color: #333;
+    }
+    .ul_list li a{
+        color:#333;
+    }
+    .ul_list li.active,
+    .ul_list li:hover {
+    background: #f5f5f5;
+    border-top: 1px solid #3c8dbc;
+}
+</style>

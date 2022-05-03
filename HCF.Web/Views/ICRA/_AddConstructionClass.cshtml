@@ -1,0 +1,53 @@
+﻿@model HCF.BDO.ConstructionClass
+@using (Html.BeginForm())
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle"> Manage Construction Class</span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.ConstructionClassId)
+            <div class="col-md-12 form-group">
+                @Html.LabelFor(model => model.ClassName)<em class="required-field"> *</em>
+                @Html.TextBoxFor(model => model.ClassName, new { @class = "form-control", required = "required", maxlength = 500 })
+                @Html.ValidationMessageFor(model => model.ClassName)
+            </div>
+            <div class="col-md-12 form-group">
+                @Html.LabelFor(model => model.Version)<em class="required-field"> *</em>
+                <select id="Version" name="Version" class="form-control" required>
+                    <option selected value="0">Both</option>
+                    <option value="1">Version 1</option>
+                    <option value="2">Version 2</option>
+
+                </select>
+            </div>
+                <div class="col-md-12 form-group comman_checkbox">
+
+                    @*@Html.LabelFor(model => model.IsActive)*@
+                    @Html.EditorFor(model => model.IsActive)<span></span>
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                    <label>Active</label>
+                </div>
+
+                <div class="col-md-12 text-right modal-footer">
+                    <input type="submit" value="Save" class="btn comm-button" />
+                    <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+    
+}
+<script>
+    $(document).ready(function () {
+        $("#Version").val(@Model.Version);
+    });
+
+</script>
+
+

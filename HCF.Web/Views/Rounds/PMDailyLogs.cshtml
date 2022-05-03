@@ -1,0 +1,405 @@
+﻿@model HCF.BDO.TPMLogs
+@{
+    var selectedBuildingId = 0;
+    if (Model != null && Model.BuildingId > 0)
+        selectedBuildingId = Model.BuildingId;
+
+    ViewBag.Title = "PLANT OPERATIONS DAILY MAINTENANCE LOG";
+    var stepsCount = 1;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Plant Operations Daily Maintenance Log
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+
+                @using (Html.BeginForm("PMDailyLogs", "Rounds", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="row tablelist-topform">
+                        <div class="col-md-3 form-group">
+                            <label>Building</label>
+                            <buildingdropdownList firsttext="Select" required="required"
+                                                  name="BuildingId"
+                                                  selectedvalue="@selectedBuildingId"
+                                                  class="form-control ddlbox">
+                            </buildingdropdownList>
+                        </div>
+                        <div class="col-md-3 form-group"><label>Date:</label>  @Html.TextBoxFor(x => x.Date, $"{Model.Date:MMM d, yyyy}", new { @class = "form-control datepicker readonly", required = "required", @readonly = "readonly" })</div>
+                        <div class="col-md-3 form-group"><label>Name:</label> @Html.TextBoxFor(x => x.Name, new { @class = "form-control", required = "required" })</div>
+                        <div class="col-md-3 form-group">
+                            <label>Time:</label>
+                            <div style="display:inline-block; vertical-align:middle;width:100%"
+                                 class="input-group clockpicker"
+                                 data-placement="left" data-align="top" data-autoclose="true">
+                                <input type="text" name="POTime"
+                                       id="POTime"
+                                       class="timepicker form-control CompleteTime readonly" autocomplete="off" readonly="readonly"
+                                       value="@Model.POTime" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered table-striped" id="Pmdailytbl" width="100%">
+                                <tr>
+                                    <th>S#</th>
+                                    <th>Item</th>
+                                    <th>Value</th>
+                                    <th>Expected Value</th>
+                                    <th>Format</th>
+                                    <th>Notes</th>
+                                </tr>
+                                @for (int i = 0; i < Model.Questionnaires.Count; i++)
+                                {
+                                    for (var j = 0; j < Model.Questionnaires[i].QuestionnaireSteps.Count; j++)
+                                    {
+                                        <tr class="@Model.Questionnaires[i].QuestionnaireSteps[j].StepCode">
+                                            <td>
+                                                <b> @($"{stepsCount++}")</b>
+                                            </td>
+                                            <td width="40%">
+                                                @Html.HiddenFor(x => x.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepId)
+                                                <span style="padding-left:0px;">
+                                                    @Model.Questionnaires[i].QuestionnaireSteps[j].Step
+                                                </span>
+                                            </td>
+                                            @if (Model.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps.Count == 0)
+                                            {
+                                                <td><input class="txtInput" type="text" /></td>
+                                                <td colspan="2" class="black"></td>
+                                                <td><input class="txtInput" type="text" /></td>
+                                                <td colspan="2" class="black"></td>
+                                            }
+                                            else if (Model.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps.Count >= 1 && Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail.Count > 0)
+                                            {
+                                                <td>
+                                                    @Html.HiddenFor(x => x.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps[0].QuestionnaireHeaderTypeId)
+                                                    <input type="hidden" class="isDeleted" name="Questionnaires[@i].QuestionnaireSteps[@j].PMLogSteps[0].IsDeleted" value="@Model.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps[0].IsDeleted" />
+
+                                                    <input type="hidden" class="minValue" value="@Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MinValue" />
+                                                    <input type="hidden" class="maxValue" value="@Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MaxValue" />
+                                                    <input type="hidden" class="formatValue" value="@Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].Format" />
+                                                    <input type="hidden" class="recommendValue" value="@Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].RecommendedText" />
+                                                    @if (!string.IsNullOrEmpty(Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].InputValueHeader))
+                                                    {
+                                                        var maxnumvalue = Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MaxValue;
+                                                        var minnumvalue = Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MinValue;
+                                                        var recommendedvalue = Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].RecommendedValue;
+                                                        if (recommendedvalue == "N/A")
+                                                        {
+                                                            if (maxnumvalue <= 0 || minnumvalue <= 0)
+                                                            {
+                                                                recommendedvalue = minnumvalue.ToString();
+                                                            }
+                                                            else
+                                                            {
+                                                                recommendedvalue = "N/A";
+                                                            }
+                                                        }
+                                                        else if (recommendedvalue == "")
+                                                        {
+                                                            if (maxnumvalue > 0 || minnumvalue > 0)
+                                                            {
+                                                                recommendedvalue = maxnumvalue.ToString();
+                                                            }
+                                                            else
+                                                            {
+                                                                recommendedvalue = "N/A";
+                                                            }
+
+                                                        }
+                                                        else { }
+
+                                                        <stepsoptionsdropdownlist name="@string.Format("Questionnaires[{0}].QuestionnaireSteps[{1}].PMLogSteps[0].Value",i,j)"
+                                                                                  selectedvalue="@Model.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps[0].Value"
+                                                                                  showOnlyData="@Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].InputValueHeader"
+                                                                                  maxvalue="@maxnumvalue"
+                                                                                  minValue="@minnumvalue"
+                                                                                  class="form-control selectopt ddlbox"
+                                                                                  firsttext="Choose"
+                                                                                  recvalue="@(recommendedvalue == "0" ? "N/A" : recommendedvalue)">
+                                                        </stepsoptionsdropdownlist>
+                                                    }
+
+                                                    else
+                                                    {
+                                                        <span>
+                                                            @Html.TextBoxFor(x => x.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps[0].Value, new
+                                                            {
+                                                                @class = "txtInput inputvalue form-control",
+                                                                @minValue = Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MinValue,
+                                                                @maxValue = Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].MaxValue,
+                                                                @ctrType = (HCF.BDO.Enums.InputType)Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].InputType
+                                                            })
+                                                        </span>
+                                                    }
+
+                                                </td>
+
+                                                <td width="20%" align="center" class="@(string.IsNullOrEmpty(Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].RecommendedValue) ? "black" :"")">
+                                                    @Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail[0].RecommendedText
+                                                </td>
+
+                                            }
+                                            <td width="5%">
+                                                @string.Join(",", Model.Questionnaires[i].QuestionnaireSteps[j].QuestionnaireStepDetail.Select(n => n.Format.ToString()).Distinct().ToArray())
+                                            </td>
+                                            <td>
+                                                @Html.TextBoxFor(x => x.Questionnaires[i].QuestionnaireSteps[j].PMLogSteps[0].Comments, new { @class = "form-control" })
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label> Comments:</label>
+                            @Html.TextAreaFor(x => x.Comments, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label> Action Taken:</label>
+                            @Html.TextAreaFor(x => x.ActionTaken, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Reviewed By:</label>
+                            <userdropdownlist class="form-control ddlbox" name="ReviewedBy" selectedvalue="@Model.ReviewedBy" firsttext="Select"></userdropdownlist>
+                            @*@Html.UserDropDownList("ReviewedBy", Model.ReviewedBy, "Select", new { @class = "form-control ddlbox" })*@
+                        </div>
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="submit" id="saveBtn" value="Save" class="comm-button" />
+                            @Html.ActionLink("Cancel", "DailyLogs", new { controller = "Rounds" }, new { @class = "comm-Cancelbutton" })
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var input = $('.timepicker');
+    var saveBtn = $('#saveBtn');
+    input.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+        }
+    });
+
+
+    $(document).ready(function () {
+        $(".inputvalue").each(function () {
+            var type = $(this).attr('ctrType');
+            //console.log(type);
+            if (type.toLowerCase() == "Number".toLowerCase() || type.toLowerCase() == "Decimal".toLowerCase() || type.toLowerCase() == "4".toLowerCase()) {
+                //$(this).attr("type", "tel").attr("pattern", "^-?[0-9]\d*(\.\d+)?$").attr("title", "only dot(.),minus(-) and numbers are allowed");
+                $(this).attr("type", "text").attr("pattern", "^([-+,0-9.]+)").attr("inputmode", "numeric");
+                if (type.toLowerCase() == "Decimal".toLowerCase() || type.toLowerCase() == "4".toLowerCase()) {
+                    $(this).attr("step", "0.01");
+                }
+            }
+        });
+
+        $('.selectopt').each(function () {
+            checkDropdownValidValues(this);
+        });
+
+        $('.selectopt').each(function () {
+            if ($(this).val() == "Gas") { // EDITED THIS LINE
+                checkDropdownValidValues(this);
+            }
+        });
+
+        $("#BuildingId").attr("required", "true");
+
+    });
+
+
+    $(".selectopt").change(function () {
+        checkDropdownValidValues($(this));
+    });
+
+    // new methods
+    function isValidTr(cntrl) {
+        var status = false;
+        var maxval = Number($(cntrl).attr("maxvalue"));
+        var minval = Number($(cntrl).attr("minvalue"));
+        var value = Number($(cntrl).val());
+        var operaotorType = "b";
+        if (maxval < 0 || minval < 0) {
+            operaotor = "b";
+            status = operators[operaotor](minval, value, maxval);
+        } else if (maxval == 0 && minval != 0) {
+            operaotorType = "less than " + minval;
+            operaotor = ">";
+            status = operators[operaotor](minval, value)
+        } else if (maxval != 0 && minval == 0) {
+            operaotorType = "grater than " + maxval;
+            operaotor = "<";
+            status = operators[operaotor](maxval, value)
+        } else {
+            operaotor = "b";
+            status = operators[operaotor](minval, value, maxval);
+        }
+        return status;
+    }
+
+    var operators = {
+        '>': function (a, b) { return a >= b },
+        '<': function (a, b) { return a <= b },
+        'b': function (a, b, c) { return b >= a && b <= c },
+    };
+    // end new method
+
+
+
+    function checkDropdownValidValues(cntrl) {
+        //debugger
+        var recValue = $(cntrl).attr("recvalue");
+        var color_tr = $(cntrl).closest("tr");
+        var stepCode = $(cntrl).closest("tr").attr("class");
+        if (isNaN(recValue)) {
+            var isValid = true;
+            var currentValue = $(cntrl).val();
+            var seqid = [];
+            if (currentValue == "Gas" && stepCode === "FTY") {
+                $("tr.PAFST,tr.STE,tr.SPR,tr.SBDC,tr.CFL,tr.CML,tr.CABD,tr.COLIN,tr.VFG,tr.VFFW,tr.FPAP").addClass('hidden');
+                $("#Pmdailytbl tbody tr").each(function (count) {
+                    if (count > 0) {
+                        seqid[count] = parseInt($("#Pmdailytbl tbody").children()[count].children[0].textContent);
+                    }
+                });
+                seqid.sort((a, b) => a - b);
+                var j = 0;
+                $("#Pmdailytbl tbody tr").each(function (count) {
+                    var hiddenExist = $(this).hasClass("hidden");
+                    if (hiddenExist) {
+                        $(this).find(".isDeleted").val('true');
+                    }
+                    if (count > 0) {
+                        if (!hiddenExist) {
+                            $("#Pmdailytbl tbody").children()[count].children[0].children[0].innerHTML = seqid[j];
+                            j++;
+                        }
+                    }
+
+                });
+            }
+            else if (currentValue == "Oil" && stepCode === "FTY" || currentValue === "") {
+                $("tr.PAFST,tr.STE,tr.SPR,tr.SBDC,tr.CFL,tr.CML,tr.CABD,tr.COLIN,tr.VFG,tr.VFFW,tr.FPAP").removeClass('hidden');
+                var k = 1;
+                $("#Pmdailytbl tbody tr").each(function (count) {
+                    var hiddenExist = $(this).hasClass("hidden");
+                    if (hiddenExist == false) {
+                        $(this).find(".isDeleted").val('false');
+                    }
+                    if (count > 0) {
+                        if (!hiddenExist) {
+                            $("#Pmdailytbl tbody").children()[count].children[0].children[0].innerHTML = k;
+                            k++;
+                        }
+                    }
+
+                });
+            }
+            if (recValue === "NA" || recValue === "N/A" || currentValue === "" || recValue === "") {
+
+            } else if (recValue.toLowerCase().replace(/\s/g, '') != currentValue.toLowerCase().replace(/\s/g, '')) {
+                isValid = false;
+            }
+            if (!isValid) {
+                $(color_tr).css('background-color', 'red');
+                //$("#saveBtn").addClass("disabled");
+            }
+            else {
+                $(color_tr).css('background-color', 'white');
+                //$("#saveBtn").removeClass("disabled");
+            }
+        }
+        else {
+            var isValid = true;
+            //if ($(cntrl).val() == '') {
+            //    $(color_tr).css('background-color', 'white');
+            //    return;
+            //}
+
+
+
+            if ($(cntrl).val() == "" || color_tr.find(".recommendValue").val() == "N/A") {
+                $(color_tr).css('background-color', 'white');
+                return;
+            }
+
+            isValid = isValidTr($(cntrl));
+
+            if (!isValid) {
+                $(color_tr).css('background-color', 'red');
+                //$("#saveBtn").addClass("disabled");
+            }
+            else {
+                $(color_tr).css('background-color', 'white');
+                //$("#saveBtn").removeClass("disabled");
+            }
+
+        }
+    }
+
+    $('.inputvalue').each(function () {
+        ///debugger
+        var isValid = true;
+
+        var color_tr = $(this).closest("tr");
+
+        if ($(this).val() == "" || color_tr.find(".recommendValue").val() == "N/A") {
+            $(color_tr).css('background-color', 'white');
+            return;
+        }
+
+        isValid = isValidTr($(this));
+
+        if (!isValid) {
+            $(color_tr).css('background-color', 'red');
+        }
+        else {
+            $(color_tr).css('background-color', 'white');
+        }
+    });
+
+    $('.inputvalue').on('change keyup', function () {
+        //debugger;
+        var isValid = true;
+        var color_tr = $(this).closest("tr");
+
+        if ($(this).val() == "" || color_tr.find(".recommendValue").val() == "N/A") {
+            $(color_tr).css('background-color', 'white');
+            return;
+        }
+
+        isValid = isValidTr($(this));
+
+        if (!isValid) {
+            $(color_tr).css('background-color', 'red');
+
+        }
+        else {
+            $(color_tr).css('background-color', 'white');
+        }
+    });
+
+
+
+</script>

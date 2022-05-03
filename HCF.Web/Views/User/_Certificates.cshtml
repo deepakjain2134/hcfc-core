@@ -1,0 +1,102 @@
+﻿@model IEnumerable<HCF.BDO.Certificates>
+
+<div class="cretificate-listBox">
+    <div id="masterTables">
+        <table id="certification_myTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="display:none"></th>
+                    <th style="display:none">userid</th>
+                    <th style="display:none">vendorid</th>
+                    <th>Organization</th>
+                    <th>Name</th>
+                    <th>Certificates</th>
+                    <th>Expiration Date</th>
+                    <th>Issue Date</th>
+                    <th>Upload Date</th>
+                    <th>Status</th>
+                    <th>Preview</th>
+                    <th>Uploaded By</th>
+                    @if (ViewBag.View != "BinderView" && ViewBag.View != "UserView")
+                    {
+                        <th>Edit</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                {
+
+                    <tr id="@item.CertificateId">
+                        <td style="display:none">@item.CertificateType</td>
+                        <td style="display:none">
+                            @if (item.UserId != 0)
+                            {@item.UserId}
+                        </td>
+                        <td style="display:none">
+                            @if (item.VendorId != 0)
+                            {@item.VendorId}
+                        </td>
+                        <td>
+                            @if (item.CertificateType == 1)
+                            {<span>Internal</span> }
+                            else if (item.CertificateType == 2)
+                            { <span>Vendor</span> }
+                            else
+                            {<span>General</span>}
+                        </td>
+                        <td>
+                            @if (item.CertificateType != 3)
+                            {
+                                @($"{@item.UserName}")
+                            }
+                        </td>
+                        <td>@item.CertificateName </td>
+                        <td>@item.ValidUpTo.ToFormatDate() </td>
+                        <td>@item.IssueDate.ToFormatDate() </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.Path))
+                            {
+                                @item.CreatedDate.ToFormatDate()
+                            }
+                        </td>
+                        <td>
+                            @{
+                                HCF.BDO.Enums.ACTIVStatus enums = (HCF.BDO.Enums.ACTIVStatus)Convert.ToInt32(item.IsActive);
+                            }
+                            <span>@enums</span>
+                        </td>
+                        <td>
+                            @if (item.Path != "")
+                            {
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.Path, title = "Preview" })" class="modal-link allowclick">
+                                    <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FileName" />
+                                </a>
+                            }
+                        </td>
+                        <td>@($"{@item.UploadedBy}") </td>
+                        @if (ViewBag.View != "BinderView" && ViewBag.View != "UserView")
+                        {
+                            <td>
+                                <a class="" href="@Url.Action("AddOrEditCertificates", "User", new { Id = item.CertificateId })">
+                                    <img src="/dist/Images/Icons/edit_button2.png" title="Edit" alt="3d_add_button">
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#BinderInternal_View").hide();
+        $("#BinderVendor_view").hide();
+    });
+</script>
+<style>
+    div#certification_myTable_filter {
+        text-align: right;
+    }
+</style>

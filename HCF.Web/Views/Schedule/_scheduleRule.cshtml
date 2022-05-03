@@ -1,0 +1,81 @@
+﻿@{
+    DateTime dateTime = this.ViewData.ContainsKey("selectDate") ? Convert.ToDateTime(this.ViewData["selectDate"].ToString()) : DateTime.Now.ToClientTime();
+    //int frequencyId = this.ViewData.ContainsKey("frequencyId") ? Convert.ToInt32(this.ViewData["frequencyId"].ToString()) : 7;
+}
+<ul class="schedule-rule">
+    @*<li id="frequencyId_@Convert.ToInt32(HCF.Utility.Enums.Frequency.Daily)" frequencyid="@Convert.ToInt32(HCF.Utility.Enums.Frequency.Daily)" class="schedulerule">
+            Daily at
+        </li>*@
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Weekly)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Weekly)" class="schedulerule">
+        Every  @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Monthly)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Monthly)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of month
+    </li>
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Annually)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Annually)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of @Html.DropDownList("annually_month", commonModelFactory.Months, new { @class = "monthNo ddl-schedule" })
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.SemiAnnually)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.SemiAnnually)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of <select class="monthNo ddl-schedule">
+            <option value="1"> 1st</option>
+            <option value="2"> 2nd</option>
+            <option value="3"> 3rd</option>
+            <option value="4"> 4th</option>
+            <option value="5"> 5th</option>
+            <option value="6"> 6th</option>
+        </select> month
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Threeyears)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Threeyears)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of @Html.DropDownList("annually_month", commonModelFactory.Months, new { @class = "monthNo ddl-schedule" })
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Fiveyears)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Fiveyears)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of @Html.DropDownList("annually_month", commonModelFactory.Months, new { @class = "monthNo ddl-schedule" })
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Sixyears)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Sixyears)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of @Html.DropDownList("annually_month", commonModelFactory.Months, new { @class = "monthNo ddl-schedule" })
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.Quarterly)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.Quarterly)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        of <select class="monthNo ddl-schedule">
+            <option value="1"> 1st</option>
+            <option value="2"> 2nd</option>
+            <option value="3"> 3rd</option>
+        </select> month
+    </li>
+
+    <li id="frequencyId_@Convert.ToInt32(HCF.BDO.Enums.Frequency.TwoMonths)" frequencyid="@Convert.ToInt32(HCF.BDO.Enums.Frequency.TwoMonths)" class="schedulerule">
+        Every @*@Html.WeekDropDown("drpweekNo", "", "", new { @class = "form-control selectyear weekNo ddl-schedule" })*@  
+        <weekdropdown name="drpweekNo" class="form-control selectyear weekNo ddl-schedule"></weekdropdown>
+        @Html.DropDownList("monthdays", commonModelFactory.Days, new { @class = "dayNo ddl-schedule" })
+        @*of <select class="monthNo">
+            <option value="1"> 1st</option>
+            <option value="2"> 2nd</option>
+        </select> month*@
+    </li>
+</ul>

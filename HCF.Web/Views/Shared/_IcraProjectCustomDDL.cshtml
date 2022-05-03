@@ -1,0 +1,145 @@
+﻿@model List<HCF.BDO.TIcraProject>
+@{
+    Layout = null;
+    // string ProjectId = this.ViewData.ContainsKey("ProjectId") ? this.ViewData["ProjectId"].ToString() : "0";
+
+    var projectList = Model;
+    
+
+}
+@{ var checkListClass =ViewBag.type!=null && !string.IsNullOrEmpty(ViewBag.type) && ViewBag.type.ToLower() == "single" ? "chkSigleSelect" : "chkMultiSelect"; }
+<div class="selectList ddlprojects" id="ullistitem">
+    <label>Select Project </label>
+    <ul class="ullistitem">
+        @foreach (var project in projectList)
+        {
+
+            <li class="@checkListClass">
+                <input type="checkbox" data-projecttype="@project.ProjectTypeName" value="@project.ProjectId" data-text="@project.ProjectName (@project.ProjectNumber)" /><span></span> @project.ProjectName (@project.ProjectNumber)
+                <ul>
+                    @foreach (var l1Child in project.SubProject.Where(x => x.Status || x.ProjectId == Convert.ToInt32(ViewBag.ProjectId)))
+                    {
+                        <li>
+                            <input type="checkbox" value="@l1Child.ProjectId" data-projecttype="@l1Child.ProjectTypeName" data-text="@l1Child.ProjectName (@l1Child.ProjectNumber)" /><span></span> @l1Child.ProjectName (@l1Child.ProjectNumber)
+                            @*<ul>
+                                    @foreach (var l2Child in l1Child.SubProject)
+                                    {
+                                        <li>
+                                            <input type="checkbox" value="@l2Child.ProjectId" data-text="@l2Child.ProjectName (@l2Child.ProjectNumber)" /><span></span> @l2Child.ProjectName (@l2Child.ProjectNumber)
+                                        </li>
+                                    }
+                                </ul>*@
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>
+<script>
+    $(document).ready(function () {
+        $('.chkSigleSelect input[type="checkbox"]').change(function () {
+            debugger;
+            var isChecked = $(this).is(':checked')
+            var thisVal = "0"
+            if (isChecked) {
+                thisVal = $(this).val()
+            }
+
+            $('.chkSigleSelect input[type="checkbox"]').prop('checked', false)
+            $(this).prop('checked', isChecked)
+            $('.chkSigleSelect').parent().parent().children('label').text(selectProjectLabel($('.chkSigleSelect')))
+            $('#ProjectId').val(thisVal);
+            $('#txtprojectName').val(thisVal);
+            var projectype = $(this).attr("data-projecttype");
+            $("#txtProjectType").val(projectype);
+            if ($(".chkSigleSelect input[type='checkbox']:checked").length == 0) {
+                $("#txtprojectName").val("");
+                $("#txtProjectType").val("");
+            }
+
+            //console.log(thisVal, $('#ProjectId').val())
+        })
+
+        $('.chkMultiSelect input[type="checkbox"]').change(function () {
+            var val = getCheckedValue('chkMultiSelect')
+            console.log(selectProjectLabel($('.chkMultiSelect')))
+            $('.chkMultiSelect').parent().parent().children('label').text(selectProjectLabel($('.chkMultiSelect')))
+            $("#projectDLL").trigger('change')
+        })
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+    })
+    function getCheckedValue(className) {
+        var checkedVals = []
+        $('.' + className + ' input[type="checkbox"]:checked').each((i, data) => {
+            checkedVals.push($(data).val());
+        })
+        return checkedVals
+    }
+
+    var selectProjectLabel = (input) => {
+
+        var chkCount = $(input).find('input[type="checkbox"]:checked').length
+        var txt = 'Select Project'
+        if (chkCount == 0) {
+            return txt;
+        }
+        if (chkCount < 2) {
+            console.log($(input).find('input[type="checkbox"]:checked').data('text'))
+            txt = $(input).find('input[type="checkbox"]:checked').data('text')
+        }
+        else {
+            txt = chkCount + ' Project Selected'
+        }
+        return txt;
+    }
+</script>
+<style>
+    .selectList li, .selectList ul {
+        list-style-type: none;
+        text-decoration: none;
+    }
+
+    .selectList {
+        width: 70%;
+        display: inline-block;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .ullistitem {
+        display: none;
+        z-index: 99;
+        position: absolute;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .ddlproject {
+        width: 0;
+        border-color: transparent;
+    }
+</style>

@@ -1,0 +1,808 @@
+﻿@model List<HCF.BDO.Assets>
+<div style="display:none">
+    Inspection Group
+    <select id="inspectiongroup" class="form-control selectyear select_group"></select>
+</div>
+<div class="rbn_container">
+    <div id="exTab1" class="container">
+        @foreach (var asset in Model)
+        {
+            <ul class="nav nav-pills" data-toggle="buttons">
+                @foreach (var ep in asset.EPdetails.OrderBy(x => x.StandardEp))
+                {
+                    <li id="@ep.EPDetailId" inspect="@($"type_{ep.CanInspect()}")" class="test">
+                        <a href="@($"#{ep.EPDetailId}a")" data-toggle="tab">
+                            @Html.RadioButton("epdetail", ep.EPDetailId, new { inspect = ep.CanInspect(), docrequired = (ep.IsDocRequired ? 1 : 0), IsPreviousCycle = 0, PreviousCycleInspectionId = 0, TCycleId = 0 })
+                            <label for="EC">
+                                <span class="ep_name">
+                                    @ep.StandardEp
+
+                                </span> <br />
+                                <span style="font-weight:200">@ep.GetFrequencyName()</span>
+                            </label>
+                        </a>
+
+                    </li>
+                }
+            </ul>
+            <div class="tab-content clearfix" style="margin: 0 0 6px 0">
+                @foreach (var ep in asset.EPdetails.OrderBy(x => x.StandardEp))
+                {
+                    //var _copy = "</br><span style='font-size:10px'>©2020 The Joint Commission. All rights reserved. Used with permission.</span>";
+                    <div class="tab-pane" id="@($"{ep.EPDetailId}a")">
+                        <div class="ephisCol-22" id="@($"divEp{ep.EPDetailId}")">
+                            @await Component.InvokeAsync("EpDescription", new { epDetailId = ep.EPDetailId, epdetails = ep })
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div class="inspe-toggle-btn">
+    <input type="checkbox" class="cb-value" />
+</div>
+
+<table class="table inpetion_table" id="myTable" style="width:100%;">
+    <thead>
+        <tr>
+            <th style="display:none">
+                Inspection Group
+            </th>
+            <th style="display:none">
+                EPDetailId
+            </th>
+            <th>
+                Status
+            </th>
+            <th> @Localizer["AssetNo"] </th>
+            <th>
+                Location
+            </th>
+            <th> @Localizer["NearBy"] </th>
+
+            <th> @Localizer["LastInspectionDate"] </th>
+            <th>
+                Action
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var asset in Model)
+        {
+            foreach (var fep2 in asset.EPdetails)
+            {
+                foreach (var floorasset in asset.TFloorAssets.Where(x => x.EpDetailId == fep2.EPDetailId).OrderByDescending(x => x.Source).ThenBy(x => x.DeviceNo).OrderBy(x => x.EpDetailId))
+                {
+                    //var inspectionActivity = floorasset.TInspectionActivity.Where(x => x.EPDetailId == fep2.EPDetailId && x.Status != 2).FirstOrDefault();
+
+                    <tr id="@floorasset.EpDetailId-@floorasset.FloorAssetsId" epdetailid="@floorasset.EpDetailId" floor-assetId="@floorasset.FloorAssetsId" style="display:none;">
+
+                        @await Html.PartialAsync("_FloorAssetStep", floorasset,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "FrequencyId", fep2.Frequency.FrequencyId }}
+                              )
+                        @*@await Html.PartialAsync("_FloorAssetStep", floorasset, new ViewDataDictionary { { "FrequencyId", fep2.Frequency.FrequencyId } })*@
+                    </tr>
+
+                }
+            }
+        }
+
+    </tbody>
+</table>
+@if (Model.Count > 0 && Model[0].TFloorAssets.Count > 0)
+{
+<div class="row">
+    <div class="col-md-12 text-right button_Div">
+        <input type="button" value="Save" class="comm-button" id="btnSubmit" />
+    </div>
+</div>
+    <script>
+        $("#dateBox").show();
+        $("#inspectiondate").removeClass('disable');
+        $("#btnuploadfile").removeClass('disable');
+        $("#inspectionimg").removeClass('disable');
+
+
+
+    </script>
+}
+else
+{
+    <script>
+        $("#inspectiondate").addClass('disable');
+        $("#btnuploadfile").addClass('disable');
+        $("#inspectionimg").addClass('disable');
+
+
+
+    </script>
+
+}
+
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="FailStepsPopup" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="loadpartial">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="CustomFrequencyMoal" role="dialog">
+    <div class="modal-dialog">
+        @*Modal content*@
+        <div class="modal-content" style="width: 50%; margin: 0px auto;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Custom Schedule Date</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="InspectionDate" class="form-control datepicker" readonly="readonly" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-button disabled" data-dismiss="modal" id="saveCustomFrequency" onclick="">Save & Done</button>
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal" id="CancelCustomFrequency">Cancel</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var IsdocRequired = "";
+    var parm_inspectionid = 0;
+    $(document).ready(function (e) {
+
+        var table = $('#myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "bPaginate": false,
+            "bSort": false,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+        });
+        $('#InspectionDate').datepicker({
+            dateFormat: "mm/dd/yy",
+            minDate: new Date()
+        });
+        $('#InspectionDate').on("change", function () {
+            $("#saveCustomFrequency").removeClass("disabled");
+        })
+        
+        var epdetailid = getParameterByName('epdetailid');
+       
+        var param_assetId = getParameterByName('assetsid') + ",";
+        if (getParameterByName('inspectionid') != undefined || getParameterByName('inspectionid') > 0) { parm_inspectionid = getParameterByName('inspectionid');}
+        var _assetId = "";
+        $('input:checkbox[id^="cb2"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    _assetId = _assetId + $(this).val() + ",";
+                }
+            }
+        });
+
+        if (epdetailid != undefined && epdetailid > 0 && (param_assetId == _assetId)) {
+            $("[checked=checked]").removeAttr("checked");
+            epId = epdetailid;
+        }
+        else {
+                $("#UploadDocFile").remove();
+                $("#lbldocmsg").hide();
+        }
+
+        function ShowActiveEpDetails  (epId) {
+
+
+        showOngoingEp(epId);
+       $("tbody tr").hide();
+            $("tr[epdetailid=" + epId + "]").show();
+            if ($("#myTable tbody tr td").hasClass("dataTables_empty")) { $("#myTable tbody tr td").closest('tr').show() }
+        $(".epsection").hide();
+        $(".eps" + epId).show();
+        $("#epdetail").prop("checked", false);
+        $('li input[type="radio"]').each(function () {
+            if ($(this).val() == epId) {
+                $(this).prop("checked", true);
+            } else {
+                if (parm_inspectionid>0)
+                $(this).addClass("disabled");
+            }
+        });
+    }
+
+        function showOngoingEp(EpId) {
+            debugger
+            if (getParameterByName('Isupload') != 1) {
+
+                if ($("#file-upload-list").find("#file-lists").find("ul").length > 0 ||
+                    typeof $("#file-upload-list").find("#file-lists").find("ul") !== 'undefined') {
+                    $("#file-upload-list").find("#file-lists").find("ul").empty();
+                    $("#lbldocmsg").hide();
+                }
+            }
+
+            $("#btnSubmit").show();
+            $(".ins_check3_Ins_btn").removeClass("disable");
+            var canInspectEp = $("input[name=epdetail]:radio:checked").attr("inspect");
+            if (canInspectEp.toLowerCase() === "false") {
+                var cancelRedirectUrl = CRxUrls.Goal_EpInspections + "?epId=" + EpId;
+                SwalConfirmPopUp("Asset Review", $.Constants.EP_Inspection_Ongoing_Assets, "info", "Proceed", "", "Back to EP Review", cancelRedirectUrl);
+                $("#btnSubmit").hide();
+                $(".ins_check3_Ins_btn").addClass("disable");
+            }
+            IsdocRequired = $("#exTab1 li.active").find("input[name='epdetail']").attr('docrequired');
+            //if (IsdocRequired == "1") {
+            //    $("#inspectiondate").hide();
+            //}
+            //else {
+            //    $("#inspectiondate").show();
+            //}
+
+
+        }
+
+
+        //$(".epsection").hide();
+        $("input:radio[name=epdetail]:first").attr('checked', true);
+        var value = $("input[name=epdetail]:radio:checked").val();
+
+        ShowActiveEpDetails(value);
+        //$(".epDescription").hide();
+        $("#divEp" + value).show();
+        //$('table tr').removeClass("disable");
+        //$('table tr[substatus=pass]').addClass("disable");
+        //$(document).on("click", ".open-FailStepsPopup", function () {
+
+        //});
+        activeTab(value + "a");
+
+
+        function activeTab(tab) {
+            $('.nav-pills a[href="#' + tab + '"]').tab('show');
+        };
+
+        var epdetailid = getParameterByName('epdetailid');
+        var param_assetId = getParameterByName('assetsid') + ",";
+        var _assetId = "";
+        $('input:checkbox[id^="cb2"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    _assetId = _assetId + $(this).val() + ",";
+                }
+            }
+        });
+
+        if (epdetailid != undefined && epdetailid > 0 && (param_assetId == _assetId)) {
+
+            $("#divEp" + epdetailid).show();
+            activeTab(epdetailid + "a");
+            $("tbody tr").hide();
+            $("tr[epdetailid=" + epId + "]").show();
+            $(".epsection").hide();
+            $(".eps" + epId).show();
+            $("#epdetail").prop("checked", false);
+            $('li input[type="radio"]').each(function () {
+                if ($(this).val() == epId) {
+                    $(this).prop("checked", true);
+                }
+            });
+        }
+        //$("input[name=epdetail]:radio").change(function () {
+
+        //    var value = $("input[name=epdetail]:radio:checked").val();
+        //    $(".epDescription").hide();
+        //    $("#divEp" + value).show();
+
+        //    filterAssetbyEP();
+        //    //var values = $(this).val();
+        //    //table.columns(1).search($(this).val()).draw();
+        //});
+        $('body').on('click', '.addremove-assets', function () {
+           // debugger;
+            //$('.remove').click(function () {
+            $(this).text($(this).text().trim() == 'Remove' ? 'Removed' : 'Remove');
+            //$(this).closest("tr").toggleClass("removed");
+            $(this).closest("tr").find(".ins_check3_Ins_btn").toggleClass("disable");
+        });
+
+        $('body').on('click', '.goto-assets-wo', function () {
+             var floorAssetId=  $(this).attr("assetId");
+             var urlAction = '@Url.Action("Index", "WorkOrder")';
+             var epdetailId = 0;
+             window.location.href = urlAction + "?page=1&floorAssetId=" + floorAssetId + "&EPdetailId=" + epdetailId;
+        });
+
+        $('body').on('click', '.goto-assets-ilsm', function () {
+             var floorAssetId=  $(this).attr("assetId");
+             var urlAction = '@Url.Action("IlsmView", "Goal")';
+             var epdetailId = 0;
+            window.location.href = urlAction + "?assetId=" + floorAssetId;
+        });
+
+        $('.nav-pills li').click(function () {
+            var value = $(this).attr("id");
+           // var canInspect = $(this).attr("inspect");
+            $(this).focusout();
+            activeTab(value + "a");
+            $("input[name=epdetail][value=" + value + "]").prop('checked', true);
+            $(".epDescription").hide();
+            $("#divEp" + value).show();
+            ShowActiveEpDetails(value);
+           // filterAssetbyEP();
+           // showOngoingEp(canInspect, value);
+        });
+
+
+
+
+
+
+
+        $("#inspectiongroup").append(
+            $('<option></option>').val("").html("Select"));
+        //var tabledata = $('#myTable').DataTable();
+        var dtValues = table.rows().data();
+        var arrDistinct = new Array();
+        $(dtValues).each(function (index, item) {
+            if ($.inArray(item[0], arrDistinct) == -1)
+                if (item[0] != null && item[0] != "") {
+                    arrDistinct.push(item[0]);
+                }
+        });
+
+        $(arrDistinct).each(function (index, item) {
+            $("#inspectiongroup").append(
+                $('<option></option>').val(item).html(item));
+        });
+
+        $("#inspectiongroup").change(function () {
+            var values = $(this).val();
+            table.columns(0).search($(this).val()).draw();
+        });
+
+
+        $(document).on("click", "#saveComment", function () {
+            var control = $("#setpId").val();
+            var text = $("#Commenttxt").val();
+            $("input[name='" + control + "'][type=hidden]").val(text);
+        });
+
+        $('#btnSubmit').click(function () {
+
+            if ($('input#chkbtn.disable').length === $('input#chkbtn').length) {
+                warningAlert("Please select at least one asset to inspect.");
+                return false;
+            }
+            debugger
+
+
+
+            var totalnumbercompliant = $("#myTable tbody > tr:visible > td:visible > div.epsection").find("[value=1]").length// $('input#chkbtn.compliant').length;
+            // var totalNoAssets = $('input:button[id^="chkbtn"]').length;
+            var totalNoAssets = $("#myTable  tbody > tr:visible").length;
+            var isSelectAllChecked = $("#selectAll").prop('checked');
+            var totalNumberOfAssetsDone = $("#myTable tbody > tr:visible > td:visible > div.epsection").find("[value=1]").length + $("#myTable tbody > tr:visible > td:visible > div.epsection").find("[value=0]").length;
+            //debugger;
+            if (parseInt(totalNumberOfAssetsDone) == parseInt(totalNoAssets)) {
+                var buttons = "<div><button id='btnyes' class='comm-button'>Yes</button><button  id ='btnNo' class='comm-Cancelbutton'>No</button></div>";
+
+                swal({
+                    html: true,
+                    title: "All assets are already compliant.",
+                    text: "Do you want to proceed? </br></br>" + buttons,
+                    type: "warning",
+                    showConfirmButton: false,
+                    showCancelButton: false
+                });
+            }
+            else if (isSelectAllChecked == true || parseInt(totalnumbercompliant) > 0) {
+                var buttons = "<div><button id='btnyes' class='comm-button'>Yes</button><button  id ='btnNo' class='comm-Cancelbutton'>No</button><button id='btnRemove' class='comm-button excludebtn'>Yes, but exclude already compliant assets</button></div>"
+                swal({
+                    html: true,
+                    title: "All assets are already compliant.",
+                    text: "Do you want to proceed? </br></br>" + buttons,
+                    type: "warning",
+                    showConfirmButton: false,
+                    showCancelButton: false
+                });
+            }
+            else {
+                swal.close();
+                SaveInspections(0);
+                return false;
+            }
+
+            //debugger;
+
+
+
+        });
+
+        $('input:button[id^="chkbtn"]').click(function () {
+
+            if ($('input:button[id^="chkbtn"]').length == $('input:button[id^="chkbtn"][value="1"]').length) {
+                $('#selectAll').prop('checked', true)
+            } else {
+                $('#selectAll').prop('checked', false)
+            }
+        });
+
+        $(document).off("click", "#btnyes").on("click", "#btnyes", function () {
+
+            debugger
+            var FAssetId = "";
+            var FassetId = []
+            var Epdetailid = "";
+            var Standardep = $("#exTab1 li.active").find('label').text();
+            var frequencyid = "";
+            $('input:button[id^="chkbtn"]:visible').not(".disable").each(function () {
+                var btnval = $(this).val();
+
+                if (btnval == 1) {
+                    var value =
+                        $(this).data('floorassetid')
+
+                    FassetId.push(value);
+                    Epdetailid = $(this).data('epid');
+
+                    frequencyid = $(this).data('frequencyid');
+
+                }
+               // i++;
+            });
+            FAssetId = FassetId.join(',');
+            $(".loadingModal").show();
+
+            $.ajax({
+                url: CRxUrls.Assets_GetAssetsCurrentStatus,
+                type: "POST",
+                //contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: { FassetId: FassetId, Epdetailid: Epdetailid },
+                success: function (data) {
+                    debugger;
+                    console.log(data);
+                    $(".loadingModal").hide();
+                    if (data.data == 0) {
+
+
+
+
+                        SaveInspections(0)
+
+                    }
+                    else {
+                        SaveInspections(0)
+                    }
+                }
+
+
+            });
+
+
+            //SaveInspections(0);
+            return false;
+        });
+
+
+        $(document).on("click", "#btnNo", function () {
+            $('input:button[id^="chkbtn"]').each(function () {
+                var control = $(this).data("orgvalue");
+                $('#selectAll').attr('checked', false);
+                $(this).val(control);
+
+            });
+        });
+
+        $(document).off("click", "#btnRemove").on("click", "#btnRemove", function () {
+            var FAssetId = "";
+            var FassetId = []
+            var Epdetailid = "";
+            var Standardep = $("#exTab1 li.active").find('label').text();
+            var frequencyid = "";
+            $('input:button[id^="chkbtn"]:visible').not(".disable").each(function () {
+                var btnval = $(this).val();
+
+                if (btnval == 1) {
+                    var value =
+                        $(this).data('floorassetid')
+
+                    FassetId.push(value);
+                    Epdetailid = $(this).data('epid');
+
+                    frequencyid = $(this).data('frequencyid');
+
+                }
+               // i++;
+            });
+           // FAssetId = values.join(',');
+            $(".loadingModal").show();
+            $.ajax({
+                url: CRxUrls.Assets_GetAssetsCurrentStatus,
+                type: "POST",
+               // contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: { FassetId: FassetId, Epdetailid: Epdetailid },
+                success: function (data) {
+                    debugger;
+                    console.log(data);
+                    $(".loadingModal").hide();
+                    if (data.data == 0) {
+                        SaveInspections(1)
+
+
+                    }
+                    else {
+                        SaveInspections(1)
+                    }
+                }
+
+
+            });
+           // SaveInspections(1);
+            return false;
+        });
+
+    });
+
+    function SaveInspections(isRemovecompliant) {
+        debugger
+        var assetName = "";
+        @if (Model != null && Model.Count > 0)
+        {
+            @:assetName = '@string.Format("{0}s", Model.FirstOrDefault().Name.ToLower())';
+        }
+
+        var queryArr = [];
+        var i = 0;
+        var dt = new Date();
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds() + ":" + dt.getMilliseconds();
+        var inspectiondate = $("#inspectiondate").val();//new Date($("#inspectiondate").val() + ' ' + time);
+        if (isRemovecompliant == 1) {
+            $('input:button[id^="chkbtn"]:visible').not(".disable").each(function () {
+                    var hascompliantClass = $(this).hasClass("compliant");
+
+                    if (hascompliantClass == false) {
+                        var btnval = $(this).val();
+                        var fileContent = $("#fileContent").val();
+                        var fileName = $("#fileName").val();
+                        if (i > 0) {
+                            fileContent = "";
+                            fileName = "";
+                        }
+                        var IsPreviousCycle=  $("#exTab1 li.active").find("input[name='epdetail']").attr('IsPreviousCycle');
+                        var PreviousCycleInspectionId= $("#exTab1 li.active").find("input[name='epdetail']").attr('PreviousCycleInspectionId');
+                        var TCycleId= $("#exTab1 li.active").find("input[name='epdetail']").attr('TCycleId');
+
+                        if (btnval == 1) {
+                            var queryStr = {
+                                floorAssetId: $(this).data('floorassetid'),
+                                ePDetailId: $(this).data('epid'),
+                                InspectionDate: inspectiondate,
+                                inspectionId: parm_inspectionid > 0 ? parm_inspectionid:0,
+                                InspectionGroupId: $(this).data('inspectiongroupid'),
+                                Comment: $("#inspectionComment").val(),
+                                FileContent: fileContent, //$("#fileContent").val(),
+                                FileName: fileName,
+                                AttachFiles: $("#attachFiles").val(),
+                                IsPreviousCycle: IsPreviousCycle,
+                                PreviousCycleInspectionId: PreviousCycleInspectionId,
+                                TCycleId: IsPreviousCycle == 1 ? TCycleId : null
+                            }
+                            queryArr.push(queryStr);
+                        }
+                    }
+                    i++;
+                });
+            }
+            else {
+                $('input:button[id^="chkbtn"]:visible').not(".disable").each(function () {
+                    var btnval = $(this).val();
+                    var fileContent = $("#fileContent").val();
+                    var fileName = $("#fileName").val();
+                    if (i > 0) {
+                        fileContent = "";
+                        fileName = "";
+                    }
+
+                    var IsPreviousCycle = $("#exTab1 li.active").find("input[name='epdetail']").attr('IsPreviousCycle');
+                    var PreviousCycleInspectionId = $("#exTab1 li.active").find("input[name='epdetail']").attr('PreviousCycleInspectionId');
+                    var TCycleId = $("#exTab1 li.active").find("input[name='epdetail']").attr('TCycleId');
+                    if (btnval == 1) {
+                        var queryStr = {
+                            floorAssetId: $(this).data('floorassetid'),
+                            ePDetailId: $(this).data('epid'),
+                            InspectionDate: inspectiondate,
+                            inspectionId: parm_inspectionid > 0 ? parm_inspectionid:0,
+                            InspectionGroupId: 1,//$(this).data('inspectiongroupid'),
+                            Comment: $("#inspectionComment").val(),
+                            FileContent: fileContent, //$("#fileContent").val(),
+                            FileName: fileName,
+                            AttachFiles: $("#attachFiles").val(),
+                            IsPreviousCycle: IsPreviousCycle,
+                            PreviousCycleInspectionId: PreviousCycleInspectionId,
+                            TCycleId: IsPreviousCycle == 1 ? TCycleId : null
+                        }
+                        queryArr.push(queryStr);
+                    }
+                    i++;
+                });
+        }
+
+
+        if (queryArr.length > 0) {
+            $("#btnSubmit").prop('disabled', true);
+            $(".loadingModal").show();
+              //  queryArr = JSON.stringify({ 'objAssetList': queryArr });
+                var UrlAction = CRxUrls.assets_getfloorassetsforins;
+                $.ajax({
+                    contentType: 'application/x-www-form-urlencoded',
+                    dataType: 'json',
+                    type: 'POST',
+                    url: UrlAction, //'/Assets/GetFloorAssetsForIns',
+                    data: { 'objAssetList': queryArr },
+                    success: function (resultData) {
+                        $("#btnSubmit").prop('disabled', false);
+                        var epId = resultData.EPDetailId;
+                        var inspectiongroupId = 0;
+                        if ($("#inspectiongroup").val() > 0) {
+                            inspectiongroupId = $("#inspectiongroup").val();
+                        } else { inspectiongroupId = 1; }
+                        if (resultData.Result) {
+                            debugger
+                            $(".loadingModal").hide();
+                            if (resultData.IsInspReady == 1) {
+                               swal({
+                                html: true,
+                                title: "Asset Inspection Complete ",
+                                          text: "All assets connected to" + $("#exTab1 li.active").find('span.ep_name').text()+" have been marked compliant and all required documentation has been uploaded. You will now be re-directed to EP Review to assess EP checkpoints", //"This inspection is not complete untill inspection is completed",
+                                type: "info",
+                                showCancelButton: false,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Review",
+                                //cancelButtonText: "Review Later",
+                                closeOnConfirm: true,
+                                closeOnCancel: true
+                            }, function (isConfirm) {
+                                if (isConfirm) {
+                                    var epscount = $("input[name=epdetail]").length;
+                                    var ismulipleEp = 0;
+                                    if (epscount > 0) {
+                                        ismulipleEp = 1;
+                                    }
+                                    window.location.href = CRxUrls.Goal_EPstate + "?epId=" + epId + "&inspectionid=" + parm_inspectionid + "&inspectionGroupId=" + inspectiongroupId + "&ismulipleEp=" + ismulipleEp;
+                                } else {
+                                    successAlert("Inspection Added Successfully.");
+                                    RedirectToPage();
+                                }
+                            });
+                            }
+                            else {
+                                successAlert("Asset Inspection Added Successfully.");
+                                if ($("#file-upload-list").find("#file-lists").find("ul").length > 0 ||
+                                    typeof $("#file-upload-list").find("#file-lists").find("ul") !== 'undefined') {
+                                    $("#file-upload-list").find("#file-lists").find("ul").empty();
+                                    $("#lbldocmsg").hide();
+                                }
+                                RedirectToPage();
+                            }
+
+                    }
+                    },
+                    failure: function (response) {
+                        $("#btnSubmit").prop('disabled', false);
+                        alert("Error is occurred");
+                    }
+                });
+        } else {
+            $("#btnSubmit").prop('disabled', false);
+                AlertWarningMsg("Please select at least one asset!");
+            }
+        }
+
+    function RedirectToPage() {
+        debugger;
+        //successAlert("Inspection Added Successfully.");
+        loadData();
+    }
+
+
+    var markAllbtn = $('.cb-value');
+
+
+    markAllbtn.click(function () {
+        debugger
+        var value = -1;
+        var mainParent = $(this).parent('.inspe-toggle-btn');
+        if ($(mainParent).find('input.cb-value').not(".disable").is(':checked')) {
+            $(mainParent).not(".disable").addClass('active');
+            value = 1;
+        } else {
+            $(mainParent).not(".disable").removeClass('active');
+        }
+
+        $(".ins_check3_Ins_btn").not(".disabled").each(function () {
+            $(this).val(value);
+        });
+    });
+
+
+
+      $('#saveCustomFrequency').click(function () {
+            $.ajax({
+                        url: '@Url.Action("SheduleDateEpInspection", "Import")',
+                        type: "POST",
+                        data: {
+                            epdetailId: @Model.FirstOrDefault().EPDetailId,
+                            inspectiondate: $("#InspectionDate").val()
+                        },
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Result) {
+                               // swalalert("Inspection date added successfully!")
+                                //$("#" + result.EPDetailId).addClass("disabled");
+                                SaveInspection(bval, fcount);
+                            }
+                            //alert("Call");
+                        }
+                    });
+        });
+
+    function customfrequencylink() {
+        swal.close()
+    };
+
+    function fileUploadSuccess(tFiles, selectedFiles) {
+        debugger
+        console.log(tFiles, selectedFiles);
+        if (IsdocRequired == "1") {
+            var epId = "";
+            var assetid = "";
+            $('input:button[id^="chkbtn"]:visible').not(".disable").each(function () {
+                epId = $(this).data('epid');
+            });
+            $('input:checkbox[id^="cb2"]').each(function () {
+                var $this = $(this);
+                if ($this.is(":checked")) {
+                    if ($(this).val() != "on") {
+                        assetid = $(this).val();
+                    }
+                }
+            });
+            localStorage.drpBuildings = $('#drpBuildings').val();
+            localStorage.floors = $('#floors').val();
+            localStorage.ddlroutefltr = $('#ddlroutefltr').val();
+            localStorage.inspectiondate = $('#inspectiondate').val();
+            var docUploadUrl = CRxUrls.Goal_EPDocs + "?epId=" + epId + "&assetsid=" + assetid + "&inspectionid=" + parm_inspectionid;
+            localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedFiles));
+            localStorage.attachmentid = $("#attachFiles").val();
+            localStorage.epId = epId;
+            window.location.href = docUploadUrl;
+        }
+        else {
+
+            BindUploadFile();
+        }
+
+
+}
+</script>

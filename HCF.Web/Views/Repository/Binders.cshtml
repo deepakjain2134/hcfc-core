@@ -1,0 +1,136 @@
+﻿@model IEnumerable<HCF.BDO.Binders>
+@{
+    ViewBag.Title = "Binders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Binders
+                @ViewBag.result
+            </h1>
+        </section>
+    }
+    @Html.Raw(TempData["msg"])
+
+    @if (TempData["notice"] != null)
+    {
+        <p>@TempData["notice"]</p>
+    }
+
+    <section class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                        {
+                            <div class="col-md-12 add_button_comman form-group">
+                                <a href='@(Url.RouteUrl("addBinder"))' class="pull-right">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Binder" alt="3d_add_button" />
+                                </a>
+                            </div>
+                        }
+                        <div class="col-md-12">
+                            <table id="binderTable" class="table table-bordered table-striped vendor_view">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.BinderName)
+                                        </th>
+                                        <th style="width: 46px;"> @Localizer["Status"] </th>
+                                        @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                        {
+                                            <th style="width: 52px;">
+                                                Action
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Where(x => x.ParentBinderId == null).OrderBy(x => x.BinderName))
+                                    {
+                                        <tr>
+                                            <td class="details-control @((item.StandardEps.Count==0)? "disable":"")" rel='@item.BinderId'></td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.BinderName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                            </td>
+                                            @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                            {
+                                                <td>
+                                                    @Html.ActionLink("Modify ", "AddBinders", "Repository", new { binderId = item.BinderId }, new { @class = "button1" })
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+@section scripts
+{
+    <script>
+        var table = $('#binderTable').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "aaSorting": [],
+            "bPaginate": $('#binderTable tbody tr').length > 2,
+            "bInfo": false,
+            "searching": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            //    "<'row'<'col-sm-12'tr>>" +
+            //    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+
+
+        dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+        });
+
+        $('#binderTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+
+            var row = table.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var binderId = $(this).attr("rel");
+                $.get("Repository/SubBinders?binderId=" + binderId, function (data) {
+
+                    row.child(data, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    </script>
+   
+
+
+}
+
+<style>
+    .tableactions .dataTables_wrapper .dataTables_paginate {
+        margin-right: 65px;
+    }
+</style>

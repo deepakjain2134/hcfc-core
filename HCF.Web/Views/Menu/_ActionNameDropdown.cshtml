@@ -1,0 +1,15 @@
+﻿@model string
+
+@*@Html.ActionNameDropDownList("ActionName", "", "Select Action Method", new { controllerName = Model, @class = "form-control"})*@
+<actionnamedropdownlist name="ActionName" firsttext="Select Action Method" class="form-control" >
+
+</actionnamedropdownlist>
+<script>
+    $('select#ActionName').on("change", function () {
+        debugger;
+        let controllerName = $('#ControllerName').val();
+        let actionMethod = $('#loadpartial-ActionName #ActionName').val();
+        roleName = controllerName + '_' + actionMethod;
+        $('#RoleName').val(roleName);   
+    });
+</script>

@@ -1,0 +1,298 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var allBuildings = Model.buildings;
+    Layout = null;
+}
+<div id="locationgroup">
+    
+    <div class="row view_step_2" id="round_step_2">
+        <div class="col-lg-12">
+            <div class="row tablelist-topform">
+                <div class="col-lg-12">
+                    <p class="roundBlue">
+                        Step 2 : Caution: Adding or removing any floors will reflect for everyone in the group round. <br />
+                        Add floors by selecting the building and then clicking on the applicable floor(s). To remove floors click on the applicable
+                        floors on the right.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <div class="col-md-6" id="step2_part1">
+            <div class="roundsListBox roundlocations">
+                <div class="roundsheadBox" id="roundsheadBox">
+                    @await Html.PartialAsync("_roundsBuildings", Model)
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 roundpart2 " id="step2_part2">
+            <div class="roundsListBox">
+                <div id="loadgrouploacation" class="step2" style="display:none">
+                </div>
+            </div>
+        </div>
+        <input id="btnCancel" type="button" onclick="gotoCategoryStep()" value='@Localizer["Back"]' class="comm-Cancelbutton" />
+        <input id="btnNext" onclick="openUserSelectionView()" type="button" value=' @Localizer["Next"] ' class="comm-button" />
+    </div>
+    <div class="row hide view_step_3" id="round_step_3">
+        <div class="col-lg-12">
+            <div class="row tablelist-topform">
+                <div class="col-lg-12">
+                    <p class="roundBlue">
+                        Step 3 : Confirm your assignment in the list. If you need to be replaced, remove yourself from assignment list and 
+                        select the replacement user.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <h4 style="margin-bottom: 25px;">Volunteers</h4>
+            <input type="text" placeholder="Search" class="form-control" id="searchUser" />
+            <br />
+            <table class="table table-bordered table-striped" id="userTable">
+
+                @foreach (var volunteers in Model.userList.Where(x => x.IsUserRole(HCF.BDO.Enums.UserRole.RoundVolunteer)))
+                {
+                    <tr class="usertr" id="@string.Format("tr_user_{0}", volunteers.UserId)">
+                        <td class="name">
+                            @string.Format("{0} ({1})", volunteers.Name, volunteers.Email)
+                        </td>
+                        <td class="text-center">
+                            <a class="volunteers_round button1" id="@string.Format("user_{0}", volunteers.UserId)"> Select </a>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="col-md-6 roundpart2" id="step2_part2">
+            <h4 style="margin-bottom: 25px;">Selected Volunteers</h4>
+            <div class="roundsListBox">
+                <div id="loadgroupusers">
+                </div>
+            </div>
+        </div>
+
+        <input id="btnCancel" type="button" onclick="gotoBuildingStep()" value='@Localizer["Back"]' class="comm-Cancelbutton" />
+        <button type="button" class="comm-button" title="Inspect" id="btnInspect"
+                data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+            Inspect
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $('#searchUser').bind('keyup', function () {
+        var searchString = $(this).val();
+        $("#userTable tr td.name").each(function (index, value) {
+            currentName = $(value).text()
+            if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                $(value).closest(".usertr").show();
+            } else {
+                $(value).closest(".usertr").hide();
+            }
+        });
+    });
+
+    //function gotoBuildingStep(){
+    // $("#round_step_3").addClass("hide");
+    //    $("#round_step_2").removeClass("hide");
+    //}
+
+    //function gotoCategoryStep(){
+    //    $("#btnNextStepI").show();
+    //    openStep1RoundType(1, '');
+    //}
+
+    $(document).ready(function () {
+        var roundGroupId = $("#hdn_locationgroupId").val();
+        getGroupLocation();
+        getGroupUsers();
+    });
+
+    $(document).off('click', '.roundfloor').on('click', '.roundfloor', function () {
+        var roundGroupId = roundSchedule.roundGroupId;
+        if (roundGroupId > 0) {
+                var buildingId = $(this).attr('buildingId');
+                var floorId = $(this).attr('floorid');
+                var isActive = true;
+                AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive);
+        } else {
+            AlertWarningMsg(" Select a location group prior to selecting a floor or building. ");
+        }
+    });
+
+    $('body').on('click', '.selectedroundfloor', function () {
+        var roundGroupId = roundSchedule.roundGroupId;
+        var buildingId = $(this).attr('buildingId');
+        var floorId = $(this).attr('floorid');
+        var isActive = false;
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to remove this Floor from round?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive);
+            });
+    });
+
+    function AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive) {
+        var url = '@Url.Action("SaveTRoundLocations", "Round")';
+        $.get(url + '?troundId=' + roundSchedule.tRoundId + '&buildingId=' + buildingId + '&floorId=' + floorId + '&IsActive=' + isActive, function (data) {
+            if (isActive) {
+                successAlert("Saved Successfully");
+            } else {
+                successAlert("Removed Successfully");
+            }
+            getGroupLocation();
+        });
+    }
+
+    $("#lbllocationgrp").click(function () {
+        $("#locationgroup").hide();
+        $("#locationgrouplst").show();
+    });
+
+    function getGroupUsers() {
+        // debugger;
+        userIdsArray=[];
+         $(".volunteers").removeClass("disable");
+         var roundGroupId =roundSchedule.roundGroupId;
+         //$("#ddlroundgroup").val();
+
+         var troundId=roundSchedule.tRoundId;
+        if (roundGroupId > 0) {
+
+             $(".name").removeClass("block-ctr");
+             var url = '@Url.Action("GetRoundGroupUsers", "Round")';
+            $.get(url + '?roundGroupId=0&RoundType=2&troundId='+troundId, async = true,function (data) {
+                debugger;
+                console.log(data.Result);
+                //console.log(data.Result.RoundGroupUsers);
+                 var name = $("#ddlroundgroup option:selected").text();
+                 $(".ddlroundgroupName").text(name);
+                 $("#loadgroupusers").empty();
+                 var str = "";
+                if (data!=null && data.Result.length != 0) {
+                        str = "<ul>"
+                    for (var i = 0; i < data.Result.length; i++) {
+                        if (data.Result[i].userProfile.UserId != 0) {
+                            userIdsArray.push(data.Result[i].userProfile.UserId);
+                            $("#tr_user_" + data.Result[i].userProfile.UserId).find(".name").addClass("block-ctr");//find(".button1");
+                            $("#user_" + data.Result[i].userProfile.UserId).addClass("disable");
+
+                            str = str + "<li class='roundgroup_user_list'> <div class='volunteer-flexgroup'> <div class='roundplusemail'> <p >" +
+                                '<img class="hide" onclick="VolunteerDetails(' + data.Result[i].userProfile.UserId + ')" class="howto-plus_' + data.Result[i].userProfile.UserId + '" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" />' +
+                                '<img onclick="HideVolunteerDetails(' + data.Result[i].userProfile.UserId + ')" class="howto-minus_' + data.Result[i].userProfile.UserId + '" style="display: none;"  src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png" />'
+                                + data.Result[i].userProfile.Name + "(" + data.Result[i].userProfile.Email + ")";
+
+                            if (data.Result[i].roundVolunteers.length > 0) {
+                                str = str + "<span class='tooltipCus roundBlue'>" + "  ..." + "<strong class='tooltipTitle roundBlue'>Changes in effect </strong>" + "</span>";
+                            }
+
+                            str = str + "</p>  </div>  <div class='volunteerc-checkBox'>";
+
+                            if (data.Result[i].userProfile.ISExistsRoundSchedules == true) {
+                                str = str + "<input type='button' value='Replace' userid='" + data.Result[i].userProfile.UserId + "' username='" + data.Result[i].userProfile.FullName + "  ' name='round_replace' id ='replaceRoundUser' class='replaceRoundUser button1'/>"
+                            }
+                            str = str + "<input type='button' value='Remove' userid='" + data.Result[i].userProfile.UserId + "' name='round_usergroup' class='removevolunteers button1'   /><span></span></div>  </div> <div style='display: none;' class ='roundvolunteerdetails_" + data.Result[i].userProfile.UserId + " ' > </div>  ";
+
+
+                        }
+                        //$("#hdnRoundUsers").val(userIdsArray.join(","));
+                    }
+                        str = str + "</ul>";
+                        $("#loadgroupusers").append(str);
+                 } else {
+                     str = "<span> There is no Volunteer Assigned. </span>"
+                     $("#loadgroupusers").append(str);
+                 }
+             });
+
+         }
+         else {
+             $("#loadgroupusers").html('');
+             $(".name").addClass("block-ctr");
+         }
+    }
+
+    function getGroupLocation() {
+         var roundGroupId = roundSchedule.roundGroupId;
+          var troundId=roundSchedule.tRoundId;
+         var url = '@Url.Action("GetRoundGroupLocations", "Round")';
+         floorIds = [];
+         $("#loadgrouploacation").html('');
+         $(".addfloorBox1 li").removeClass("disable").removeClass("yellow");//.removeClass("gray");
+         if (roundGroupId > 0) {
+             $.get(url + '?roundGroupId=0&troundId='+troundId, async = true, function (data) {
+                 var str = "";
+                 console.log(data.Result);
+                 if (data.Result.length > 0) {
+                     for (var i = 0; i < data.Result.length; i++) {
+                         str = str + "<div class='selectedaddfloorBox1'><p>" + data.Result[i].BuildingName + "</p><ul class='roundfloor_list'>";
+                         for (var j = 0; j < data.Result[i].Floor.length; j++) {
+                             $(".addfloorBox1 li[floorid='" + data.Result[i].Floor[j].FloorId + "']").addClass("disable").addClass("yellow");
+                             str = str + "<li class='selectedroundfloor yellow' floorid='" + data.Result[i].Floor[j].FloorId + "' buildingId='" + data.Result[i].Floor[j].BuildingId + "'>" + data.Result[i].Floor[j].Alias.toUpperCase().substring(0, 2) + "</li>";
+                             floorIds.push(data.Result[i].Floor[j].FloorId);
+                         }
+                         str = str + "</ul></div>";
+                     }
+                    // $("#floorIds").val(floorIds.join(","));
+                     $("#loadgrouploacation").append(str);
+                 }
+             });
+         }
+    }
+
+    $(document).off('click', '#btnInspect').on('click', '#btnInspect', function () {
+          if(roundcatId.length==0){
+              swalalert("Please select round category for questionaries");
+              return;
+          }
+          if(floorIds.length==0){
+              swalalert("Please select round location");
+              return;
+          }
+           if(userIdsArray.length==0){
+              swalalert("Please select at least on user");
+              return;
+          }
+       var roundCatLists=roundcatId.join(",");
+        if (roundSchedule.tRoundId > 0 && roundcatId.length>0) {
+            var url = '@Url.Action("InspectGroupRound", "Round")';
+            $(".loadingModal").show();
+            $.get(url + '?roundId=' + roundSchedule.tRoundId +'&roundCatIds=' + roundCatLists, function (data) {
+                    $(".loadingModal").hide();
+                    if (data) {
+                         window.location.href = '/Round/RoundInspection?rid=' + roundSchedule.tRoundId;
+                    }else
+                    {swalalert("Some Error Occurred.");
+                    }
+                });
+        }
+    });
+
+</script>
+
+<style>
+    .round-groupname .buildingGroupBy {
+        background-color: #f5f5f5;
+    }
+
+    .round-groupname {
+        border: none;
+    }
+
+    .round-groupname:last-child {
+            border-bottom: none;
+    }
+</style>

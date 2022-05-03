@@ -1,0 +1,97 @@
+﻿@model HCF.BDO.LifeSafetyDeviceList
+
+
+@{
+    var type = this.ViewData.ContainsKey("type") ? this.ViewData["type"].ToString() : string.Empty;
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+    var BuildingId = this.ViewData.ContainsKey("BuildingId") ? this.ViewData["BuildingId"].ToString() : "0";
+ 
+    ViewBag.sequence = Convert.ToInt32(sequence)+1;
+}
+<tr id="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)">
+
+
+    <td><span class="rowNo">@string.Format("{0}", Convert.ToInt32(sequence) + 1)</span></td>
+    <td>
+        @Html.HiddenFor(x => x.Id)
+        
+        <span class="mop-search">
+            <textarea id="@string.Format("txt_devicenumber_{0}", Convert.ToInt32(sequence) + 1)" name="LifeSafetyDeviceList[@sequence].DeviceNumber" autocomplete="off"
+                      placeholder="Enter Device #" class="form-control assetNo" maxlength="250" style="height: 34px;">@Model.DeviceNumber</textarea>
+
+            <span class="openAssetsSearchPopUp" trid="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" title="Seach Assets">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </span>
+        </span>
+    </td>
+    <td class="tdbuilding">
+        <input type="hidden" id="@string.Format("buildingIdName{0}", Convert.ToInt32(sequence) + 1)" name="LifeSafetyDeviceList[@sequence].Building" />
+        <input type="hidden" id="@string.Format("Buildingddl{0}", Convert.ToInt32(sequence) + 1)" name="LifeSafetyDeviceList[@sequence].BuildingId" />
+        <input type="hidden" id="@string.Format("lstBuildingDetails{0}", Convert.ToInt32(sequence) + 1)" name="lstBuildingDetails[@sequence]" />
+
+        @*@Html.Action("lifesafetybuildingddl", "Permit", new { type = "single", BuildingId = BuildingId, sequence = Convert.ToInt32(sequence) + 1 })*@
+        @await Component.InvokeAsync("Permitlifesafetybuildingddl", new { type = "single", BuildingId = BuildingId, sequence =Convert.ToString( Convert.ToInt32(sequence) + 1 )})
+
+    </td>
+    <td>
+        <input type="text" name="LifeSafetyDeviceList[@sequence].Location" value="@Model.Location" autocomplete="off"
+               placeholder="Enter Location" class="form-control assetNearBy"  maxlength="250"/>
+    </td>
+    <td>
+        <input type="text" name="LifeSafetyDeviceList[@sequence].AssetType" value="@Model.AssetType" autocomplete="off" id="@string.Format("txt_devicetype_{0}", Convert.ToInt32(sequence) + 1)"
+               placeholder="Enter Device Type" class="form-control deviceType" maxlength="250"/>
+    </td>
+    <td>
+        <input type="text" name="LifeSafetyDeviceList[@sequence].Make" value="@Model.Make" autocomplete="off"
+               placeholder="Enter Make" class="form-control assetMake" maxlength="250"/>
+    </td>
+    <td>
+        @if (type == "1")
+        {
+            <input id="@string.Format("txt_date_{0}", Convert.ToInt32(sequence) + 1)"   type="text" name="LifeSafetyDeviceList[@sequence].DateAdded" value="@Model.DateAdded.ToFormatDate()" autocomplete="off"
+                   placeholder="Enter Date Added" class="@(Convert.ToInt32(sequence)==0?"form-control futuredatepicker readonly datechanged" :"form-control futuredatepicker readonly")"/>
+
+        }
+        else
+        {
+            <input id="@string.Format("txt_date_{0}", Convert.ToInt32(sequence) + 1)"  type="text" name="LifeSafetyDeviceList[@sequence].DateRemoved" value="@Model.DateRemoved.ToFormatDate()" autocomplete="off"
+                   placeholder="Enter Date Removed" class="@(Convert.ToInt32(sequence)==0?"form-control futuredatepicker readonly datechanged" :"form-control futuredatepicker readonly")" />
+        }
+    </td>
+    <td>
+        <span class="deleteTr" trid="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" title="delete">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+        </span>
+    </td>
+</tr>
+
+<script>
+
+
+    $(document).ready(function () {
+        debugger;
+        var chkedBuildingId = '@Model.BuildingId';
+        debugger;
+        var buildingIds = chkedBuildingId.split(',');
+        $('.chkBuildSigleSelect' +@ViewBag.sequence+' input[type="checkbox"]').prop('checked', false);
+
+        for (var i = 0; i < buildingIds.length; i++) {
+
+            $(`.chkBuildSigleSelect`+@ViewBag.sequence+` input[type="checkbox"][value="${buildingIds[i]}"]`).prop('checked', true);
+            $(`.chkBuildSigleSelect` + @ViewBag.sequence).parent().parent().children('label').text(selectLabel($(`.chkBuildSigleSelect` + @ViewBag.sequence)));
+        }
+        $('#Buildingddl' + @ViewBag.sequence).val('@Model.BuildingId');
+        $('#txtbuildingName' +  @ViewBag.sequence).val('@Model.Building');
+        $('#buildingIdName' +  @ViewBag.sequence).val('@Model.Building');
+
+        if ($("#txt_devicetype_" +  @ViewBag.sequence).val() == "") {
+            $("#txt_devicetype_" + @ViewBag.sequence).val($("#hdnDeviceType").val())
+        }
+
+        if ($("#txt_devicetype_1").val() == "") {
+            $("#txt_devicetype_1").val($("#hdnDeviceType").val())
+        }
+    });
+    
+   
+</script>

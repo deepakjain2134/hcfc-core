@@ -1,0 +1,230 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var userList = Model.userList;
+    var roundUserGroup = Model.Roundgrouplist;
+}
+
+<div class="box box-primary">
+
+    <div id="locationgroup" class="buildings-row">
+        <div id="step6_part1">
+            <div class="row tablelist-topform">
+                <div class="col-md-12">
+                    <div class="round-buttonHeading">
+                        <p class="step6-details">
+                            <label>Select a location group or a volunteer from the dropdown menus below to view associated round schedules.</label>
+                        </p>
+
+                    </div>
+                    <div class="row">
+                        <div class="roundlocations">
+                            <div class="col-md-4 col-xs-6 col-sm-4 form-group">
+                                <select class="form-control" id="ddlroundgroup">
+                                    <option value="0" selected="selected">All Locations</option>
+                                    @foreach (var item in roundUserGroup.OrderBy(x => x.Name))
+                                    {
+                                        <option value="@item.RoundGroupId">@item.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-xs-6 col-sm-3 form-group" id="roundGroupUserDropDownView">
+                                @await Html.PartialAsync("RoundGroupUserDropDownList", Model.UserSelectPicker)
+                                @*<select class="form-control" id="ddlusers">
+                                        <option value="0">All Volunteers</option>
+                                        @foreach (var item in userList.OrderBy(x => x.Name))
+                                        {
+                                            <option value="@item.UserId">@item.FullName</option>
+                                        }
+                                    </select>*@
+                            </div>
+                            <div class="col-md-4 col-xs-6 col-sm-5 form-group">
+                                <input type="button" class="comm-button viewassignbtn" value="View Schedules" id="btn_view_schedules" />
+                                @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                {
+                                    <a href="@Url.RouteUrl("roundschedulerflow")" class="comm-button"> Round Scheduler</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="step2_part2">
+            <div class="schedulesList" id="schedulesList">
+                @await Component.InvokeAsync("RoundViewAssignmentData",
+               new { userId = HCF.Web.Base.UserSession.CurrentUser.UserId, locationGroupId = 0 })
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+
+    $(document).ready(function() {
+
+        var ddlRoundGroup=$("#ddlroundgroup");
+        var ddlRoundGroupUsers=$("#ddlusers");
+
+
+        ddlRoundGroup.change(function() {
+           var roundGroupId= $(this).val();
+            $.get('@Url.Action("RoundGroupUserDropDownList","Round")' + "?roundGroupId=" + roundGroupId,
+                    function (data) {
+                        $("#roundGroupUserDropDownView").html(data);
+                        $("#roundGroupUserDropDownView").fadeIn('fast');
+                    });
+
+        });
+
+
+        var url = '@Url.Action("ViewAssignmentData", "Round")';
+        $('#btn_view_schedules').removeClass('viewassignbtn');
+
+
+        $("#btn_view_schedules").click(function () {
+            //debugger;
+            $('#btn_view_schedules').removeClass('viewassignbtn');
+            loadCalender();
+        });
+
+        function loadCalender() {
+           // debugger;
+            var userId = $("#ddlUsers").val(); //$("#ddlusers").val();
+            var groupId = $("#ddlroundgroup").val();
+            debugger;
+            if (userId != "" && groupId != "") {
+                $.get(url + "?userId=" + userId + "&locationGroupId=" + groupId,
+                    function (data) {
+                        $("#schedulesList").html(data);
+                        $("#schedulesList").fadeIn('fast');
+                    });
+            } else {
+                AlertWarningMsg('Please select Locations and Volunteer');
+            }
+        }
+
+        $('#ddlusers').on('change', function () {
+            //debugger;
+            var val = $(this).val();
+            if (val != "") {
+                $('#calendar').fullCalendar('removeEvents');
+                $('#btn_view_schedules').addClass('viewassignbtn');
+            }
+        })
+
+
+
+    });
+
+</script>
+<style>
+    .calender {
+        border: #ddd solid 1px;
+        width: 100%;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0 !important;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-scroller.fc-day-grid-container {
+        height: auto !important;
+    }
+
+    .fc .fc-toolbar > * > :first-child {
+        display: flex;
+    }
+
+    .fc-widget-header:last-of-type, .fc-widget-content:last-of-type {
+        border: 1px solid #ddd;
+    }
+
+    .fc .fc-toolbar > * > :first-child {
+        line-height: 20px;
+    }
+
+    /* .legand {
+        margin: 14px 0 35px 0;
+    }*/
+
+    .fc-toolbar .fc-center {
+        font-size: 10px;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 20px;
+        display: inline-block;
+        margin: 0 12px;
+        vertical-align: middle;
+    }
+
+    .fc-today-button {
+        height: 23px !important;
+        font-size: 12px !important;
+    }
+
+    .fc td, .fc th {
+        font-size: 15px;
+    }
+
+    .fc-basic-view .fc-day-number, .fc-basic-view .fc-week-number {
+        padding: 8px !important;
+        font-weight: 500;
+    }
+
+    .fc-day-number {
+        font-size: 15px;
+    }
+
+    .fc th {
+        padding: 5px 0 !important;
+        font-size: 14px;
+    }
+
+    .fc-today {
+        border: none !important;
+        border-top: 1px solid #ddd !important;
+        font-weight: bold;
+    }
+
+    tr:first-child > td > .fc-day-grid-event {
+        margin-top: -4px;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-widget-content {
+        padding: 0px !important;
+    }
+
+    .fc-time {
+        display: none;
+    }
+
+    .fc-event {
+        width: 24px !important;
+        text-align: center !important;
+    }
+
+
+
+    .fc-day-header span {
+        color: #171717;
+    }
+
+    .fc-scroller {
+        overflow-x: visible !Important;
+    }
+</style>

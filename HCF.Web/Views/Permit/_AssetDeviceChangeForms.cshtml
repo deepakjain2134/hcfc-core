@@ -1,0 +1,89 @@
+﻿@model HCF.BDO.AssetDeviceList
+
+
+@{
+    var type = this.ViewData.ContainsKey("type") ? this.ViewData["type"].ToString() : string.Empty;
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+
+
+    ViewBag.sequence = Convert.ToInt32(sequence) + 1;
+}
+<tr id="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)">
+
+
+    <td><span class="rowNo">@string.Format("{0}", Convert.ToInt32(sequence) + 1)</span></td>
+    <td>
+        @Html.HiddenFor(x => x.Id)
+
+        <span class="mop-search">
+
+            <textarea id="@string.Format("txt_devicenumber_{0}", Convert.ToInt32(sequence) + 1)" name="AssetDeviceList[@sequence].DeviceNumber" autocomplete="off"
+                      placeholder="Enter Device #" class="form-control assetNo" maxlength="250" style="height: 34px;">@Model.DeviceNumber</textarea>
+
+            <span class="openAssetsSearchPopUp" trid="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" title="Seach Assets">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </span>
+        </span>
+    </td>
+    <td>
+        <input type="text" name="AssetDeviceList[@sequence].AssetType" value="@Model.AssetType" autocomplete="off"
+               placeholder="Enter Asset Type" class="form-control assettype" maxlength="250" />
+    </td>
+    <td>
+        <input type="text" name="AssetDeviceList[@sequence].CMMSAssetNumber" value="@Model.CMMSAssetNumber" autocomplete="off"
+               placeholder="Enter CMMSAsset #" class="form-control assetNo" maxlength="250" />
+    </td>
+    <td>
+        <input type="text" name="AssetDeviceList[@sequence].SerialNumber" value="@Model.SerialNumber" autocomplete="off" id="@string.Format("txt_devicetype_{0}", Convert.ToInt32(sequence) + 1)"
+               placeholder="Enter Serial #" class="form-control serialno" maxlength="250" />
+    </td>
+    <td>
+        <input type="text" name="AssetDeviceList[@sequence].Manufacturer" value="@Model.Manufacturer" autocomplete="off"
+               placeholder="Enter Manufacturer" class="form-control assetMake" maxlength="250" />
+    </td>
+    <td>
+        <input type="text" name="AssetDeviceList[@sequence].RoomNumber" value="@Model.RoomNumber" autocomplete="off"
+               placeholder="Enter Room #" class="form-control assetNearBy" maxlength="250" />
+    </td>
+    <td>
+        @if (type == "1")
+        {
+            <input id="@string.Format("txt_date_{0}", Convert.ToInt32(sequence) + 1)" type="text" name="AssetDeviceList[@sequence].DateAdded" value="@Model.DateAdded.ToFormatDate()" autocomplete="off"
+                   placeholder="Enter Date Added" class="@(Convert.ToInt32(sequence)==0?"form-control futuredatepicker readonly datechanged" :"form-control futuredatepicker readonly")" />
+
+        }
+        else if (type == "0")
+        {
+            <input id="@string.Format("txt_date_{0}", Convert.ToInt32(sequence) + 1)" type="text" name="AssetDeviceList[@sequence].DateRemoved" value="@Model.DateRemoved.ToFormatDate()" autocomplete="off"
+                   placeholder="Enter Date Removed" class="@(Convert.ToInt32(sequence)==0?"form-control futuredatepicker readonly datechanged" :"form-control futuredatepicker readonly")" />
+        }
+        else
+        {
+            <input id="@string.Format("txt_date_{0}", Convert.ToInt32(sequence) + 1)" type="text" name="AssetDeviceList[@sequence].DateRelocation" value="@Model.DateRelocation.ToFormatDate()" autocomplete="off"
+                   placeholder="Enter Date Relocation" class="@(Convert.ToInt32(sequence)==0?"form-control futuredatepicker readonly datechanged" :"form-control futuredatepicker readonly")" />
+        }
+    </td>
+    <td>
+        <span class="deleteTr" trid="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" title="delete">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+        </span>
+    </td>
+</tr>
+
+<script>
+
+
+    $(document).ready(function () {
+        debugger;
+
+        if ($("#txt_devicetype_" +  @ViewBag.sequence).val() == "") {
+            $("#txt_devicetype_" + @ViewBag.sequence).val($("#hdnDeviceType").val())
+        }
+
+        if ($("#txt_devicetype_1").val() == "") {
+            $("#txt_devicetype_1").val($("#hdnDeviceType").val())
+        }
+    });
+
+
+</script>

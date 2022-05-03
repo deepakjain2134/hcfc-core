@@ -1,0 +1,249 @@
+﻿@model IEnumerable<HCF.BDO.Site>
+@{
+    ViewBag.Title = Localizer["TitleSite"].Value;
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Campus@* @Resources.Resource.TitleSite *@
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="row tablelist-topform form-inline">
+                            <div class="form-group col-md-4">
+                                <label>SiteType:</label>
+                                <sitetypedropdownlist name="SiteTypeName" selectedvalue="0" class="form-control" firsttext="All Site Type" required="required"></sitetypedropdownlist>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                            <div class="add_button_comman">
+                                <a href='@(Url.Action("Addsite", "Organization"))' class="pull-right">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Site" alt="3d_add_button" />
+                                </a>
+                            </div>
+                        </div>*@
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="MyTable" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <th>
+                                                @*@Html.DisplayNameFor(model => model.SiteTypeName)*@
+                                                SiteType
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Name)
+                                            </th>
+                                            <th>
+                                                @*@Html.DisplayNameFor(model => model.Code)*@
+                                                Site
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Description)
+                                            </th>
+                                            @*<th>
+                                @Html.DisplayNameFor(model => model.SiteDescription)
+                        </th>*@
+                                            <th class="no-sorting" style="width:20px;">Active</th>
+                                            @*<th style="width:20px;">IsInternal</th>*@
+                                        <th class="no-sorting">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderBy(x => x.Name))
+                                        {
+                                            <tr>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(modelItem => item.SiteTypeId)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.SiteTypeName)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Code)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Description)
+                                                </td>
+                                                @*<td>
+                                @Html.DisplayFor(modelItem => item.SiteDescription)
+                            </td>*@
+                                                <td class="comman_checkbox1 text-center">
+                                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                                </td>
+                                                @*<td class="comman_checkbox1 text-center">
+                                @Html.DisplayFor(modelItem => item.IsInternal)<span></span>
+                            </td>*@
+                                                <td class="build-editicon">
+                                                    <a href="@Url.Action("Addsite", "Organization",new { siteId = item.SiteId})" class="pull-right">
+                                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Round Category" alt="3d_add_button" />
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+
+        var dTable = $('#MyTable').DataTable({
+            searching: true,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#MyTable tbody tr').length > 20,
+            bInfo: true,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+
+            //dom: "<'row'<'col-sm-12'f p>>" +
+            //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            //    "<'row'<'col-sm-5'i><'col-sm-7'p>>Blftip",
+
+
+             initComplete: function () {
+                 $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("Addsite", "Organization"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Site" alt="3d_add_button"></a></div >');
+        },
+            dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Site Report',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Site Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Site Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1, 2, 3, 4],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+        $(document).ready(function () {
+            DisableDefaultDTfp();
+            $("div.dataTables_info#MyTable_info").css("display", "none");
+            $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+            $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+        });
+
+        function DisableDefaultDTfp() {
+            const filterEl = $(".dataTables_filter input[type='search']")[1];
+            const paginationEl = $("div.dataTables_paginate.paging_simple_numbers")[1];
+            $(filterEl).css("display", "none");
+            $(paginationEl).css("display", "none");
+        }
+
+ $('#SiteTypeName').on('change', function () {
+     var SiteTypeId = $(this).val();
+     if (SiteTypeId >0) {
+         dTable.column(0).search("^" + SiteTypeId + "$", true, false, true, false).draw();
+            }
+            else
+                dTable.columns(0).search("").draw();
+
+        });
+    });
+
+    </script>

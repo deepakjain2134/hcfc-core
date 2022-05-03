@@ -1,0 +1,77 @@
+﻿@model IEnumerable<HCF.BDO.QuestionOptionPCRA>
+@Html.HiddenFor(x => Model.FirstOrDefault().QuesPCRAId)
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-7">
+                    @Html.DisplayNameFor(m => m.Text)
+                </div>
+                <div class="col-md-1">
+                    @Html.DisplayNameFor(m => m.IsReadOnly)
+                </div>
+                <div class="col-md-1">
+                    @Html.DisplayNameFor(m => m.CanComment)
+                </div>
+                <div class="col-md-1">
+                    @Html.DisplayNameFor(m => m.IsActive)
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            @Html.Label("Action")
+        </div>
+    </div>
+}
+
+    <div class="row">
+        <div class="col-md-10">
+            @foreach (var item in Model)
+            {
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-group">
+                            @Html.TextBoxFor(m => item.Text, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            @Html.CheckBoxFor(m => item.IsReadOnly, new { @class = "form-control" })<span></span>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            @Html.CheckBoxFor(m => item.CanComment, new { @class = "form-control" })<span></span>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            @Html.CheckBoxFor(m => item.IsActive, new { @class = "form-control" })<span></span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (Model.Any())
+        {
+            <div class="col-md-2">
+                <button type="button" onclick="loadAddEditQuestionOptionPCRA()" class="btn btn-primary">Open in Edit Mode</button>
+            </div>
+        }
+        </div>
+<script>
+
+    function loadAddEditQuestionOptionPCRA() {
+        debugger;
+        $('#questionOptionPCRAModal').modal("show");
+        var quesPCRAId = $('input[type="hidden"][name="QuesPCRAId"]')[0].value;
+        var url = CRxUrls.PCRA_GetQuestionOptionPCRAs;
+        $.get(url + "?quesPCRAId=" + quesPCRAId + "&mode=edit", function (data) {
+            $("#loadpartial").html('');
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+    }
+</script>

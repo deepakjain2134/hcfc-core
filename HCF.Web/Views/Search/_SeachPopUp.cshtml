@@ -1,0 +1,22 @@
+﻿@using (Html.BeginForm("SearchView", "Search"))
+{
+    @Html.AntiForgeryToken()
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Advanced Search</h4>
+    </div>
+    <div class="modal-body">
+        <div class="advanceSearch-model">
+            <input type="hidden" name="SearchMode" value="1" />
+            @await Component.InvokeAsync("SearchSearchFilters"
+                               , new { searchLists = Model })
+            @*@{Html.RenderAction("SearchFilters", "Search");}*@
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="comm-button">Search</button>
+        <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+    </div>
+
+}
+

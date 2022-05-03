@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4 auth">
+        <LoginDisplay />
+       @* <Connection>
+            <Online>
+                <h1 style="color: green">Online</h1>
+            </Online>
+            <Offline>
+                <h1 style="color: red">Offline</h1>
+            </Offline>
+        </Connection>*@
+    </div>
+    <div class="content px-4">
+        @Body
+    </div>
+</div>

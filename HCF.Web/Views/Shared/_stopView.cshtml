@@ -1,0 +1,121 @@
+﻿@model HCF.BDO.StopMaster
+@{
+    Layout = null;
+   // var AssetInspectionFrequency =AssetsRepository.GetAssetFrequency();
+}
+<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Stop Information</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row tble_shadow">
+            <input type="hidden" name="locationId" id="locationId" value="@Model.StopId" />
+            <div class="col-lg-4"><strong>Stop Name: </strong> @Model.StopName.CastToNA()</div>
+            <div class="col-lg-4"> <strong>Stop Code: </strong>   @Model.StopCode.CastToNA()</div>
+            <div class="col-lg-4 SerialNobar">
+                <input type="text" placeholder="Please enter Tag #" id="SerialNo" class="form-control" maxlength="100" /> &nbsp;&nbsp;
+                <img src="~/dist/Images/Icons/scanner_icon.png" id="btnbarcode" style="text-align:left" />
+            </div>
+            <div class="col-md-12">
+             
+                <table border="0" cellspacing="0" cellpadding="0" class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Tag #</th>
+                            <th>Asset</th>
+                            <th>Name</th>
+                            <th>Nearby</th>
+                            <th>Inspect</th>
+                            <th>Remove</th>
+                        </tr>
+                        @foreach (var item in Model.TfloorAssets)
+                        {
+                            <tr>
+                                <td>@item.SerialNo</td>
+                                <td>@item.Assets.Name</td>
+                                <td>@item.Name.CastToNA()</td>
+                                <td>@item.NearBy.CastToNA()</td>
+                                <td>
+                                    @{
+                                        var routeId = -2;
+                                        if (item.Routes.Count > 0)
+                                        {
+                                            routeId = item.Routes.FirstOrDefault().RouteId;
+                                        }
+                                        var inspType = 7;
+                                        if (item.Assets != null && item.Assets.AssetFrequency != null && item.Assets.AssetFrequency.Any())
+                                        {
+                                            inspType = item.Assets.AssetFrequency.FirstOrDefault().FrequencyId;
+                                        }
+                                    }
+                                    <img style="cursor:pointer"
+                                         onclick="GoToInspectionPage(0 ,'@routeId' ,'@item.AssetId',@item.FloorAssetsId,'@Model.StopId', @inspType)" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")"
+                                         title="Route Based Inspection" />
+                                </td>
+                                <td>
+                                    <a href="" data-id="@item.FloorAssetsId" class="delete">
+                                        <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" />
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+</div>
+@await Html.PartialAsync("_assetNotExistpopup")
+<script>
+    $("#SerialNo").focusout(function () {
+        var tagNo = $("#SerialNo").val();
+        var assetId = 123; //$("#selassetId").val();
+        var orgFloorAssetsId = 0;
+        var stopno = "";
+        var locationId = $("#locationId").val();
+        var orgTagno = $("#orgTagNo").val();
+        if (tagNo) {
+            var url = '@Url.Action("GetTfloorAssetsByTagNo", "FireExtinguisher")';
+            $.get(url + '?tagNo=' + tagNo + "&stopcode=" + stopno + "&assetId=" + assetId, function (data) {
+                console.log(data.success);
+                console.log(data.Result);               
+                if (data.success == false) {
+                    $('#extinguisherPopUpMsg').modal('show');
+                }                
+                else {
+                    var floorAssetId = data.Result.FloorAssetsId;
+                    var assetlocationId = data.Result.StopId;
+                    if (locationId == assetlocationId) {
+                        AlertInfoMsg("Asset is already on this location");
+                        return false;
+                    }
+                    var textmsg = (assetlocationId != undefined && assetlocationId != "")
+                        ? "Tag/BarCode you entered belong to another location (" +
+                        data.Result.Floor.Building.BuildingName +
+                        "-" +
+                        data.Result.Floor.FloorName +
+                        ") do you want to replace"
+                        : "Tag/BarCode you entered belong to inventory do you want to replace";
+                    swal({
+                        html: true,
+                        title: "Message",
+                        text: "<label>" + textmsg + "</label>",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "REPLACE",
+                        cancelButtonText: "CANCEL",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        debugger;
+                        if (isConfirm) {
+                            AddAssetTlocation(floorAssetId, locationId, orgFloorAssetsId,0);
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>

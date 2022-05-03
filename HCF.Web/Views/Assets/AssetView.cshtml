@@ -1,0 +1,186 @@
+﻿@model List<HCF.BDO.AssetType>
+
+@{
+    ViewBag.Title = "Find And Inspect";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Inspect by Asset ID
+            </h1>
+        </section>
+    }
+    <div class="container-fluid" id="completedata" style="display:none">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @*<div class="col-xs-12" style="padding:5px;"> <button type="button" class="btn comm-button showallbtn"  style="float:right;">show Less</button></div>*@
+                    <div class="box-body assets_category">
+                        <table class="table table-hover table-expandable table-striped" id="assets_viewTable">
+                            <thead style="display:none;">
+                                <tr>
+                                    <th style="width:40px;"></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var assetType in Model.Where(x => x.IsActive && x.IsInternal == false).OrderBy(x => x.Name))
+                                {
+                                    <tr>
+                                        <td style="width:40px;" class="details-control" rel='@assetType.TypeId'></td>
+                                        <td class="asset_title" style="text-align:left" rel='@assetType.TypeId'>
+                                            @assetType.Name
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" id="selecteddata" style="display:none">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="col-md-12" style="padding:5px;"> <button type="button" class="btn comm-button showallbtn" style="float:right">show All</button></div>
+                    <div class="box-body assets_category">
+                        <table class="table-striped" id="assets_viewTable_selected">
+                            <thead style="display:none;">
+                                <tr>
+                                    <th style="width:40px;"></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var assetType in Model.Where(x => x.IsActive && x.IsInternal == false).OrderBy(x => x.Name))
+                                {
+                                    <tr class="shown">
+                                        <td style="width:40px;" class="details-control" rel='@assetType.TypeId'></td>
+                                        <td class="asset_title" style="text-align:left" rel='@assetType.TypeId'>
+                                            @assetType.Name
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    $(document).ready(function () {
+        var assettypeid = getParameterByName('assettypeid');
+        if (assettypeid != undefined && assettypeid > 0) {
+            $("#selecteddata").show();
+
+        }
+        else {
+            $("#completedata").show();
+            $(".showallbtn").hide();
+        }
+
+        var assettable = $('#assets_viewTable').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#assets_viewTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+        $.fn.dataTable.ext.errMode = 'none';
+
+        $('#assets_viewTable tbody').on('click', 'td.details-control , td.asset_title', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                debugger
+                var assetTypeId = $(this).attr("rel");
+               
+                var Url = '@Url.Action("AssetsByType", "Assets")';
+                $.get(Url + "?assetTypeId=" + assetTypeId , function (assets) {
+                    row.child(assets, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+
+
+
+
+        ///---------new requirement--------------------//
+
+        var assettable_selected = $('#assets_viewTable_selected').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#assets_viewTable_selected tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+        $.fn.dataTable.ext.errMode = 'none';
+        if (getParameterByName('assetsid') != undefined || getParameterByName('assetsid') > 0) {
+
+             // $('#assets_viewTable_selected tbody').on('click', 'td.details-control , td.asset_title', function () {
+        var tr = $('#assets_viewTable_selected tbody td').closest('tr');
+            var row = assettable_selected.row(tr);
+            //if (row.child.isShown()) {
+            //    $('div.slider', row.child()).slideUp(function () {
+            //        row.child.hide();
+            //        tr.removeClass('shown');
+            //    });
+            //}
+            //else {
+                var assetid = getParameterByName('assetsid');
+                var epdetailid = getParameterByName('epdetailid');
+                var assetTypeId = getParameterByName('assettypeid');
+                var Url = '@Url.Action("AssetsByType", "Assets")';
+                $.get(Url + "?assetTypeId=" + assetTypeId + "&assetid=" + assetid + "&epdetailid=" + epdetailid, function (assets) {
+                    row.child(assets, 'no-padding').show();
+                   // tr.addClass('shown');
+                });
+                //$('div.slider', row.child()).slideDown();
+            //}
+        //});
+        }
+      
+        $(".showallbtn").click(function () {
+            
+            
+            if ($('#selecteddata:visible').length == 0) {
+                $("#selecteddata").show();
+                $("#completedata").hide();
+            }
+            else {
+                $("#selecteddata").hide();
+                $("#completedata").show();
+            }
+        });
+        //-----------------end-------------------------//
+    });
+</script>

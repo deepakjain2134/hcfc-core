@@ -1,0 +1,356 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{ 
+
+}
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Custom EP Frequency</h4>
+</div>
+<div class="modal-body comman_checkbox1 comman_checkbox">
+
+    <div class="form-inline text-left">
+        <div class="form-group">
+            <label>Select TJC Freq: </label>
+            <select name="TjcfrequencypDownList" id="TjcfrequencypDownList" class="form-control">
+                <option value="">All</option>
+                @foreach (var item in (List<HCF.BDO.FrequencyMaster>)TempData["freqecny"])
+                {
+
+                    <option value="@item.FrequencyId" data-days="@item.Days">@item.DisplayName</option>
+                }
+            </select>
+
+        </div>
+    </div><br />
+    <div class="form-group" style="display: inline-block; position: absolute; z-index: 99; left: 21px;">
+        <input type="checkbox" name="chkSelectAllEps" id="chkSelectAllEps"><span></span><label>&nbsp; Select All EPs</label>
+    </div>
+    <div id="standardep_tree">
+        @await Component.InvokeAsync("GoalEpFrequency", new { pagemode = "PopUp" })
+    </div>
+
+
+    <div class="row text-right">
+        <div class="col-md-12">
+            @if (Model.Any())
+            {
+                <div class="form-inline text-left">
+
+
+
+                    <div class="form-group">
+                        <label>Select Custom Freq: </label>
+                        <select name="CustfrequencypDownList" id="CustfrequencypDownList" class="form-control">
+
+                            @foreach (var item in (List<HCF.BDO.FrequencyMaster>)TempData["freqecny"])
+                            {
+
+                                <option value="@item.FrequencyId" data-days="@item.Days">@item.DisplayName</option>
+                            }
+                        </select>
+                        @* <frequencypdownlist name="CustfrequencypDownList" class="form-control"></frequencypdownlist>*@
+                    </div>
+
+
+
+                </div>
+
+                <button type="button" class="popupCommon-btn comm-button" id="saveBulkCustomfreq">Apply changes</button>
+            }
+            <button type="button" class="popupCommon-btn comm-Cancelbutton" data-dismiss="modal" id="CancelBulkCustomfreq">Cancel</button>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+
+        $(".descriptions").popover({ trigger: "manual", html: true, animation: false })
+            .on("mouseenter", function () {
+                var _this = this;
+                $(this).popover("show");
+                $(".popover").on("mouseleave", function () {
+                    $(_this).popover('hide');
+                });
+            }).on("mouseleave", function () {
+                var _this = this;
+                setTimeout(function () {
+                    if (!$(".popover:hover").length) {
+                        $(_this).popover("hide");
+                    }
+                }, 50);
+            });
+
+
+        var datatable = $('#frequencyTablePopUp').DataTable({
+                "lengthChange": false,
+                "pageLength": 7000000,
+            "bPaginate": $('#frequencyTablePopUp tbody tr').length > 7000000,
+                "bInfo": false,
+                "aaSorting": [],
+                "searching": true,
+                "language": {
+                    "emptyTable": "No data available in table"
+                },
+                //dom: "<'row'<'col-sm-6'l>>" +
+                //    //"<'row'<'col-sm-12'tr>>" +
+                //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                //    "<'row'<'col-sm-5'i><'col-sm-7'p>>Blfrtip",
+
+                dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'fl <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+                buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'EP Frequency Report',
+                    exportOptions: {
+                        columns: [1, 3, 4, 5, 6, 7]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+
+
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'EP Frequency Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'EP Frequency Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1, 3, 4, 5, 6, 7],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+            });
+        var allPages = datatable.cells().nodes();
+        $('#chkSelectAllEps').change(function () {
+            if ($('#chkSelectAllEps').is(":checked")) {
+                $(allPages).find("input[name=epidCheckbox]").prop('checked', true);
+                // $("input[name=epidCheckbox]").prop("checked",true);
+            }
+            else {
+                $(allPages).find("input[name=epidCheckbox]").prop('checked', false);
+                //  $("input[name=epidCheckbox]").prop("checked", false);
+            }
+        });
+
+        $('#TjcfrequencypDownList').change(function () {
+            debugger
+            var val = $(this).val();
+            console.log(val);//.search("^" + $(this).val() + "$", true, false, true)
+            if (val > 0) {
+                datatable.columns(0).search("^" + val + "$", true, false, true).draw();
+            } else {
+                datatable.columns(0).search("").draw();
+            }
+        });
+
+     $('#CustfrequencypDownList').change(function () {
+            debugger
+            var custfreqval = $(this).val();
+            var tjcval = $("#TjcfrequencypDownList").val();
+
+            if (custfreqval > 0 && tjcval>0) {
+               if(parseInt(custfreqval)==parseInt(tjcval))
+                    {
+                        AlertWarningMsg("Custom Frequency can not be same as TjcFrequency");
+                     }
+
+            }
+        });
+
+        $(document).on("click", "#CustfrequencypDownList", function () {
+         debugger
+            var tjcDays = parseInt($("#TjcfrequencypDownList").find(':selected').data('days'));
+            console.log(tjcDays)
+            if (tjcDays) {               
+                var daysCustom = 0;
+                $("#CustfrequencypDownList").find('option').each(function (idx, option) {
+                    daysCustom = parseInt($(this).data('days'));
+                    if (daysCustom > tjcDays || daysCustom == tjcDays) {
+                       
+                            $(this).attr('disabled', true);
+                        }
+                     else {
+                        $(this).attr('disabled', false);
+                    }
+                });
+            }
+
+        });
+
+          $('#saveBulkCustomfreq').click(function () {
+            debugger;
+            var Custfrequency = $("#CustfrequencypDownList").val();
+            var tjcval = $("#TjcfrequencypDownList").val();
+            if (Custfrequency == 0) {
+                AlertWarningMsg('Select Custom Frequency');
+                return false;
+            }
+
+
+            if (Custfrequency > 0 && tjcval>0) {
+               if(parseInt(Custfrequency)==parseInt(tjcval))
+                    {
+                        AlertWarningMsg("Custom Frequency can not be same as TjcFrequency");
+                         return false;
+                     }
+            }
+            debugger;
+            var checked_ids = [];
+              $("input[name=epidCheckbox]").each(function () {
+                  if ($(this).is(":checked")) {
+                      var selectedepid = parseInt($(this).attr('epid'));
+                      if (selectedepid > 0 || selectedepid != undefined) {
+                          checked_ids.push(selectedepid);
+                      }
+                  }
+
+            });
+            if (checked_ids.length == 0 || Custfrequency == 0) {
+                AlertWarningMsg('Select atleast one EP');
+                return false;
+            }
+            if ($('#chkSelectAllEps').is(":checked")) {
+                warningMsg(checked_ids, Custfrequency);
+            } else {
+                saveEpInspection(checked_ids, Custfrequency);
+            }
+        });
+
+        function warningMsg(checked_ids, Custfrequency) {
+            swal({
+                html: true,
+                title: "Are you sure?",
+                text: "You have selected to assign a custom frequency for All EPs. Would you like to continue?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Continue",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        swal({
+                            html: true,
+                            title: "Are you sure?",
+                            text: "The custom frequency  chosen will be applied to selected Standards and EPs. This cannot be undone.",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Apply",
+                            cancelButtonText: "Cancel",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        },
+                            function (isConfirm) {
+                                if (isConfirm) {
+                                    saveEpInspection(checked_ids, Custfrequency);
+                                } else {
+                                    return false;
+                                }
+                            });
+                    } else
+                        return false;
+                });
+        }
+
+        function saveEpInspection(epIds, frequnctId) {
+
+              $.ajax({
+                url: '@Url.Action("UpdateBulkEpFrequency", "Goal")',
+                type: "POST",
+                contentType: 'application/x-www-form-urlencoded',
+                  data: {
+                    __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                    epdetailIds: epIds,                    
+                    frequncyId: frequnctId
+                      },
+                dataType: 'json',
+                success: function (result) {
+                    if (result.Result) {
+                        $('#modal-container').modal('hide');
+                                AlertSuccessMsg("Custom Frequency updated successfully.!");
+                                window.location.reload(true);
+                            }
+                        }
+             });
+
+        }
+
+
+
+    });
+</script>
+
+<style>
+    .modal-dialog .table-responsive {
+        height: 300px;
+        overflow-y: auto;
+    }
+    .modal-dialog thead {
+        position: sticky;
+        top: -2px !important;
+        z-index: 9;
+        background-color: #fff;
+    }
+    .modal-open .modal {
+        overflow-y: hidden;
+    }
+</style>

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<HCF.BDO.TIlsm>
+@{
+    Layout = null;
+    TempData["IcraItem"] = null;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            ILSM Binder
+        </h1>
+    </section>
+}
+<div class="row">
+    <div class="col-md-12 col-xs-12 binderilsmRow">
+        <div class="ilsmbindersrach">
+            <div class="binderpage-heading">
+                <common-image src="~/images/services/ilsm.png" title="ILSM Binder" class="img_binder"></common-image>
+                <div class="binder-RightHeading">
+                    <h3>ILSM Binder</h3>
+                    <p>
+                        View closed ILSMs by year. <a href="@Url.RouteUrl("ilsmView")">
+                            (To view open ILSMs, click <u>here</u>).
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+       
+        <div class="status-colsBoxNo form-inline">
+            <div class="form-group">
+                <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+            </div>
+            <div class="form-group">
+                <label>Year :</label>
+                @Html.DropDownList("YearFilter", Enumerable.Range(DateTime.Now.Year - 2, 3).Select(x => new SelectListItem { Text = x.ToString() }).OrderByDescending(x => x.Text), new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        @await Html.PartialAsync("_ilsmBinder", Model)
+    </div>
+</div>
+<script>
+    $("#SiteCode").prepend("<option value='-1' selected='selected'>Select Campus</option>");
+
+    $("#SiteCode").trigger("change");
+</script>
+
+
+

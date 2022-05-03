@@ -1,0 +1,95 @@
+﻿@model IEnumerable<HCF.BDO.TRounds>
+
+
+<div class="roundreportsRow">
+    <div class="col-md-12">
+
+        <div class="panel panel-reports">
+            <div class="trgtry">
+
+
+                <div class="round-groupname panel-active">
+                    <p class="buildingGroupBy">Total Asset Inspection Deficiencies with Risk Severity</p>
+                    <div id="roundbuildings" class="round-groupdetails reportsmdetails">
+                        <div class="roundExpand-box">
+                            <div class="col-md-8 reportsm-col-8">
+                                <div class="management_reportrow" id="partialContents">
+                                    <table class="table table-bordered" id="assettbl" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>status</th>
+                                                <th>Assets</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.Assets > 0)
+                                                {
+                                                    <tr>
+                                                        <td class="AssetStatus">@item.AssetStatus</td>
+                                                        <td class="Assets">@item.Assets</td>
+
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <figure class="highcharts-figure">
+                                        <div class="" id="Assetpiechart"></div>
+                                    </figure>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h3 class="permitNumberHeading">
+                                        Asset Deficiencies
+                                    </h3>
+                                    <div class="asset-deficiRow">
+                                        <div class="deficiLeft-col1">
+                                            <h3>
+
+                                                @*@Model.AllPermitCount*@
+                                                @{ var sum = 0; }
+                                                @foreach (var item in Model)
+                                                {
+
+                                                    if (@item.Assets > 0)
+                                                    {
+                                                        sum += @item.Assets;
+                                                    }
+
+
+                                                } @sum
+                                                <span>Total</span>
+                                            </h3>
+                                        </div>
+                                        <div class="defici-col1">
+                                            <ul>
+                                                @foreach (var item in Model)
+                                                {
+                                                    if (@item.Assets > 0)
+                                                    {
+                                                        <li><span>@item.Assets</span> @item.AssetStatus</li>
+                                                    }
+                                                }
+
+
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>

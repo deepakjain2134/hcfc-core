@@ -1,0 +1,215 @@
+﻿@model HCF.BDO.MainGoal
+@{
+    var assets = new List<HCF.BDO.Assets>();
+    var allDocType = new List<HCF.BDO.DocumentType>();
+    var activityType = commonModelFactory.GetActivityType();
+    var epAssets = new List<HCF.BDO.EPDetails>();
+    HCF.BDO.EPDetails ep = new HCF.BDO.EPDetails();
+    if (ViewBag.CurrentEP != null)
+    {
+        ep = ViewBag.CurrentEP;
+        assets = ep.Assets;
+        allDocType = ep.DocumentType;
+        if (!ep.IsAssetsRequired)
+        {
+            activityType = activityType.Where(x => x.ActivityTypeId != 2).ToList();
+        }
+
+        if (!ep.IsDocRequired)
+        {
+            activityType = activityType.Where(x => x.ActivityTypeId != 3).ToList();
+        }
+
+    }
+    if (Model.AssetId.HasValue && Model.AssetId.Value > 0 && (Model.EPDetailId == 0 || Model.EPDetailId == null))
+    {
+        epAssets = Model.epDetails;
+        activityType = activityType.Where(x => x.ActivityTypeId == 2).ToList();
+    }
+}
+
+@if (Model != null)
+{
+    //using (Ajax.BeginForm("SaveGoal", "Goal", new AjaxOptions { OnSuccess = "OnGoalSaveDone" }))
+    //{
+
+    <form asp-controller="Goal" asp-action="SaveGoal"
+          data-ajax-success="OnGoalSaveDone"
+          data-ajax="true" data-ajax-method="POST">
+        <input type="hidden" name="MainGoalId" value="@Model.MainGoalId" />
+        <input type="hidden" name="EPDetailId" value="@((Model.EPDetailId.HasValue) ? Model.EPDetailId.Value : 0)" />
+        <input type="hidden" name="AssetId" value="@((Model.AssetId.HasValue) ? Model.AssetId.Value : 0)" />
+        <input type="hidden" name="FrequencyId" value="@((Model.FrequencyId.HasValue) ? Model.FrequencyId.Value : 0)" />
+        <input type="hidden" name="FloorAssetId" value="@((Model.FloorAssetId.HasValue) ? Model.FloorAssetId.Value : 0)" />
+        <input type="hidden" name="ClientNo" value="@((Model.ClientNo.HasValue) ? Model.ClientNo.Value : 0)" />
+
+
+        <div class="col-md-12 form-group hidediv">
+            <label class="control-label col-md-2">Goal Type</label>
+            <div class="col-md-10">
+                <select class="ddlAsset form-control" id="ActivityType" name="ActivityType" required>
+                    @*<option value="">Select Type</option>*@
+                    @foreach (var activty in activityType)
+                    {
+                        <option value="@activty.ActivityTypeId">@activty.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-12 form-group ddlAssetAdd hidediv">
+            <label class="control-label col-md-2">Asset</label>
+            <div class="col-md-10">
+                <select class="ddlAsset form-control" id="ddlAssetAdd">
+                    <option value="">None</option>
+                    @foreach (var pitem in assets)
+                    {
+                        <option value="@pitem.AssetId">@pitem.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (epAssets.Count > 0 && (Model.EPDetailId == 0 || Model.EPDetailId == null))
+        {
+            <div class="col-md-12 form-group ddlAssetsEpFrequency hidediv">
+                <label class="control-label col-md-2" for="ActivityType">Select EP</label>
+                <div class="col-md-10">
+                    <select class="form-control disable" name="ddlAssetsEpFrequency" id="ddlAssetsEpFrequency">
+                        <option value="">All</option>
+                        @foreach (var epAsset in epAssets)
+                        {
+                            <option value="@(string.Format("{0}", (epAsset.EPDetailId > 0) ? "EP-" + epAsset.EPDetailId : "FQ-" + epAsset.EPFrequency.FirstOrDefault().Frequency.FrequencyId))">
+                                @epAsset.StandardEp @epAsset.GetFrequencyName()
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+        <div class="col-md-12 form-group dllDocumenttype hidediv">
+            <label class="control-label col-md-2" for="ActivityType">Document Type</label>
+            <div class="col-md-10">
+                <select class="form-control" name="dllDocumenttype" id="dllDocumenttype">
+                    <option value="">None</option>
+                    @foreach (var citem in allDocType)
+                    {
+                        <option value="@citem.DocTypeId">@citem.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-12 form-group">
+            <label class="control-label col-md-2" id="lblgoal">Goal</label>
+            @*@Html.LabelFor(model => model.Goal, htmlAttributes: new { @class = "control-label col-md-2" })*@
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Goal, new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.Goal, "", new { @class = "text-danger", required = "required" })
+            </div>
+        </div>
+
+
+        <div class="col-md-12 form-group">
+            <label class="control-label col-md-2" for="Status">Status</label><div class="col-md-10">
+                <input type="hidden" value="@Model.IsActive" id="IsActive" name="IsActive" />
+                <div class="btn-group btn-group-toggle crxtoggle-btn" data-toggle="buttons">
+                    <label class="btn toggleGreenbtn active">
+                        <input type="radio" name="options" class="options" id="option1" checked value="1"> Active
+                    </label>
+                    <label class="btn toggleRedbtn">
+                        <input type="radio" name="options" class="options" id="option2" value="0"> Inactive
+                    </label>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-12 button_Div text-right">
+            <input class="addNewCheckList comm-button" value="Save" id="addMaingoal" type="submit" />
+            <input class="addNewCheckList comm-Cancelbutton" value="Cancel" id="cancelMaingoal" type="button" />
+
+        </div>
+        <h4>&nbsp;</h4>
+    </form>
+}
+
+
+<script>
+
+    $("#IsActive").val(true);
+    var ddlAssetsEpFrequency = $("#ddlAssetsEpFrequency");
+    var hdnFrequencyId = $("#FrequencyId");
+    var hdnEPDetailId = $("#EPDetailId");
+
+    $(".ddlAssetAdd").hide();
+    $(".dllDocumenttype").hide();
+    @if (Model.ActivityType == 3)
+    {
+        @:$(".dllDocumenttype").show();
+    }
+    else if (Model.ActivityType == 2)
+    {
+        @:$(".ddlAssetAdd").hide();
+    }
+
+
+
+    ddlAssetsEpFrequency.change(function () {
+        var type = $(this).val().split("-")[0];
+        var value = $(this).val().split("-")[1];
+        if (type.toLowerCase() == "EP".toLowerCase()) {
+            hdnEPDetailId.val(value)
+        } else if (type.toLowerCase() == "FQ".toLowerCase())
+            hdnFrequencyId.val(value);
+        else { }
+
+    });
+
+    $("#ddlActivityType").change(function () {
+        $(".ddlAssetAdd").hide();
+        $(".dllDocumenttype").hide();
+        var activityType = $("#ddlActivityType").val();
+        if (activityType == 2) {
+            $(".ddlAssetAdd").show();
+            $("#ddlAssetAdd").attr("required", "true");
+        } else if (activityType == 3) {
+            $(".dllDocumenttype").show();
+            $("#dllDocumenttype").attr("required", "true");
+        }
+    });
+
+    $("#cancelMaingoal").click(function () {
+        $("#addgoal").show();
+    });
+
+
+    $(document).ready(function () {
+        debugger;
+        if (window.location.href.indexOf("configurefloorassets") > -1) {
+            $(".hidediv").hide();
+            $("#lblgoal").text("ATS Header");
+        }
+
+
+        if (parseInt('@Model.MainGoalId') > 0) {
+            $('input[name=options]').removeAttr('checked').parent().removeClass('active');
+            if ('@Model.IsActive' == 'True') {
+                $("input[name=options][value=" + '1' + "]").attr('checked', 'checked').parent().addClass('active');
+            } else {
+                $("input[name=options][value=" + '0' + "]").attr('checked', 'checked').parent().addClass('active');;
+            }
+        }
+    });
+
+
+    $(".options").change(function () {
+        debugger;
+        if ($(this).val() == "1") {
+            $("#IsActive").val(true);
+        } else {
+            $("#IsActive").val(false);
+        }
+    });
+
+</script>

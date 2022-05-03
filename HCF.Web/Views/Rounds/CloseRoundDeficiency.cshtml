@@ -1,0 +1,70 @@
+﻿@model HCF.BDO.WorkOrder
+@{
+    ViewBag.Title = "Close Round Deficiency";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Close Round Deficiency
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        @using (Html.BeginForm("FloorRoundInspection", "Rounds", FormMethod.Post, new { id = "floorInspectionform" }))
+        {
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                    @Html.HiddenFor(m => Model.IssueId)
+                    @* @Html.HiddenFor(m => Model.StatusCode)*@
+                    <input type="hidden" name="StatusCode" value="@HCF.BDO.Enums.StatusCode.CMPLT.ToString()" id="StatusCode" />
+                    @Html.HiddenFor(m => Model.Xcoordinate)
+                    @Html.HiddenFor(m => Model.Ycoordinate)
+                    @Html.HiddenFor(m => Model.FloorId)
+                    @Html.HiddenFor(m => Model.BuildingCode)
+                    @Html.HiddenFor(m => Model.Description)
+                    <input type="hidden" name="IsCloseRoundDeficiency" id="IsCloseRoundDeficiency" value="true" />
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label>@Localizer["Problem"]:</label>
+                            @Model.Description
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>@Localizer["Date"]:</label>
+                            @Model.DateCreated.ToFormatDate()
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            <label>@Localizer["Location"]:</label>
+                            @($"{Model.Floor.FloorName} , {Model.Floor.Building.BuildingName}")
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            @Html.LabelFor(model => model.CompletionComments)<em class="required-field"> *</em>
+                            @Html.TextAreaFor(model => model.CompletionComments, new { @class = "form-control", @required = "required", @rows = "4", @cols = "10" })
+                            @Html.ValidationMessageFor(model => model.CompletionComments)
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right common-btnBox">
+                            @if (Model.StatusCode != HCF.BDO.Enums.StatusCode.CMPLT.ToString())
+                            {
+                                <input type="submit" value='Save' class="comm-button" id="Submit" />
+                            }
+                            <a href='@HCF.Web.Base.UISession.GetBackPage("rounds_CloseRoundDeficiency")' class="comm-Cancelbutton">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    @if(Model.StatusCode == HCF.BDO.Enums.StatusCode.CMPLT.ToString())
+            {
+                @: $("#CompletionComments").prop('readonly', true);
+            }
+</script>

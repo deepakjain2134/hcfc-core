@@ -1,0 +1,35 @@
+﻿<div class="btn-group btn-group-vertical right_setting" data-toggle="buttons" style="padding-top: 6px;">
+    <label class="btn active">
+        @Html.RadioButton("EPCat", 1)<label for="EC">EC (<span class="countec" id="txtEpEcCount"></span>)</label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+    </label>
+    <label class="btn">
+        @Html.RadioButton("EPCat", 2)<label for="LS">LS (<span class="countec" id="txtEpLsCount"></span>)</label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+    </label>
+    <label class="btn">
+        @Html.RadioButton("EPCat", 3)<label for="EM">EM (<span class="countec" id="txtEpEmCount"></span>)</label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+    </label>
+    <label class="btn">
+        @Html.RadioButton("EPCat", 0, true)<label for="ALL">All (<span class="countec" id="txtEpAllCount"></span>)</label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+    </label>
+</div>
+<script>
+    $("input[name=EPCat]:radio").change(function () {
+        //debugger;
+        var filter = this.value;
+        if (filter == "0") {
+            $("tr.dataRow").css("visibility", "visible");
+            return false;
+        }
+        else {
+            $("tr.dataRow").css("visibility", "collapse")
+        };
+
+        $("tr.dataRow").find("td.catId").each(function () {
+            $this = $(this);
+            if ($this.html().trim() == filter) {
+                matchFound = true;
+                $this.parent().css("visibility", "visible");
+            }
+        });
+    });
+</script>

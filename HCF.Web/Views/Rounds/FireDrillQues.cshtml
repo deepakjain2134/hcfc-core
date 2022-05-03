@@ -1,0 +1,276 @@
+﻿@model IEnumerable<HCF.BDO.FireDrillCategory>
+@{
+    ViewBag.Title = "Fire Drill Questionnaries";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Fire Drill Questionnaire
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        
+                            
+
+                            <div class="row vender_page tablelist-topform">
+                                <div class="col-md-6 col-sm-8 form-inline">
+                                    <label>Status:</label>
+                                    <input type="hidden" id="selectedStatus" name="selectedStatus" />
+                                    <select id="ddlStatus" name="ddlStatus" class="form-control" style="min-width: 200px;">
+                                        <option value="-1">All</option>
+                                        <option value="1">Active</option>
+                                        <option value="0">In active</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    @{
+                                        int? isCommon = ViewBag.isCommon;
+                                        if (isCommon != 1)
+                                        {
+                                            <div class="add_button_comman">
+                                                <a href="@Url.RouteUrl("addFiredrillQuestionnaires")" class="pull-right">
+                                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Questionnaire" alt="3d_add_button" />
+                                                </a>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <table id="firedrillQuesTable" class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th style="display:none">CategoryId</th>
+                                                <th>
+                                                    Fire Drill Category
+                                                </th>
+                                                <th>
+                                                    Questionnaire
+                                                </th>
+                                                <th> Active </th>
+                                                <th>Action</th>
+                                                <th style="display:none"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                foreach (var ques in item.FireDrillQuestionnaires)
+                                                {
+                                                    <tr>
+                                                        <td style="display:none">
+                                                            @item.FiredrillCatId
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(modelItem => item.CategoryName)
+                                                        </td>
+                                                        <td>  @Html.DisplayFor(modelItem => ques.Questionnaries) </td>
+
+
+                                                        @if (ques.IsCommQues)
+                                                        {
+                                                            <td> @Html.CheckBoxFor(modelItem => ques.IsActive, new { @class = "chkQues", rel = ques.FireDrillQuesId })<span></span> </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td> @Html.DisplayFor(modelItem => ques.IsActive)<span></span> </td>
+                                                        }
+
+
+                                                        @if (ques.IsCommQues)
+                                                        {
+                                                            <td></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td title="Edit">
+                                                                <img onclick="location.href ='@Url.Action("AddFiredrillQuestionnaires", "Rounds", new { id = ques.FireDrillQuesId })'"
+                                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                                            </td>
+                                                        }
+
+                                                        <td style="display:none;">@(ques.IsActive?1:0)</td>
+                                                    </tr>
+
+                                                }
+
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+   
+    $(document).ready(function () {
+        var firedrillCatid = '@ViewBag.fireCatId';
+
+        function getExporteDExcelTitle() {
+            var title = "Fire Drill Questionnaire Report";
+            return title;
+        }
+
+        var dtable = $('#firedrillQuesTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "aaSorting": [0, 'desc'],
+            "bPaginate": $('#firedrillQuesTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+          /*  dom: "Blfrtip",*/
+
+            dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+            columnDefs: [
+                {
+                    targets: [2, 3],
+                    orderable: false
+                }
+            ],
+            buttons: [
+                {
+                    extend: 'pdf',
+                    text: 'Export as pdf',
+                    orientation: 'portrait',
+                    title: function () { return getExporteDExcelTitle(); },
+                    exportOptions: {
+                        columns: [1,2]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: 'Fire Drill Questionnaire Report',
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n @HCF.Web.Base.UserSession.CurrentOrg.Address',
+                                        margin: [0, 6, 0, 0]
+                                    }
+
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Fire Drill Questionnaire Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+        if (firedrillCatid > 0) {
+            dtable.column(0).search("^" + firedrillCatid + "$", true, true, false).draw();
+        }
+
+        $('#ddlStatus').on('change', function () {
+            debugger;
+            var status = $(this).val();
+            var dtable = $('#firedrillQuesTable').DataTable();
+            if (status > "-1") {
+                dtable.column(-1).search("^" + status + "$", true, true, false).draw();
+
+                $('#selectedStatus').val(status);
+
+            }
+            else {
+                dtable.columns(-1).search("").draw();
+            }
+
+        });
+        $('#ddlStatus').val(1).trigger('change');
+    });
+
+
+    $('.chkQues').on('change', function () {
+            debugger;
+            var id = $(this).attr("rel")
+            var val = $(this).prop('checked');
+            $.get("@Url.Action("FireDrillActive", "Rounds")" + "?id=" + id + "&IsActive=" + val, function () {
+
+        });
+    });
+</script>
+<style>
+    .tableactions .dataTables_filter, .tableactions .dataTables_paginate {
+        margin-right: 0px;
+    }
+</style>

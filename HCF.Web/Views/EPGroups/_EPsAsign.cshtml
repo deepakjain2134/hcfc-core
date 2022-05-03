@@ -1,0 +1,147 @@
+﻿@model List<HCF.BDO.EPGroups>
+<div class="modal-dialog epgroup-head" style="background: #fff;width: 90%; margin: 20px auto;">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+        @if (@ViewBag.EPGroupName != null)
+        {
+            <h4 class="modal-title">@ViewBag.EPGroupName  </h4>
+        }
+        else
+        {
+            <h4 class="modal-title"> Assign Eps  </h4>
+        }
+
+
+    </div>
+    <div class="modal-body">
+       
+            <div class="row" style="height: calc(100% - 50px);overflow-y: auto;">
+               
+                <div class="col-lg-12">
+                    <div class="epsassigns-Scroll">
+                        @if (Model.Count > 0)
+                        {
+                            <table id="epgroupsTable" class="table table-bordered table-striped no-footer">
+                                <thead>
+                                    <tr>
+                                        <th> </th>
+                                        <th>StandardEP</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var standards in Model.FirstOrDefault().StandardEps)
+                                    {
+                                        var isEpChecked = Model.Where(x => x.EPDetailId == standards.EPDetailId && x.IsActive).Count() > 0 ? "checked" : "";
+                                        <tr>
+                                            <td>
+                                                <p style="display:none">@isEpChecked</p>
+                                                <input type="checkbox" class="checkBox epgroup-eps" value="@standards.EPDetailId" @isEpChecked /><span></span>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" name="strJson" id="epgroupid" value="@ViewBag.EPGroupID" />
+                                                @standards.StandardEP
+                                            </td>
+                                            <td>
+                                                @await Html.PartialAsync("_EpDescription", standards.Description,
+                                 new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                 { { "standardEp", @standards.StandardEP }})
+                                                @*@await Html.PartialAsync("_EpDescription", standards.Description, new ViewDataDictionary { { "standardEp", @standards.StandardEP } })*@
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="tble_shadow text-center">No data available in table</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer button_Div">
+                <input type="button" id="closebtn" value="Close" data-dismiss="modal" class="comm-Cancelbutton" />
+            </div>
+        
+    </div>
+</div>
+
+
+<script>
+    $('.descriptions').popover({ trigger: 'focus' });
+    $("[type=checkbox]").on('change', function () {
+        debugger;
+        var IsActive = $(this).is(':checked');
+        var epGroupId = $('#epgroupid').val();
+        var epdetailId = $(this).val();
+            $.ajax({
+                url: '@Url.Action("AssignEPToGroup", "EPGroups")' + "?epGroupId=" + epGroupId + "&epDetailId=" + epdetailId + "&IsActive=" + IsActive,
+                type: 'GET',
+                success: function (data) {
+                    if (data.ep_count != null) {
+                        debugger;
+                        $('#epcount_' + epGroupId).html(data.ep_count)
+                        if (IsActive == true) {
+                            swalalert('Saved Successfully');
+                        } else {
+                            swalalert('Removed Successfully');
+                        }
+                    }
+                }
+            })
+     });
+
+    var table = $('#epgroupsTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 7,
+        "aaSorting": [],
+        "bPaginate": $('#epgroupsTable tbody tr').length > 20,
+        "bInfo": false,
+        "order": [[0, "desc"]],
+        "searching": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6 text-right'>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7 text-right'p>>",
+    });
+
+
+    $("#btntxtsearch").off().on('click', function () {
+        debugger;
+        var epgroupid = $('#epgroupid').val();
+        var searchText = $('#inputSuccess2').val();
+        filtereps(epgroupid,searchText)
+    });
+
+    $("#closesearch").off().on('click', function () {
+        debugger;
+        var epgroupid = $('#epgroupid').val();
+        $("#inputSuccess2").val('');
+        filtereps(epgroupid,null)
+    })
+
+    function filtereps(index, searchText) {
+        debugger;
+        $.get(CRxUrls.EPGroups_EPsAssign + '?epgroupId=' + index + '&searchText=' + searchText, function (data) {
+            debugger;
+            $('#userep_view').html(data);
+            $('#userep_view').fadeIn('fast');
+        });
+    }
+
+    $('#closebtn').click(function () {
+        debugger;
+        var url = '@Url.Action("EPGroups", "EPGroups")';
+        $.get(url, function () {
+        });
+    });
+
+   
+</script>

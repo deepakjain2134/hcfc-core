@@ -1,0 +1,155 @@
+﻿@model HCF.BDO.TExercises
+@{
+    var i = this.ViewData.ContainsKey("i") ? this.ViewData["i"].ToString() : string.Empty;
+
+    var buildingno = this.ViewData["buildingno"] != null ? this.ViewData["buildingno"].ToString() : string.Empty;
+    if (!string.IsNullOrEmpty(buildingno) && i == "0")
+    {
+        i = buildingno;
+    }
+    var year = this.ViewData.ContainsKey("year") ? Convert.ToInt32(this.ViewData["year"].ToString()) : DateTime.Now.Year;
+    var j = this.ViewData.ContainsKey("j") ? this.ViewData["j"].ToString() : string.Empty;
+    //var ii = this.ViewData.ContainsKey("ii") ? this.ViewData["ii"].ToString() : string.Empty;
+    var startTime = this.ViewData.ContainsKey("startTime") ? this.ViewData["startTime"] : string.Empty;
+    var endTime = this.ViewData.ContainsKey("endTime") ? this.ViewData["endTime"] : string.Empty;
+    var quarterNo = this.ViewData.ContainsKey("quarterNo") ? this.ViewData["quarterNo"].ToString() : string.Empty;
+    var ll = this.ViewData.ContainsKey("texerciseCount") ? Convert.ToInt32(this.ViewData["texerciseCount"].ToString()) : 0;
+    var viewday = (Model.Date != null) ? Model.Date.Value.ToString("ddd") : string.Empty;
+    var date = (Model.Date != null) ? Model.Date.Value.ToString("MMM d, yyyy") : string.Empty;
+    Model.DateTimeSpan = @HCF.Utility.Conversion.ConvertToTimeSpan(Model.Date);
+    var currentqrt = Convert.ToInt32((DateTime.Now.Month + 2) / 3);
+    var timeformat = this.ViewData.ContainsKey("timeformat") ? Convert.ToInt32(this.ViewData["timeformat"].ToString()) : 1;
+}
+<div class="editMode firedrill-minwidth" style="display:none;">
+    <table width="100%" cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr id="@(Model.BuildingId.HasValue ? Model.BuildingId.Value : Model.LocationGroupId.Value)" quarterno="@quarterNo">
+                <td align="center" style="width:40%; min-width:93px;">
+                    <input type="hidden" value="@year" name="Year" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].DrillType" value="@Model.DrillType" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].Name" value="@Model.Name" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].ShiftId" value="@Model.ShiftId" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].BuildingId" value="@Model.BuildingId" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].LocationGroupId" value="@Model.LocationGroupId" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].Comment" value="@Model.Comment" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].TExerciseId" value="@Model.TExerciseId" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].ConductedBy" value="@Model.ConductedBy" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].CritiquesComment" value="@Model.CritiquesComment" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].CritiqueDate" value="@Model.CritiqueDate" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].EducationComment" value="@Model.EducationComment" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].EducationDate" value="@Model.EducationDate" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].Announced" value="@Model.Announced" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].Year" value="@year" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].QuarterNo" value="@quarterNo" />
+                    @Html.Hidden("Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].IsAdditional", Model.IsAdditional, new { name = "Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].IsAdditional" })
+                    @Html.Hidden("Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].IsAudible", Model.IsAudible, new { name = "Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].IsAudible" })
+                    @Html.Hidden("Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].DateTimeSpan", Model.DateTimeSpan, new { name = "Buildings[" + @i + "].Shifts[" + @j + "].Exercises[" + @ll + "].DateTimeSpan" })
+                    <input type="text" name="Buildings[@i].Shifts[@j].Exercises[@ll].Date" value="@date" class="date @((HCF.Web.Base.UserSession.HasRoles("add_firedrill_schedule"))?"":(HCF.Web.Base.UserSession.HasRoles("edit_fire_drill") && Model.Time.HasValue) ?"":"disable") firedrilldates " readonly autocomplete="off"
+                           placeholder="Enter Date" />
+                </td>
+                <td align="center" style="width:30%; min-width:72px;">
+                    <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                        <input type="text" name="Buildings[@i].Shifts[@j].Exercises[@ll].StartTime" class="timepicker @((HCF.Web.Base.UserSession.HasRoles("add_firedrill_schedule"))?"":(HCF.Web.Base.UserSession.HasRoles("edit_fire_drill") && Model.Time.HasValue) ?"":"disable") "
+                               rel="@Model.ShiftId" readonly value="@commonModelFactory.ConvertToAMPM(Model.Time)" id="shift_Timings"
+                               placeholder="Enter Start Time" st="" starttime="@startTime" endTime="@endTime" />
+                    </div>
+                </td>
+                <td align="right" style="width:20%; min-width:28px;">
+                    <input id="chkbtn" type="button" class="check2_btn"
+                           onclick="tristate1(this)"
+                           value="@(Model.Status ?? 0)"
+                           tempname="Buildings[@i].Shifts[@j].Exercises[@ll].Status" />
+                    <input type="hidden" name="Buildings[@i].Shifts[@j].Exercises[@ll].Status" value="@Model.Status" />
+                </td>
+                <td align="center" style="width:10%; min-width:36px;" class="@(year > DateTime.Now.Year ? "disab" :year == DateTime.Now.Year && (Convert.ToInt32(quarterNo) > currentqrt) ? "disab" : "")" currentqrt="@currentqrt">
+                    @if (HCF.Web.Base.UserSession.HasRoles("edit_fire_drill"))
+                    {
+                        <div style="padding-left: 12px;" class="@((Model.TExerciseId>0||HCF.Web.Base.UserSession.HasRoles("delete_fire_drill"))?"delete_fileFrill":"disable")" id="@Model.TExerciseId" buildingshift="@($"{i}_{j}_{ll}")">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete" />
+                            @*@Html.StaticImage(new { @src = @Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon), title = "Delete" })*@
+                            @*<common-image src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete"></common-image>*@
+                        </div>
+                        <div class="uploadEx_file">
+                            <input type="button" title="Evaluation Questions" buildingshift="@($"{i}_{j}_{ll}_{quarterNo}")" onclick="Openpoup(this,'@i','@j','@ll','@quarterNo',1)" />
+                        </div>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <input type="text" name="Buildings[@i].Shifts[@j].Exercises[@ll].NearBy" value="@Model.NearBy"
+                           class="form-control" autocomplete="off" placeholder="Enter Location/Department" maxlength="100" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        @if (Model.Announced)
+                    {
+        @:$("input[tempname='Buildings[@i].Shifts[@j].Exercises[@ll].Announced'][type=checkbox]").prop("checked", true).val(true);
+        @:$("input[name='Buildings[@i].Shifts[@j].Exercises[@ll].Announced'][type=hidden]").val(true);
+    }
+    </script>
+
+</div>
+
+<div class="readonly">
+    <table width="100%" border="0" cellspacing="0" id="firedrilltable">
+        <tbody>
+            <tr id="viewfiredrill_@Model.TExerciseId" class="timefiredrill text-center">
+                <td>
+
+                    <div>
+                        <span>@viewday</span>
+                        @if (Model.Time != null && timeformat == 1)
+                        {
+                            <span class="time_view" id="hours_12Time"> @commonModelFactory.ConvertToAMPM(Model.Time) </span>
+                        }
+                        else
+                        {
+                            <span class="time_view" id="hours_12Time"> @Model.Time </span>
+                        }
+                    </div>
+                    <div class="date_view">@date</div>
+                    <div>
+                        <span class="view_Status">
+                            @if (Model.TExerciseId > 0)
+                            {
+                                if (Model.Status == 1)
+                                {
+                                    <span>Completed</span>
+                                }
+                                else
+                                {
+                                    <span>Scheduled</span>
+                                }
+                            }
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" style="border-top: 1px solid #eee;">
+                    <span class="view_location">
+                        @Model.NearBy
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="@(year > DateTime.Now.Year ? "disab" :year == DateTime.Now.Year && (Convert.ToInt32(quarterNo) > currentqrt) ? "disab" : "")">
+                    <span class="view_Comments">
+                        @if (Model.TExerciseId > 0)
+                        {
+                            HCF.BDO.Enums.FiredrillDocStatus enums = (HCF.BDO.Enums.FiredrillDocStatus)Model.FiredrillDocStatus;
+                            <button type="button" class="firedrilldocstatus" value="@Model.FiredrillDocStatus" onclick="Openpoup(this,'@i','@j','@ll','@quarterNo',0)">@enums.GetDescription()</button>
+                            @*<button type="button" class="docpending-btn" onclick="Openpoup(this,'@i','@j','@ll','@quarterNo',0)">@enums.GetDescription()</button>*@
+                        }
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+

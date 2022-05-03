@@ -1,0 +1,218 @@
+﻿@model List<HCF.BDO.RoundGroup>
+<table id="roundTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <td>@Localizer["Round Type"]</td>
+            <td>@Localizer["Round Name"]</td>
+            <td>
+                Round start date</td>
+                @*<td>@Localizer["Campus"]</td>*@ 
+             <td>@Localizer["Building"]</td>
+            <td>@Localizer["Round By"]</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reports in Model)
+        {
+            <tr>
+                <td>
+                    @if (reports.RoundType == 1)
+                    {
+
+                        <div class="roundtypeicon">
+                            <a href="@Url.RouteUrl("roundinsp", new { rid = reports.RoundSchedules.FirstOrDefault().RoundScheduleDates.FirstOrDefault().TRoundId })">
+                                <img src="~/dist/Images/Icons/IndividualRounds.png" class="" />
+
+                                <span>@reports.RoundCategory.Distinct().FirstOrDefault().CategoryName</span>
+                            </a>
+
+                        </div>
+                    }
+
+                    else
+                    {
+                     
+                        <div class="roundtypeicon">
+
+
+                            <a href="@Url.Action("GroupRoundInspection", "Round", new
+                                                                    {
+                                                        troundGroupId = reports.RoundGroupId,
+                                                users = string.Join("," , reports.GroupUsers.Select(x=> x.UserId)),
+                                                 RoundDate = reports.RoundDate
+                                            })">
+                                <img src="~/dist/Images/Icons/Grouprounds.png" class="" />
+                                @{string categorylst = string.Join(",", reports.RoundCategory.Distinct().Select(x => x.CategoryName));
+                                }
+                                <span> @categorylst</span>
+                            </a>
+
+
+                        </div>
+
+                    }
+                </td>
+                <td>@reports.Name</td>
+                <td><span style="display:none">@Convert.ToDateTime(@reports.RoundDate).ToString("yyyy/MM/dd")</span>@reports.RoundDate.ToFormatDate()</td>
+                @*<td>
+                        @{string sitelst = string.Join(",", reports.Locations.Select(x => x.SiteCode));}
+                        @sitelst
+                    </td>*@
+
+                <td>
+
+                    @{string locationlst = string.Join(",", reports.Locations.Select(x => x.BuildingName));}
+                    @locationlst
+                </td>
+                <td>
+                    @{string RoundUser = string.Join(",", reports.GroupUsers.Select(x => x.FullName));}
+                    @RoundUser
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+<script>
+    var dataTables = $('#roundTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [[2, 'desc']],
+        "pageLength": 20,
+        "bPaginate": $('#roundTable tbody tr').length > 20,
+        "bInfo": false,
+        "oSearch": { "bSmart": false },
+        "language": {
+            "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6 text-right'f p>>" +
+            /* "<'row'<'col-sm-12'<'table-responsive'tr>>>" +*/
+            "<'row'<'col-sm-5'i>>" + "Blrtip",
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                orientation: 'portrait',
+                //pageSize:'LEGAL',
+                title: 'Round Deficiencies Report',
+                exportOptions: {
+                    /*columns: [0, 1, 2, 3, 4, 5]*/
+                    columns: [0, 1, 2, 3, 4]
+                },
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                customize: function (doc) {
+                    //Remove the title created by datatTables
+                    doc.content.splice(0, 1);
+                    //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                    var now = new Date();
+                    var jsDate = setDateFormat(now);
+                    //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                    // Logo converted to base64
+                    //var logo = $("#logoimgbase64").val();
+                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                    //console.log(logo);
+                    // The above call should work, but not when called from codepen.io
+                    // So we use a online converter and paste the string in.
+                    // Done on http://codebeautify.org/image-to-base64-converter
+                    // It's a LONG string scroll down to see the rest of the code !!!
+                    //var logo = '';
+                    // A documentation reference can be found at
+                    // https://github.com/bpampuch/pdfmake#getting-started
+                    // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                    // or one number for equal spread
+                    // It's important to create enough space at the top for a header !!!
+                    doc.pageMargins = [20, 60, 20, 30];
+                    // Set the font size fot the entire document
+                    doc.defaultStyle.fontSize = 8;
+                    // Set the fontsize for the table header
+                    doc.styles.tableHeader.fontSize = 7;
+                    // Create a header object with 3 columns
+                    // Left side: Logo
+                    // Middle: brandname
+                    // Right side: A document title
+                    doc['header'] = (function () {
+                        return {
+                            columns: [
+                                { image: logo, width: 40 },
+                                {
+                                    alignment: 'left',
+                                    italics: true,
+                                    text: '',
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n Round Deficiencies Report',
+                                    margin: [0, 6, 0, 0],
+                                    width: 600,
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Create a footer object with 2 columns
+                    // Left side: report creation date
+                    // Right side: current page and total pages
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Created on: ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated from: ', { text: '@HCF.Web.Base.UserSession.CurrentOrg.Name' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: [{ text: page.toString() }, ' of ', { text: pages.toString() }],
+                                }
+                            ],
+                            margin: [20]
+                        }
+                    });
+                    // Change dataTable layout (Table styling)
+                    // To use predefined layouts uncomment the line below and comment the custom lines below
+                    // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+            {
+                extend: 'excel',
+                title: 'Round Deficiencies Report',
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                exportOptions: {
+                    /*columns: [0, 1, 2, 3, 4, 5],*/
+                    columns: [0, 1, 2, 3, 4],
+                    orthogonal: 'export'
+                }
+            }
+        ],
+        drawCallback: function () {
+            var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+            $('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+        }
+    });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+</script>

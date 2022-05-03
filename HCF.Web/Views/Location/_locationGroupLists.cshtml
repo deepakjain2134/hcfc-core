@@ -1,0 +1,51 @@
+﻿@model HCF.Web.ViewModels.Location.LocationGroupViewModel
+<div class="row tablelist-topform">
+    <div class="col-md-12">
+        <h4>Location Group List <button class="button1 btnbacklst float-right" id="btnbacklst">Back to list</button></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-bordered table-striped" id="myTable">
+            <thead>
+                <tr>
+                    <th>
+                        Location Group Name
+                    </th>
+                    <th style="width:60px;">
+                        Status
+                    </th>
+                    <th style="width:90px;">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.locationGroup != null)
+                {
+                    foreach (var item in Model.locationGroup.OrderBy(x => x.Name))
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>                               
+                                @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                <span style="display:none">@item.IsActive</span>
+                            </td>
+                            <td class="">
+                                <a href="@Url.Action("AddLocationGroup", "Location", new { locationGroupId = item.LocationGroupId, mode = "Edit" })" class="modal-link">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Location Group" alt="3d_add_button" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(".btnbacklst").click(function () {
+        $("#locationgroup").show();
+        $("#locationgrouplst").hide();
+    });
+</script>

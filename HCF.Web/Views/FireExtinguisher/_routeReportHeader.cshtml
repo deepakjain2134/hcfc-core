@@ -1,0 +1,40 @@
+﻿@model string
+
+@{
+    var year = ViewData.ContainsKey("year") ? Convert.ToInt32(ViewData["year"].ToString()) : DateTime.Now.Year;
+    var month = ViewData.ContainsKey("monthNo") ? Convert.ToInt32(ViewData["monthNo"].ToString()) : DateTime.Now.Month;
+}
+
+@if (Model == "M")
+{
+    <th>J</th>
+    <th>F</th>
+    <th>M</th>
+    <th>A</th>
+    <th>M</th>
+    <th>J</th>
+    <th>J</th>
+    <th>A</th>
+    <th>S</th>
+    <th>O</th>
+    <th>N</th>
+    <th>D</th>
+}
+else if (Model == "Q")
+{
+    <th>Q1(J-M)</th>
+    <th>Q2(A-J)</th>
+    <th>Q3(J-S)</th>
+    <th>Q4(O-D)</th>
+}
+else
+{
+    //HCF.Web.Controllers.CommonController obj = new HCF.Web.Controllers.CommonController();
+    var weeks = commonModelFactory.GetWeeks(year, month);
+    foreach (var item in weeks.OrderBy(x => x.weekNum))
+    {
+    <th style="width:60px;">
+        <span>@item.weekStart.ToString("MMM d")</span> <div style="display:none;">-</div><br /><span>@item.weekFinish.ToString("MMM d")</span>
+    </th>
+    }
+}

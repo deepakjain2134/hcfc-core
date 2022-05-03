@@ -1,0 +1,31 @@
+﻿@model HCF.BDO.TComment
+@{
+    Layout = null;
+}
+@if (!Model.IsDeleted)
+{
+    <li class="list-group-item ilsmComments" id="li_@Model.TCommentId">
+        <div class="ilsmCol1">
+            @Model.AddedDate.CastLocaleDate()
+            <br />
+            @($"{Model.AddedByUserProfile.FullName}")
+        </div>
+        <div class="ilsmCol2">
+            @Model.Comment
+        </div>
+        <div class="ilsmCol3">
+            <a class="deleteComment" tcommentId="@Model.TCommentId" stepid="@Model.StepId" addedby="@Model.AddedBy"
+               addeddate="@Model.AddedDate.Value.ToFormatDate()" commenttxt="@Model.Comment">
+                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)"
+                     stepid="@Model.StepId" tcommentId="@Model.TCommentId"
+                     addedby="@Model.AddedBy"
+                     addeddate="@Model.AddedDate.Value.ToFormatDate()" commenttxt="@Model.Comment"
+                     class="@(HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || HCF.Web.Base.UserSession.CurrentUser.IsSystemUser || HCF.Web.Base.UserSession.CurrentUser.UserId == Model.AddedBy ?  "deleteComment show" : "deleteComment hide")" />
+            </a>
+            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)"
+                 alt="" data-toggle="modal" data-target="#commentModal" stepid="@Model.StepId" tcommentId="@Model.TCommentId" addedby="@Model.AddedBy" addeddate="@Model.AddedDate.Value.ToFormatDate()" commenttxt="@Model.Comment"
+                 class="commentIcon" />
+
+        </div>
+    </li>
+}

@@ -1,0 +1,87 @@
+﻿@model HCF.BDO.EPDetails
+
+@{
+    ViewBag.Title = "EP History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>EP History</h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary">
+                    <div class="ep_heading">
+                        @Model.Standard.TJCStandard,@Model.EPNumber
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                @if (Model != null)
+                {
+                    <div class="box box-primary">
+                        <div class="tble_shadow">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td height="30" width="15%">
+                                            <span title=" @Localizer["StandardEP"] ">@Model.StandardEp</span><br />                                           
+                                            <ep-risk-score risk-score="@Model.Scores.Name">
+                                            </ep-risk-score>
+
+                                        </td>
+                                        <td height="30" width="85%" class="">
+                                            @await Html.PartialAsync("_EpDescription", Model.Description,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "minLength", "0" }, { "standardEp", @Model.StandardEp }}
+                              )
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <ul class="ep_history_list">
+                            @foreach (var item in Model.Inspections.Where(x => x.EPDetailId == Model.EPDetailId && x.Status != 2))
+                            {
+                                <li>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tbody>
+
+                                            <tr>
+                                                <td width="50%"><strong>Status: </strong>@commonModelFactory.GetStatus(item.Status.Value)</td>
+                                                <td>
+                                                    <strong>Detail:</strong> <img onclick="location.href ='@Url.Action("EPActivityHistory", "Assets", new { InspectionId = item.InspectionId, epId = item.EPDetailId })'"
+                                                                                  src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" /><br />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Inspection Begin Date: </strong> @item.StartDate.ToFormatDate()</td>
+                                                <td><strong>Inspection Complete Date: </strong> @item.EndDate.Value.ToFormatDate()</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </li>
+                            }
+                            @if (Model.Inspections.Count(x => x.EPDetailId == Model.EPDetailId) == 0)
+                            {
+                        <p class="text-center">No record found</p>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="tble_shadow">
+                        No record found
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+

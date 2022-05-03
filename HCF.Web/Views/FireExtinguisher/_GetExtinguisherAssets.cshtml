@@ -1,0 +1,514 @@
+﻿@model List<HCF.BDO.StopMaster>
+@{
+    var result = Model.Where(x => x.TfloorAssets.Any()).SelectMany(y => y.TfloorAssets).ToList();
+    var assetsCategoryList = result.Select(x => x.Assets).GroupBy(x => x.AssetId).ToList();    
+    var rec = result.Where(x => !(string.IsNullOrEmpty(x.AssetSubCategory.AscName))).GroupBy(y => y.AssetSubCategory.AscName, (key, g) => new { AscId = key, Count = g.Count(), Name = g.FirstOrDefault().AssetSubCategory.AscName });
+
+    <div class="row floorIdTable">
+        <div class="col-md-12 form-inline">
+            @foreach (var assetsCategory in assetsCategoryList)
+            {
+                <div class="form-group">
+                    <input type="checkbox" class="assetRouteChk"  data-assetId="@assetsCategory.Key" assetid="@assetsCategory.Key" /><span></span>
+                    @assetsCategory.FirstOrDefault().Name &nbsp;&nbsp;
+                </div>
+            }
+        </div>
+    </div>
+
+    if (rec.Any())
+    {
+        <div class="row floorIdTable">
+            <div class="col-md-12 form-inline">
+                @foreach (var item in rec.OrderBy(x => x.Name))
+                {
+                    <div class="form-group">
+                        <label>@($"{item.Name}: {item.Count}") &nbsp;&nbsp;</label>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+<div class="">
+    <table id="feTable2" class="table table-bordered table-striped" style="width:99.96%;">
+        <thead>
+            <tr>
+                <th style="display:none">IsEmptyStop</th>
+                <th>
+                    Stop <br />(Stop&nbsp;Code)
+                </th>
+                <th>
+                    Route
+                </th>
+                <th>
+                    Tag/BarCode
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Make
+                </th>
+                <th>
+                    Model
+                </th>
+                <th>
+                    Inspected
+                </th>
+                <th>
+                    Result
+                </th>
+                <th>
+                    Status
+                </th>
+                @*<th>
+                        Insp. Type
+                    </th>*@
+                <th>
+                    Inspector
+                </th>
+                <th>
+                    Notes
+                </th>
+                <th>
+                    Inspect
+                </th>
+                <th>
+                    History
+                </th>
+                <th>More</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var loc in Model)
+            {
+                if (loc.TfloorAssets.Count > 0)
+                {
+                    foreach (var item in loc.TfloorAssets)
+                    {
+                        <tr floorassetid="@item.FloorAssetsId" locationid="@loc.StopId" assetId="@item.AssetId" IsOpenIlsmCount="@item.OpenIlsmsCount" IsOpenWorkorderCount="@item.OpenWorkOrdersCount">
+                            <td style="display:none">True</td>
+                            <td class="assetItem">
+                                @if (loc.StopId > 0)
+                                {
+                                    <span>@($"{loc.StopName} ({loc.StopCode})")</span>
+                                }
+                            </td>
+                            <td class="assetItem">
+                                @if (item.Routes.Count > 0)
+                                {
+                                    <span>@item.Routes.FirstOrDefault().RouteNo</span>
+                                }
+                                else if (loc.StopId > 0 && item.Stop.Routes.Count > 0)
+                                {
+                                    <span>@item.Stop.Routes.FirstOrDefault().RouteNo</span>
+                                }
+                                else if (loc.StopId > 0)
+                                {
+                                    <span>Route 0</span>
+                                }
+                                else
+                                { <span> Inventory Assets </span>}
+                            </td>
+                            <td class="assetItem">
+                                @item.SerialNo
+                            </td>
+                            <td class="assetItem">
+                                @if (item.AssetSubCategory.AscId > 0 && item.FireExtinguisherType != null)
+                                {
+                                    <span>@item.AssetSubCategory.CustomAscName(item.FireExtinguisherType.FeType)</span>
+                                }
+                                else
+                                {
+                                    <span>NA</span>
+
+                                }
+                            </td>
+                            <td class="assetItem">
+                                @if (item.Make != null && item.Make.ManufactureId > 0)
+                                {
+                                    <span>@item.Make.ManufactureName</span>
+                                }
+                            </td>
+                            <td class="assetItem">
+                                @item.Model
+                            </td>
+                            @if (item.TInspectionActivity.Count > 0)
+                            {
+                                foreach (var activity in item.TInspectionActivity.OrderByDescending(x => x.ActivityInspectionDate).Where(x => x.IsCurrent).Take(1))
+                                {
+                                    @*<tr>*@
+                                    <td class="assetItem">
+                                        @activity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                                    </td>
+                                    <td class="assetItem">
+                                        @activity.InspResult.ResultName
+                                    </td>
+                                    <td class="assetItem">
+                                        @activity.InspStatus.StatusName
+                                    </td>
+                                    <td class="assetItem">
+                                        @activity.UserProfile.FullName
+                                    </td>
+                                    <td class="align-center">
+                                        @if (!string.IsNullOrEmpty(activity.Comment))
+                                        {
+                                            <a href="@Url.Action("CommentPopUp", "Common", new { area = "", Title = "Comment", description = activity.Comment })" class="modal-link">
+                                                <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" tempname='@activity.Comment' class="commentIcon text" style="float: none" />
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float:none;" />
+                                        }
+                                    </td>
+                                    <td class="assetItem align-center">
+                                        <img style="cursor:pointer" src="~/dist/Images/Icons/inspect_icon.png" title="Inspection" />
+                                    </td>
+                                    <td class="align-center">
+                                        <img style="cursor:pointer"
+                                             onclick="location.href ='@Url.Action("ActivityHistory", "FireExtinguisher", new { area = "RoundInsp", floorAssetId = activity.FloorAssetId })'"
+                                             src="@Url.Content("~/dist/Images/Icons/detail_icon.png")"
+                                             title="Detail" />
+                                    </td>
+                                }
+                            }
+                            else
+                            {
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="assetItem align-center">
+                                    <img style="cursor:pointer" src="~/dist/Images/Icons/inspect_icon.png" title="Inspection" />
+                                </td>
+                                <td class="align-center">
+                                    <img style="cursor:pointer" src="@Url.Content("~/dist/Images/Icons/detail_icon.png")" title="Detail" class="disable" />
+                                </td>
+                            }
+                            <td>
+                                <div class="dropdown icratable-drop">
+                                    <button class="btn dropdown-toggle dot-icons @(loc.StopId > 0?"":"disabled")" type="button" data-toggle="dropdown">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </button>
+                                    <ul class="dropdown-menu ctmenu" floorassetId="@item.FloorAssetsId">
+                                        <li data-action="addassets" class="addAssets">
+                                            <a href="#">Manage Asset</a>
+                                        </li>
+                                        <li data-action="manualsignedReport">
+                                            <a href="" data-id="@item.FloorAssetsId" class="delete" style="cursor:pointer">
+                                                Remove Asset
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr floorassetid="0" locationid="@loc.StopId">
+                        <td style="display:none">False</td>
+                        <td class="assetItem">
+                            @if (loc.StopId > 0)
+                            {
+                                <span>@($"{loc.StopName} ({loc.StopCode})")</span>
+                            }
+                        </td>
+                        <td class="assetItem">
+                            <span></span>
+                        </td>
+                        <td class="assetItem"></td>
+                        <td class="assetItem"></td>
+                        <td class="assetItem"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        @*<td></td>*@
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="dropdown icratable-drop">
+                                <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </button>
+                                <ul class="dropdown-menu ctmenu" floorassetId="0">
+                                    <li data-action="addassets" class="addAssets">
+                                        <a href="#">Add Assets</a>
+                                    </li>
+                                    <li data-action="manualsignedReport" class="disable">
+                                        <a href="" data-id="0" class="delete" style="cursor:pointer">
+                                            Remove Assets
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<input type="hidden" value="@ViewBag.inspType" name="inspType" id="inspType" />
+
+
+<div class="modal fade" id="extinguisherInsPopUp" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+       
+       
+        $(".assetRouteChk").change(function () {
+            debugger;
+            var assetId = $(this).data("assetid");
+            $(this).not().closest('div').show();
+            if ($(this).is(':checked')) {
+                $('tr[assetid="' + assetId + '"]').show();
+            } else {
+                $('tr[assetid="' + assetId + '"]').hide();
+                    
+            }
+        });
+
+        debugger
+        if (localStorage.getItem("rTtype") === "-1") {
+            debugger;
+            var table = $('#feTable2').DataTable();
+            table.state.clear();
+            table.destroy();;
+        }
+
+        var routeAssets = $('#feTable2').DataTable({
+            "searching": true,
+            "lengthChange": false,
+             stateSave: true,
+            "pageLength": 20,
+            "bPaginate": $('#feTable2 tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search..."
+            },
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'f p>>" +
+            //    // "<'row'<'col-sm-12'tr>>" +
+            //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            //    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+
+            initComplete: function () {
+                $("div.toolbar").html('<div class="add-commanBtn"><a class= "pull-right addnew" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add New Assets" alt="3d_add_button"></a></div >');
+        },
+            dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row' <'col-sm-12 '<'table-responsive tableHeight'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+
+
+        });
+
+        $("#hidememptystop").change(function () {
+            if ($(this).is(':checked')) {
+                filterstop("True");
+            } else {
+                filterstop("");
+            }
+        });
+
+        function filterstop(value) {
+            //debugger;
+            routeAssets.columns(0).search(value).draw();
+        }
+
+
+        if ('@ViewBag.FloorAssetId' > 0) {
+            var floorAssetId = '@ViewBag.FloorAssetId';
+            var locationId = '@ViewBag.LocationId';
+            OpenInspectionPopup(floorAssetId, locationId);
+        }
+
+       /* pageLoadPopup();*/
+    });
+
+    $('body').off('click', '.assetItem').on('click', '.assetItem', function (event) {
+        //debugger;
+        var floorAssetId = $(this).closest('tr').attr("floorAssetid");
+        var epId = $('input[name=drpInspTypes]:checked').attr("epid");
+        var locationId = $(this).closest('tr').attr("locationid");
+        var routeAssets = $('#feTable2').DataTable();
+        var info = routeAssets.page.info();
+        var IsOpenIlsmCount = $(this).closest('tr').attr("IsOpenIlsmCount");
+        var IsOpenWorkorderCount = $(this).closest('tr').attr("IsOpenWorkorderCount");
+        //console.log(info);
+        localStorage.setItem("roundTbl", info.page);
+
+         if (IsOpenIlsmCount>0) {
+            var confirmRedirectUrl = '@Url.RouteUrl("ilsmView")';
+            ConfirmPopUp("Message",
+                $.Constants.First_Close_Pending_ILSM,
+                "warning",
+                "Go TO ILSM",
+                confirmRedirectUrl,
+                "-1");
+         } else if (IsOpenWorkorderCount>0) {
+
+             confirmRedirectUrl = "/wo/workorder?page=1&floorAssetId=" + floorAssetId + "&EPdetailId=" + epId;
+            //var cancelRedirectUrl = getinspectionbackUrl();
+            ConfirmPopUp("Message",
+                $.Constants.First_Close_Pending_Workorder,
+                "warning",
+                "GO TO WORK ORDER",
+                confirmRedirectUrl,
+                "-1");
+        }
+
+        else {
+            OpenInspectionPopup(floorAssetId, locationId);
+        }
+
+
+    });
+
+
+    function OpenInspectionPopup(floorAssetId, locationId) {
+        event.preventDefault();
+        var assetId = $("#sassetId").val(); //$(this).closest('tr').attr("assetId");
+        var inspType = $('input[name=drpInspTypes]:checked').val();
+        var epId = $('input[name=drpInspTypes]:checked').attr("epid");
+        var isloaddata = 1;
+        var insMode = 'inspection';
+        //var insMode = 'FE';
+        //if (assetId == 173) {
+        //    insMode = 'EW';
+        //} else if (assetId == 127) { insMode = 'EW'; }
+        //else if (assetId == 128) { insMode = 'EW'; }
+        //else if (assetId == 174) { insMode = 'EW'; }
+        if (floorAssetId == 0) {
+           /// openNewAsset(locationId, assetId, '');
+        }
+
+        else {
+            loadInspectionData(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId);
+        }
+    }
+
+
+    function loadInspectionData(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId) {
+        $.get(CRxUrls.fireExtinguisher_ExtinguisherInspetion + '?mode=' + insMode + '&floorAssetId=' + floorAssetId + "&inspType=" + inspType + "&locationid=" + locationId + "&isloaddata=" + isloaddata + "&assetId=" + assetId + "&epId=" + epId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#extinguisherInsPopUp').modal('show');
+        });
+    }
+
+    //Add FloorAssets to CurrentLocation or New FloorAssets
+    $('body').off('click', '.addAssets').on('click', '.addAssets', function (event) {
+        event.preventDefault();
+        var floorAssetId = $(this).closest('tr').attr("floorAssetid");
+        var locationId = $(this).closest('tr').attr("locationid");
+        var assetId = $("#sassetId").val();
+        var inspType = $('input[name=drpInspTypes]:checked').val();
+        var isloaddata = 1;
+        var insMode = 'addassets';
+        var epId = $('input[name=drpInspTypes]:checked').attr("epid");
+        $("#sdnpopup").val("2");
+        debugger;
+        loadInspectionData(insMode, floorAssetId, inspType, locationId, isloaddata, assetId, epId);
+    });
+
+    //Add FloorAssets to CurrentLocation or New FloorAssets
+
+
+
+
+    //Remove FloorAssets From CurrentLocation
+    $(document).on('click', 'a.delete', function (e) {
+        e.preventDefault();
+        var orgFloorAssetsId = $(this).data("id");
+        swal({
+            html: true,
+            title: "Are you sure?",
+            text: "You are removing an asset from this stop. <br /><br /> This will not erase the stop.",
+            //text: "You want to remove assets from this location !",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.fireExtinguisher_RemoveFloorAssetsFromCurrentLocation + "?orgFloorAssetsId=" + orgFloorAssetsId,
+                    success: function (data) {
+                        //debugger;
+                        if (data.isClosedPopUp == 1) {
+                            swal(data.msg);
+                           // loadData();
+                            loadSelectedData();
+                        } else {
+                            swal(data.msg);
+                        }
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+     //Remove FloorAssets From CurrentLocation
+    @*function pageLoadPopup() {
+
+         var html = "<div class='form-group'>";
+        debugger
+     @foreach (var assetsCategory in assetsCategoryList)
+     {
+
+         @:html += htmlbind('@assetsCategory.Key', '@assetsCategory.FirstOrDefault().Name')
+
+     };
+            html += "</div>";
+        function htmlbind(key, Name) {
+            return "<input class='radio' id='radio-1' name='doctyperadio' type='radio' checked value="+key+">" + Name + "&nbsp;&nbsp;";
+        }
+
+        debugger
+        swal({
+            html: true,
+            title: "Select Asset For Inspection",
+            text: html,
+            type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        debugger;
+                        const AssetType = $('input[name=doctyperadio]:checked').val();
+                        if (AssetType) {
+                            $('[data-assetid="' + AssetType + '"]').prop('checked', true)
+                            $('.assetRouteChk').trigger("change");
+                        } else {
+                           
+                        }
+                    }
+                });
+
+    };*@
+</script>

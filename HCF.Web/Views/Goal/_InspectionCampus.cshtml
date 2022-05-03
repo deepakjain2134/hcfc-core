@@ -1,0 +1,15 @@
+﻿@model HCF.BDO.EPSteps
+
+<div>
+    @if (Model.Campus.Count > 0)
+    {
+    <h4>Campus</h4>
+    for (int i = 0; i < Model.Campus.Count; i++)
+    {
+            
+    <div class="ep-campusList">
+        @Html.CheckBox("Campus[" + @i + "].SiteId", Model.Campus[i].IsInspectionDone==true?true:false, new { id = "Campus[" + @i + "].SiteId", value = Model.Campus[i].SiteId, @class = "" })<span></span>@Model.Campus[i].SiteName
+    </div>
+    }
+    }
+</div>

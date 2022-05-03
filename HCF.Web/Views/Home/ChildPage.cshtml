@@ -1,0 +1,65 @@
+﻿@model List<HCF.BDO.Menus>
+@{
+    ViewBag.Title = "Home";
+}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @*@foreach (var item in Model.Where(x => x.Id != 1060))*@
+                    @foreach (var item in Model)
+                    {
+                        if (!string.IsNullOrEmpty(item.PageUrl))
+                        {
+                            <a onclick="showmoreconfigmsg('@item.Alias.ToString().TrimEnd()','@item.PageUrl')">
+                                <div class="col-lg-3 col-xs-6">
+                                    <div class="small-box">
+                                        <div class="inner">                                        
+                                            <span>@item.Name</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("SetPage", "Home", new { id = item.Id })">
+                                <div class="col-lg-3 col-xs-6">
+                                    <div class="small-box">
+                                        <div class="inner">
+                                          
+                                            <span>@item.Name</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function showmoreconfigmsg(alias, pageUrl) {
+        if (alias == "setup_more") {
+            swal({
+                title: "Message",
+                type: 'info',
+                text: $.Constants.CHILD_PAGE_ADMIN_CONFIRMATION,
+                confirmButtonColor: "#DD6B55",
+                showCancelButton: true,
+                confirmButtonText: "OK",
+                closeOnConfirm: false
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        window.location.href = '/' + pageUrl;
+                    }
+                });
+        } else {
+            window.location.href = '/' + pageUrl;
+        }
+    }
+</script>

@@ -1,0 +1,28 @@
+﻿@model HCF.BDO.CeilingPermit
+@{
+    ViewBag.Title = "UpdateContactDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <section class="content-header">
+        <h1>
+            Update Contact Details
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            @await Html.PartialAsync("_commonHtmlEditor")
+                        }
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>

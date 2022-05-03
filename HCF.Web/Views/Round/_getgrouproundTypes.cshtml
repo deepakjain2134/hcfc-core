@@ -1,0 +1,87 @@
+﻿
+@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var RoundCat = Model.roundGroup.RoundCategory;
+}
+<div class="table-responsive round-steptable" id="round_view">
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var item in RoundCat.OrderBy(x => x.CategoryName))
+                {
+                    <th>@item.CategoryName </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Select Round Types</strong></td>
+                @foreach (var item1 in Model.roundGroup.RoundCategory.OrderBy(x => x.CategoryName))
+                {
+                    bool isChecked = false;
+                    var roundCategories = Model.roundGroup.RoundGroupUsers.FirstOrDefault(x => x.RoundGroupId == Convert.ToInt32(ViewBag.RoundGroupId))?.RoundCategories;
+                    if (!string.IsNullOrEmpty(roundCategories))
+                    {
+                        List<int> catArray = roundCategories.Split(',').Select(x => int.Parse(x)).ToList();
+                        if (catArray.Any(x => x == item1.RoundCatId))
+                        {
+                            isChecked = true;
+                        }
+                    }
+                    <td style="position:relative;">
+                        <input type="checkbox" class="roundcategroychk" value='' rel="@item1.RoundCatId" @((isChecked == true) ? "checked='checked'" : "") />
+                        <span></span>
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+   
+    $(document).ready(function () {
+        var roundcatId = [];
+        $('input[type="checkbox"]:checked').each(function () {
+            var value = $(this).attr("rel");
+            roundcatId.push(value);
+            //alert(roundcatId.join(","));
+        });
+        $("#roundCatIds").val(roundcatId.join(","));
+    });
+</script>
+<style type="text/css">
+    .table {
+        margin-top: 0px !important;
+    }
+
+    .round-steptable tbody tr td:first-child,
+    .round-steptable thead tr th:first-child {
+        min-width: 180px;
+        position: sticky;
+        left: -2px;
+        background-color: #fbfbfb;
+        z-index: 99;
+        text-align: left;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+    }
+
+    .round-steptable td {
+        min-width: 56px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .round-steptable th {
+        position: sticky;
+        top: -1px;
+        background-color: #fbfbfb;
+        z-index: 9;
+        vertical-align: bottom !important;
+    }
+</style>

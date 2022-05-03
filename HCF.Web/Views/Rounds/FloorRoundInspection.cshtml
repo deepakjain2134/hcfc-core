@@ -1,0 +1,253 @@
+﻿@model IEnumerable<HCF.BDO.WorkOrder>
+
+@{
+    ViewBag.Title = "Floor Inspection";
+    HCF.BDO.Floor floor = (HCF.BDO.Floor)ViewBag.Floors;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Floor Inspection
+        </h1>
+    </section>
+}
+<div class="container-fluid floor_round_inspection">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-4">
+                        @($"{floor.FloorLocation}")
+                    </div>
+                    <div class="col-md-4">
+                        <img draggable="true" ondragstart="dragStart(event);"
+                             src="@Url.Content("~/dist/Images/Icons/problem_icon.png")"
+                             alt="Mark Deficiency - drag and drop me to marke deficiency on floor plan" id="@floor.FloorId"><label>&nbsp;Mark Deficiency</label>
+                        <br />
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <input type="button" name="button" class="button1 btn_deficient" id="btn_deficientMarked" value="Deficiency Marked" onclick="showfilteritem(1, this)" />
+                        <input type="button" name="button" class="button1 timetoresolve" id="btn_timetoresolve" value="Time to resolve it" onclick="showfilteritem(0, this)" />
+                        <input type="button" name="button" class="button1 showall active" id="btn_showall" value="Show All" onclick="showfilteritem(-1, this)" />
+                        <img onclick="location.href='@Url.Action("SurveyHistory", "Rounds", new { floorId =floor.FloorId,buildingId=floor.BuildingId })'"
+                             src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" class="hyper_link" title="Detail" />
+                    </div>
+                </div>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="containers" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <img class="img-responsive" src="@commonModelFactory.FilePath(floor.ImagePath)" id="floorimg" />
+                                <input type="hidden" id="floorId" value="@floor.FloorId" />
+                                <input type="hidden" id="buildingCode" value="@floor.Building.BuildingCode" />
+                                @if (Model.Any())
+                                {
+                                    foreach (var item in Model)
+                                    {
+                                        <div id="@item.IssueId" class="@(item.IsDeficiency ? "floorInspection_1 assets location" : "floorInspection_0 assets location")"
+                                             data-content="@item.Description" rel="popover" data-original-title="@(item.IsDeficiency ? "Deficiency" : "Time To Resolve")"
+                                             data-trigger="hover" style="width: 30px; clear: both;">
+                                            <img src="@Url.Content("~/dist/Images/Icons/problem_icon.png")" alt="Mark Deficiency" height="24px" width="24px" />
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+</div>
+<!-- /.content -->
+
+<div class="modal fade" id="floorInspection" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="loadpartial">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var newControlId = 0;
+    $(document).ready(function () {
+
+        var imgpath = '@floor.ImagePath';
+        var issueId = getParameterByName('issueId');
+        debugger;
+        if (issueId != null) {
+            var IssuefloorId = '@floor.FloorId';
+            OpenIssuePopUp(IssuefloorId, issueId);
+        }
+        pageLoad(imgpath);
+
+        $("#floorimg").on('load', function () {
+            @if (Model.Any()) {
+            foreach (var item in Model)
+            {
+                @:placeDiv('@item.Xcoordinate', '@item.Ycoordinate', '@item.IssueId');
+                                                                                                                                                                                                                                                         }
+             }
+        }).each(function () {
+            if (this.complete) $(this).load();
+        });
+
+        $('.location').popover();
+    });
+
+   var pageLoad=function(imgpath) {
+        if (imgpath == null || imgpath == "") {
+            swal({
+                title: "Message",
+                text: "No floor plan",
+                type: "warning",
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "OK",
+                closeOnConfirm: false
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        window.location.href = CRxUrls.Rounds_Survey;
+                    }
+                });
+        }
+    }
+
+    function dragStart(e) {
+        e.dataTransfer.effectAllowed = "move";
+        var dragDataJson = {
+            id: e.target.getAttribute("id"),
+            imgpath: e.target.getAttribute("src")
+        };
+        e.dataTransfer.setData("text", JSON.stringify(dragDataJson));
+    }
+
+    function allowDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function drop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        debugger;
+        var sourceData = JSON.parse(e.dataTransfer.getData("text"));
+        var data = sourceData.id; //e.dataTransfer.getData("Text");
+        // var imgpath = sourceData.imgpath; //e.dataTransfer.getData("imgpath");
+
+        var nodeCopy = document.getElementById(data).cloneNode(true);
+        var floorId = nodeCopy.id;
+        var dt = new Date();
+        var inMilliSeconds = dt.getTime();
+
+        nodeCopy.id = "newId_" + inMilliSeconds + floorId;
+        newControlId = nodeCopy.id
+        //e.target.appendChild(nodeCopy);
+        //nodeCopy.id = data;
+        $("#containers").append(nodeCopy);
+        //e.target.parentNode.append(nodeCopy);
+        if (floorId > 0) {
+            debugger;
+            var floorId = $("#floorId").val();
+            //var buildingCode = $("#bcruildingCode").val();
+            var myImg = document.querySelector("#floorimg");
+            var pic_real_width = myImg.naturalWidth;
+            var pic_real_height = myImg.naturalHeight;
+            var myImg = document.getElementById("floorimg");
+            var currentImageHeight = myImg.height;
+            var currentImagewidth = myImg.width;
+            var currentx = e.offsetX * pic_real_height / currentImageHeight;
+            var currenty = e.offsetY * pic_real_width / currentImagewidth;
+             placeDiv(currentx, currenty, nodeCopy.id)
+
+            var url = CRxUrls.Common_floorInspection;
+            $.get(url + '?FloorId=' + floorId + '&Xcoordinate=' + currentx + '&Ycoordinate=' + currenty, function (data) {
+                $('#loadpartial').html(data);
+                $('#floorInspection').modal('show');
+            });
+        }
+    }
+
+    $('#floorInspection').on('hidden.bs.modal', function () {
+        $("#" + newControlId).remove();
+    });
+
+    function offset(el) {
+        var rect = el.getBoundingClientRect(),
+        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
+    }
+
+    function placeDiv(x_pos, y_pos, divId) {
+        //var img = $("#floorimg"); // Get my img elem
+        var myImg = document.querySelector("#floorimg");
+        var pic_real_width = myImg.naturalWidth;
+        var pic_real_height = myImg.naturalHeight;
+        //var myImg = document.getElementById("floorimg");
+        var currentImageHeight = myImg.height;
+        var currentImagewidth = myImg.width;
+        var currentx = x_pos * currentImageHeight / pic_real_height;
+        var currenty = y_pos * currentImagewidth / pic_real_width;
+        var d = document.getElementById(divId);
+        var wrapper = $("#containers");
+        var offset = wrapper.offset();
+        $(document.getElementById(divId)).offset({ top: currenty + offset.top - 25, left: currentx + offset.left - 25, position: 'absolute' });
+
+    }
+
+    $('.floorInspection_0').click(function () {
+        var IssuefloorId = '@floor.FloorId';
+        var item = $(this);
+        var issueid = item[0].id;
+        OpenIssuePopUp(IssuefloorId, issueid);
+    });
+
+    function OpenIssuePopUp(IssuefloorId, issueid) {
+        var url = CRxUrls.Common_floorInspection;
+        $.get(url + '?FloorId=' + IssuefloorId + "&IssueId=" + issueid, function (data) {
+            console.log(data);
+            $('#loadpartial').html(data);
+            $('#floorInspection').modal('show');
+        });
+    }
+
+    $('.floorInspection_1').click(function () {
+        var IssuefloorId = '@floor.FloorId';
+        var item = $(this);
+        var issueid = item[0].id;
+        OpenIssuePopUp(IssuefloorId, issueid);
+        //window.location.href = CRxUrls.WorkOrder_UpdateWorkOrder + "?issueId=" + issueid;
+
+    });
+
+    function showfilteritem(values, control) {
+        debugger;
+        $(".button1").removeClass("active");
+        $("#" + control.id).addClass("active");
+        if (values == 1) {
+            $(".floorInspection_0").hide();
+            $(".floorInspection_1").show();
+
+        } else if (values == 0) {
+            $(".floorInspection_0").show();
+            $(".floorInspection_1").hide();
+        } else {
+            $(".floorInspection_0").show();
+            $(".floorInspection_1").show();
+        }
+    };
+
+
+</script>

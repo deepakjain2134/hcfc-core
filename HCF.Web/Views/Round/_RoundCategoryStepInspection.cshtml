@@ -1,0 +1,44 @@
+﻿@model HCF.BDO.TRoundsQuestionnaires
+@{
+    Layout = null;
+    string inspStatus = this.ViewData.ContainsKey("inspStatus") ? this.ViewData["inspStatus"].ToString() : "2";
+    string troundId = this.ViewData.ContainsKey("troundId") ? this.ViewData["troundId"].ToString() : "0";
+}
+
+<tr id="@($"tr_{Model.RouQuesId}")"
+    class="details @(@Model.RoundsQuestionnaires.IsShared ? "shareQuestr" : "Questr")">
+    <td width="10%">
+        <input type="hidden" value="@Model.RoundsQuestionnaires.RoundCatId" class="hndCatId">
+        <input type="hidden" value="@Model.TRoundId" name="TRoundId" id="TRoundId">
+        <input id="InsStatus_@Model.RouQuesId"
+               type="button" class="ins_check3_btn"
+               onclick="showstepsOptions('@Model.RouQuesId')"
+               value="@Model.Status"
+               tempname='@string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}",Model.RoundsQuestionnaires.RouQuesId,Model.RoundsQuestionnaires.RoundCatId)' />
+
+        <div id="round_steps_@Model.RouQuesId" class="dropdown-content ddlilsm"
+             tempname='@string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}", Model.RoundsQuestionnaires.RouQuesId,Model.RoundsQuestionnaires.RoundCatId )'>
+            <a val="-1">Pending</a>
+            <a val="1">Compliant</a>
+            <a val="0">Non Compliant</a>
+            <a val="-3">Non Applicable</a>
+        </div>
+        @Html.HiddenFor(x => Model.Status, new { @id = string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}", Model.RoundsQuestionnaires.RouQuesId, Model.RoundsQuestionnaires.RoundCatId) })
+
+    </td>
+    <td width="55%" style="vertical-align: middle;">
+        @Html.HiddenFor(x => Model.RouQuesId)
+        @Model.RoundsQuestionnaires.RoundStep
+    </td>
+    <td style="vertical-align: middle;" width="30%">
+        @Html.TextBox("Comment", null, new { @class = "form-control stepComment" })
+    </td>
+    <td>
+        @await Html.PartialAsync("_roundStepFileAttach", Model,
+        new ViewDataDictionary(
+        new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+        { { "inspStatus", inspStatus }}
+        )
+    </td>
+</tr>

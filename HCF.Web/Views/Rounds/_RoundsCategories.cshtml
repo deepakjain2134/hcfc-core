@@ -1,0 +1,43 @@
+﻿@model IEnumerable<HCF.BDO.TRounds>
+<ul class="table roundsCategory">
+
+    @foreach (var item in Model)
+    {
+        <li>
+            @if (ViewBag.RoundId != null && ViewBag.RoundId == item.TRoundId)
+            {
+                <input type="checkbox" value="@item.TRoundId" name="cb2" class="roundsChk">
+
+                <span></span>
+            }
+            else
+            {
+                <input type="checkbox" value="@item.TRoundId" name="cb2" class="roundsChk">
+                <span></span>
+            }
+            @Html.DisplayFor(modelItem => item.CategoryName)
+        </li>
+    }
+</ul>
+<script>
+    $('input[type="checkbox"]').on('change', function () {
+        $('li').find('input[type="checkbox"]:eq(' + $(this).index() + ')').not(this).prop('checked', false);
+        $("ul.floor_no li").removeClass("active");
+
+        var roundCatId = $(this).val();
+        if (roundCatId == 15) {
+            $.ajax({
+                type: "GET",
+                url: CRxUrls.Rounds_GetActiveRoundDeficiency,             
+                success: function (datas) {                   
+                    for (i = 0; i < datas.Result.length; i++) {
+                        $("li#" + datas.Result[i]).addClass("active");
+                    }
+                },
+                dataType: "json",
+                traditional: true
+            });
+        }
+    });
+   
+</script>

@@ -1,0 +1,126 @@
+﻿@model List<HCF.BDO.News>
+@{
+    ViewBag.Title = "CRx News";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentNews = (HCF.BDO.News)ViewBag.CurrentNews;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            CRx Updates
+        </h1>
+    </section>
+}
+
+@if (Model != null)
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 Certificate_list ">
+                <div class="box box-primary">
+                    <ul class="crx-scrollBar-no">
+                        @foreach (var item in Model.Where(x => x.IsExpired == false).OrderByDescending(x => x.CreatedOn))
+                        {
+                            <li class="newsli @((currentNews !=null && currentNews.Id==item.Id)?"liactive":"")" id="@item.Id">
+                                <a>@Html.DisplayFor(modelItem => item.Title) <span class="newupdateDate">( @item.StartDate.ToFormatDate() )</span> </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <div id="news-description" class="lasted-newsBox">
+                        @if (currentNews != null)
+                        {
+                            @await Html.PartialAsync("_ReleaseNotesView", currentNews)
+                        }
+                    </div>
+                    <div id="ndbackButton hide">
+                        @Html.RouteLink("Back", "dashboard", "", new { @class = "btn button1" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="tble_shadow text-center">No data available</div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts{
+    <script type="text/javascript">
+
+        var releaseNotesUrl = '@Url.Action("GetReleaseNotes", "NewsItem")';
+
+        $(document).ready(function () {
+            $(".newsli").click(function () {
+                $("li").removeClass("liactive");
+                $(this).addClass("liactive");
+                var url = releaseNotesUrl;
+                $.get(url + "?id=" + $(this).attr("id"),
+                    function (data) {
+                        $("#news-description").html('');
+                        $('#news-description').html(data);
+                        $('#news-description').fadeIn('fast');
+                    });
+            });
+        });
+
+        $('input#searchNews1').keyup(function() {
+            const searchText = $(this).val().toLowerCase();
+            let els = $('.crx-scrollBar li');
+            if (searchText.trim() == '') {
+                $(els).css('display', 'block');
+            } else {
+                let searchFound = 0;
+                for (var el of els) {
+                    let liText = $(el).text().toLowerCase();
+                    if (liText.search(searchText) != "-1") {
+                        $(el).css('display', 'block');
+                        searchFound = 1;
+                        //debugger;
+                        let url = releaseNotesUrl; //CRxUrls.News_GetReleaseNotes;
+                        let liels = $('.newsli:visible');
+                        let id = $(liels)[0].id;
+                        if (isNaN(id)) {
+                            id = 0;
+                        };
+                        $.get(url + "?id=" + id,
+                            function(data) {
+                                $('#news-description').html('');
+                                $('#news-description').html(data);
+                                $('#news-description').fadeIn('fast');
+                            });
+                    } else {
+                        $(el).css('display', 'none');
+                    }
+                }
+                //debugger;
+                if (searchFound == 0) {
+                    var notFoundMsgEl = `<p id='notFoundMsgEl' style='margin-top:40px'>No Record Found</p>`;
+                    var elCount = $(body).find('#notFoundMsgEl').length;
+                    if (elCount == 0) {
+                        $('#news-description').hide();
+                        $(this).parent().append(notFoundMsgEl);
+                        $('#notFoundMsgEl').addClass('border border-info rounded')
+                            .fadeOut(7500, function() { $('#notFoundMsgEl').remove(); });
+                    }
+                } else {
+                    //debugger;
+                    $('#notFoundMsgEl').hide()
+                    $('#news-description').show();
+                }
+            }
+        });
+    </script>
+}

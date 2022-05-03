@@ -1,0 +1,86 @@
+﻿@*@model HCF.BDO.Organization
+
+<ul class="top_menu">
+    @if (HCF.Web.Base.UserSession.CurrentUser.Orgkey == Guid.Empty)
+    {
+        <li>
+            <a href='@(Url.RouteUrl("client"))' class="home_icon">
+                <img alt="client Lists" src="@Url.Content("~/Images/Icons/list_icon.png")" title="Hospital list" />
+                <span>Hospitals</span>
+            </a>
+        </li>
+    }
+    //else if (ViewContext.RouteData.Route == RouteTable.Routes["Client"] || ViewContext.RouteData.Route == RouteTable.Routes["dashboard"])
+    //{
+
+    //}
+    else
+    {
+        if (!string.IsNullOrEmpty(HCF.Web.Base.UserSession.UserOrg))
+        {
+            <li>
+                <a href='@(Url.RouteUrl("dashboard"))' class="home_icon" title="Home">
+                    <img alt="Home" src="@Url.Content("~/Images/Icons/home_new_icon.png")" title="Home" />
+                    <span>Home</span>
+                </a>
+            </li>
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(HCF.Web.Base.UserSession.UserOrg))
+    {
+        foreach (var item in Model.Services.Where(x => x.ParentId == 0).ToList())
+        {
+            if (HCF.Web.Base.UserSession.IsInRole(item.Alias.Trim()))
+            {
+                <li class="dynamic_menu">
+                    @if (!string.IsNullOrEmpty(item.PageUrl))
+                    {
+                        <a href="@Url.RouteUrl(item.PageUrl)" title="@item.Name">                         
+                            <img src="@item.ImagePath" />
+                            <span>@item.Name</span>
+                        </a>
+                    }
+                    else
+                    {
+                <a href="@Url.Action("SetPage", "Home", new { id = item.Id })" title="@item.Name">                  
+                    <img src="@item.ImagePath" />
+                    <span>@item.Name</span>
+                </a>
+                    }
+                </li>
+            }
+        }
+    }
+
+    <ul class="nav navbar-nav" title="Settings">
+        <li class="dropdown user user-menu">
+
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <div class="profile-user-menu-img">
+                    <img alt="Home" src="@HCF.Web.Base.UserSession.GetUserImage()" title="@HCF.Web.Base.UserSession.CurrentUser.FullName"
+                         onerror="this.onerror = null; this.src = '@Url.Content("~/Images/User/default.png")';" />
+                </div>
+                <span>Me</span>
+            </a>
+
+            <ul class="dropdown-menu">
+                <li>
+                    @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <a href="javascript:document.getElementById('logoutForm').submit()"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a>
+                    }
+                </li>
+                <li class="liprofile">
+                    <a href="@Url.RouteUrl("myprofile")"><i class="fa fa-user" aria-hidden="true"></i> Profile</a>
+                </li>
+                <li class="chkpassword">
+                    <a href="@Url.RouteUrl("changepassword")"><i class="glyphicon glyphicon-lock" aria-hidden="true"></i> Change Password</a>
+                </li>
+              
+            </ul>
+        </li>
+    </ul>
+
+</ul>*@

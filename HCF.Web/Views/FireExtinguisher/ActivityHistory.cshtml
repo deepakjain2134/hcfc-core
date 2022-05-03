@@ -1,0 +1,81 @@
+﻿@model HCF.BDO.TFloorAssets
+@{
+    ViewBag.Title = "Asset Activity History";
+}
+@section pageHeader
+{
+    <section class="content-header">
+        <h1>
+            Activity History 
+        </h1>
+    </section>
+    }
+   
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3 asset_list_view">
+                    <div class="box box-primary col-lg-12">
+
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box box-primary">
+                        @Html.HiddenFor(m => m.FloorAssetsId)
+                        <div class="row tablelist-topform">
+                            <div class="tble_shadow">
+                                <div class="col-md-4 form-group"><label>Asset: </label> @Model.Assets.Name</div>
+                                <div class="col-md-4 form-group"><label>Name: </label>   @Model.Name.CastToNA()</div>
+                                <div class="col-md-4 form-group"><label> @Localizer["StopName"] :</label>@string.Format("{0}({1})", Model.Stop.StopName.CastToNA(), Model.Stop.StopCode.CastToNA())</div>
+
+                                <div class="col-md-4 form-group"><label>Tag #: </label>@Model.SerialNo</div>
+                                <div class="col-md-4 form-group"><label>Location: </label> @commonModelFactory.GetFloorAssetLocation(Model)</div>
+                                <div class="col-md-4 form-group"><label>Nearby: </label> @Model.NearBy.CastToNA()</div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12 text-right" style="border-bottom: 4px solid #f5f5f5; margin-bottom: 10px;">
+                                <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                    <label class="btn active">
+                                        <input type="radio" name="drpInspTypes" value="0" /><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        <span>All</span>
+                                    </label>
+                                    @foreach (HCF.BDO.FrequencyMaster item in (List<HCF.BDO.FrequencyMaster>)(ViewBag.InspectionType))
+                                    {
+                                        <label class="btn">
+                                            <input type="radio" name="drpInspTypes" value="@item.FrequencyId" /><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            <span>@item.DisplayName</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div id="loadpartial">
+                            @await Html.PartialAsync("_activityFE", Model)
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    <script>
+
+    $(document).ready(function (e) {
+        $("input:radio[name=drpInspTypes]:first").attr('checked', true);
+    });
+
+    $("input[name=drpInspTypes]:radio").change(function () {
+        var floorassetid = $("#FloorAssetsId").val();
+        var drpInspTypes = $('input[name=drpInspTypes]:checked').val();
+        var url = '@Url.Action("filterActivityHistory", "FireExtinguisher")';
+        $.get(url + "?floorAssetId=" + floorassetid +"&insptype=" + drpInspTypes, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+    });
+    </script>
+

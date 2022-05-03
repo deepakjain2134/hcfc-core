@@ -1,0 +1,178 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@if (Model.Any())
+{
+
+    //using (Ajax.BeginForm("GenerateReports", "FireExtinguisher", new { id = "reportform" }, new AjaxOptions { OnSuccess = "OnSuccess" }))
+    //{
+
+
+    <form asp-controller="FireExtinguisher" asp-action="GenerateReports"
+          data-ajax-success="OnSuccess" id="reportform"
+          data-ajax="true" data-ajax-method="POST">
+        @{
+            var buildings = from c in Model
+                            group c by new
+                            {
+                                c.Floor.BuildingId
+                            }
+                            into gcs
+                            select new
+                            {
+                                buildingId = gcs.Key.BuildingId,
+                                buildingName = gcs.FirstOrDefault().Floor.Building.BuildingName,
+                                floorassets = gcs.ToList()
+                            };
+        }
+        <div id='dvhtml' style='padding:12px 20px;width:100%;'>
+            <input type="hidden" name="htmlcontent" id="htmlcontent" />
+            @foreach (var item in buildings)
+            {
+                <div class="tble_shadow" style="width:100%;">
+                    <div class="tble_shadow">@string.Format("{0} : {1}", "BuildingName", item.buildingName)</div>
+                    <div class="tble_shadow" style="width:100%;">
+                        @{
+                            var tfloorasset = item.floorassets.Where(x => x.Floor.BuildingId == item.buildingId);
+                            var floors = from b in tfloorasset
+                                         group b by new
+                                         {
+                                             b.Floor.FloorName
+                                         }
+                                         into floor
+                                         select new
+                                         {
+                                             floorName = floor.Key.FloorName,
+                                             floorAssets = floor.ToList()
+                                         };
+                            foreach (var fl in floors)
+                            {
+                                <div class="tble_shadow" style="width:100%;">
+                                    @string.Format("{0} : {1}", "FloorName", fl.floorName)
+                                </div>
+                                <table class="table table-bordered table-striped tbls" id="tbls" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            @*<th style="display:none"></th>*@
+                                            <th>Tag #</th>
+                                            <th>Model</th>
+                                            <th>Name</th>
+                                            <th>Make</th>
+                                            <th>Inspected</th>
+                                            <th>Result</th>
+                                            <th>Status</th>
+                                            <th>Insp. Type</th>
+                                            <th>Inspector</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var floorAsset in fl.floorAssets)
+                                        {
+                                            <tr>
+                                                @*<td style="display:none">@floorAsset.FloorAssetsId</td>*@
+                                                <td>@floorAsset.TagNo</td>
+                                                <td>@floorAsset.Model</td>
+                                                <td>@floorAsset.Assets.Name</td>
+                                                <td>@floorAsset.Make.ManufactureName</td>
+                                                @if (floorAsset.TInspectionActivity.Count > 0)
+                                                {
+                                                    foreach (var activity in floorAsset.TInspectionActivity.Where(x => x.IsCurrent))
+                                                    {
+                                                        <td>@activity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()</td>
+                                                        <td>@activity.InspResult.ResultName</td>
+                                                        <td>@activity.InspStatus.StatusName</td>
+                                                        <td>@activity.Frequency.DisplayName</td>
+                                                        <td>@activity.UserProfile.FullName</td>
+                                                        <td>@activity.Comment</td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            <div style="display:none">
+                @string.Format("{0} : {1} \n\n\n {2} : {3}", Localizer["PrintGeneratedFromTitle"], Localizer["PrintGeneratedFromText"], Localizer["PrintGeneratedByTitle"], HCF.Web.Base.UserSession.CurrentUser.Name)
+            </div>
+        </div>
+        <div class="button_Div" style="clear:both;">
+            <input type="button" value="Export To Pdf" class="button1" id="btnSubmit" onclick="exportPDF();" />
+        </div>
+    </form>
+}
+else
+{
+    <div class="tble_shadow text-center">No data available</div>
+}
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+<script src="@Url.Content("~/dist/js/jspdf.debug.js")"></script>
+<script>
+    var dtable = $('.tbls').DataTable({
+        "searching": false,
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('.tbls tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "oSearch": { "bSmart": false },
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+    });
+
+
+
+    var specialElementHandlers = {
+        // element with id of "bypass" - jQuery style selector
+        '.no-export': function (element, renderer) {
+            // true = "handled elsewhere, bypass text extraction"
+            return true;
+        }
+    };
+
+    function exportPDF() {
+
+        var doc = new jsPDF('l', 'pt', 'a4');        //Html source
+
+        var imgData = localStorage.getItem("logoimgbase64");
+        doc.addImage(imgData, 'JPEG', 20, 20, 40, 26);
+        doc.text(60, 42, getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'));
+        doc.text(350, 42, 'Fire Extinguisher Report');
+
+        var source = document.getElementById('dvhtml').innerHTML;
+
+        var margins = {
+            top: 60,
+            bottom: 10,
+            left: 20,
+            width:'100%'
+        };
+
+        doc.fromHTML(
+            source, // HTML string or DOM elem ref.
+            margins.left,
+            margins.top, {
+                'width': margins.width,
+                'elementHandlers': specialElementHandlers
+            },
+            //table.style.fontSize = '5px',
+            function (dispose) {
+                // dispose: object with X, Y of the last line add to the PDF
+                  //        this allow the insertion of new lines after html
+                doc.save('fire-extinguisher.pdf');
+            }, margins);
+    }
+
+</script>

@@ -1,0 +1,372 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+    ViewBag.Title = "ILSM Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            ILSM Reports
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    
+                        <div id="catfilter" class="MarkDeficiency">
+                            <div class="btn-group btn-group-vertical left_setting">
+                                <label class="btn">
+                                    @Html.RadioButton("IlsmCat", 1, true, new { onclick = "getSelectedItem()" })@Html.Label("ILSM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                </label>
+                                <label class="btn">
+                                    @Html.RadioButton("IlsmCat", 2, new { onclick = "getSelectedItem()" })@Html.Label("Non ILSM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="Ilsm">
+                            <table id="ilsmTable" class="table table-bordered table-striped" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th colspan="6">ILSM</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th>1</th>
+                                        <th>2</th>
+                                        <th>3</th>
+                                        <th>4</th>
+                                        <th>5</th>
+                                        <th>6</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th>Asset was inspected on</th>
+                                        <th>Deficiency was recorded</th>
+                                        <th>Work Order was Created</th>
+                                        <th>Risk assessment done</th>
+                                        <th>It was determined that ILSM was required</th>
+                                        <th>Work order completed</th>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            @Localizer["WorkOrderNo"]
+                                        </th>
+                                        <th>
+                                            Deficiency
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ep in Model)
+                                    {
+                                        foreach (var inspe in ep.Inspections)
+                                        {
+                                            foreach (var item in inspe.TInspectionActivity.Where(x => x.IsIlsm == true))
+                                            {
+                                                if (item.WorkOrders.Where(x => x.DeficiencyCode == "AD").ToList().Count > 0)
+                                                {
+                                                    foreach (var WO in item.WorkOrders)
+                                                    {
+                                                        <tr>
+                                                            <td>@WO.WorkOrderNumber</td>
+                                                            <td>@WO.Description</td>
+                                                            @if (item.CreatedDate.HasValue)
+                                                            {
+                                                                <td>@item.CreatedDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.DeficiencyDate.HasValue)
+                                                            {
+                                                                <td>@item.DeficiencyDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (WO.CreatedDate.HasValue)
+                                                            {
+                                                                <td>@WO.CreatedDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.RaDate.HasValue)
+                                                            {
+                                                                <td>@item.RaDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.IlsmDate.HasValue)
+                                                            {
+                                                                <td>@item.IlsmDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (WO.DateCompleted.HasValue)
+                                                            {
+                                                                <td>@WO.DateCompleted.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        @if (item.CreatedDate.HasValue)
+                                                        {
+                                                            <td>@item.CreatedDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        @if (item.DeficiencyDate.HasValue)
+                                                        {
+                                                            <td>@item.DeficiencyDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        <td>
+                                                            N/A
+                                                        </td>
+                                                        @if (item.RaDate.HasValue)
+                                                        {
+                                                            <td>@item.RaDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        @if (item.IlsmDate.HasValue)
+                                                        {
+                                                            <td>@item.IlsmDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        <td>
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="Nonilsm" class="row">
+                            <table id="ilsmTable" class="table table-bordered table-striped" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th colspan="6">Non ILSM</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th>1</th>
+                                        <th>2</th>
+                                        <th>3</th>
+                                        <th>4</th>
+                                        <th>5</th>
+                                        <th>6</th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th>Asset was inspected on</th>
+                                        <th>Deficiency was recorded</th>
+                                        <th>Work Order was Created</th>
+                                        <th>Risk assessment done</th>
+                                        <th>It was determined that ILSM was not required</th>
+                                        <th>Work order completed </th>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            @Localizer["WorkOrderNo"]
+                                        </th>
+                                        <th>
+                                            Deficiency
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ep in Model)
+                                    {
+                                        foreach (var inspe in ep.Inspections)
+                                        {
+                                            foreach (var item in inspe.TInspectionActivity.Where(x => x.IsIlsm == false))
+                                            {
+                                                if (item.WorkOrders.Where(x => x.DeficiencyCode == "AD").ToList().Count > 0)
+                                                {
+                                                    foreach (var WO in item.WorkOrders)
+                                                    {
+                                                        <tr>
+                                                            <td>@WO.WorkOrderNumber</td>
+                                                            <td>@WO.Description</td>
+                                                            @if (item.CreatedDate.HasValue)
+                                                            {
+                                                                <td>@item.CreatedDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.DeficiencyDate.HasValue)
+                                                            {
+                                                                <td>@item.DeficiencyDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (WO.CreatedDate.HasValue)
+                                                            {
+                                                                <td>@WO.CreatedDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.RaDate.HasValue)
+                                                            {
+                                                                <td>@item.RaDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (item.IlsmDate.HasValue)
+                                                            {
+                                                                <td>@item.IlsmDate.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                            @if (WO.DateCompleted.HasValue)
+                                                            {
+                                                                <td>@WO.DateCompleted.Value.ToFormatDate()</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td>N/A</td>}
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        @if (item.CreatedDate.HasValue)
+                                                        {
+                                                            <td>@item.CreatedDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        @if (item.DeficiencyDate.HasValue)
+                                                        {
+                                                            <td>@item.DeficiencyDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        <td>
+                                                            N/A
+                                                        </td>
+                                                        @if (item.RaDate.HasValue)
+                                                        {
+                                                            <td>@item.RaDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        @if (item.IlsmDate.HasValue)
+                                                        {
+                                                            <td>@item.IlsmDate.Value.ToFormatDate()</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>N/A</td>}
+                                                        <td>
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        getSelectedItem();
+    });
+
+    function getSelectedItem() {      
+        var IlsmCat = parseInt($('input[name=IlsmCat]:checked').val());
+        if (IlsmCat == 1) {
+            $("#Ilsm").show();
+            $("#Nonilsm").hide();
+        } else {
+            $("#Nonilsm").show();
+            $("#Ilsm").hide();
+        }
+    }
+
+</script>
+
+
+
+

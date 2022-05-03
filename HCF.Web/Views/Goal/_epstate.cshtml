@@ -1,0 +1,37 @@
+﻿<div class="progress">
+    <div class="circle">
+        <span class="label">1</span>
+        <span class="title">Doc Uploaded</span>
+    </div>
+    <span class="bar"></span>
+    <div class="circle">
+        <span class="label">2</span>
+        <span class="title">Assets Done</span>
+    </div>
+    <span class="bar"></span>
+    <div class="circle">
+        <span class="label">3</span>
+        <span class="title">EP Done</span>
+    </div>
+</div>
+<script>
+    var circles = $('.progress .circle');
+    var currentCircle = circles.first();
+    var previousCircle = $();
+
+    (function () {
+        currentCircle.addClass('active');
+        previousCircle.removeClass('active').addClass('done');
+
+        var bar = currentCircle.prev();
+        bar.addClass('done');
+
+        previousCircle = currentCircle;
+        currentCircle = currentCircle.nextAll('.circle:first');
+
+        if (previousCircle.length) {
+            setTimeout(arguments.callee, 1000);
+        }
+    })();
+
+</script>

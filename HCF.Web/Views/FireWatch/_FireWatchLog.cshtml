@@ -1,0 +1,275 @@
+﻿@model List<HCF.BDO.TimeSlots>
+@{
+    HCF.BDO.TimeSlots currentTimeSlot = Model.FirstOrDefault(x => x.isCurrent);
+    HCF.BDO.TimeSlots nextTimeSlot = Model.OrderBy(x => x.Sequence).FirstOrDefault(x => x.isNext);
+}
+@using (Html.BeginForm("AddFireWatchlog", "FireWatch", FormMethod.Post, new { enctype = "multipart/form-data", id = "firewatchlogform" }))
+{
+    @Html.AntiForgeryToken()
+<div class="col-md-12">
+    <table id="currentSlotTd">
+        @if (Model.FirstOrDefault().Start.ToClientTime().ToShortDateString() == DateTime.Now.ToShortDateString())
+        {
+            <tr>
+                <td>
+                    <b>Current Round:</b>
+                
+                    @if (currentTimeSlot != null)
+                    {
+                        <span>
+                            @($"{currentTimeSlot.Start.ToClientTime().ToString("t")}-{currentTimeSlot.End.ToClientTime().ToString("t")}")
+                        </span>
+                    }
+                </td>
+                <td style="padding-left: 24px;">
+                    <b>Next Round:</b>
+                
+
+                    @if (nextTimeSlot != null)
+                    {
+                        <span> @($"{nextTimeSlot.Start.ToClientTime().ToString("t")}-{nextTimeSlot.End.ToClientTime().ToString("t")}")</span>
+                    }
+                    else
+                    {
+                        <span>
+                            @($"{Model[0].Start.ToClientTime().ToString("t")}")
+                        </span>
+                    }
+
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+<div class="col-md-12">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="fireWatchTable">
+            <tr>
+                <th align="center">Start</th>
+                <th align="center">Finish</th>
+                <th align="center">
+                    <table width="100%">
+                        <tr>
+                            <th width="15%" align="center">Officer</th>
+                            <th width="45%" align="center">Areas </th>
+                            <th width="10%" align="center">Round Completed</th>
+                            <th width="30%" align="center">
+                                Comments
+                            </th>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr class="firelog"
+                        min="@Model[i].Start.ToClientTime().TimeOfDay.Hours"
+                        max="@Model[i].End.ToClientTime().AddMinutes(1).TimeOfDay.Hours"
+                        startTime="@Model[i].Start.ToClientTime()"
+                        endtime="@Model[i].End.ToClientTime()">
+                        <td style="vertical-align:middle" class="firsttd">
+                            @Model[i].Start.ToClientTime().ToString("t")
+
+                        </td>
+                        <td style="vertical-align:middle" class="firsttd">
+                            @Model[i].End.ToClientTime().ToString("t")
+                        </td>
+                        <td>
+                            <table width="100%" class="inner_table">
+                                @for (int j = 0; j < Model[i].FireWatchLog.Count; j++)
+                                {
+                                    @Html.HiddenFor(x => Model[i].Start)
+                                    @Html.HiddenFor(x => Model[i].End)
+                                    @Html.HiddenFor(x => Model[i].FireWatchLog[j].LogDate)
+                                    @Html.HiddenFor(x => Model[i].FireWatchLog[j].LogDateText)
+                                    @Html.HiddenFor(x => Model[i].FireWatchLog[j].FWLogId)
+                                    @Html.HiddenFor(x => Model[i].FireWatchLog[j].CreatedBy, new { Value = HCF.Web.Base.UserSession.GetUserId() })
+                                    <tr class="logtr">
+                                        <td width="15%">
+                                            @Html.TextBoxFor(x => Model[i].FireWatchLog[j].InspectorName, new { @class = "form-control InspectorName", maxlength = 50, oninput = "validate(this)" })
+                                        </td>
+                                        <td style="vertical-align:middle;" width="45%">
+                                            @Html.TextAreaFor(x => Model[i].FireWatchLog[j].Area, new { @class = "form-control trigger Area", @readonly = "readonly", @data_toggle = "popover", @title = string.Format("{0}-{1}", @Model[i].Start.ToClientTime().ToString("t"), @Model[i].End.ToClientTime().ToString("t")), @data_content = Model[i].FireWatchLog[j].Area })
+                                        </td>
+                                        <td width="10%">
+                                            <div style="display:inline-block; vertical-align:middle" class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                                                <input type="text" name="[@i].FireWatchLog[@j].CompleteTime" id="[@i].FireWatchLog[@j].CompleteTime"
+                                                       class="timepicker form-control CompleteTime readonly" min="@Model[i].Start.ToClientTime().TimeOfDay.Hours"
+                                                       max="@Model[i].End.ToClientTime().AddMinutes(1).TimeOfDay.Hours" autocomplete="off"
+                                                       readonly="readonly" value="@commonModelFactory.ConvertToAMPMClient(Model[i].FireWatchLog[j].RoundInspDate)" />
+
+                                            </div>
+                                        </td>
+                                        <td width="30%">
+                                            @Html.TextBoxFor(x => Model[i].FireWatchLog[j].Comment, new { @class = "form-control Comment", maxlength = 250, oninput = "validate(this)" })
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+    <div class="col-md-12 text-right button_Div">
+        <button type="button" class="comm-button" id="updateBtn">Update</button>
+    </div>
+}
+
+    <div class="col-md-12">
+        <div class="comman_checkbox1">
+            <input type="checkbox" id="closed" value="0" /><span></span><label>Show Closed</label>
+        </div>
+
+        <div id="loadSchedulespartial">
+            @await Html.PartialAsync("_FireWatchSchedules", (List<HCF.BDO.ScheduledLogs>)ViewBag.WireWatchLogs)
+        </div>
+    </div>
+
+
+
+<script>
+
+
+    $(document).ready(function () {
+        $("[data-toggle=popover]").popover({
+            trigger: 'auto',
+            placement: "auto",
+            html: true,
+            container: 'body',
+            content: function () {
+                var anchorText = $(this).val();
+                $('#popover-content').find('input[id=txtContent]').attr('value', anchorText);
+                return $('#popover-content').html();
+            }
+        });
+        setcurrentDate();
+    });
+
+
+    $("#updateBtn").click(function () {
+        if ($("tr.logtr.error").length == 0) {
+            $("#firewatchlogform").submit();
+        } else {
+            return false;
+        }
+    });
+
+    $(".timepicker").each(function () {
+        var input = $(this);
+        var max = $(this).attr("max");
+        var min = $(this).attr("min");
+        max = max == 0 ? 24 : max;
+        input.clockpicker({
+            autoclose: false,
+            twelvehour: true,
+            donetext: "Done",
+            afterDone: function () {
+                checkValidTime(input, max, min);
+                //  console.log("after done");
+            }
+        });
+    });
+
+    function checkValidTime(input, max, min) {
+        var currentDate = new Date();
+        var month = currentDate.getMonth();
+        var day = currentDate.getDate();
+        var year = currentDate.getFullYear();
+        var minDateObj = new Date(year, month, day, min, 0, 0);
+        var maxDateObj = new Date(year, month, day, Number(max) - 1, 59, 0);
+        var selectedDateObj = ConvertToDateTime(currentDate, input.val());
+
+        if (IsDateInBetween(minDateObj, maxDateObj, selectedDateObj)) {
+        } else {
+            swalalert("Round Completed time must be in between the time slots");
+            input.val("");
+        }
+    }
+
+    function setcurrentDate() {
+        $('.firelog').each(function () {
+            // var min = $(this).attr("min");
+            //var max = $(this).attr("max");
+            var d = new Date();
+            var n = d.getHours();
+
+            var startDate = new Date($(this).attr("startTime"));
+            var endDate = new Date($(this).attr("endtime"));
+
+            var open = d < endDate && d > startDate ? 1 : 0;
+            if (open == 1) {
+                $(this).addClass("currenttr").addClass("currsch");
+                $(this).next().addClass("nextsch");
+                //$(".currentScheduleText").text($("tr.currenttr td:nth-child(1)").text() + "-" + $("tr.currenttr td:nth-child(2)").text());;
+                //$(".nextScheduleText").text($("tr.nextsch td:nth-child(1)").text() + "-" + $("tr.nextsch td:nth-child(2)").text())
+                $(this).find(".firsttd").addClass("currenttd");
+                $("tr.currenttr").nextAll().find(".Area").attr("readonly", true);
+                $("tr.currenttr").nextAll().find(".InspectorName").attr("readonly", true);//.css("background-color", "red");
+                $("tr.currenttr").nextAll().find(".CompleteTime").attr("readonly", true).removeClass("readonly");
+                $("tr.currenttr").nextAll().find(".Comment").attr("readonly", true);
+                $("tr.currenttr").nextAll().find(".CompleteTime").removeClass("timepicker");
+                var endTime = new Date($(this).attr("endtime"));
+                var min = diff_minutes(endTime, d);
+                if (min > 0 && min < 30) {
+                    //$(this).find("td:nth-child(1)").addClass("current_log_red");
+                    //$(this).find("td:nth-child(2)").addClass("current_log_red");
+                    //$(this).addClass("current_log_red");
+                    $(this).find(".firsttd").addClass("current_log_red");
+                }
+            }
+        });
+    }
+
+   
+
+    function diff_minutes(dt2, dt1) {
+        var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+        diff /= 60;
+        return Math.abs(Math.round(diff));
+    }
+
+    function validateFireLog() {
+        debugger;
+        $("tr.logtr").removeClass("error");
+        var isValid = true;
+        $('#fireWatchTable tbody tr').each(function () {
+            if ($(this).hasClass("logtr")) {
+                var array = [];
+                var isAnyEmpty = false;
+                var isAnyNotEmpty = false;
+                var inspectorName = $(this).find(".InspectorName").val();
+                var completeTime = $(this).find(".CompleteTime").val();
+                var comment = $(this).find(".Comment").val();
+                var area = $(this).find(".Area").val();
+                array.push(inspectorName.trim().length);
+                array.push(completeTime.trim().length);
+                array.push(comment.trim().length);
+                array.push(area.trim().length);
+                var totallength = array.length;
+                var emptyResults = jQuery.inArray(0, array);
+
+                var arr = jQuery.grep(array, function (n, i) {
+                    return (n === 0);
+                });
+              
+            }
+        });
+        return isValid;
+    }
+
+   
+
+
+
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+
+</script>
+

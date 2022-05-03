@@ -1,0 +1,195 @@
+﻿@model List<HCF.BDO.Site>
+@{
+    ViewBag.Title = "Permit Workflow";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            CRx Workflows
+
+        </h1>
+    </section>
+}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary">
+                    <ul class="list notification-leftMenu">
+                        <li>
+                            <span style="color:#000;" class="notifyType activeSite" ctrId="" mode="c">Organization Default</span>
+                        </li>
+                     
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4 id="notificationfor">Work Flow Default Matrix</h4>
+                            <p class="notification-helptext">
+                                Your Permit's default notification will be sent on assigned user below. The order of notification will be 1,2,2,2 and all required by default. Please see the help section below for more help.
+                            </p>
+                            <div class="float-right toccmailBox" style="display: none">
+                                <span class="tomail-bg">To Emails</span>
+                                <span class="ccmail-bg">Cc Emails</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="hidden" name="mode" id="mode" value="c" />
+                            <input type="hidden" name="searchId" id="searchId" value="" />
+                            <div class="views" id="partialContents">
+                                @await Component.InvokeAsync("PermitPermitFormSettingsMatrix", new { mode = "c" })
+                                @*@Html.Action("PermitFormSettingsMatrix", new { mode = "c" })*@
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+    <script>
+        $('body').on('click', '.addEmail', function () {
+            debugger;
+
+            var emailurl = CRxUrls.Permit_AssignpermitWorkFlowEmail;
+            var notiCatId = $(this).attr("id")
+            $.ajax({
+                url: emailurl + "?id=" + notiCatId,
+                method: "GET",
+                success: function (data) {
+                    debugger;
+                $('#modelContent').html($(data));
+                    //$(".modelTitle").text("Users");
+                }
+            })
+        });
+        function RefreshNotificationPage() {
+            window.redirecturl = "/permit/workflow";
+        }
+
+
+        var btnsettings = $(".btnsettings");
+        $(document).ready(function () {
+            btnsettings.click(function () {
+                debugger;
+                var type = $(this).attr("permittype");
+                var assetpathtype = $(this).attr("Path");
+                var trCount = $('#deviceTbl_' + type + ' tr:last td:first-child').find(".rowinput").val();
+                if (type == 13) {
+                    trCount = $('#deviceTbl_' + type + '_' + assetpathtype + ' tr:last td:first-child').find(".rowinput").val();
+                }
+               // var trCount = parseInt($('#deviceTbl_' + type + ' tr').length) - 1;
+               
+        var url = '@Url.Action("BindPermitSettingList", "Permit")';
+        $.ajax({
+            url: url + '?sequence=' + trCount + '&PermiType=' + type + '&assetpathtype=' + assetpathtype,
+            cache: false,
+            type: "GET",
+            success: function (trResult) {
+                if (type == 13) {
+                    $('#deviceTbl_' + type + '_' + assetpathtype + ' tr:last').after(trResult);
+                    addRowCount(type, assetpathtype);
+                }
+                else {
+                    $('#deviceTbl_' + type + ' tr:last').after(trResult);
+                    addRowCount(type);
+                }
+            
+               
+
+                var datetxt = "txt_date_" + (trCount+1);
+                    $('#' + datetxt).datepicker({
+                        showOn: "both",
+                        buttonImage: ImgUrls.datepicker_calendar,
+                        buttonImageOnly: true,
+                        dateFormat: $.CRx_DateFormat,
+                        beforeShow: changeYearButtons,
+                        onChangeMonthYear: changeYearButtons
+                    });
+
+                var datetxt1 = "txt_devicenumber_" + (trCount + 1);
+                    $('#' + datetxt1).on('input', function () {
+                    $(this).outerHeight(34).outerHeight(this.scrollHeight);
+                });
+                $('#' + datetxt1).trigger('input');
+            }
+        });
+        });
+
+        })
+        function addRowCount(type, assetpathtype) {
+            if (type == 13) {
+                $("#deviceTbl_ " + type + "_" + assetpathtype+ "tbody tr:not(.hide)").each(function (index) {
+                    debugger
+                    $(this).find(".rowNo").html(index + 1);
+                });
+
+            } else {
+                $("#deviceTbl_ " + type + "tbody tr:not(.hide)").each(function (index) {
+                    debugger
+                    $(this).find(".rowNo").html(index + 1);
+                });
+            }
+           
+        }
+        $(document).on('click', '.deleteTr', function () {
+            debugger;
+            var rowid = $(this).attr("rowid");
+            var trid = $(this).attr("trid");
+            var type = $(this).attr("permittype");
+            swal({
+                title: "Delete!",
+                text: "Deleting this will not impact the existing permits but will reflect only on further permits created. Are you sure you want to delete this record?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Yes',
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+
+                        $.ajax({
+                        type: "GET",
+                            url: CRxUrls.Permit_DeletePermitWorkFlow + "?Id=" + rowid + "&PermitType=" + type,
+                        success: function (data) {
+                            swal("Deleted!", "Your permit workflow has been deleted.", "success");
+                           
+                            location.reload();
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                       
+                    }
+                });
+        });
+    $(document).on('click', '.notfi-menuSubmenulist li', function () {
+        $('.notfi-menuSubmenulist li').not(this).removeClass('active');
+      //  $('.notfi-menuSubmenulist li.active').find(".notification-tomails").toggleClass('hide');
+        $(this).toggleClass('active');
+    });
+
+    $(document).on('click', '.notification-leftMenu .crxcheckbox li', function () {
+      //  $('.notification-leftMenu .crxcheckbox li').removeClass('noti-active');
+      //  $(this).addClass('noti-active');
+
+        $(this).closest(".notifyType.activeSite").find(".crxcheckbox").hide();
+    });
+      
+    </script>
+   
+}

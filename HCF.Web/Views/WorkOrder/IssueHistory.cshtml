@@ -1,0 +1,155 @@
+﻿@model HCF.BDO.WorkOrder
+@{
+    ViewBag.Title = "IssueHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["WorkOrder"]
+        </h1>
+
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+
+                    <div class="tble_shadow">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td width="25%"><strong>Issue ID#:</strong>   @Model.IssueId</td>
+                                    <td width="25%"><strong>Date:</strong>   @Model.CreatedDate.ToFormatDate()</td>
+                                    <td width="25%"><strong>Standard EP:</strong>   @Model.EPDetails.Standard.TJCStandard ,@Model.EPDetails.EPNumber</td>
+                                    <td width="25%" style="text-align:right;">
+                                        @*@if (Model.Status == 1)
+                                        {
+                                            <input type="submit" name="button" class="button_yellow"
+                                                   value="@commonModelFactory.GetIssueStatus(2)" />
+
+
+                                            <input type="submit" name="button" value="@commonModelFactory.GetIssueStatus(0)" data-target="#closeModal" data-toggle="modal" class="closeModal button_orange" style="float:right; margin-left:8px;" />
+
+                                        }
+                                        else if (Model.Status == 2)
+                                        { <input type="submit" name="button" value="@commonModelFactory.GetIssueStatus(0)" data-target="#closeModal" data-toggle="modal" class="closeModal button_orange" style="float:right; margin-left:8px;" />
+
+                                        }*@
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tbody>
+                                                <tr>
+                                                    <td width="10%"><strong>EP Description:</strong></td>
+                                                    <td class="comment">@Model.EPDetails.Description</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="asset_table">
+                        <tbody>
+                            <tr>
+                                <th><strong>Device Name:</strong>   @Model.TInspectionActivity.TFloorAssets.Name  </th>
+                                <th><strong> @Localizer["AssetNo"]:</strong>  @Model.TInspectionActivity.TFloorAssets.AssetNo</th>
+                                <th><strong>Floor# / Area:</strong>   @commonModelFactory.GetFloorAssetLocation(Model.TInspectionActivity.TFloorAssets) </th>
+                                <th style="text-align:right;">
+                                    @await Html.PartialAsync("_InspectionFiles", Model.TInspectionActivity)
+
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-xs-12 ">
+
+                            <div class="work_order">
+                                @foreach (var item in Model.TInspectionActivity.TInspectionDetail)
+                                {
+
+                                    <strong>@item.MainGoal.Goal</strong>
+                                    <ul>
+                                        @foreach (var steps in item.InspectionSteps)
+                                        {
+                                            <li>
+                                                <input type="button" class="ins_check3_btn" value="@steps.Status" />     @steps.Steps.Step
+                                                @Html.HiddenFor(modelItem => steps.Comments)
+                                                @if (!string.IsNullOrEmpty(steps.Comments))
+                                                {
+                                                    <a href="@Url.Action("CommentPopUp", "Common", new { Title = "Comment", description = steps.Comments })" class="modal-link">
+                                                        <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" tempname='@steps.Comments' class="commentIcon" style="float:right" />
+                                                    </a>
+
+
+                                                }
+                                                else
+                                                {
+                                                    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />
+                                                }
+                                                @if (!string.IsNullOrEmpty(steps.FilePath))
+                                                {
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = steps.FilePath, title = "Image Preview" })" class="modal-link"><img class="@(steps.FilePath != string.Empty ? "img_prev_upload" : "img_prev")" id="imagePreview_@steps.StepsId" src="@commonModelFactory.FilePath(steps.FilePath)" style="float:right; margin-right:5px;"></a>
+                                                }
+                                                else
+                                                {
+                                                    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float:right; margin-right:5px;" class="commentIcon disable" />
+                                                }
+
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<div class="modal fade" id="closeModal" role="dialog">
+    <div class="modal-dialog">
+
+        @using (Html.BeginForm("SaveStatus", "WorkOrder", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> </h4>
+                </div>
+
+                <div class="modal-body">
+                    @Html.HiddenFor(x => x.IssueId)
+                    <div class="form-group"><strong>Date :</strong> @DateTime.Now.ToShortDateString()</div>
+                    <div class="form-group"><strong>Work Order Id:</strong> <input type="text" value="" id="workOrderId" name="workOrderId" class="form-control" /></div>
+                    <div class="form-group"><strong>Comment:</strong> <input type="text" value="" id="Commnet" name="Commnet" class="form-control" /></div>
+                    <div class="form-group"><strong>Attatch Doc :</strong> <input type="file" id="file" name="file"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="comm-button">Save</button>
+                    <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+

@@ -1,0 +1,30 @@
+﻿@page "/"
+
+@using HCF.Module.Survey.Model;
+@using HCF.Module.Survey.Services;
+
+@inject IAccountService _accountService;
+@inject NavigationManager NavigationManager;
+
+<div class="row">
+    <EditForm Model="@loginModel" OnValidSubmit="@validateAccount">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            Code: <InputText id="code" @bind-Value="loginModel.code" class="form-control" />
+        </div>
+        <br />
+        <button type="submit" class="btn btn-success">Submit</button>
+    </EditForm>
+</div>
+
+@code {
+
+    private LoginModel loginModel = new LoginModel();
+    private async Task validateAccount()
+    {
+        bool result = await _accountService.LoginAsync(loginModel);
+        if (result)
+            NavigationManager.NavigateTo("saveUserDetails/" + loginModel.code,true);
+    }
+}

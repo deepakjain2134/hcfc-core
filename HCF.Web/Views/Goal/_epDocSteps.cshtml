@@ -1,0 +1,444 @@
+﻿@model List<HCF.BDO.EPSteps>
+<div>
+    @*@Html.HiddenFor(m => Model.FirstOrDefault().InspectionId)
+        @Html.HiddenFor(m => Model.FirstOrDefault().ActivityId)
+        @Html.HiddenFor(m => Model.FirstOrDefault().DoctypeId)
+        @Html.HiddenFor(m => Model.FirstOrDefault().Status)
+        @Html.HiddenFor(m => Model.FirstOrDefault().ActivityType)
+        @Html.HiddenFor(m => Model.FirstOrDefault().DocInspectionGroupId)*@
+    <input type="hidden" id="IsDocDashboard" name="IsDocDashboard" value="@TempData["IsDocDashboard"]" />
+    @*<input type="hidden" id="IsCurrentCycle" name="IsCurrentCycle" value="" />*@
+    <input type="hidden" id="IsPreviousCycle" name="IsPreviousCycle" value="" />
+    <input type="hidden" id="PreviousCycleInspectionId" name="PreviousCycleInspectionId" value="" />
+    <input type="hidden" id="assetsid" name="assetsid" value="" />
+    <input type="hidden" id="TCycleId" name="TCycleId" value="" />
+    @*<input type="hidden" id="duedate" name="duedate" value="@Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.Inspection.DueDate.Value.ToFormatDate()" />*@
+
+    @foreach (var Model in Model)
+    {
+        for (var h = 0; h < Model.EPStep.Count; h++)
+        {
+            @Html.HiddenFor(m => Model.EPStep[h].EPDetailId);
+            @Html.HiddenFor(m => Model.EPStep[h].InspectionId)
+            @Html.HiddenFor(m => Model.EPStep[h].IsCurrentCycle)
+            @Html.HiddenFor(m => Model.EPStep[h].ActivityId)
+            @Html.HiddenFor(m => Model.EPStep[h].DoctypeId)
+            @Html.HiddenFor(m => Model.EPStep[h].Status)
+            @Html.HiddenFor(m => Model.EPStep[h].ActivityType)
+            @Html.HiddenFor(m => Model.EPStep[h].DocInspectionGroupId)
+            @Html.HiddenFor(m => Model.EPStep[h].DocName)
+            @Html.HiddenFor(m => Model.EPStep[h].FrequencyId)
+
+        }
+
+    }
+
+</div>
+
+  
+    <div class="inspection_Docform">
+        @if (Model.FirstOrDefault().EPStep.Count <= 1)
+        {
+            <div class="form-group">
+               
+                    <label> @Localizer["StandardEP"] :</label>
+                    @foreach (var Model in Model)
+                    {
+                        for (var h = 0; h < Model.EPStep.Count; h++)
+                        {
+                            @*<span> @Model.EPStep[h].StandardEP</span>*@
+                            var _copy = "</br><span style='font-size:10px'>©2020 The Joint Commission. All rights reserved. Used with permission.</span>";
+                            <a href="javascript:void(0);"
+                                tabindex="0" data - trigger="focus"
+                                class="descriptions" rel='popover'
+                                data-placement='right'
+                                data-html="true"
+                                data-original-title='@Model.EPStep[h].StandardEP'
+                                data-content='@Model.EPStep[h].Description @_copy '>@Model.EPStep[h].StandardEP</a>
+                            for (var j = h; j < Model.EPStep.Count - 1; j++)
+                            {<span>|</span>
+                            }
+                        }
+                    }
+               
+            </div>
+            <div class="form-group">
+               
+                    <label>Binder:</label>
+                    @foreach (var Model in Model)
+                    {
+
+                        for (var h = 0; h < Model.EPStep.Count; h++)
+                        {
+                            @Model.EPStep[h].BinderName.CastToNA()
+                            for (var j = h; j < Model.EPStep.Count - 1; j++)
+                            {<span>|</span>
+                            }
+                        }
+                    }
+
+               
+            </div>
+            }
+
+           
+                <div class="form-group" id="_docname">
+                    <label>CRx Standardized Name:</label>
+                    @Model.FirstOrDefault().EPStep.FirstOrDefault().DocName.CastToNA()
+                </div>
+            
+            <div class="form-group">
+                
+                    <label>File Name:</label><em class="required-field"> *</em>
+                    <div class="xlsxflex">
+                        <input type="text" name="txtfileName" class="form-control" id="txtfileName" required />
+                        &nbsp;<label>.</label><label id="lblfileext"></label>
+                    </div>
+               
+            </div>
+            <div class="form-group">
+               
+                    <label>
+                        Doc. Review Date:<em class="required-field"> *</em>   <i class="fa fa-info" data-toggle="tooltip" title="Enter the document’s actual date of review, e.g., when it was reviewed by a department or committee."></i>
+
+                    </label>
+                    <div class="">
+                        <input type="text" id="effectiveDate" name="effectiveDate" pattern="(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d"
+                               title="Format: MM/DD/YYYY"
+                               class="form-control datepicker" required="required" autocomplete="off" />
+                    </div>
+               
+            </div>
+            <div class="form-group">
+               
+                    <label>Upload As:</label><em class="required-field"> *</em>
+                    @{
+
+                        if (Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 106)
+                        {
+                            ViewBag.doctype = "Policy";
+                            <input type="hidden" id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required" autocomplete="off" value="@Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID" />
+
+                            <input type="text" id="uploaddocTypeId_text" name="uploaddocTypeId_text" class="form-control" required="required" autocomplete="off" readonly="readonly" value="@ViewBag.doctype" />
+                        }
+                        else if (Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 107)
+                        {
+                            ViewBag.doctype = "Report";
+                            <input type="hidden" id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required" autocomplete="off" value="@Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID" />
+
+                            <input type="text" id="uploaddocTypeId_text" name="uploaddocTypeId_text" class="form-control" required="required" autocomplete="off" readonly="readonly" value="@ViewBag.doctype" />
+                        }
+                        else
+                        {
+                            @*<select id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required">
+                            <option value="108">Misc. Documents</option>
+                            <option value="106">Policy</option>
+                            <option value="107">Report</option>
+                        </select>*@
+                            <input type="hidden" id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required" autocomplete="off" value="106" />
+
+                            <input type="text" id="uploaddocTypeId_text" name="uploaddocTypeId_text" class="form-control" required="required" autocomplete="off" readonly="readonly" value="Policy" />
+                        }
+                    }
+                    @*@if (Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 106 || Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 107)
+                {
+                    <input type="hidden" id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required" autocomplete="off" value="@Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID" />
+
+                    <input type="text" id="uploaddocTypeId_text" name="uploaddocTypeId_text" class="form-control" required="required" autocomplete="off" readonly="readonly" value="@ViewBag.doctype" />
+                }
+                else
+                {
+                    <select id="uploaddocTypeId" name="uploaddocTypeId" class="form-control" required="required">
+                        <option value="108">Misc. Documents</option>
+                        <option value="106">Policy</option>
+                        <option value="107">Report</option>
+                    </select>
+                }*@
+
+            
+
+            </div>
+
+        </div>
+   
+    <div class="row">
+        <div class="col-lg-12">
+
+            @foreach (var Model in Model)
+            {
+                for (var h = 0; h < Model.EPStep.Count; h++)
+                {
+                    if (Model.EPStep[h].IsDocRequired)
+                    {
+                        if (Model.EPStep.Count > 1)
+                        {
+                            var _copy = "</br><span style='font-size:10px'>©2020 The Joint Commission. All rights reserved. Used with permission.</span>";
+
+                            <a href="javascript:void(0);"
+                               tabindex="0" data - trigger="focus"
+                               class="descriptions" rel='popover'
+                               data-html="true"
+                               data-placement='right'
+                               data-original-title='@Model.EPStep[h].StandardEP'
+                               data-content='@Model.EPStep[h].Description @_copy'>@Model.EPStep[h].StandardEP</a>
+                        }
+
+
+                        for (var i = 0; i < Model.EPStep[h].MainGoal.Count; i++)
+                        {
+                            <div class="main_class_@Model.EPStep[h].MainGoal[i].ActivityType">
+                                <p class="class_@Model.EPStep[h].MainGoal[i].ActivityType" style="display:none;"><b>@($"{(Model.EPStep[h].MainGoal[i].ActivityType == 1 ? "The following EP requirement must be met." : "Confirm this document met these requirements.")}")</b></p>
+                                <div class="editor-field">
+                                    <h4>@Html.DisplayFor(m => Model.EPStep[h].MainGoal[i].Goal)</h4>
+                                    @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].MainGoalId)
+                                    @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].ActivityType)
+                                    @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].EPDetailId)
+                                </div>
+                                @for (int j = 0; j < Model.EPStep[h].MainGoal[i].Steps.Count; j++)
+                                {
+                                    <div class="@(Model.EPStep[h].MainGoal[i].Steps[j].IsRA ? " editor-field rastep goal-step-doc" : "editor-field  goal-step-doc" )">
+                                        <div>
+                                            <input class="@(Model.EPStep[h].MainGoal[i].ActivityType == 1 ? "ins_check3_btn" : "ins_check2_btn" )" type="button" onclick="tristate1(this),@Model.EPStep[h].MainGoal[i].ActivityType" value="@Model.EPStep[h].MainGoal[i].Steps[j].Status" tempname='EPStep[@h].MainGoal[@i].Steps[@j].Status' />
+                                            @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].Steps[j].Status)
+                                        </div>
+
+                                        @Html.DisplayFor(m => Model.EPStep[h].MainGoal[i].Steps[j].Step)
+                                        @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].Steps[j].StepsId)
+                                        @Html.HiddenFor(m => Model.EPStep[h].MainGoal[i].Steps[j].StepType)
+
+
+                                    </div>
+
+                                }
+                                @if (Model.EPStep[h].MainGoal[i].ActivityType == 1)
+                                {
+                                    <div class="form-group" style="background-color:white !important;">
+                                        @*<div class="col-lg-12">*@
+
+                                        @*<div class="row inspComment-row">*@
+                                        @*<div class="inspComment-Col1">
+                                            <h4 class="text-left">Comments: </h4>
+                                        </div>*@
+                                        @*<div class="inspComment-Col2">*@
+                                        @Html.TextBoxFor(m => Model.EPStep[h].Comment, Model.EPStep[h]?.Comment, new { @class = "form-control tabelcommentBox", @placeholder = "Comment for EP: " + Model.EPStep[h].StandardEP })
+                                        @*<input type="text" id="Comment" name="Comment" class="form-control tabelcommentBox" value="@(Model.EPStep.[h]?.Comment)" />*@
+                                        @*</div>
+                                            </div>
+                                        </div>*@
+                                    </div>
+
+                                }
+                            </div>
+
+
+                        }
+
+                    }
+                }
+            }
+
+        </div>
+    </div>
+
+
+<div class="text-right button_Div">
+    @*@if (Model.SingleOrDefault().MainGoal.Where(x => x.ActivityType == (int)HCF.Utility.Enums.Mode.DOC).Any(y => y.Steps.Count > 0))
+        {*@
+
+
+    @if (Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.EpState == HCF.BDO.Enums.EpStateCode.ACTIV || Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.EpState == HCF.BDO.Enums.EpStateCode.TJCInActive)
+    {
+        <input type="button" class="comm-button disable" title="Submit" value="Submit" id="btnSubmit" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+        @*}
+            else
+            {
+                <span> Please add checkpoints for required document</span>
+            }*@
+        <input type="button" class="comm-button  goToNextEp hide" title="Review Next EP" id="goToNextEp" value="Review Next EP" />
+    }
+
+    </div>
+
+
+<script>
+
+     var epDetailId = parseInt('@Model.FirstOrDefault().EPDetailId');
+
+    var param_inspectionid = 0;
+   
+
+    pageload();
+
+    $(document).ready(function () {
+
+        
+       
+      
+        if (getParameterByName('inspectionid') != undefined || getParameterByName('inspectionid') > 0) {
+
+            param_inspectionid = getParameterByName('inspectionid');
+            var inspdate = localStorage.getItem("InspDate");
+            if (inspdate!= undefined || inspdate != '')
+             {
+                $('#effectiveDate').datepicker("option", "dateFormat", "MM/DD/YYYY").val(inspdate)
+            } 
+           
+        }
+        $('#IsPreviousCycle').val(localStorage.getItem("IsPreviousCycle"));
+        
+        $('#PreviousCycleInspectionId').val(param_inspectionid);
+        $('#TCycleId').val(localStorage.getItem("TCycleId"));
+
+
+        $('.class_1').eq(0).show();
+        $('.class_3').eq(0).show();
+
+        $("#SubmitButton").val("Yes");
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: "/Images/Icons/calendar.gif",
+            buttonImageOnly: true,
+            maxDate: 0,
+            tittle: true,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        });
+        //$(".datepicker").datepicker("option", "maxDate", 0);
+
+       // debugger;
+        $('.ui-datepicker-trigger').attr('alt', 'Select date').attr('title', 'Select date');
+
+        var fileName = $('#fileName').val();
+        var fileext = $('#fileext').val();
+        $("#txtfileName").val(fileName);
+        $("#lblfileext").html(fileext);
+        $("#btnSubmit").show();
+
+        var totalEpsToInspect = 1;
+        var newEpDocDetails = JSON.parse(localStorage.getItem("epDocEpsLists"));
+        if (newEpDocDetails != undefined) {
+            totalEpsToInspect = newEpDocDetails.epDetailId.length;
+            if (totalEpsToInspect > 1) {
+                $(".goToNextEp").removeClass("hide");
+            }
+        }
+        //debugger;
+       // console.log(totalEpsToInspect);
+
+        @if (Model != null && (Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 106 || Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID == 107))
+        {       @: var _DOCTYPE = @Model.FirstOrDefault().EPStep.FirstOrDefault().DocCategoryID;
+                @: $("#uploaddocTypeId").val(_DOCTYPE);
+        }
+        else
+        {
+             @: $("#uploaddocTypeId").val(106);
+        }
+
+        if (getParameterByName('assetsid') > 0) {
+            $("#effectiveDate").val(localStorage.getItem("inspectiondate"));
+
+            $("#effectiveDate").addClass("disable");
+        }
+        else {
+            $("#effectiveDate").removeClass("disable");  
+        }
+
+    });
+
+    function pageload() {
+        var ActivityType = parseInt('@Convert.ToString(Model.FirstOrDefault().ActivityType)');
+        var inspectionGroupId = parseInt('@Model.FirstOrDefault().DocInspectionGroupId');
+        var stdescId = parseInt('@Model.FirstOrDefault().StDescID');
+
+    }
+
+
+
+    var getDocType = function (docTypeId) {
+
+        var docType;
+        switch (parseInt(docTypeId)) {
+            case $.Constants.Policy:
+                docType = "Policy";
+                break;
+            case $.Constants.Report:
+                docType = "Report";
+                break;
+            case $.Constants.MiscDocuments:
+                docType = "Misc Documents";
+                break;
+            case $.Constants.SampleDocument:
+                docType = "Sample Document";
+                break;
+            default:
+                docType = "Policy";
+                break;
+        }
+        console.log(docType, docTypeId);
+        return docType;
+    }
+
+
+    var dueDate = "@Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.Inspection.DueDate.Value.ToFormatDate()";
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+        $('.descriptions').popover();
+
+        $('.descriptions').on('click', function (e) {
+            $('.descriptions').not(this).popover('hide');
+        });
+        $('[data-toggle="tooltip"]').tooltip();
+        $("[rel=tooltip]").tooltip({ placement: 'bottom' });
+    });
+    function EPReviewNotification() {
+      var  effectiveDate = $("#effectiveDate").val();
+    var epid = @Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetailId;
+    var standardep = "@Model.FirstOrDefault().EPStep.FirstOrDefault().StandardEP";
+    if ("@Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.IsInspectionDateFixed" == "True") {
+        var PageName = "scheduledDate"
+    }
+    else {
+        var PageName = "DocUplaod"
+
+    }
+
+        var frequencyId = $("#EPStep_0__FrequencyId").val();
+        var DueDate = "@Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.Inspection.DueDate";
+        var RecentActivityType = "@Model.FirstOrDefault().EPStep.FirstOrDefault().Inspection.RecentActivityType"
+        var epStatus="@Model.FirstOrDefault().EPStep.FirstOrDefault().EPDetails.Inspection.SubStatus"
+        console.log(DueDate);
+
+    $.ajax({
+        url: CRxUrls.Goal_EPReviewNotification,
+        type: "GET",
+        //dataType: "JSON",
+        data: { frequencyId: frequencyId, epid: epid, standardep: standardep, PageName: PageName, DueDate: dueDate, RecentActivityType: RecentActivityType, effectiveDate: effectiveDate, epStatus: epStatus},
+        success: function (data, textStatus, XmlHttpRequest) {
+            debugger;
+            console.log(data);
+            console.log(textStatus, XmlHttpRequest);
+            swal({
+                html: true,
+                title: "",
+                text: data,
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "finalize",
+                cancelButtonText: "Go Back",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $("#form0").submit();
+                    } else {
+
+                    }
+                });
+
+        }
+    });
+}
+</script>

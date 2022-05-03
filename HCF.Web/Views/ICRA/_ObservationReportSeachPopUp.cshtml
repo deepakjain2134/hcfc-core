@@ -1,0 +1,110 @@
+﻿<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Search Observation Report</h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="form-group workinput">
+            <div class="popworkBox1">
+                <label class="control-label"><b> @Localizer["Project #"]</b>&nbsp;</label>
+                <input type="text" class="numeric" id="txtSearch" maxlength="15" />
+                <button type="submit" id="btnSearch" class="popsearch-btn disable comm-button">Search</button>
+            </div>
+            <a href='@Url.Action("TICRAProjectObservationReport","ICRA",new { tilsmId = ViewBag.tilsmId})' class="comm-button float-right">Create Observation Report</a>
+        </div>
+        <div id="">
+            <table id="obrTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@Localizer["Project #"]</th>
+                        <th>@Localizer["Project Name"]</th>
+                        <th>@Localizer["Report Name"]</th>
+                        <th>@Localizer["Report Date"]</th>
+                        <th>@Localizer["Contractor"]</th>
+                        <th>@Localizer["Observer"]</th>
+                    </tr>
+                </thead>
+                <tbody id="partialContents">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="col-md-12 text-right button_Div">
+            <input type="button" value='Save' class="comm-button" id="btnSubmit" />
+            <input type="button" value='Close' class="comm-Cancelbutton" id="btncancel" data-dismiss="modal" />
+        </div>
+    </div>
+</div>
+<script>
+
+    var dtable = $('#obrTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [[3, 'desc']],
+        "bPaginate": $('#observationReportTable tbody tr').length > 20,
+        "bInfo": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-sm-12 '<'table-responsive'tr> > >" + "<'row'<'col-sm-12'p>>",
+        "searching": true
+    });
+
+    $("#btnSearch").click(function () {
+        getObservationReport();
+    });
+
+    function getObservationReport() {
+        // debugger;
+        //alert("Callled");
+        var text = $('#txtSearch').val();
+        $.get(CRxUrls.ICRA_ObservationReportSeach + '?projectno=' + text, function (data) {
+            $('#partialContents').empty();
+            $('#partialContents').append(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+
+    $('#txtSearch').on('input', function (e) {
+        //alert('Changed!')
+        var text = $('#txtSearch').val();
+        if (text != undefined && text.length > 0) {
+            $("#btnSearch").removeClass("disable")
+        } else { $("#btnSearch").addClass("disable") }
+    });
+
+
+    $("#btnSubmit").click(function () {
+        var tilsmId = '@ViewBag.tilsmId';
+        debugger;
+        var allPages = dtable.cells().nodes();
+        //var ticraReportIds = $(allPages).find('input[type="checkbox"]').prop('checked', true);
+        var ticraReportIds = $.map($(':checkbox[name=TICRAReportId]:checked'), function (n, i) {
+            return n.value;
+        }).join(',');
+        debugger;
+        //alert(ticraReportIds);
+        linkToILSM(tilsmId, ticraReportIds);
+    });
+
+
+    var linkToILSM = function (tilsmId, ticraReportIds) {
+        $.ajax({
+            url: CRxUrls.ICRA_ILSMlinkToObservationReport + "?tilsmId=" + tilsmId + "&ticraReportIds=" + ticraReportIds,
+            type: "POST",
+            dataType: "JSON",
+            success: function (resuslt) {
+                swalalert("Observation report link with ILSM Successfully");
+                $('#partialContents').empty();
+                $('#txtWoSearch').val('');
+                $('#popUpModal').modal('toggle');
+                loadilsmdetailpartial();
+            }
+        });
+    }
+</script>
+

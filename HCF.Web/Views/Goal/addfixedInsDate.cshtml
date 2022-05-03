@@ -1,0 +1,190 @@
+﻿@model HCF.BDO.Standard
+<div>
+    @if (Model.StDescID > 0)
+    {
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span class="modelTitle">@Model.TJCStandard</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+            <div class="TJCDescription">
+                <label><strong>Standard Description :</strong></label>
+                @Model.TJCDescription
+            </div>
+        </div>
+        <div class="modal-body">
+            @if (Model != null && Model.EPDetails.Count > 0)
+            {
+                int j = 0;
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>EP #</strong>
+                        </div>
+                        <div class="col-md-5">
+                            <strong>Assign Schedule</strong>
+                        </div>
+                        <div class="col-md-3" style=" margin-left:32px;">
+                            <strong>Schedule Date</strong>
+                        </div>
+                    </div>
+                </div>
+                foreach (var ep in Model.EPDetails)
+                {
+                   
+                    var EPInspectionDate = string.Empty;
+                    var EPdropdownSelectedtext = "Select Schedule";
+                    var EinspectionDate = Model.EPDetails[j].InspectionDates.FirstOrDefault(x => x.EpDetailId == ep.EPDetailId && x.AssetId == null && x.DocTypeId == null && x.IsActive);
+                    if (EinspectionDate != null)
+                    {
+                        EPdropdownSelectedtext =Model.Inspectiongroup.FirstOrDefault(x => x.InspectionGroupId == EinspectionDate.InspectionGroupId.Value).GroupName;
+                        EPInspectionDate = EinspectionDate.InspectionDate.Value.ToClientTime().ToString("MM/dd/yyyy");
+                    }
+                    else { EPInspectionDate = null; }
+                    <div id="dv_@ep.EPDetailId" class="ep_insp" data-epdetailid="@ep.EPDetailId">
+                        @Html.HiddenFor(a => a.EPDetails[j].EPDetailId, new { id = "EPDetailId" })
+                        @Html.HiddenFor(a => a.EPDetails[j].StDescID, new { id = "StDescID" })
+                        <strong>@ep.EPNumber</strong>
+                        @if (!ep.IsDocRequired && !ep.IsAssetsRequired)
+                        {
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        @ep.EPNumber
+                                    </div>
+                                    <div class="col-md-9 assig_group">
+                                        Inspection Schedule:
+                                        @Html.DropDownList("epInsGroups", (SelectList)ViewBag.InspectionGroups, EPdropdownSelectedtext, new { @class = "form-control selectyear" })
+                                        <input type="text" value="@EPInspectionDate" name="epInspectionDate" class="datepicker" style="width:100px; border-radius:0;" required readonly="readonly" data-activitytype="1" data-assetid="" data-doctypeid="" data-epdetailid="@ep.EPDetailId" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (ep.IsDocRequired)
+                        {
+                            int k = 0;
+                            foreach (var item in ep.DocumentType)
+                            {
+                                var docInspectionDate = string.Empty;
+                                var docdropdownSelectedtext = "Select Schedule";
+                                var DinspectionDate = Model.EPDetails[j].InspectionDates.FirstOrDefault(x => x.DocTypeId == item.DocTypeId && x.IsActive);
+                                if (DinspectionDate != null)
+                                {
+                                    docdropdownSelectedtext =Model.Inspectiongroup.FirstOrDefault(x => x.InspectionGroupId == DinspectionDate.InspectionGroupId.Value).GroupName;
+                                    docInspectionDate = DinspectionDate.InspectionDate.Value.ToClientTime().ToString("MM/dd/yyyy");
+                                }
+                                else { docInspectionDate = null; }
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label>@($"{item.Name}-({"Document"})")</label>
+                                            @Html.HiddenFor(a => a.EPDetails[j].DocumentType[k].DocTypeId)
+                                        </div>
+                                        <div class="col-md-9 assig_group">
+                                            Inspection Schedule:
+                                            @Html.DropDownList("docInsGroups", (SelectList)ViewBag.InspectionGroups, docdropdownSelectedtext, new { @class = "form-control selectyear" })
+                                            <input type="text" value="@docInspectionDate" name="docInspectionDate" class="datepicker" style="width:100px; border-radius:0;" required readonly="readonly" data-activitytype="3" data-assetid="" data-doctypeid="@item.DocTypeId" data-epdetailid="@ep.EPDetailId" />
+                                        </div>
+                                    </div>
+                                </div>
+                                k++;
+                            }
+                           
+                        }
+                    </div>
+                        j++;
+                }
+            }
+        </div>
+    }
+    <div class="modal-footer">
+        <input id="btnSubmit" type="submit" value="Submit" class="button1" />
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+            buttonImageOnly: true,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker();
+
+        $(".selectyear").change(function () {
+            debugger;
+            var Id = $(this).val();
+            //alert(Id);
+            var control = $(this)[0].parentElement.children[1];
+            var url = '@Url.Action("getGroups", "Inspection")';
+            $.get(url + '?inspectionGroupId=' + Id, function (data) {
+                if (data.Result) {
+                    control.value = data.InspectionDate;
+                    control.id = Id;
+                    console.log(control);
+                    //control.val(data.InspectionDate);
+                    //$(this).find("").html(data.InspectionDate);
+                }
+            });
+        });
+
+
+
+
+        $(document).on("click", "#btnSubmit", function (e) {
+            var queryArr = [];
+            //$("div[class*='ep_insp']").each(function () {
+            debugger;
+            $("div[class*='ep_insp']").find("input:text[class*='datepicker']").each(function () {
+                var queryStr = {
+                    EpDetailId: $(this).data('epdetailid'),
+                    ActivityType: $(this).data('activitytype'),
+                    AssetId: $(this).data('assetid'),
+                    DocTypeId: $(this).data('doctypeid'),
+                    InspectionDate: $(this).val(),
+                    InspectionGroupId: $(this).attr('id')
+                }
+                queryArr.push(queryStr);
+            });
+            //});
+            if (queryArr.length > 0) {
+                queryArr = JSON.stringify({ 'objAssetsFixInsDate': queryArr });
+                var UrlAction = '@Url.Action("addfixedInsDate", "Goal")';
+                $.ajax({
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    type: 'POST',
+                    url: UrlAction, //'/Assets/GetFloorAssetsForIns',
+                    data: queryArr,
+                    success: function (d) {
+                        //debugger;
+                        if (d.Result) {
+                            swal({
+                                html: true,
+                                title: "Message",
+                                text: "Inspection Date Added Successfully",
+                                type: "success",
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "OK",
+                                closeOnConfirm: true
+                            },
+                                function (isConfirm) {
+                                    if (isConfirm) {
+                                        window.location.reload();
+                                    }
+                                });
+                        }
+                    },
+                    failure: function (response) {
+                        alert("Error is occured");
+                    }
+                });
+            }
+        });
+    });
+
+
+
+</script>

@@ -1,0 +1,164 @@
+﻿@model HCF.Web.ViewModels.Goal.IlsmMatrixViewModel
+@{
+    ViewBag.Title = "Interim Life Safety Evaluation For Construction Projects";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var IlsmEP = Model.IlsmEPs; //EpRepository.GetIlsmEPs();
+    var listeps = Model.AffectedEPs; //GoalMaster.GetAffectedEPs();
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Interim Life Safety Evaluation For Construction Projects
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary col-lg-12">
+                        <table id="ilsmTable_matrix" class="table table-bordered no-footer permission comman_checkbox" border="0" cellpadding="0" cellspacing="0" style="width:3000px;">
+                            <thead>
+                                <tr>
+                                    <td>Steps/ILSM EP</td>
+                                    @foreach (var ilsm in IlsmEP)
+                                    {
+                                        <td>
+                                            <input type="hidden" id='@($"txt{ilsm.EPDetailId}")' value='@ilsm.Description' />
+                                            @ilsm.Description.Substring(0, Math.Min(ilsm.Description.Length, 90))
+                                            <a class="trigger" href="javascript:void(0);"
+                                               id='@ilsm.EPDetailId'>
+                                                @($"{"...See More"}")
+                                            </a>
+                                        </td>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var item in Model.MainGoals)
+                                {
+                                    <tr class="maingoaltr">
+                                        <td style="background: #ccc">
+                                            <span style="font-weight:bold">@item.Goal</span>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+
+                                    </tr>
+                                    foreach (var step in item.Steps)
+                                    {
+                                        <tr>
+                                            <td class="comment" style="width:5%">@step.Step</td>
+                                            @foreach (var ilsm in IlsmEP)
+                                            {
+                                                <td class="comman_checkbox1" align="center">
+                                                    @if (listeps.Count(x => x.StepsId == step.StepsId && x.AffectedEPDetailId == ilsm.EPDetailId && x.IsActive == true) > 0)
+                                                    {
+                                                        <input type="checkbox" checked="checked" class="FlagT"
+                                                               epdetailid='0'
+                                                               stepsid="@step.StepsId" disabled="disabled"
+                                                               affectedepdetailid="@ilsm.EPDetailId" /><span></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" class="FlagT"
+                                                               epdetailid='0'
+                                                               stepsid="@step.StepsId" disabled="disabled"
+                                                               affectedepdetailid="@ilsm.EPDetailId" /><span></span>
+                                                    }
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script src="https://cdn.datatables.net/fixedcolumns/3.2.4/js/dataTables.fixedColumns.min.js"></script>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $.fn.dataTable.ext.errMode = 'none';
+            $('#ilsmTable_matrix').on('error.dt', function (e, settings, techNote, message) { console.log('An error occurred: ', message); });
+            var table = $('#ilsmTable_matrix').DataTable({
+                scrollY: "450px",
+                scrollX: true,
+                bSort: false,
+                bPaginate: false,
+                pageLength: 30,
+                scrollCollapse: true,
+                paging: false,
+                fixedColumns: {
+                    leftColumns: 1
+                }
+            });
+            $('.descriptions').popover({
+                trigger: 'focus'
+            });
+        })
+    </script>
+}
+
+
+<script type="text/javascript">
+    $(function () {
+        var moveLeft = -250;
+        var moveDown = 20;
+
+        $('a.trigger').hover(function (e) {
+            var id = $(this).attr('id');
+            var desc = $("#txt" + id).val();
+            $('div#pop-up').text(desc).show();
+        }, function () {
+            $('div#pop-up').hide();
+        });
+
+        $('a.trigger').mousemove(function (e) {
+            $("div#pop-up").css('top', e.pageY + moveDown).css('left', e.pageX + moveLeft);
+        });
+
+    });
+
+    $(".FlagT").change(function () {
+        debugger;
+        $.ajax({
+            url: '@Url.Action("UpdateIlsmMatrix", "Goal")',
+            type: "POST",
+            data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), isActive: $(this).is(':checked'), epdetailId: $(this).attr('epDetailId'), affectedEPDetailId: $(this).attr('affectedEPDetailId'), stepsId: $(this).attr('stepsId') }, //data,
+            dataType: 'json',
+            success: function (result) {
+                if (result = false) {
+                    $(this).prop('checked', !$(this).is(':checked'));
+                }
+            }
+        });
+    });
+
+</script>
+
+<div id="pop-up">
+
+</div>

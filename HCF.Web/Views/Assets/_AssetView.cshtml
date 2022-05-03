@@ -1,0 +1,100 @@
+﻿@model List<HCF.BDO.TFloorAssets>
+
+<div class="slider">
+    @if (Model.Count > 0)
+    {
+    <div class="table-responsive">
+        
+        <table id="assetsTable_@Model.FirstOrDefault().Assets.AssetType.TypeId" class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th> @Localizer["Asset"] </th>
+                    <th> @Localizer["AssetNo"] </th>
+                    <th> @Localizer["Location"] </th>
+                    <th> @Localizer["NearBy"] </th>
+                    <th>Inspect</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var floorAssets in Model.GroupBy(x => x.FloorAssetsId).Select(g => g.OrderBy(x => x.Name).FirstOrDefault()))
+                {
+                    <tr>
+                        <td class="details-control2 @(floorAssets.EPDetails.Any() ? "" : "disable")" rel='@floorAssets.FloorAssetsId'></td>
+                        <td>@floorAssets.Assets.Name</td>
+                        <td>@floorAssets.AssetNo</td>
+                        <td>
+                            @if (floorAssets.Floor.FloorName != null)
+                            {
+                                @commonModelFactory.GetFloorAssetLocation(floorAssets)
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </td>
+                        <td>@floorAssets.NearBy</td>
+                        <td width="5%">
+                            <img style="float: right; cursor:pointer" onclick="location.href = '@(Url.Action("AssetEps", "Assets", new { floorAssetId = floorAssets.FloorAssetsId, epId = ViewBag.epdetailid==null?0:ViewBag.epdetailid }))'" src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)" title="Inspect" alt="" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+    else
+    {
+        <div class="tble_shadow text-center">No data available in table</div>
+    }
+</div>
+<script>
+    $(document).ready(function() {
+
+        $('.ep_history_btn').click(function(e){
+            e.stopPropagation();
+        });
+
+        var typeId = 0;
+        @if (Model.Count > 0) {
+           @:typeId = '@Model.FirstOrDefault().Assets.AssetType.TypeId';
+        }
+        var datatable = $('#assetsTable_' + typeId).DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#assetsTable_'+typeId+' tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [[3,'desc']],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+
+        $('#assetsTable_' + typeId +" tbody").on('click', 'td.details-control2 , td.asset_title', function () {
+            var tr = $(this).closest('tr');
+            var row = datatable.row(tr);
+            if (row.child.isShown()) {
+                $('div.assetSlider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var floorAssetId = $(this).attr("rel");
+                var assetTypeId = typeId;
+                $.get(CRxUrls.Assets_FloorAssetEPs + "?floorAssetId=" + floorAssetId + "&assetTypeId="+assetTypeId, function (assets) {
+                    row.child(assets, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.assetSlider', row.child()).slideDown();
+            }
+        });
+
+        
+       
+
+    });
+
+</script>

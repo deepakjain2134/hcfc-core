@@ -1,0 +1,174 @@
+﻿
+@model HCF.BDO.PermitSetting
+
+
+
+
+@{
+    var type = this.ViewData["type"] != null && this.ViewData.ContainsKey("type") ? this.ViewData["type"].ToString() : string.Empty;
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+    int seq = Convert.ToInt32(sequence) + 1;
+    var Path = this.ViewData["Path"] != null && this.ViewData.ContainsKey("Path") ? this.ViewData["Path"].ToString() : string.Empty;
+}
+@if (Convert.ToInt32(type) != 13)
+{
+<tr id="@string.Format("tr_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" Path="@Path" permittype="@type">
+
+   
+    <td>
+        <input type="hidden" name="PermitSetting[@sequence].PermitType" value="@type" />
+        <input class="rowinput" type="hidden" value="@(seq!=0?Convert.ToInt32(seq):0 )"  />
+        <input class="@(Convert.ToInt32(sequence)==0?"form-control seqinput disable":"form-control seqinput")" id="@string.Format("txtsequence_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].Sequence" value="@(Model.Sequence!=0?Model.Sequence:Convert.ToInt32(seq) )" autocomplete="off" class="form-control assetLocation percent numeric numberinput" required
+               placeholder="Enter Sequence " maxlength="3" />
+    </td>
+    <td>
+        <input type="hidden" name="PermitSetting[@sequence].Id" value="@Model.Id" />
+        <input type="hidden" id="hdn_PermitSetting[@sequence].RequiredType" name="hdnReqired" value="@Model.RequiredType" />
+        <select name="PermitSetting[@sequence].RequiredType" class="@(Convert.ToInt32(sequence)==0?"form-control disable":"form-control")" required>
+            @if (Model.Required || Model.Id == 0)
+            {
+                <option selected value="1">Yes</option>
+                <option value="0">Any</option>
+            }
+            else
+            {
+                <option value="1">Yes</option>
+                <option selected value="0">Any</option>
+            }
+
+
+
+
+        </select>
+    </td>
+    <td>
+        <input id="@string.Format("txtlabeltype_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].LabelType" value="@Model.LabelType" autocomplete="off" required
+               placeholder="Enter role Type " class="@(Convert.ToInt32(sequence)==0?"form-control assetLocation disable":"form-control assetLocation")" maxlength="250" />
+    </td>
+    <td>
+        <input id="@string.Format("txtlabeltext_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].LabelText" value="@Model.LabelText" autocomplete="off" required
+               placeholder="Enter Text" class="form-control assetNearBy" maxlength="250" />
+    </td>
+    <td>
+        <div class="IsSendMailcols">
+            <input type="hidden" id="hdn_PermitSetting[@sequence].IsSendMail" name="hdnIsSendMail" value="@Model.IsSendMail" />
+            <select name="PermitSetting[@sequence].IsSendMailValue" class="form-control" required>
+                @if (Model.IsSendMail || Model.Id == 0)
+                {
+                    <option selected value="1">Yes</option>
+                    <option value="0">No</option>
+                }
+                else
+                {
+                    <option value="1">Yes</option>
+                    <option selected value="0">No</option>
+                }
+            </select>&nbsp;&nbsp;
+            <div title="@(Model != null && Model.Id > 0 ? "Assign Users email" : "Please save this first then assign emails")">
+                <a data-toggle="modal" data-target="#addEmailModel"
+                   class="@(Model != null && Model.Id > 0 ? "addEmail" : "addEmail disabled")"
+                   id="@Model.Id" href="javascript:void(0);">
+                    <span>
+                        <img class="@(Model != null && Model.Id > 0 ? "" : "disable")" src="@Url.Content(HCF.Web.Models.ImagePathModel.MessageIcon)" title="Assign Email" alt="" />
+                    </span>
+                </a>
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <input type="hidden" name="PermitSetting[@sequence].IsDeleted" value="0" id="@string.Format("hdnDeleted_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" />
+        <span class="deleteTr" rowid="@Model.Id" permittype="@Model.PermitType" trid="@string.Format("tr_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" title="delete" style="@(sequence=="0"?"display:none;":"display:block;")">
+            <i class="fa fa-trash" aria-hidden="true" style="font-size:22px;"></i>
+        </span>
+    </td>
+</tr>
+
+
+}
+else
+
+    {
+<tr id="@string.Format("tr_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" permittype="@type">
+
+
+    <td>
+        <input type="hidden" name="PermitSetting[@sequence].PathId" value="@Path" />
+        <input type="hidden" name="PermitSetting[@sequence].PermitType" value="@type" />
+        <input class="rowinput" type="hidden" value="@(seq!=0?Convert.ToInt32(seq):0 )" />
+        <input class="@(Convert.ToInt32(sequence)==0?"form-control seqinput disable":"form-control seqinput")" id="@string.Format("txtsequence_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].Sequence" value="@(Model.Sequence!=0?Model.Sequence:Convert.ToInt32(seq) )" autocomplete="off" class="form-control assetLocation percent numeric numberinput" required
+               placeholder="Enter Sequence " maxlength="3" />
+    </td>
+    <td>
+        <input type="hidden" name="PermitSetting[@sequence].Id" value="@Model.Id" />
+        <input type="hidden" id="hdn_PermitSetting[@sequence].RequiredType" name="hdnReqired" value="@Model.RequiredType" />
+        <select name="PermitSetting[@sequence].RequiredType" class="@(Convert.ToInt32(sequence)==0?"form-control disable":"form-control")" required>
+            @if (Model.Required || Model.Id == 0)
+            {
+                <option selected value="1">Yes</option>
+                <option value="0">Any</option>
+            }
+            else
+            {
+                <option value="1">Yes</option>
+                <option selected value="0">Any</option>
+            }
+
+
+
+
+        </select>
+    </td>
+    <td>
+        <input id="@string.Format("txtlabeltype_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].LabelType" value="@Model.LabelType" autocomplete="off" required
+               placeholder="Enter role Type " class="@(Convert.ToInt32(sequence)==0?"form-control assetLocation disable":"form-control assetLocation")" maxlength="250" />
+    </td>
+    <td>
+        <input id="@string.Format("txtlabeltext_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].LabelText" value="@Model.LabelText" autocomplete="off" required
+               placeholder="Enter Text" class="form-control assetNearBy" maxlength="250" />
+    </td>
+    <td>
+        <input id="@string.Format("txtstepcode_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].StepCode" value="@Model.StepCode" autocomplete="off" required
+               placeholder="Enter Text" class="form-control assetNearBy" maxlength="250" />
+    </td>
+    <td style="display:none;">
+        <input id="@string.Format("txtadditionaldesc_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" type="text" name="PermitSetting[@sequence].AdditionalDescription" value="@Model.AdditionalDescription" autocomplete="off" 
+               placeholder="Enter Text" class="form-control assetNearBy" maxlength="250" />
+    </td>
+    <td>
+        <div class="IsSendMailcols">
+            <input type="hidden" id="hdn_PermitSetting[@sequence].IsSendMail" name="hdnIsSendMail" value="@Model.IsSendMail" />
+            <select name="PermitSetting[@sequence].IsSendMailValue" class="form-control" required>
+                @if (Model.IsSendMail || Model.Id == 0)
+                {
+                    <option selected value="1">Yes</option>
+                    <option value="0">No</option>
+                }
+                else
+                {
+                    <option value="1">Yes</option>
+                    <option selected value="0">No</option>
+                }
+            </select>&nbsp;&nbsp;
+            <div title="@(Model != null && Model.Id > 0 ? "Assign Users email" : "Please save this first then assign emails")">
+                <a data-toggle="modal" data-target="#addEmailModel"
+                   class="@(Model != null && Model.Id > 0 ? "addEmail" : "addEmail disabled")"
+                   id="@Model.Id" href="javascript:void(0);">
+                    <span>
+                        <img class="@(Model != null && Model.Id > 0 ? "" : "disable")" src="@Url.Content(HCF.Web.Models.ImagePathModel.MessageIcon)" title="Assign Email" alt="" />
+                    </span>
+                </a>
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <input type="hidden" name="PermitSetting[@sequence].IsDeleted" value="0" id="@string.Format("hdnDeleted_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" />
+        <span class="deleteTr" rowid="@Model.Id" permittype="@Model.PermitType" trid="@string.Format("tr_id_{0}_{1}", Convert.ToInt32(type),Convert.ToInt32(sequence) + 1)" title="delete" style="@(sequence=="0"?"display:none;":"display:block;")">
+            <i class="fa fa-trash" aria-hidden="true" style="font-size:22px;"></i>
+        </span>
+    </td>
+</tr>
+
+
+    }
+
+

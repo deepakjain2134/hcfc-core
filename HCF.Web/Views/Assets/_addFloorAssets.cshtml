@@ -1,0 +1,90 @@
+﻿@model HCF.BDO.TFloorAssets
+
+    <div class="row">
+        <div class="col-lg-12 forward_form">
+            <div class="col-lg-6">
+                <div class="form-group row">
+                    @Html.LabelFor(modelItem => Model.Assets.AssetType.Name):
+                    @Html.DisplayFor(modelItem => Model.Assets.AssetType.Name)
+                    @Html.HiddenFor(x => x.AssetId)
+                    @Html.Hidden("Xcoordinate", 0)
+                    @Html.Hidden("Ycoordinate", 0)
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group row">
+                    @Html.LabelFor(modelItem => Model.Assets.Name):
+                    @Html.DisplayFor(modelItem => Model.Assets.Name)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 forward_form">
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.Name)<em class="required-field"> *</em>
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.Name, new { @class = "form-control", maxlength = 50, required = "required" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.BarCodeNo)
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.SerialNo, new { @class = "form-control", maxlength = 50 })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.AssetNo)<em class="required-field"> *</em>
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.DeviceNo, new { @class = "form-control", maxlength = 50, required = "required" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.Notes)
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.Notes, new { @class = "form-control", maxlength = 50 })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.Rating)
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.Rating, new { @class = "form-control", maxlength = 10 })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-lg-3">
+                    @Html.LabelFor(modelItem => Model.NearBy)
+                </div>
+                <div class="col-lg-9">
+                    @Html.TextBoxFor(modelItem => Model.NearBy, new { @class = "form-control", maxlength = 50 })
+                </div>
+            </div>
+            @for (int i = 0; i < Model.EPDetails.Count; i++)
+            {
+                <div class="form-group row">
+                    <div class="col-lg-3">
+                        @Model.EPDetails[i].Standard.TJCStandard , @Model.EPDetails[i].EPNumber
+                        @Html.Hidden("FloorAssetsInspection[" + @i + "].EPDetailId", Model.EPDetails[i].EPDetailId)
+                    </div>
+                    <div class="col-lg-9">
+                        @Html.TextBoxFor(x => Model.FloorAssetsInspection[i].InspectionDate, new { @class = "date" })
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+<script>
+    $('.date').datepicker();
+
+</script>

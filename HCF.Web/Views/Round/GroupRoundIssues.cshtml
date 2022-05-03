@@ -1,0 +1,207 @@
+﻿@model List<HCF.BDO.TRounds>
+@{
+    List<int> floorIds = new List<int>();
+    ViewBag.Title = "Readiness Round Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<HCF.BDO.TRounds> lstTRounds = new List<HCF.BDO.TRounds>();
+    var inspections = Model.FirstOrDefault().Inspections;
+    if (inspections != null && inspections.Any())
+        floorIds = inspections.Select(x => x.FloorId).Distinct().ToList();
+}
+
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        Round Inspection Work Order
+    </h1>
+</section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-left">
+            <div class="box box-primary asset_list_view">
+                <div class="adduserlistBox">
+                    <div class="roundpanel">
+                        <h4 class="roundsHeading"> @Model.FirstOrDefault().RoundName</h4>
+                        <h4 class="roundsHeading"> @Model.FirstOrDefault().RoundDate.ToFormatDate()</h4>
+                    </div>
+                    @*@Html.HiddenFor(x => x.TRoundId)*@
+                    <div id="insp_round_locations">
+                        @await Html.PartialAsync("_RoundLocations", Model.FirstOrDefault().Locations)
+                    </div>
+                    <div id="insp_round_users">
+                        @await Html.PartialAsync("_RoundInspectors", Model.FirstOrDefault().TRoundUsers)
+                    </div>
+                    <div id="insp_round_issues">
+                        @await Html.PartialAsync("_RoundIssues", Model.FirstOrDefault().RoundWorkOrders)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-xs-9">
+            <input type="hidden" name="RoundName" id="RoundName" value="@Model.FirstOrDefault().RoundName" />
+            <div class="box box-primary" id="floor_round_questions">
+                @*@Html.HiddenFor(x => x.TRoundId)*@
+
+                @{
+                    lstTRounds = Model.FindAll(item => item.Inspections.Any());
+                }
+                <input name="TRoundId" id="TRoundId" type="hidden" value="@string.Join(",", lstTRounds.Select(x => x.TRoundId))" />
+                @if (lstTRounds != null && lstTRounds.Count > 0)
+                {
+                    <div class="tble_shadow">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td class="float-right">
+                                        <button class="comm-button" id="btnCreateWO">Create WorkOrder</button>
+                                        <img onclick="location.href='@Url.Action("FloorRoundInspction", "Round", new { rId = Model.FirstOrDefault().TRoundId, floorId = Model.FirstOrDefault().Inspections.FirstOrDefault().Floor.FloorId })'"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" class="hyper_link" title="Detail" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                @if (floorIds != null && floorIds.Count > 0)
+                {
+                    foreach (var floorId in floorIds)
+                    {
+                        var floorDetails = Model.FirstOrDefault().Locations.Where(x => x.Floor.Any(y => y.FloorId == floorId))
+                        .Select(o => new { Building = o, Floor = o.Floor.FirstOrDefault(d => d.FloorId == floorId) });
+                        if (floorDetails != null)
+                        {
+                            <div class="tble_shadow">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <strong>Location: </strong>@string.Format("{0},{1}",floorDetails.FirstOrDefault().Floor.FloorName,floorDetails.FirstOrDefault().Building.BuildingName)
+                                                //<input type="hidden" id="hdn_floorId" value="@floorDetails.FirstOrDefault().Floor.FloorId" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        <table class="table floorRoundtbl comman_checkbox">
+                            <thead>
+                                <tr>
+                                    <th style="width:15%"></th>
+                                    <th style="width:48%"></th>
+                                    <th style="width:5%">Round Category</th>
+                                    <th style="width:25%">Comment</th>
+                                    <th style="width:110%">Inspected By</th>
+                                    <th style="width:10%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var roundInspection in inspections.Where(x => x.FloorId == floorId))
+                                {
+                                    foreach (var item in roundInspection.Questionnaires.ToList())
+                                    {
+                                        <tr>
+                                            <td style="display: flex;">
+                                                <input type="checkbox" class="chkStep @(item.RoundsQuestionnaires.IsWODone == true ? "disabled" : "")"
+                                       id="questionId" troundid="@roundInspection.TRoundId" floorid="@roundInspection.Floor.FloorId"
+                                       buildingId='@roundInspection.Floor.BuildingId' style="float:right"
+                                       siteCode='@roundInspection.Floor.Building?.SiteCode'
+                                       value="@item.RouQuesId" questxt="@item.RoundsQuestionnaires.RoundStep"
+                                       quescomment="@item.Comment" /><span></span>
+                                                <input type="button" class="ins_check3_btn" value="@item.Status" />
+
+                                            </td>
+                                            <td><span>@item.RoundsQuestionnaires.RoundStep.Trim()</span></td>
+                                            <td>@item.RoundsQuestionnaires.CategoryName</td>
+                                            <td>
+                                                @item.Comment
+                                            </td>
+                                            <td>
+                                                @roundInspection.InspectByUser.FullName
+                                            </td>
+                                            <td>
+                                                @if (item.RoundsQuestionnaires.IsWODone && item.RoundsQuestionnaires.IssueId > 0)
+                                                {
+                                                    <a class="gotoWO button1"
+                                   style="cursor:pointer"
+                                   href="@Url.Action("UpdateWorkOrder","WorkOrder", new {issueId=item.RoundsQuestionnaires.IssueId})">Go to Work Order</a>
+
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+
+                    }
+                }
+                else
+                {
+                    <div class="tble_shadow text-center">
+                        <h4>No Work order created or Non-Complaint isn’t marked yet</h4>
+                    </div>
+                }
+
+                <a href="@Url.RouteUrl("roundinsp", new {  rid = Model.FirstOrDefault()?.TRoundId})" class="comm-button align-right" style="float:right">
+                    Back To Inspection
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $("#addwo").hide();
+    var roundId = $("#TRoundId").val();
+    $(document).ready(function () {
+        $("#btnCreateWO").click(function () {
+            
+            var Ids = "";
+            var count = 0;
+            var questxt = "";
+            var TRoundWorkOrders = [];
+            var _roundName = $("#RoundName").val();
+
+            $('input:checkbox[id^="questionId"]').each(function () {
+               
+                var _objTRoundWorkOrder = {};
+                var $this = $(this);
+                if ($this.is(":checked")) {
+                    if ($(this).val() != "on") {
+                        _objTRoundWorkOrder = {
+                            TRoundId: parseInt($(this).attr('troundid')),
+                            FloorId: parseInt($(this).attr('floorid')),
+                            StepsId: $(this).val(),
+                            IssueId: 0,
+                            BuildingId:parseInt($(this).attr('buildingId')),
+                            questionIdText: $(this).attr('questxt') + " Comment-" + $(this).attr('quescomment'),
+                            RoundName: $("#RoundName").val(),
+                            questionResponseComment: ""
+                        }
+                        count++;
+                    }
+                    TRoundWorkOrders.push(_objTRoundWorkOrder);
+                }
+
+            });
+            if (count > 0) {
+                $.ajax({
+                    url: CRxUrls.WorkOrder_SaveTRoundWorkOrder,
+                    method: "POST",
+                    data: JSON.stringify(TRoundWorkOrders) ,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data) {
+                            var url = CRxUrls.WorkOrder_CreateTRoundWorkOrder;
+                            window.location.href = url;
+                        }
+                    }
+                })
+            } else {
+                AlertWarningMsg("Please select at least one steps!");
+            }
+        })
+    });
+</script>

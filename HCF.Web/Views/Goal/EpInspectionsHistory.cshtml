@@ -1,0 +1,423 @@
+﻿@model HCF.BDO.EPDetails
+@{
+    ViewBag.Title = "EP Inspections History";
+
+
+    Microsoft.Extensions.Primitives.StringValues queryVal;
+
+    
+
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                EP Inspection History
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row tablelist-topform">
+                        <div class="col-md-10">
+                            <div class="ephisCol-1">
+                                <div class="epDetails">
+                                    <label>@Model.StandardEp</label><br />
+                                    <ep-risk-score risk-score="@Model.Scores.Name">
+                                    </ep-risk-score>
+
+                                </div>
+                            </div>
+                            <div class="ephisCol-2">
+                                @await Component.InvokeAsync("EpDescription", new { epDetailId = Model.EPDetailId, maxLength = 0, epdetails = Model })
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 text-right">
+                            @{ HCF.BDO.Enums.Frequency frequencyValue = (HCF.BDO.Enums.Frequency)Model.EPFrequency.FirstOrDefault().FrequencyId; }
+                            <span><label>EP Frequency:</label> @($"{frequencyValue.GetDescription()}".ToUpper()) </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 epexpandbox">
+                            @foreach (var groupitem in Model.Inspections.Where(x => x.EPDetails.EPDetailId == Model.EPDetailId).GroupBy(x => x.StartDate.Year).OrderByDescending(x=>x.Key))
+                            {
+                                <div class="tble_shadow maindata ep-panellist eppanel-active" style="display:none">
+                                    <div class="eptoggle-rowbox">
+                                        <div class="eptoptoggleBox">
+                                            <h3><span>Year: @($"{groupitem.Key}")</span></h3>
+                                        </div>
+                                        <div class="ep-panelHeading">
+                                            <img class="howto-plus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" />
+                                            <img class="howto-minus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png" />
+                                        </div>
+                                    </div>
+
+                                    <div class="ep-panelDescption">
+                                        <div class="epexpandbox">
+                                            @foreach (var item in groupitem.Where(x => x.EPDetails.EPDetailId == Model.EPDetailId && x.StartDate.Year == groupitem.Key))
+                                            {
+                                                var currentEpActivity = item.TInspectionActivity.Where(x => x.ActivityType == 1).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+                                                var epcount = item.TInspectionActivity.Where(x => x.ActivityType == 1).Count();
+                                                var assetscount = item.TInspectionActivity.Where(x => x.ActivityType == 2).GroupBy(x => x.FloorAssetId).Count();
+                                                var requireddoccount = item.InspectionDocs.Where(x => x.DocTypeId != 108 && x.IsDeleted == false || (x.CreatedBy == 0)).Count();
+                                                var miscdoccount = item.InspectionDocs.Where(x => x.DocTypeId == 108 && x.IsDeleted == false && (x.CreatedBy > 0)).Count();
+
+
+
+                                                <div class="tble_shadow  ep-panellist eppanel-active">
+                                                    <div class="eptoggle-rowbox">
+                                                        <div class="eptoptoggleBox">
+                                                            @if (currentEpActivity != null)
+                                                            {
+                                                                @*<h3><span>Year: @($"{item.CreatedDate.Year}")</span></h3>*@
+                                                                <h3><span>EP Reviewed Period:</span> @($"{item.StartDate.ToFormatDate()} {"-"} {item.DueDate.ToFormatDate()}")</h3>
+                                                            }
+                                                            else
+                                                            {
+
+                                                                if (item.IsCurrent)
+                                                                {
+                                                                    <h3>
+                                                                        <span>
+                                                                            EP Review Pending
+                                                                        </span>
+                                                                    </h3>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <h3>
+                                                                        <span>
+                                                                            EP Review not done
+                                                                        </span>
+                                                                    </h3>
+
+                                                                }
+                                                            }
+                                                        </div>
+                                                        <div class="ep-panelHeading">
+                                                            <img class="howto-plus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" />
+                                                            <img class="howto-minus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="ep-panelDescption">
+                                                        <div class="epHistory-row">
+                                                            @if (currentEpActivity != null)
+                                                            {
+                                                                <div class="epHistory-col1">
+                                                                    <p>
+                                                                        <label>EP Reviewed By:</label>
+                                                                        <span>
+                                                                            @($"{currentEpActivity.UserProfile.Name} {"on"} {((item.InspectionId > 0) ? item.CreatedDate.ToFormatDate() : "")}")
+                                                                        </span>
+
+
+                                                                        <a href="@Url.Action("EPActivityHistory", "Assets", new { InspectionId = item.InspectionId, epId = item.EPDetailId })" class="@(item.TInspectionActivity.Count > 0 ? "" : "hide")">View Complete Inspection History</a>
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <label>Review Comment:</label>
+                                                                        @if (currentEpActivity != null && !string.IsNullOrEmpty(currentEpActivity.Comment))
+                                                                        {
+                                                                            @currentEpActivity.Comment
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            @($"{ "No comments made" }");
+                                                                        }
+
+                                                                    </p>
+                                                                </div>
+                                                                if (currentEpActivity.Status == 2)
+                                                                {
+                                                                    <span class="red" style="white-space: nowrap;">
+                                                                        EP is in progress
+                                                                    </span>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="epHistory-col1">
+                                                                    <h3 class="epHistoryHeading">
+                                                                        @if (item.IsCurrent)
+                                                                        {
+                                                                            <span>
+                                                                                EP Review Pending
+                                                                            </span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span>
+                                                                                EP Review not done
+                                                                            </span>
+                                                                        }
+                                                                    </h3>
+                                                                </div>
+                                                            }
+                                                        <div class="epHistory-col2">
+                                                            @if (assetscount > 0)
+                                                            {
+                                                                <a href="@Url.Action("EPActivityHistory", "Assets", new { inspectionId = item.InspectionId, epId = item.EPDetailId })" style="cursor:pointer">
+                                                                    <img src="@Url.Content("~/dist/Images/Icons/dashboard_asset_icon.png")" />
+                                                                    <sup id="attchFileCount">@item.TInspectionActivity.Where(x => x.ActivityType == 2).GroupBy(x => x.FloorAssetId).Count()</sup>
+                                                                </a>
+                                                            }
+                                                            @if (requireddoccount > 0)
+                                                            {
+                                                                <a style="cursor:pointer" class="lireqdoc ephistory-toggleActive">
+                                                                    <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" />
+                                                                    <sup id="attchFileCount">@requireddoccount</sup>
+                                                                </a>
+                                                                @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                                                {
+                                                                    <a title="Delete" class="comm-bluebutton epDocList" style="float:right">Delete Document </a>
+                                                                    <partial name="_epDocList" for="@item.InspectionDocs" />
+                                                                }
+                                                            }
+                                                            @if (miscdoccount > 0)
+                                                            {
+                                                                <a style="cursor:pointer" class="limisdoc ephistory-toggleActive">
+                                                                    <img src="@Url.Content("~/dist/Images/Icons/doc_not_required.png")" />
+                                                                    <sup id="attchFileCount">@miscdoccount</sup>
+                                                                </a>
+                                                            }
+                                                        <a class="comm-bluebutton btnAddDoc" style="float:right" id="btnAddDoc" IsCurrent='@item.IsCurrent.ToString()' Isdocrequired='@Model.IsDocRequired.ToString()' epId='@item.EPDetailId' InspectionId='@item.InspectionId'>Add Additional Documents</a>
+                                                        </div>
+                                                        </div>
+                                                        <div class="epdetailsBox-row">
+                                                            @*@await Html.PartialAsync("_InspectionDocs", item.InspectionDocs,
+                                            new ViewDataDictionary { { "ishistory", true } })*@
+
+                                                            @await Html.PartialAsync("_InspectionDocs", item.InspectionDocs,
+                                   new ViewDataDictionary(
+                                   new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                   new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                   {{ "ishistory", true }}
+                                  )
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 text-center button_DivEP">
+                            <div id='divloadmore'><button id='loadMore' class='showmorebtn'>SHOW MORE RECORDS</button></div>
+                        </div>
+                        @*@if (Request.QueryString["IsNonTrack"] == "1")*@
+                        @if (Context.Request.Query.TryGetValue("IsNonTrack", out queryVal) && queryVal.FirstOrDefault() == "1")
+                        {
+                            <div class="col-md-12 text-right button_DivEP">
+                                <a class="comm-button" href="@Url.Action("ArchivedEPsReport", "Reports",
+                                                    new { epId = Model.EPDetailId })" style="float: right;">Go Back</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-12 text-right button_DivEP">
+                                <a class="comm-Cancelbutton" href="@Url.Action("EpInspections", "Goal", new { epId = Model.EPDetailId })" style="float: right;">Go Back</a>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+    $(".lireqdoc").click(function () {
+        $(this).closest(".tble_shadow").find(".requireddoc").toggle(100);
+    });
+    $(".limisdoc").click(function () {
+        $(this).closest(".tble_shadow").find(".miscdoc").toggle(100);
+    });
+
+    $(".lireqdoc").click(function () {
+        $(this).closest(".lireqdoc").toggleClass("ephistory-toggleActive");
+    });
+    $(".limisdoc").click(function () {
+        $(this).closest(".limisdoc").toggleClass("ephistory-toggleActive");
+    });
+
+    $(".ep-panelHeading").click(function () {
+        $(this).closest(".ep-panellist").toggleClass('eppanel-active');
+    });
+
+
+    MaxSize = $(".maindata").size();
+    countToshow = 5;
+    $('.maindata:lt(' + countToshow + ')').show();
+    if (countToshow == MaxSize || MaxSize < 5) {
+        $("#loadMore").html("NO MORE RECORDS").addClass('disable');
+
+    }
+
+    $('#loadMore').click(function () {
+        
+        countToshow = (countToshow + 5 <= MaxSize) ? countToshow + 5 : MaxSize;
+        $('.maindata:lt(' + countToshow + ')').show();
+        if (countToshow == MaxSize) {
+            $("#loadMore").html("NO MORE RECORDS").addClass('disable');
+
+        }
+
+    });
+    $(window).scroll(function () {
+        if ($(window).scrollTop() === $(document).height() - $(window).height()) {
+            countToshow = (countToshow + 5 <= MaxSize) ? countToshow + 5 : MaxSize;
+            $('.maindata:lt(' + countToshow + ')').show();
+            if (countToshow == MaxSize) {
+                $("#loadMore").html("NO MORE RECORDS").addClass('disable');
+
+            }
+        }
+    });
+    $("a.epDocList").click(function (event) {
+        $(this).parent().find(".epDocListModal").modal("show");
+    });
+
+
+        var btnAddDoc = $(".btnAddDoc");
+        var docUploadUrl = "";
+        var UploadDocType = "-1";
+        var epId = "";
+        var InspectionId = "";
+        var IsPreviousCycle="0"
+        btnAddDoc.click(function () {
+            
+            var ctrName = $(this);
+            epId = ctrName.attr("epId");
+            InspectionId = ctrName.attr("InspectionId");
+            var IsDocRequired = ctrName.attr("Isdocrequired");
+            var IsCurrent = ctrName.attr("IsCurrent");
+            if (IsCurrent == "True") {
+                IsPreviousCycle="1"
+            }
+            docUploadUrl = '@Url.Action("EPDocs", "Goal")?epId=' + epId + '&inspectionid=' + InspectionId + '&ishistory=' + 1
+            if (IsDocRequired =="True")
+            {
+               confirmFilePopUp();
+            }
+            else
+            {
+                UploadDocType = "0";
+                loadFilePopup();
+
+            }
+        });
+         var confirmFilePopUp = function() {
+            swal({
+                    html: true,
+                    title: "Add Document",
+                    text:
+                        '<div class="container1 epssweetpopup"> <div class="radio1">  <input class="radio" id="radio-1" name="doctyperadio" type="radio" checked value="1">' +
+                            '<label for="radio-1" class="radio-label">Required document</label>' +
+                            '</div> ' +
+                            '<div class= "radio1" > ' +
+                            '<input id="radio-3" class="radio" name="doctyperadio" type="radio" value="2"> ' +
+                            '<label for= "radio-3" class= "radio-label">Re-use previously reviewed document</label> ' +
+                            '</div>' +
+                            '<div class= "radio1" > ' +
+                            '<input id="radio-2" class="radio" name="doctyperadio" type="radio" value="0"> ' +
+                            '<label for= "radio-2" class= "radio-label"> Misc. Document</label> ' +
+                            '</div>' +
+
+                            ' </div>',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+
+                        const uploadDocType = $('input[name=doctyperadio]:checked').val();
+                       UploadDocType=uploadDocType;
+                        @*if (uploadDocType != "0" && '@Model.EpTransStatus' == "C") {
+                            showFileUploadPopUp(uploadDocType);
+                        } else {*@
+                            swal.close();
+                            loadFilePopup(uploadDocType);
+                        //}
+                    }
+                });
+        }
+
+        var loadFilePopup = function (uploadDocType) {
+            if (uploadDocType === "2") {
+                LoadRecentEpFiles();
+            } else {
+                LoadRecentFiles();
+            }
+        };
+
+         function fileUploadSuccess(tFiles, selectedFiles) {
+            console.log(tFiles, selectedFiles);
+             var uploadDocType = UploadDocType;
+            if (uploadDocType === "1" || uploadDocType === "2") {
+                localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedFiles));
+                window.location.href = docUploadUrl;
+            } @*else if (uploadDocType === "3") {
+                var IsPreviousCycle = $("#IsPreviousCycle").val();
+                var PreviousCycleInspectionId = $("#PreviousCycleInspectionId").val();
+                AddMiscEPDocsPreviousCycle(selectedFiles, '@Model.EPDetailId', '108', IsPreviousCycle, PreviousCycleInspectionId);
+            }*@
+            else {
+                AddMiscEPDocsPreviousCycle(selectedFiles, epId, '108', parseInt(IsPreviousCycle), parseInt(InspectionId));
+            }
+        }
+
+        function LoadRecentEpFiles() {
+            if (parseInt(epId) > 0) {
+                var modelContainer = $("#modal-container");
+                modelContainer.empty();
+                const recentFiles = CRxUrls.Goal_EpDocHistory + "?epId=" + epId;
+                $.get(recentFiles,
+                    function (data) {
+                        modelContainer.html('');
+                        modelContainer.html(data);
+                        modelContainer.fadeIn('fast');
+                        modelContainer.modal('show');
+                    });
+            }
+
+        }
+        var AddMiscEPDocsPreviousCycle = function (files, epId, docTypeId, IsPreviousCycle, PreviousCycleInspectionId) {
+            
+            var fileswithcomma = files.join(",");
+            $.ajax({
+                url: '@Url.Action("AddMiscEPDocuments", "Goal")',
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    files: fileswithcomma, epId: epId, docTypeId: docTypeId, IsPreviousCycle: IsPreviousCycle, PreviousCycleInspectionId: PreviousCycleInspectionId ,__RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val()},
+                success: function(data) {
+                    if (data.Result) {
+                        swalalert("File has been uploaded successfully.");
+                        location.reload(true);
+                    }
+                }
+            });
+        };
+    </script>
+

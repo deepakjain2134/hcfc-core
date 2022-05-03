@@ -1,0 +1,56 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+<div class="adduserListpanel">
+    <h4 class="roundsHeading" id="rCategories"><i class="fa fa-chevron-down"></i> Round Categories </h4>
+    <ul class="rCategoriesUl">
+        
+         <span>Default</span>
+        @foreach (var item1 in Model.UserFloorRoundCategory.Where(x=>x.IsActive && x.IsAdditional==false))
+        {
+            <li style="position:relative;">
+               @* <input type="checkbox" value='' rel="@item1.RoundCatId" @((item1.IsActive == true) ? "checked='checked'" : "") />
+                <span></span>*@
+                @item1.CategoryName
+            </li>
+        }
+        <hr style="margin:10px 0;">
+        <span>Additional</span>
+        @foreach (var item1 in Model.UserFloorRoundCategory.Where(x=>x.IsAdditional))
+        {
+            <li style="position:relative;">
+               @* <input type="checkbox" value='' rel="@item1.RoundCatId" @((item1.IsActive == true) ? "checked='checked'" : "") />
+                <span></span>*@
+                @item1.CategoryName
+            </li>
+        }
+    <hr style="margin:10px 0;">
+         <span>Others</span>
+        @foreach (var item1 in Model.UserFloorRoundCategory.Where(x=>x.IsActive==false))
+        {
+            <li style="position:relative;">
+                @*<input type="checkbox" value='' rel="@item1.RoundCatId" @((item1.IsActive == true) ? "checked='checked'" : "") />
+                <span></span>*@
+                @item1.CategoryName
+                <span class="addCat" style="float:right" rel="@item1.RoundCatId"><i class="fa fa-plus" aria-hidden="true"></i></span>
+            </li>
+        }
+    </ul>
+</div>
+
+<script>
+    $("#rCategories").click(function () {
+            $(".rCategoriesUl").slideToggle('linear');
+            $("#rCategories").find(".fa").toggleClass("rightarrow");
+    });
+
+    $(".addCat").on('click', function () {
+        var catId=$(this).attr("rel");
+        var url='@Url.Action("GetGroupRoundsQuestonariesView","Round")';
+        var floorId=$("#hdn_floorId").val();
+        var troundId='@Model.TRoundId';
+        $.get(url + '?floorId=' + floorId +'&rId=' + troundId+ '&seq=1' +"&rounCatId="+catId , function (data) {
+            $(".roundInspectionView").empty();
+            $(".roundInspectionView").html(data);
+            console.log(data);
+        });
+    });
+</script>

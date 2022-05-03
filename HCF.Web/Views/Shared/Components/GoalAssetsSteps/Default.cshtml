@@ -1,0 +1,1677 @@
+﻿@{
+    Layout = "";
+}
+@model List<HCF.BDO.EPSteps>
+@using (Html.BeginForm("EPstate", "Goal", FormMethod.Post, new { id = "epStepsform" }))
+{
+    Html.AntiForgeryToken();
+    //Html.EnableClientValidation(false);
+    var assetEPs = new List<HCF.BDO.EPDetails>();
+    int frequencyId = Convert.ToInt32(ViewBag.frequencyId);
+    bool status = (bool)ViewBag.showEp;
+    var inspectionActivities = Model.FirstOrDefault().InspectionActivities;
+    int inspectionId = Convert.ToInt32(ViewBag.inspectionId);
+
+    if (status)
+    {
+        <div class="tble_shadow">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="ephisCol-1 inspectionFlex">
+                        @if (Model.Count > 0 && Model.FirstOrDefault().FloorAssetId != null)
+                        {
+                            <div class="disable">
+                                <input type="checkbox" checked="checked" class="disable" />
+                                <span></span>
+                            </div>
+                        }
+                        <div class="inspectionFlex">
+                            <span class="processType-Sprite @commonModelFactory.GetInspectionStatus(Model.FirstOrDefault().EPDetails.Inspection?.SubStatus)"></span>
+                            <div>
+                                <label title="@Localizer["StandardEP"]">@Model.FirstOrDefault().StandardEP</label>
+                                <p><label>@($"{Model.SingleOrDefault().ScoreName}")</label></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ephisCol-2">
+                        @await Component.InvokeAsync("EpDescription", new { epDetailId = @Model.SingleOrDefault().EPDetailId, epdetails = @Model.SingleOrDefault().epdetials })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    @if (Model.FirstOrDefault().FloorAssetId == null)
+                    {
+
+
+                    }
+                    else
+                    {
+                        @*if (assetEPs.Count > 1)
+                            {
+                                <button style="height: 24px; width: 68px;" type="button" class="button1" data-toggle="collapse" data-target="#demo">@($"{" + "}{assetEPs.Count - 1}{" More"}")</button>
+                            }*@
+                    }
+                </div>
+            </div>
+
+        </div>
+    }
+
+
+
+
+    @Html.Hidden("IsPreviousCycle", Model.FirstOrDefault().IsPreviousCycle)
+    @Html.Hidden("PreviousCycleInspectionId", Model.FirstOrDefault().PreviousCycleInspectionId)
+    @Html.Hidden("TCycleId", Model.FirstOrDefault().TCycleId)
+
+
+    <input type="hidden" value="@Model.FirstOrDefault().ActivityType" id="activityType" name="activityType" />
+
+    <input type="hidden" value=@($"{((Model.FirstOrDefault().FrequencyId > 0) ? Model.FirstOrDefault().FrequencyId : frequencyId)}") id="frequencyId" name="frequencyId" />
+
+    if (Model.FirstOrDefault().TFloorAssets != null)
+    {
+        <div class="row tablelist-topform">
+
+            @if (Model.FirstOrDefault().TFloorAssets != null)
+            {
+                if (Model.FirstOrDefault().FloorAssetId.HasValue)
+                {
+                    <div class="col-md-4">
+                        <label> @Localizer["Name"] :</label> <span>@Model.FirstOrDefault().TFloorAssets.Name</span>
+                    </div>
+                    <div class="col-md-4">
+                        <label>@Localizer["AssetNo"]  :</label> <span>@Model.FirstOrDefault().TFloorAssets.AssetNo</span>
+                    </div>
+                    <div class="col-md-4">
+                        <label>@Localizer["NearBy"]:</label> <span>@Model.FirstOrDefault().TFloorAssets.NearBy.CastToNA()</span>
+                    </div>
+                    <div class="col-md-4" style="display:none">
+                        <input type="hidden" value="@Model.FirstOrDefault().TFloorAssets.TmsReference" id="TmsReference" />
+                    </div>
+                }
+            }
+            <div class="col-md-8" style="text-align:right;">
+            </div>
+
+        </div>
+
+
+    }
+    <div id="hdndiv">
+    </div>
+
+    @Html.HiddenFor(m => m.FirstOrDefault().FloorAssetId)
+    @Html.HiddenFor(m => m.FirstOrDefault().ActivityId)
+    @Html.HiddenFor(m => Model.FirstOrDefault().InspectionId)
+    @Html.HiddenFor(m => Model.FirstOrDefault().InspectionGroupId)
+    @Html.HiddenFor(m => Model.FirstOrDefault().EPDetailId)
+    @Html.HiddenFor(m => Model.FirstOrDefault().Status)
+    @Html.HiddenFor(m => Model.FirstOrDefault().IsCurrentCycle)
+
+    <input type="hidden" id="hdnsubmitButton" name="btnSubmit" />
+    <input type="hidden" name="PageName" id="hdnPageName" />
+
+    if (Model.SingleOrDefault().MainGoal.Count > 0)
+    {
+        //if (Model.SingleOrDefault().IsInspReady == 1)
+        //{
+        if (Model.SingleOrDefault().MainGoal.Any(x => x.Steps.Any(y => y.StepType == 1)))
+        {
+            <div class="row">
+                @*<div class="toggle-btn">
+                        <input type="checkbox" class="cb-value" />
+
+                    </div>*@
+                <div class="col-md-12 text-right">
+
+                    @if (Model.FirstOrDefault().TInspectionActivity != null && Model.FirstOrDefault().TInspectionActivity.UserProfile != null)
+                    {
+                        if (Model.FirstOrDefault().TInspectionActivity.CreatedDate != null)
+                        {
+                            <label>Last Edited By:</label>
+                            <span>
+                                @($"{Model.FirstOrDefault().TInspectionActivity.UserProfile.FullName} {"on"} {Model.FirstOrDefault().TInspectionActivity.CreatedDate.Value.ToClientTime().ToFormatDate()}")
+                            </span>
+                        }
+
+
+                    }
+
+                </div>
+            </div>
+        }
+
+    }
+    <div id="Divcampus" class="epdetailsBox-row">
+        @if (Model.FirstOrDefault().ActivityType != 2)
+        {
+            foreach (var m in Model)
+            {
+                @await Component.InvokeAsync("GoalInspectionCampus", new HCF.Web.ViewModels.Goal.InspectionCampusViewModel()
+                    {
+                       Campus = m.Campus,
+                       ShowAll = false
+
+                     });
+                @*@await Html.PartialAsync("_InspectionCampus", m)*@
+            }
+        }
+    </div>
+    if (Model.FirstOrDefault().ActivityType != 2)
+    {
+        <div class="epdetailsBox-row">
+            @await Html.PartialAsync("_epComplianceSteps", Model, new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "inspectionId", inspectionId }})
+
+        </div>
+    }
+
+    <div class="epview-row" style="border-bottom:none">
+        <div class="toggle-btn">
+            <input type="checkbox" class="cb-value" />
+        </div>
+    </div>
+
+    for (int i = 0; i < Model.FirstOrDefault().MainGoal.Count(); i++)
+    {
+        int? floorAssetId = null;
+        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].ActivityType)
+        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].MainGoalId)
+        if (Model.FirstOrDefault().TFloorAssets != null)
+        {
+            floorAssetId = Model.FirstOrDefault().TFloorAssets.FloorAssetsId;
+        }
+        <div class="inspection-table form-group">
+            <div class="editor-field" style="padding-left: 14px;padding-bottom: 0;margin-bottom: 0;">
+                @if (Model.SingleOrDefault().MainGoal.Count(x => x.Steps.Any(y => y.StepType == 2)) > 0)
+                {
+                    <div class="compliant-Col7">
+                        <strong>@Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Goal)</strong>
+                    </div>
+                    if (i == 0)
+                    {
+                        <div class="compliant-rightCol">
+                            <div class="compliant-Col3">
+                                <div class="dvinput">
+                                    <strong>
+                                        <label>
+                                            @DateTime.UtcNow.ToClientTime().ToFormatDate()
+                                        </label>
+                                    </strong>
+                                </div>
+                                @foreach (var Tins in inspectionActivities)
+                                {
+                                    <div class="dvinputValue">
+                                        <strong>
+                                            <label>
+                                                @Tins.ActivityInspectionDate.Value.ToClientTime().ToFormatDate()
+                                            </label>
+                                        </strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div>
+                        <strong>@Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Goal)</strong>
+                    </div>
+                }
+                <div class="compliant-Col6">&nbsp;</div>
+                @*<div>&nbsp;</div>*@
+
+            </div>
+
+
+            @for (int j = 0; j < Model.FirstOrDefault().MainGoal[i].Steps.Count; j++)
+            {
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Status)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].IsRA)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].StepType)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].RAScore)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Comments)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FileContent)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FileName)
+                @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FilePath)
+                <div class="no-bordertop editor-field @(Model.SingleOrDefault().MainGoal[i].Steps[j].IsRA ? "rastep" : "")">
+                    @if (Model.SingleOrDefault().MainGoal[i].Steps[j].StepType == 1)
+                    {
+                        <div class="td_btn_complaint compliant-Col1">
+                            <input @*id="InsStatus"*@
+                                   @*class="InsStatusChk ins_check3_btn @(Model.SingleOrDefault().IsInspReady != 1 ? "disabled" : "")"*@
+                                   class="InsStatusChk ins_check3_btn" @*ins_check3_btn"*@
+                                   type="button"
+                                   onclick="tristate1(this)"
+                                   value="@Model.FirstOrDefault().MainGoal[i].Steps[j].Status"
+                                   tempname='MainGoal[@i].Steps[@j].Status' />
+                        </div>
+                    }
+                    <div class="compliant-Col2">
+                        <p>@Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Step)</p>
+                    </div>
+
+                    <div class="compliant-rightCol">
+                        @if (Model.SingleOrDefault().MainGoal[i].Steps[j].StepType == 2)
+                        {
+                            <div class="compliant-Col3">
+                                <div style="display:flex;float:right">
+                                    <div class="dvinput">
+                                        <strong>
+                                            <label>
+                                                @Html.TextBoxFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].InputValue, new { @class = "form-control txtvalue" })
+                                            </label>
+                                        </strong>
+                                    </div>
+
+                                    @for (int m = 0; m < inspectionActivities.Count; m++)
+                                    {
+                                        <div class="dvinputValue">
+                                            <strong>
+                                                <label>
+                                                    @{
+                                                        var mainGoals = inspectionActivities[m].TInspectionDetail.Where(x => x.MainGoalId == Model.FirstOrDefault().MainGoal[i].MainGoalId);
+                                                        if (mainGoals != null)
+                                                        {
+                                                            string value = string.Empty;
+                                                            var steps = mainGoals.SelectMany(x => x.InspectionSteps).Where(y => y.StepsId == Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId);
+
+                                                            if (steps != null && steps.Any())
+                                                            {
+                                                                value = steps.FirstOrDefault().InputValue;
+                                                            }
+
+                                                            <span>
+                                                                @Html.TextBox("txtinputvalue", string.IsNullOrEmpty(value) ? "-" : value, new { @class = "form-control", @readonly = "readonly" })
+                                                            </span>
+                                                        }
+                                                    }
+                                                </label>
+                                            </strong>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="compliant-Col4">
+                                <div class="MarkDeficiency @(Model.SingleOrDefault().MainGoal[i].Steps[j].Status == 0 ? "show" : "hide")">
+                                    @{
+                                        bool drTime = false;
+                                        bool isDefecienc = true;
+                                        int drvalue = 4;
+                                        if (Model.FirstOrDefault().Status == 2)
+                                        {
+                                            if (Model.SingleOrDefault().MainGoal[i].Steps[j].Status == 0 && Model.SingleOrDefault().MainGoal[i].Steps[j].DRTime > 0)
+                                            {
+                                                drTime = true;
+                                                isDefecienc = false;
+                                                drvalue = Model.SingleOrDefault().MainGoal[i].Steps[j].DRTime.Value;
+                                            }
+                                        }
+                                    }
+                                    <div class="btn-group btn-group-vertical left_setting">
+                                        <label class="btn active">
+                                            @Html.RadioButton("MainGoal[" + @i + "].Steps[" + @j + "].IsMarkDefeciencies", true, isDefecienc, new { id = "MainGoal[" + @i + "].Steps[" + @j + "].IsMarkDefeciencies", onclick = "GetSelectedItem(this," + Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId + ");" })
+
+                                            <label>@Localizer["MarkedDeficiency"]</label>
+                                            <i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="@(Model.SingleOrDefault().MainGoal[i].Steps[j].IsRA ? "show btn" : "hide btn")">
+                                            @Html.RadioButton("MainGoal[" + @i + "].Steps[" + @j + "].IsMarkDefeciencies", false, drTime, new { id = "MainGoal[" + @i + "].Steps[" + @j + "].DrTime", onclick = "GetSelectedItem(this," + Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId + ");" })
+                                            <label>@Localizer["TimeToResolveit"]</label>
+                                            <i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                    </div>
+                                    <div id="Drtxt_@Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId" class="@(drTime ? "TimeToresolve" : "defeciencies")">
+                                        @Html.TextBoxFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].DRTime, new { maxlength = 2, @Value = drvalue, @Class = "numeric" })
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="compliant-Col55">
+                            @if (Model.FirstOrDefault().MainGoal[i].Steps[j].IsRA)
+                            {
+                                <div class="raScore">
+                                    Risk
+                                </div>
+                            }
+                        </div>
+                        <div class="compliant-Col6 attachedFileFlex">
+                            @*@await Html.PartialAsync("_inspAttach", Model.SingleOrDefault().MainGoal[i].Steps[j], new ViewDataDictionary {
+                                    { "goalIndex", i },
+                                    { "stepIndex", j },
+                                    { "stepmode", 1 }
+                                })*@
+                            @await Html.PartialAsync("_inspAttach", Model.SingleOrDefault().MainGoal[i].Steps[j],
+                             new ViewDataDictionary(
+                             new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                             new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                             { { "goalIndex", i },{ "stepIndex", j },{ "stepmode", 1 }}
+                            )
+
+
+
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    <div class="inspection-table inspComment-row">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Comments:</label>
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    @Html.TextBoxFor(m => Model.FirstOrDefault().TInspectionActivity.Comment, Model.FirstOrDefault().TInspectionActivity?.Comment, new { @class = "form-control" })
+                    @*@Html.TextBoxFor(m => Model.FirstOrDefault().TInspectionActivity.Comment, Model.FirstOrDefault().TInspectionActivity.Comment, new { @class = (Model.SingleOrDefault().IsInspReady == 1) ? "form-control" : "form-control disable" })*@
+                </div>
+            </div>
+        </div>
+        @* @if (Model.SingleOrDefault().IsInspReady == 1)*@
+        @* { *@
+        <div class="inspComment-Col3-1 fileuplodaRow">
+        </div>
+    </div>
+    <div class="button_Div text-right">
+        @if (Model.SingleOrDefault().MainGoal.Any(y => y.Steps.Count > 0))
+        {
+
+            if (Model.SingleOrDefault().IsInspReady == 1 || Model.FirstOrDefault().IsPreviousCycle == 1)
+            {
+                <input type="button" id="submitButton" name="btnSubmit" value="Save & Done" class="comm-button disable btnSave" />
+                <input type="button" id="resumeButton" name="btnSubmit" value="Resume Later" class="comm-bluebutton btnSave" />
+            }
+            else
+            {
+                <span style="color:gray">You may only click "Save & Done" once the EP compliance steps are completed</span>
+                <input type="button" name="btndSubmit" value="Save & Done" class="comm-button disable btnSave savepast" />
+                <input type="button" name="btndSubmit" id="resumeButton" value="Resume Later" class="comm-bluebutton btnSave" />
+            }
+        }
+        else
+        {
+            <label style="color:red; display: block;">No Steps</label>
+        }
+        <a id="btnInspCancel" class="comm-Cancelbutton" style="cursor:pointer">Cancel</a>
+    </div>
+}
+<div class="modal fade" id="commentModal">
+    <div class="modal-dialog">
+
+        <div class="modal-content" style="width: 50%; margin: 0px auto;">
+            <div class="modal-header">
+                <button class="close" type="button" data-toggle="modal" data-target="#commentModal">&times;</button>
+                <h4 class="modal-title">Comment</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="" id="setpId" />
+                <textarea name="text" cols="40" rows="5" class="form-control" id="Commenttxt"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn comm-button" data-target="#commentModal" id="saveComment">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" value="0" id="tilsmId" />
+<div id="dialog-confirm">
+    <label id="msg"></label>
+</div>
+
+<div class="modal fade" id="CustomFrequencyMoal" role="dialog">
+    <div class="modal-dialog">
+        @*Modal content*@
+        <div class="modal-content" style="width: 50%; margin: 0px auto;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Custom Schedule Date</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="InspectionDate" class="form-control futuredatepicker" readonly="readonly" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-button disabled" data-dismiss="modal" id="saveCustomFrequency" onclick="">Save & Done</button>
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal" id="CancelCustomFrequency">Cancel</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .ui-widget.ui-widget-content {
+        z-index: 99999 !important;
+    }
+
+    .no-bordertop.editor-field {
+        justify-content: space-between;
+    }
+</style>
+<script>
+    var fcount = 0; // Fail count
+    var bval = 0;
+
+   @if (Model.FirstOrDefault().EPDetails.EpState != HCF.BDO.Enums.EpStateCode.ACTIV && Model.FirstOrDefault().EPDetails.EpState != HCF.BDO.Enums.EpStateCode.TJCInActive)
+   {
+       @:$(".btnSave").addClass("disable"); $("#btnAddDocMisc").remove();
+   }
+       function tristate1(control) {
+           tristate(control, '-1', '1', '0');
+           //tristate(control, '-1', '1');
+       }
+
+       function tristate(control, value1, value2, value3) {
+           //function tristate(control, value1, value2) {
+           switch (control.value) {
+               case value1:
+                   control.value = value2;
+                   break;
+               case value2:
+                   control.value = value3;
+                   break;
+               case value3:
+                   control.value = value1;
+                   break;
+
+
+           }
+
+           var values = [];
+        $(".ins_check3_btn").each(function () {
+               //$(".ins_check2_btn").each(function () {
+               values.push($(this).val());
+               if (values.indexOf("-1") === -1) {
+                $("#submitButton").removeClass('disable');
+                $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-check.png");
+               }
+
+           });
+
+       SetCheckValue(control);
+   }
+
+   function SetCheckValue(control) {
+       var controlId = $(control).attr("tempName");
+        //debugger;
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+       if ($(control).val() == 0) {
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").removeClass("hide");
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").addClass("show");
+       } else {
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").removeClass("show");
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").addClass("hide");
+       }
+
+       setMarkAllBtn();
+   }
+
+
+    $(document).ready(function () {
+
+        $('#IsPreviousCycle').val(localStorage.getItem("IsPreviousCycle"));
+        $('#PreviousCycleInspectionId').val(localStorage.getItem("inspectionid"));
+        $('#TCycleId').val(localStorage.getItem("TCycleId"));
+
+        if ($('#IsPreviousCycle').val() == 1)
+        {
+
+            $('.savepast').attr('id', 'submitButton');
+            $("#submitButton").removeClass('disable');
+            $('#heading').html("Inspection Past Cycle");
+            $('.button_Div span').hide();
+    }
+
+       var values = [];
+        $(".ins_check3_btn").each(function () {
+           //$(".ins_check2_btn").each(function () {
+           values.push($(this).val());
+           if (values.indexOf("-1") === -1) {
+                $("#submitButton").removeClass('disable');
+                $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-check.png");
+           }
+           else {
+                $("#submitButton").addClass('disable');
+                $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-uncheck.png");
+           }
+
+       });
+
+        $("#btnInspCancel").click(function () {
+           //if (isPopUp == true) {
+           if (isPopUp == "True") {
+                $('#FailStepsPopup').modal('toggle');
+           } else {
+               if (window.location.href.indexOf("inspectbyfloor") > -1) {
+                    $('#FailStepsPopup').modal('hide');
+               } else {
+                   var backUrl="@Url.Action("EpInspections", "Goal", new { epId = Model.FirstOrDefault().EPDetailId })";
+                   location.href = backUrl;
+                   // window.history.back();
+               }
+           }
+       });
+
+       function callCancelButton() {
+           if (isPopUp == true) {
+                $('#FailStepsPopup').modal('toggle');
+           } else {
+               if (window.location.href.indexOf("inspectbyfloor") > -1) {
+                    $('#FailStepsPopup').modal('hide');
+               } else {
+                   window.history.back();
+               }
+           }
+       }
+
+       //
+       showFrequencyUpdatePopUp();
+
+       showMissingAssetsInfo();
+
+       function showFrequencyUpdatePopUp() {
+           const canInspectEp = '@Model.FirstOrDefault().EPDetails.CanInspect()';
+           if (canInspectEp.toLowerCase() === "false") {
+               var cancelRedirectUrl = '@Url.RouteUrl("activityDashboard")';
+               var confirmRedirectUrl = "";
+               var html = $.Constants.EP_Inspection_Ongoing_User;
+               var epDetailId = $("#EPDetailId").val();
+               var floorAssetId = $("#FloorAssetId").val();
+               var assetSummeryPageUrl = '@Url.Action("AssetEps", "Assets")' +
+                   "?floorAssetId=" +
+                   floorAssetId +
+                   "&epId=" +
+                   epDetailId;
+               @if (Model.FirstOrDefault().ActivityType == 1)
+                {
+                    @:showInforMsg("EP Review", html, "Back To dashboard", cancelRedirectUrl);
+
+                }
+                else
+                {
+                     @:showInforMsg("Asset Review", $.Constants.EP_Inspection_Ongoing_Assets, "Back to asset summary", assetSummeryPageUrl);
+                }
+            }
+        }
+
+        function showMissingAssetsInfo() {
+            debugger;
+            var tsAssetEp = '@Convert.ToString(Model.FirstOrDefault().IsAssetEP)';
+            var floorAssetsCount = '@Model.FirstOrDefault().FloorAssetsCount';
+            if (tsAssetEp.toLowerCase() === "true" && floorAssetsCount === "0") {
+                ////debugger;
+                var confirmRedirectUrl = '@Url.RouteUrl("setup")';
+                var cancelRedirectUrl = backtodashboard();
+                redirectosetupassets(confirmRedirectUrl, cancelRedirectUrl);
+            }
+        }
+
+
+
+        ///pageLoad();
+        $(".MarkDeficiency").hide();
+        $("#hdnPageName").val(window.location.href);
+        var isPopUp = '@((bool) ViewBag.isPopUp)';
+        var canCelUrl = '@HCF.Web.Base.UISession.GetBackPage("goal_EPstate")';
+
+
+        function pageLoadPopup(inspection) {
+            //console.log(inspection);
+            debugger;
+            var html = "";
+            //if (inspection.EPTransStatus == "C") {
+            if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "NA" && "@Model.FirstOrDefault().EPDetails.IsInspectionDateFixed" == "True")
+            {
+                html = "EP is Compliant <br /> Last EP Inspection Date : " +
+                    inspection.inspectionDate +
+                    "<br /> Next Due Date : " +
+                     "@CommonUtility.GetScheduleFixedDate(Model.FirstOrDefault().EPDetails.EPFrequency.FirstOrDefault().FrequencyId, Convert.ToDateTime(Model.FirstOrDefault().EPDetails.InitialInspDate), 0).ToFormatDate()" +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate +
+                    "<br /><br /> <b> If you proceed, EP status will get updated and EP review will be required.</b>";
+            }else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "NA") {
+                html = "EP is Compliant <br /> Last EP Inspection Date : " +
+                    inspection.inspectionDate +
+                    "<br /> Next Due Date : " +
+                    inspection.DueDate +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate +
+                    "<br /><br /> <b> If you proceed, EP status will get updated and EP review will be required.</b>";
+            }
+
+            //else if (inspection.EPTransStatus == "P") {
+            else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "NS") {
+                html = "EP inspection is not started yet";
+            }
+            //else if (inspection.EPTransStatus == "I") {
+            else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "IN") {
+                html = "EP is in progress <br /> Last EP Review Date : " +
+                    inspection.inspectionDate +
+                    "<br /> Due Date : " +
+                    inspection.DueDate +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate;
+            }
+            //else if (inspection.EPTransStatus == "F") {
+            else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "PD") {
+                html = "EP is not compliant <br /> Last EP Review Date : " +
+                    inspection.inspectionDate +
+                    "<br /><label>Last Due Date : " +
+                    "Immediate" +
+                    "</label>" +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate;
+            }
+
+
+            //else if (inspection.EPTransStatus == "D" || inspection.EPTransStatus == "G") {
+               else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "DE"||"@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "GP") {
+                html = "EP is not compliant <br /> Last EP Review Date : " +
+                    inspection.inspectionDate +
+                    "<br /><label>Last Due Date : " +
+                    "Immediate" +
+                    "</label>" +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate;
+            }
+            else {
+                html = "EP is not compliant <br /> Last EP Review Date : " +
+                    inspection.inspectionDate +
+                    "<br /><label>Last Due Date : " +
+                    "Immediate" +
+                    "</label>" +
+                    "<br /> Last Document Upload Date : " +
+                    inspection.LastDocumentUploadDate;
+            }
+
+            debugger;
+
+            if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "NA"  && inspection.IsDocRequired.toLowerCase() === "true") {
+
+
+
+            }
+            //else if (inspection.EPTransStatus == "C") {
+            else if ("@Model.FirstOrDefault().EPDetails.Inspection.SubStatus" == "NA") {
+                swal({
+                        html: true,
+                        title: "EP Status",
+                        text: html,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Proceed",
+                        cancelButtonText: "Back to EP Review",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            //RestartInspection(inspection.EpId);
+                        } else {
+                            var cancelRedirectUrl = CRxUrls.Goal_EpInspections;
+                            window.location.href = cancelRedirectUrl + "?epId=" + @Model.FirstOrDefault().EPDetailId;
+                        }
+                    });
+            }
+        }
+
+
+        function RestartInspection(epId) {
+            var inspectiongrpId = $("#InspectionGroupId").val();
+            $.ajax({
+                url: CRxUrls.Goal_StartNewInspection,
+                type: "POST",
+                dataType: "json",
+                data: {
+                    __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                    epdetailId: epId,
+                    inspectiongroupId: inspectiongrpId
+                },
+                success: function(InspectionId) {
+                    if (InspectionId > 0) {
+                        window.location.href = CRxUrls.Goal_EPstate +
+                            '?epId=' +
+                            epId +
+                            '&inspectionId=' +
+                            InspectionId +
+                            '&inspectionGroupId=' +
+                            inspectiongrpId;
+                    }
+                }
+            });
+        }
+
+        function getinspectionbackUrl() {
+            return "-1";
+        }
+
+        function Redirectdefeciencies() {
+            var confirmRedirectUrl = '@Url.RouteUrl("deficiencies")';
+            redirecttodefeciencies(confirmRedirectUrl);
+        }
+
+        function CreateWOPopUpEP(activityId, epDetailId) {
+            debugger;
+            var activityType = 1;
+            var tilsmId = 0;
+            swal({
+                    html: true,
+                    title: "Create Work Order",
+                    text:
+                        "<label>There are still pending deficiencies since last inspection.</label><br /><label> Please fix it before proceeding with new inspection. <br /> Do you want to create a work order ?</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        var urlAction = CRxUrls.WorkOrder_WorkOrderFailSteps;
+                        window.location.href =
+                            urlAction +
+                            "?activityId=" +
+                            activityId +
+                            '&tilsmId=' +
+                            tilsmId +
+                            '&activityType=' +
+                            activityType;
+                    } else {
+
+                        window.history.back();
+                    }
+                });
+        }
+
+        function dateFormat(date) {
+            if (date) {
+                var bdate = new Date(parseInt(date.substr(6)));
+                var displayDate = $.datepicker.formatDate("M d,yy", bdate);
+                return displayDate;
+            } else {
+                return "";
+            }
+        }
+
+
+        var isTmsSystem = '@HCF.Web.Base.UserSession.CurrentOrg.IsTmsWo';
+        var returnToAssetsReviewUrlAction = '@Url.Action("AssetEps", "Assets")';
+
+        var workOrder_WorkOrderFailSteps = '@Url.Action("WorkOrderFailSteps", "WorkOrder")';
+
+        pageLoad();
+
+        function pageLoad() {
+            debugger;
+            var Type = '@Convert.ToString(Model.FirstOrDefault().Type)';
+            var ActivityType = parseInt('@Convert.ToString(Model.FirstOrDefault().ActivityType)');
+            var tsAssetEp = '@Convert.ToString(Model.FirstOrDefault().IsAssetEP)';
+            var floorAssetsCount = '@Model.FirstOrDefault().FloorAssetsCount';
+            // var activityStatus = '@Model.FirstOrDefault().ActivityStatus';
+            var subStatus = '@Model.FirstOrDefault().CurrentStatus';
+            //  var inspectionGroupId = parseInt('@Model.FirstOrDefault().InspectionGroupId');
+            // var IsDocRequired = '@Model.FirstOrDefault().IsDocRequired';
+            //   var stdescId = parseInt('@Model.FirstOrDefault().StDescID');
+            //  var floorAssetId = parseInt('@Model.FirstOrDefault().FloorAssetId');
+            var _epdetailId = parseInt('@Convert.ToString(Model.FirstOrDefault().EPDetailId)');
+            var IsRelaion = parseInt('@Convert.ToString(Model.FirstOrDefault().IsRelation)');
+            var activityId = '@Convert.ToString(Model.FirstOrDefault().ActivityId)';
+            var confirmRedirectUrl;
+            debugger
+            if (ActivityType == 1 && subStatus == "NA") {
+                var inspection = {
+                    inspectionDate: @Model.FirstOrDefault().Inspection.InspectionId > 0
+                        ? '@Model.FirstOrDefault().Inspection.CreatedDate.ToClientTime().ToFormatDate()'
+                        : "",
+                    DueDate: '@Model.FirstOrDefault().Inspection.DueDate.CastDate()',
+                    DocStatus: '@Model.FirstOrDefault().Inspection.DocStatus',
+                    GraceDate: '@Model.FirstOrDefault().Inspection.GraceDate.CastDate()',
+                    IsAssetEP: '@Model.FirstOrDefault().IsAssetEP',
+                    EpId: '@Model.FirstOrDefault().EPDetailId',
+                    EPTransStatus: '@Model.FirstOrDefault().EpTransStatus',
+                    IsAssetRequired: '@Model.FirstOrDefault().IsAssetEP',
+                    IsDocRequired: '@Model.FirstOrDefault().IsDocRequired',
+                    LastDocumentUploadDate:
+                        '@((!string.IsNullOrEmpty(Model.FirstOrDefault().LastDocumentUploadDate.CastDate())) ? Model.FirstOrDefault().LastDocumentUploadDate.CastDate() : "NA")'
+                };
+                pageLoadPopup(inspection);
+            }
+
+
+            if (ActivityType == 2 && Type == "ILSMPending") {
+                var confirmRedirectUrl = '@Url.RouteUrl("ilsmView")';
+              //  var cancelRedirectUrl = getinspectionbackUrl();
+                ConfirmPopUp("Message",
+                    $.Constants.First_Close_Pending_ILSM,
+                    "warning",
+                    "Go TO ILSM",
+                    confirmRedirectUrl,
+                    "-1");
+            } else if (Type == "WOInProgress") {
+                var _floorAssetId = $("#FloorAssetId").val();
+                var urlAction = '@Url.Action("Index", "WorkOrder")';
+                confirmRedirectUrl = urlAction + "?page=1&floorAssetId=" + _floorAssetId + "&EPdetailId=" + _epdetailId;
+                //var cancelRedirectUrl = getinspectionbackUrl();
+                ConfirmPopUp("Message",
+                    $.Constants.First_Close_Pending_Workorder,
+                    "warning",
+                    "GO TO WORK ORDER",
+                    confirmRedirectUrl,
+                    "-1");
+            } else if (Type == "Fail" && ActivityType == 2) {
+                Redirectdefeciencies();
+            } else if (Type == "Fail" && ActivityType == 1) {
+                CreateWOPopUpEP(activityId, _epdetailId);
+            }
+
+        }
+
+
+        $('#submitButton').click(function() {
+           // debugger;
+            var isgenstep = '@Model.FirstOrDefault().MainGoal.Any(x => x.Steps.Any(y => y.StepType == 2))';
+            var pcount = 0; // Pendingcount
+             fcount = 0; // Failcount
+             bval = $(this).val();
+            var tcount = 0;
+            debugger;
+            $('input:button[class^="InsStatusChk"]').each(function() {
+                var btnval = $(this).val();
+                if (btnval == -1) {
+                    pcount++;
+                } else if (btnval == 0) {
+                    fcount++;
+                }
+            });
+            $(".txtvalue").each(function() {
+                var txtvalue = $(this).val();
+                if (txtvalue == "") {
+                    tcount++;
+                }
+            });
+
+            debugger;
+            if (isgenstep == "True" && (pcount > 0 || tcount != 0)) {
+                swal({
+                        title: "Message",
+                        text: $.Constants.Check_All_Status_Generator,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes",
+                        cancelButtonText: "No",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            $('input:button[class^="InsStatusChk"]').each(function() {
+                                if ($(this).val() == -1) {
+                                    tristate1($(this).get(0));
+                                }
+                                debugger;
+                            });
+                           // SaveInspection(bval, fcount);
+
+                            if (@Model.FirstOrDefault().ActivityType == 1) {
+                                EPReviewNotification();
+                            }
+                            else if (@Model.FirstOrDefault().ActivityType == 2)
+                            {
+                                var FassetId = [];
+
+
+                                   var FAssetId = parseInt("@Model.FirstOrDefault().FloorAssetId");
+                                FassetId.push(FAssetId);
+
+
+                                var Epdetailid = @Model.FirstOrDefault().EPDetailId;
+                              $.ajax({
+                                   url: CRxUrls.Assets_GetAssetsCurrentStatus,
+                                   type: "POST",
+                             //   contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                  data: { FassetId: FassetId, Epdetailid: Epdetailid },
+                                success: function (data) {
+                                    debugger;
+                                    console.log(data);
+                                    if (data.data == 0) {
+                                        EPReviewNotification();
+                                    }
+                                    else {
+                                        SaveInspection(bval, fcount);
+                                    }
+                                }
+
+
+                            });
+
+
+
+                            }
+                            else {
+                                SaveInspection(bval, fcount);
+                            }
+                        }
+                    });
+            } else if (pcount > 0) {
+                AlertWarningMsg($.Constants.Check_All_Status);
+            } else {
+                var fileId = document.getElementById('fileId');
+                if (fileId != null) {
+                    var fileId = $("#fileId").val();
+                    if (fileId == 0) {
+                        AlertWarningMsg("Please attach a file!"); //alert("Please attach a file!");
+                        return;
+                    }
+                }
+                //SaveInspection(bval, fcount);
+                if (@Model.FirstOrDefault().ActivityType == 1) {
+                    EPReviewNotification();
+                }
+                 else if (@Model.FirstOrDefault().ActivityType == 2)
+                            {
+
+
+                    var FassetId = [];
+                       var FAssetId = parseInt(@Model.FirstOrDefault().FloorAssetId);
+                                FassetId.push(FAssetId);
+
+                                var Epdetailid = @Model.FirstOrDefault().EPDetailId;
+                              $.ajax({
+                                 url: CRxUrls.Assets_GetAssetsCurrentStatus,
+                                   type: "POST",
+                               // contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                  data: { FassetId: FassetId, Epdetailid: Epdetailid },
+                                success: function (data) {
+                                    debugger;
+                                    console.log(data);
+                                    if (data.data == 0) {
+                                        EPReviewNotification();
+                                    }
+                                    else {
+                                        SaveInspection(bval, fcount);
+                                    }
+                                }
+
+
+                            });
+
+
+
+                            }
+                else {
+                    SaveInspection(bval, fcount);
+                }
+            }
+        });
+
+        function ShowCreateWOPopUp(activityId, pageName, floorAssetId, epDetailId, tilsmId, IncidentId, isExistingILSM) {
+            debugger;
+            var activityType = 1;
+            if (floorAssetId > 0) {
+                activityType = 2;
+            }
+            var msg = "";
+            if (tilsmId) {
+            if (isExistingILSM == true ) {
+                msg = jsformat($.Constants.ILSM_Information_Existing_Message, IncidentId);
+            } else {
+                msg = jsformat($.Constants.ILSM_Information_Message, IncidentId);
+                }
+            }
+            msg = msg + "\n\n" + $.Constants.Create_Work_Order;
+
+            //var urlAction = workOrder_WorkOrderFailSteps;
+            var workOrderPage = workOrder_WorkOrderFailSteps + "?activityId=" + activityId + '&tilsmId=' + tilsmId + '&activityType=' + activityType;
+            var addILSMShow = CRxUrls.ilsm_AddILSMShow + "?tilsmId=" + tilsmId;
+
+            var buttontext = tilsmId > 0 ? msg : $.Constants.Create_Work_Order;
+            buttontext = buttontext + ' <br><br> <button type="button" pageUrl="' + workOrderPage + '" role="button" tabindex="0" class="SwalBtn1 comm-button">' + 'Create WorkOrder' + '</button>';
+            if (tilsmId > 0) {
+                buttontext = buttontext + ' <button type="button" pageUrl="' + addILSMShow + '" role="button" tabindex="0" class="SwalBtn1 comm-button">' + 'Go To ILSM Documentation' + '</button><br><br>';
+            }
+
+
+            if ((window.location.href.indexOf("floorAssetId") > -1)) {
+                var pageUrl = returnToAssetsReview(floorAssetId, epDetailId);
+                buttontext = buttontext + '<button type="button" pageUrl ="' + pageUrl + '"  role="button" tabindex="0" class="SwalBtn1 comm-Cancelbutton">' + 'Back' + '</button>';
+            } else if (window.location.href.indexOf("EPstate") > -1) {
+                var pageUrl = backtodashboard(epDetailId)
+                buttontext = buttontext + '<button type="button"  pageUrl ="' + pageUrl + '" role="button" tabindex="0" class="SwalBtn1  comm-button">' + 'Back to EP review' + '</button>';
+            } else {
+                buttontext = buttontext + '<button type="button" role="button" pageUrl ="' + pageName + '?Isback=1"  tabindex="0" class="SwalBtn2 comm-Cancelbutton">' + 'Cancel' + '</button>';
+
+            }
+
+            console.log(buttontext);
+            swal({
+                title: "Create Work Order",
+                text: buttontext,
+                showCancelButton: false,
+                showConfirmButton: false,
+                type: "info",
+                html: true
+            });
+
+
+        }
+
+
+
+        $(document).on('click', '.SwalBtn1', function () {
+            var pageUrl= $(this).attr("pageUrl");
+            window.location.href = pageUrl;
+            //swal.close();
+            //var floorassetid = $("#FloorAssetId").val();
+            //var epdetailid = $("#EPDetailId").val();
+            //$("#FailStepsPopup").modal('hide');
+            debugger
+            //loadFloorAssetrowData(epdetailid, floorassetid)
+        });
+        $(document).on('click', '.SwalBtn2', function () {
+            //var pageUrl= $(this).attr("pageUrl");
+            //window.location.href = pageUrl;
+            swal.close();
+            var floorassetid = $("#FloorAssetId").val();
+            var epdetailid = $("#EPDetailId").val();
+            $("#FailStepsPopup").modal('hide');
+            debugger
+            loadFloorAssetrowData(epdetailid, floorassetid)
+        });
+
+
+
+
+
+
+
+        function SaveInspection(bval, fcount) {
+            $("#hdnsubmitButton").val(bval);
+            var _epDetailId = $("#EPDetailId").val();
+            var activityType = parseInt('@Model.FirstOrDefault().ActivityType');
+            var inspectiongroupId = parseInt('@Model.FirstOrDefault().InspectionGroupId');
+            $("#submitButton").addClass('disable');
+            $.ajax({
+                url: CRxUrls.Goal_EPstate,
+                type: "POST",
+                dataType: "JSON",
+                data: $("#epStepsform").serialize(),
+                success: function(data) {
+                    debugger;
+                    console.log(data);
+                    $("#submitButton").removeClass('disable');
+                    localStorage.clear();
+                    if (data.Result) {
+
+                        if (activityType == 1) {
+                            debugger;
+                            if (data.Inspection.InspectionId > 0) {
+                                if (data.Inspection.Status == 0) { //&& data.Inspection.EPDetails.CategoryId == 2
+                                    CreateWorkOrder(data.Inspection.EPDetailId, data.ActivityId, activityType);
+                                    //CreateILSMPopUpEP(data.Inspection.EPDetailId);
+                                } else {
+                                    epActivityMsg(data.Inspection, data, fcount, _epDetailId, activityType);
+                                }
+                            } else {
+                                epActivityMsg(data.Inspection, data, fcount, _epDetailId, activityType);
+                            }
+                        }
+                        else if (data.IsInspReady == 1 && activityType == 2)
+                        {
+                            //window.location.href = backtodashboard();
+                            swal({
+                                html: true,
+                                title: "Asset Inspection Complete ",
+                                text: "@Model.FirstOrDefault().StandardEP" + " is now compliant",
+                                type: "info",
+                                showCancelButton: false,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "OK",
+                                // cancelButtonText: "Review Later",
+                                closeOnConfirm: true,
+                                closeOnCancel: true
+                            }, function (isConfirm) {
+                                if (isConfirm) {
+                                    if (data.IsInspReady==1 && data.IsRelation) {
+                                        checkEpRelationStatus(data, fcount, _epDetailId, activityType);
+                                    }
+                                    else {
+                                        window.location.href = CRxUrls.Goal_EpInspections + "?epId=" + _epDetailId;
+                                    }
+
+
+                                }
+                            });
+                        }
+
+                        else {
+                            RedirectToPage(data, fcount, _epDetailId, activityType);
+                        }
+                    }
+                }
+            });
+        }
+
+        function backtodashboard(epId) {
+            var epDetailId = $("#EPDetailId").val();
+            return CRxUrls.Goal_EpInspections + "?epId=" + epDetailId;
+        }
+
+
+        function CreateWorkOrder(epDetailId, activityId, activityType) {
+            swal({
+                html: true,
+                title: "Create Work order",
+                text:
+                    "<label>There are some deficiencies </label><br /><label>Do you want to create a Work order?</label>",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        var workOrderPage = workOrder_WorkOrderFailSteps + "?activityId=" + activityId + '&activityType=' + activityType;
+                       // var urlAction = CRxUrls.ILSM_AddILSM;
+                        window.location.href = workOrderPage;
+                    } else {
+                        var cancelRedirectUrl = CRxUrls.Goal_EpInspections;
+                        window.location.href = cancelRedirectUrl + "?epId=" + epDetailId;
+                    }
+                });
+        }
+
+        function CreateILSMPopUpEP(epDetailId) {
+            swal({
+                    html: true,
+                    title: "Create ILSM",
+                    text:
+                        "<label>There are some deficiencies </label><br /><label>Do you want to create a ILSM?</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        var urlAction = CRxUrls.ILSM_AddILSM;
+                        window.location.href = urlAction + "?epDetailId=" + epDetailId;
+                    } else {
+                        var cancelRedirectUrl = CRxUrls.Goal_EpInspections;
+                        window.location.href = cancelRedirectUrl + "?epId=" + epDetailId;
+                    }
+            });
+        }
+
+        function epActivityMsg(inspection, data, fcount, _epDetailId, activityType) {
+            console.log(inspection);
+            debugger;
+            if (inspection.Status == 1 && data.IsRelation) {
+                checkEpRelationStatus(data, fcount, _epDetailId, activityType);
+            } else if (inspection.Status == 1) {
+                swal({
+                    html: true,
+                    title: "Compliant",
+                    text: 'EP is compliant <br /><div>' +
+                        //'<label>Next Due:</label> <label>' +
+                        //dateFormat(inspection.DueDate) +
+                        //'</label></div></div>',
+                        '</div></div>',
+                    type: "success",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        RedirectToPage(data, fcount, _epDetailId, activityType);
+                    }
+                    });
+
+            } else if (inspection.Status == 0) {
+                successAlert("ep is non-compliant");
+                location.reload();
+            } else if (inspection.Status == 2) {
+
+                if (data.IsInspReady == 0)
+                {
+                    swal({
+                        html: true,
+                        title: "This EP is in progress.",
+                        text: 'Resume later to complete this EP review.',
+                        type: "success",
+                        showCancelButton: false,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "OK",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            RedirectToPage(data, fcount, _epDetailId, activityType);
+                        } else {
+                            location.reload();
+                        }
+                    });
+                }
+                else
+                {
+                    swal({
+                        html: true,
+                        title: "This EP is in progress.",
+                        //text: 'This EP is in progress. <br /><div>' +
+                        //    'Resume later to complete this EP review.</div>',
+                        text: 'Resume later to complete this EP review.',
+                        type: "success",
+                        showCancelButton: false,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "OK",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            RedirectToPage(data, fcount, _epDetailId, activityType);
+                        } else {
+                            location.reload();
+                        }
+                    });
+
+                }
+            }
+
+            else {
+                RedirectToPage(data, fcount, _epDetailId, activityType);
+            }
+        }
+
+        function RedirectToPage(data, fcount, _epDetailId) {
+            debugger;
+
+            var _floorAssetId = $("#FloorAssetId").val();
+            var activityType = $("#activityType").val();
+            var IsTmsWo =isTmsSystem;
+            var _tmsReference = $("#TmsReference").val();
+            if (data.TinsActivityId > 0) {
+                if (parseInt(fcount) > 0) {
+                    if (activityType == 2 && IsTmsWo == "True" && _tmsReference == null) {
+                        if (window.location.href.indexOf("floorAssetId") > -1) {
+                            window.history.back();
+                        } else if (window.location.href.indexOf("EPstate") > -1) {
+                            window.location.href = backtodashboard(_epDetailId);
+                        }
+                        else {
+                           // window.location.href = data.PageName + "?Isback=1";
+                            $("#FailStepsPopup").modal('hide');
+                                var floorassetid = $("#FloorAssetId").val();
+                                var epdetailid = $("#EPDetailId").val();
+                                debugger
+                                loadFloorAssetrowData(epdetailid, floorassetid)
+
+                        }
+                    }
+                    else if (activityType == 1) {
+                        successAlert("EP is now compliant");
+                    }
+                    else {
+                        //debugger;
+                        ShowCreateWOPopUp(data.ActivityId, data.PageName, _floorAssetId, _epDetailId, data.tilsmId, data.IncidentId, data.isExistingILSM);
+                    }
+                }
+                else {
+                    if (window.location.href.indexOf("floorAssetId") > -1) {
+                        window.location.href = returnToAssetsReview(_floorAssetId, _epDetailId);
+                    } else if (window.location.href.indexOf("EPstate") > -1) {
+                        window.location.href = backtodashboard(_epDetailId);
+                    }
+                    else if (activityType == 2) {
+                        $("#FailStepsPopup").modal('hide');
+                        var floorassetid = $("#FloorAssetId").val();
+                        var epdetailid = $("#EPDetailId").val();
+                           debugger
+                        loadFloorAssetrowData(epdetailid, floorassetid)
+                    }
+                    else {
+                        window.location.href = data.PageName + "?Isback=1";
+                    }
+                }
+            }
+            else {
+                Redirectdefeciencies();
+            }
+        }
+
+        function checkEpRelationStatus(data, fcount, _epDetailId, activityType) {
+            debugger
+            $.ajax({
+                url: CRxUrls.Goal_EpRelationStatus,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                //dataType: "JSON",
+                data: { epDetailId: _epDetailId },
+                success: function (result, textStatus, XmlHttpRequest) {
+                    debugger;
+                    console.log(result);
+                    console.log(textStatus, XmlHttpRequest);
+                    if (result != null && result["result"].PendingRelationEpCount == 0) {
+                        var masterEpId = result["result"].EPDetailId;
+                        swal({
+                            html: true,
+                            title: "",
+                            text: "EP 5&6 are marked compliant and EP 7 is also related to it.",
+                            type: "info",
+                            showCancelButton: false,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Mark Compliant",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        },
+                            function (isConfirm) {
+                                if (isConfirm) {
+                                    MarkRelationalEPCompliant(masterEpId, data, fcount, _epDetailId, activityType);
+                                    //SaveInspection(bval, fcount);
+                                } else {
+
+                                }
+                            });
+                    } else {
+                        RedirectToPage(data, fcount, _epDetailId, activityType);
+                    }
+
+
+                }
+            });
+        }
+        function MarkRelationalEPCompliant(masterEpId, data, fcount, _epDetailId, activityType) {
+            $.ajax({
+                url: CRxUrls.Goal_MarkRelationalEPCompliant,
+                type: "POST",
+               // contentType: "application/json; charset=utf-8",
+                dataType: "JSON",
+                data: { epdetaild: masterEpId },
+                success: function (result, textStatus, XmlHttpRequest) {
+                    debugger;
+                    console.log(result);
+                    console.log(textStatus, XmlHttpRequest);
+                    if (result != null ) {
+                        swal({
+                            html: true,
+                            title: "Compliant",
+                            text: 'EP  is compliant <br /><div>' +
+                                //'<label>Next Due:</label> <label>' +
+                                //dateFormat(inspection.DueDate) +
+                                //'</label></div></div>',
+                                '</div></div>',
+                            type: "success",
+                            showCancelButton: false,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "OK",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        }, function (isConfirm) {
+                            if (isConfirm) {
+                                if (activityType == 2) {
+                                    window.location.href = CRxUrls.Goal_EpInspections + "?epId=" + _epDetailId;
+                                } else {
+                                    RedirectToPage(data, fcount, _epDetailId, activityType);
+                                }
+
+                            }
+                        });
+
+                    }
+
+
+                }
+            });
+        }
+        var returnToAssetsReview = function (floorAssetId, epDetailId) {
+            return returnToAssetsReviewUrlAction + "?floorAssetId=" + floorAssetId + "&epId=" + epDetailId;
+        }
+
+        $('#resumeButton').click(function() {
+            var bval = $(this).val();
+            SaveInspection(bval, 0);
+        });
+
+        $('.cb-value').click(function () {
+            var value = -1;
+            var mainParent = $(this).parent('.toggle-btn');
+            if ($(mainParent).find('input.cb-value').is(':checked')) {
+                $(mainParent).addClass('active');
+                value = 1;
+            } else {
+                $(mainParent).removeClass('active');
+            }
+
+            $(".ins_check3_btn").each(function () {
+                var control = $(this);
+                $(this).val(value);
+                var controlId = $(this).attr("tempName");
+                $("input[name='" + controlId + "'][type=hidden]").val(value);
+
+            });
+            if (value === -1) {
+                $(".MarkDeficiency").removeClass("show").addClass("hide");
+            } else if (value == 1) {
+                $(".MarkDeficiency").addClass("hide").removeClass("show");
+            }
+            var values = [];
+            $(".ins_check3_btn").each(function () {
+                //$(".ins_check2_btn").each(function () {
+                values.push($(this).val());
+                if (values.indexOf("-1") === -1) {
+                    $("#submitButton").removeClass('disable');
+                    $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-check.png");
+                }
+                else {
+                    $("#submitButton").addClass('disable');
+                    $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-uncheck.png");
+                }
+
+            });
+        });
+
+        $('#btnCancel').click(function() {
+            var bval = $(this).val();
+            $("#hdnsubmitButton").val(bval);
+            if ($('#FailStepsPopup').length) {
+                $('#FailStepsPopup').modal('hide');
+            } else if ($('#loadpartial').length) {
+                $('#loadpartial').empty();
+            } else {
+                $("#hdnsubmitButton").val(bval);
+                $("#epStepsform").submit();
+            }
+        });
+
+        //epreviewNotification section
+    function EPReviewNotification() {
+
+        var epid = @Model.FirstOrDefault().EPDetailId;
+
+        var standardep = "@Model.FirstOrDefault().StandardEP";
+        if ("@Model.FirstOrDefault().EPDetails.IsInspectionDateFixed" == "True") {
+            var PageName = "scheduledDate";
+        }
+        else {
+             if(@Model.FirstOrDefault().ActivityType==1) {
+             var PageName = "EpInspection";
+        }
+        if(@Model.FirstOrDefault().ActivityType==2) {
+            var PageName = "AssetsInspection";
+        }
+        }
+
+
+        var frequencyId = $("#frequencyId").val();
+        if ("@Model.FirstOrDefault().EPDetails.IsInspectionDateFixed" == "True") {
+            var DueDate = "@Model.FirstOrDefault().EPDetails.InitialInspDate";
+             var effectiveDate = "@Model.FirstOrDefault().EPDetails.InitialInspDate"
+        }
+        else {
+            var DueDate = "@Model.FirstOrDefault().EPDetails.Inspection.DueDate";
+            var effectiveDate = "@Model.FirstOrDefault().EPDetails.Inspection.DueDate"
+        }
+
+        if ("@Model.FirstOrDefault().EPDetails.IsAssetsRequired" == "False" && "@Model.FirstOrDefault().EPDetails.IsDocRequired" == "False") {
+            var RecentActivityType = "1";
+        }
+        if ("@Model.FirstOrDefault().EPDetails.IsAssetsRequired" =="True" && "@Model.FirstOrDefault().EPDetails.IsDocRequired" == "False") {
+             var RecentActivityType = "2"
+        }
+        if ("@Model.FirstOrDefault().EPDetails.IsAssetsRequired"=="True" && "@Model.FirstOrDefault().EPDetails.IsDocRequired" =="True") {
+             var RecentActivityType = "2"
+        }
+        if ("@Model.FirstOrDefault().EPDetails.IsDocRequired"=="True" && "@Model.FirstOrDefault().EPDetails.IsAssetsRequired" == "False") {
+            var RecentActivityType = "3";
+        }
+
+
+        var epStatus="@Model.FirstOrDefault().EPDetails.Inspection.SubStatus"
+        $.ajax({
+            url: CRxUrls.Goal_EPReviewNotification,
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            //dataType: "JSON",
+            data: { frequencyId: frequencyId, epid: epid, standardep: standardep, PageName: PageName, DueDate: DueDate, RecentActivityType: RecentActivityType, effectiveDate: effectiveDate, epStatus: epStatus },
+            success: function (data, textStatus, XmlHttpRequest) {
+                debugger;
+                console.log(data);
+                console.log(textStatus, XmlHttpRequest);
+                swal({
+                    html: true,
+                    title: "",
+                    text: data,
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Finalize",
+                    cancelButtonText: "Go Back",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            SaveInspection(bval, fcount);
+                            //SaveInspection(bval, fcount);
+                        } else {
+
+                        }
+                    });
+
+            }
+        });
+    }
+
+        $('#saveCustomFrequency').click(function () {
+            $.ajax({
+                        url: '@Url.Action("UpdateEpInspStartDate", "Goal")',
+                        type: "POST",
+                        data: {
+                            epdetailId: @Model.FirstOrDefault().EPDetailId,
+                            inspectiondate: $("#InspectionDate").val(),
+                            frequencyId: $("#frequencyId").val()
+                        },
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Result) {
+                               // swalalert("Inspection date added successfully!")
+                                //$("#" + result.EPDetailId).addClass("disabled");
+                                SaveInspection(bval, fcount);
+                            }
+                            //alert("Call");
+                        }
+                    });
+        });
+
+
+
+
+
+    });
+
+    var markAllbtn = $('.cb-value');
+    var setMarkAllBtn = function () {
+        var total = $(".ins_check3_btn").length;
+        var passSteps = $(".ins_check3_btn[value='1']").length;
+       // var pendingSteps = $(".ins_check3_btn[value='-1']").length;
+        if (total == passSteps) {
+            markAllbtn.parent().addClass('active');
+        } else {
+            markAllbtn.parent().removeClass('active');
+        }
+        var values = [];
+        $(".ins_check3_btn").each(function () {
+            //$(".ins_check2_btn").each(function () {
+            values.push($(this).val());
+            if (values.indexOf("-1") === -1) {
+                $("#submitButton").removeClass('disable');
+                $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-check.png");
+            }
+            else {
+                $("#submitButton").addClass('disable');
+                $("#epstepsfinal").attr("src", "/dist/Images/Icons/epdocSteps-uncheck.png");
+            }
+
+        });
+    }
+
+    function GetSelectedItem(rdbtnctrl, stepsId) {
+        var Val = $(rdbtnctrl).val();
+        if (Val == "False") {
+            $("#Drtxt_" + stepsId).show();
+            $("#Drtxt_" + stepsId).css("display", "inline-block");
+        } else {
+            $("#Drtxt_" + stepsId).hide();
+            $("#Drtxt_" + stepsId).removeClass("TimeToresolve");
+        }
+
+
+    }
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+
+    $('#InspectionDate').datepicker({
+        dateFormat: "mm/dd/yy",
+        minDate: new Date()
+    });
+    $('#InspectionDate').on("change", function () {
+        $("#saveCustomFrequency").removeClass("disabled");
+    })
+
+    function customfrequencylink() {
+        swal.close()
+    };
+
+
+
+</script>
+
+<link rel="stylesheet" href="@Url.Content("~/dist/css/_assetsSteps.css")" />

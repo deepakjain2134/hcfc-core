@@ -1,0 +1,133 @@
+﻿
+
+@model List<HCF.BDO.TRounds>
+@{
+
+    ViewBag.Title = "Readiness Round Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int i = 1;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Floor Round Inspection Summary
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-left">
+            <div class="box box-primary asset_list_view">
+                <div class="adduserlistBox">
+                    <div class="roundpanel">
+                        <h4 class="roundsHeading"> @Model.FirstOrDefault().RoundName.CastToNA("NA")</h4>
+                         <div class="roundtypeicon">
+                            <img src="@((Model.FirstOrDefault().RoundType == 1)?"/dist/Images/Icons/IndividualRounds.png":"/dist/Images/Icons/Grouprounds.png")" />
+                         </div>
+
+                        <h4 class="roundsHeading"> @Model.FirstOrDefault().RoundDate.ToFormatDate()</h4>
+                    </div>
+                    @Html.HiddenFor(x => x.FirstOrDefault().TRoundId)
+                    <div id="insp_round_locations">
+                        @await Html.PartialAsync("_RoundLocations", Model.FirstOrDefault().Locations)
+                    </div>
+                    <div id="insp_round_users">
+                        @await Html.PartialAsync("_RoundInspectors", Model.FirstOrDefault().TRoundUsers)
+                    </div>
+                    <div id="insp_round_issues">
+                        @await Html.PartialAsync("_RoundIssues", Model.FirstOrDefault().RoundWorkOrders)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-xs-9">
+            <div class="box box-primary" id="floor_round_questions">
+                @foreach (var item1 in Model) 
+                {
+                    
+                    @await Component.InvokeAsync("RoundFloorRoundQuestonaries", new { floorId = ViewBag.FloorTRoundId, rId = item1.TRoundId ,seq=i})
+                    i = i + 1; 
+                }
+                </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+         @foreach (var item1 in Model)
+         {
+             foreach (var item in item1.Inspections.Where(x => x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId).ToList())
+             {
+             @:BindFloorsStatus('@item.FloorId', '@item.InspStatus');
+          }
+             }
+
+        if ($("#ainspection").length > 0) {
+            $(".anoinspection").hide();
+        }
+         });
+
+    function BindFloorsStatus(floorId, status) {
+        //debugger;
+        if (parseInt(status) === 1) {
+            $('li.floor[floorid=' + floorId + ']').addClass('pass');
+        } else if (parseInt(status) === 0) {
+            $('li.floor[floorid=' + floorId + ']').addClass('fail');
+        }else {
+            $('li.floor[floorid=' + floorId + ']').addClass('inprogress');
+        }
+    }
+
+    $("#addwo").hide();
+
+     $("#insp_round_locations .floor").click(function () {
+        var floorId = $(this).attr("floorid");
+        openRoundQuestons(floorId);
+    });
+
+    var openRoundQuestons = function (floorId) {
+       // debugger;
+        //1
+        var troundId = $("#TRoundId").val();
+        $.get(CRxUrls.Round_FloorRoundQuestonaries + '?floorId=' + floorId + "&rId=" + troundId, function (data) {
+            $('#floor_round_questions').html(data);
+            $('#floor_round_questions').fadeIn('fast');
+        });
+    }
+</script>
+<style>
+    .pass {
+        background-color: #54a77b;
+        color: #fff !important;
+    }
+
+    .fail {
+        background-color: #cc6164;
+        color: #fff !important;
+    }
+
+    .inprogress {
+        background-color: blue;
+        color: #fff !important;
+    }
+
+
+    .roundpanel {
+        position: relative;
+    }
+
+    .roundtypeicon {
+        display: inline-block;
+        position: absolute;
+        top: 6px;
+        right: 10px;
+    }
+
+        .roundtypeicon img {
+            max-width: 20px;
+        }
+
+</style>

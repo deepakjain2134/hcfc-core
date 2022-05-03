@@ -1,0 +1,109 @@
+﻿@model string
+
+<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Search Assets</h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="form-group workinput">
+            <div class="popworkBox1">
+                <label class="control-label"><b>Asset #</b>&nbsp;</label>
+                <input type="text" class="numeric" id="txtSearch" maxlength="35" />
+                <button type="submit" id="btnSearch" class="assets-search popsearch-btn disable">Search</button>
+            </div>
+        </div>
+        <div id="">
+            <table id="woTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Asset Type
+                        </th>
+                        <th>
+                            Asset #
+                        </th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Make/Model
+                        </th>
+                        <th>
+                            Location
+                        </th>
+                        <th>
+                            Serial #                          
+                        </th>
+                        <th>
+                            Near By
+                        </th>
+                        <th style="display:none;">
+                           Path
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="partialContents"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+
+    </div>
+
+</div>
+<input type="hidden" name="clickCtr" id="clickCtr" value="@Model" />
+<input type="hidden" name="hdndevicetypevalue" id="hdndevicetypevalue" value="@ViewBag.ddlDeviceType" />
+<input type="hidden" name="hdnIsAssertdevicechange" id="hdnIsAssertdevicechange" value="@ViewBag.IsAssertdevicechange" />
+
+<script>
+
+    $('#txtSearch').on('input', function (e) {
+        var text = $(this).val();
+        if (text != undefined && text.length > 0) {
+            $("#btnSearch").removeClass("disable")
+        } else { $("#btnSearch").addClass("disable") }
+    });
+    $(document).ready(function () {
+        debugger;
+        if ($("#hdnIsAssertdevicechange").val() == '1') {
+            getSearchData();
+        }
+      
+    });
+    $("#btnSearch").click(function () {
+        getSearchData();
+    });
+
+    function getSearchData(index) { 
+        var searchData = $("#txtSearch").val();
+        var clickCtrId = $("#clickCtr").val();
+        var ddlDeviceType = $("#hdndevicetypevalue").val();
+        var IsAssertdevicechange = $("#hdnIsAssertdevicechange").val();
+        setTimeout(function () {
+            // doing async stuff
+            $(".loadingModal").show();
+        }, 1000);
+        if (searchData.length > 0 || $("#hdnIsAssertdevicechange").val() == '1') {
+            var url = '@Url.Action("SearchAssetsPopUpResult","Assets")';
+            $.get(url + '?searchData=' + searchData + "&clickCtr=" + clickCtrId + "&ddlDeviceType=" + ddlDeviceType + "&IsAssertdevicechange=" + IsAssertdevicechange + "&Path=" + $("#Path").val(), function (data) {
+                $('#partialContents').empty();
+                $('#partialContents').append(data);
+                $('#partialContents').fadeIn('fast');
+                setTimeout(function () {
+                    // doing async stuff
+                    $(".loadingModal").hide();
+                }, 1000);
+                if ($("#hdnPathworkflow").val() > 0) {
+                    $("#woTable").find("tbody tr td.assertlink").find("a").addClass("disable");
+                    $("#woTable").find("tbody tr td.assertlink").find("a[path=" + $("#hdnPathworkflow").val() + "]").removeClass("disable");
+                }
+            });
+        }
+    }
+</script>

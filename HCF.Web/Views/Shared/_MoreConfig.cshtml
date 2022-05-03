@@ -1,0 +1,818 @@
+﻿<div class="leftcol-setting">
+    <div class="box box-primary general_menu">
+        <div class="sidebar">
+            <nav class="navigation">
+                <ul class="profile_setting_left">
+
+                    @if (HCF.Web.Base.UserSession.IsInRole("organization_general"))
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("general")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "general" ? "active" : "")">
+                                <span class="spritebg sprite-generalsettings" title="General Settings"></span>
+                                <span>General Settings</span>
+                            </a>
+                        </li>
+                    }
+                    @if (HCF.Web.Base.UserSession.IsInRole("user_permissions"))
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("permissions")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "permissions" ? "active" : "")">
+                                <span class="spritebg sprite-rolesmaster" title="Roles Master View"></span>
+                                <span>Roles Master</span>
+                            </a>
+                        </li>
+                    }
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || HCF.Web.Base.UserSession.CurrentUser.IsSystemUser
+                   || HCF.Web.Base.UserSession.CurrentUser.IsCRxUser
+                   )
+                    {
+                        <li>
+                            <a href="/module/training" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "moduletraininglists" ? "active" : "")">
+                                <span class="spritebg sprite-rolesmaster" title="Implementation Status"></span>
+                                <span>Implementation Status </span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "bbi" ? "tree-toggle active" : "tree-toggle")">
+
+                            <span class="spritebg sprite-sitemanagement" title="Site Management"></span>
+                            <span>Site Management</span>
+                            <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                        </a>
+                        <ul class="tree" style="display:none;">
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("organization_Site"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("site")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "site" ? "active" : "")">
+
+                                        <span class="spritebg sprite-Site" title="Campus"></span>
+                                        <span>Campus</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("organization_buildings"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("buildings")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "buildings" ? "active" : "")">
+                                        <span class="spritebg sprite-wings" title="Buildings"></span>
+                                        <span>Buildings</span>
+                                    </a>
+                                </li>
+                            }
+                            @if (HCF.Web.Base.UserSession.IsInRole("setup_bbi"))
+                            {
+                                <li>
+                                    <a href="@Url.Action("BBI", "Site")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "bbi" ? "active" : "")">
+                                        <span class="spritebg sprite-questionnaire" title="BBI Tracking"></span>
+                                        <span>BBI Tracking</span>
+                                    </a>
+                                </li>
+                            }
+
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("organization_wings"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("wings")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "wings" ? "active" : "")">
+
+                                        <span class="spritebg sprite-wings" title="Wings"></span>
+                                        <span>Wings</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("setup_fireextinguisher_stop"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("locations")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "locations" ? "active" : "")">
+
+                                        <span class="spritebg sprite-stops" title="Stops"></span>
+                                        <span>Stops</span>
+                                    </a>
+                                </li>
+                            }
+                            @if (HCF.Web.Base.UserSession.IsInRole("setup_fireextinguisher_route"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("routes")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "routes" ? "active" : "")">
+
+                                        <span class="spritebg sprite-routes" title="Routes"></span>
+                                        <span>Routes</span>
+                                    </a>
+
+                                </li>
+                            }
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("setup_constructionriskarea"))
+                            {
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("icrariskarea")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "icrariskarea" ? "active" : "")">
+
+                                        <span class="spritebg sprite-Constructionarea" title="Construction Risk Area"></span>
+                                        <span>Department Risk Types</span>
+                                    </a>
+                                </li>
+                            }
+
+
+
+                            <li>
+                                <a href="@Url.RouteUrl("Shift")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "Shift" ? "active" : "")">
+
+                                    <span class="spritebg sprite-sitemanagement" title="Shift"></span>
+                                    <span>Shift</span>
+                                </a>
+                            </li>
+
+
+                            <li>
+                                <a href="@Url.RouteUrl("firesystemtype")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "firesystemtype" ? "active" : "")">
+
+                                    <span class="spritebg sprite-roundsetup" title="fire system type"></span>
+                                    <span>Fire System Type</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+
+                    @if (HCF.Web.Base.UserSession.IsInRole("rounds_FireDrillQuestionnaries"))
+                    {
+                        <li>
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "Questionnaires" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-questionnaire" title="Questionnaire"></span>
+                                <span>Fire Drill </span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                @if (HCF.Web.Base.UserSession.IsInRole("rounds_FireDrillQuestionnaries"))
+                                {
+                                    <li>
+                                        <a href="@Url.RouteUrl("firedrillCateg")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "firedrillquestionnaries" ? "active" : "")">
+
+                                            <span class="spritebg sprite-FireDrillCat" title="FireDrill Category"></span>
+                                            <span>FireDrill Category</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("firedrillQuestionnaries")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "firedrillquestionnaries" ? "active" : "")">
+
+                                            <span class="spritebg sprite-FireDrill" title="FireDrill"></span>
+                                            <span>Questionnaire</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("FireDrillSettings")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "FireDrillSettings".ToLower())">
+
+                                            <span class="spritebg sprite-generalsettings" title="Hospital Menu"></span>
+                                            <span>
+                                                Fire Drill Settings
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("groupbuildings")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "FireDrillGroupBuildings".ToLower())">
+
+                                            <span class="spritebg sprite-generalsettings" title="Hospital Menu"></span>
+                                            <span>
+                                                Group Buildings
+                                            </span>
+                                        </a>
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                        if (HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower() == "HCF_Atlantic".ToLower() && HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower() != null)
+                        {
+
+                            <li>
+                                <a href="@Url.RouteUrl("questionnaire")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "questionnaire" ? "active" : "")">
+
+                                    <span class="spritebg sprite-plantOps" title="Plant Ops"></span>
+                                    <span>Plant Ops</span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    <li>
+                        <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "index" ? "tree-toggle active" : "tree-toggle")">
+
+                            <span class="spritebg sprite-epconfiguration" title="EP Configuration"></span>
+                            <span>EP Configuration</span>
+                            <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                        </a>
+                        <ul class="tree" style="display:none;">
+                            @if (HCF.Web.Base.UserSession.IsInRole("goal_index"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("goals")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "index" ? "active" : "")">
+
+                                        <span class="spritebg sprite-CRxSettings" title="Setup Master EP"></span>
+                                        <span>@($"{(HCF.Web.Base.UserSession.CurrentUser.IsSystemUser ? "Setup Master EP" : "Setup EP")}")</span>
+                                    </a>
+                                </li>
+                            }
+                            @*<li>
+                                <a href="@Url.RouteUrl("importnonassetseps")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "importnonassetseps" ? "active" : "")">
+                                <img src="@Url.Content("/dist/Images/SetupImages/compliance_dates.png")" alt="" title="Compliance Dates" /> <span>Compliance Dates </span>
+                                </a>
+                                </li>*@
+                            <li>
+                                <a href="@Url.RouteUrl("EpFrequency")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "epfrequency" ? "active" : "")">
+
+                                    <span class="spritebg sprite-epFrequency" title="EP Frequency"></span>
+                                    <span>EP Frequency</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="@Url.RouteUrl("NonTrackedEPs")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "NonTrackedEPs" ? "active" : "")">
+
+                                    <span class="spritebg sprite-epFrequency" title="Non-Tracked EP Report"></span>
+                                    <span>Non-Tracked EP Report</span>
+                                </a>
+                            </li>
+
+
+                            @if (HCF.Web.Base.UserSession.IsInRole("organization_epassignments"))
+                            {
+                                <li>
+                                    <a href="@Url.RouteUrl("epassignments", new { type = 0 })" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "epassignments" ? "active" : "")">
+
+                                        <span class="spritebg sprite-FireDrill" title="EP Assignment"></span>
+                                        <span>EP Assignment</span>
+                                    </a>
+                                </li>
+                            }
+
+
+
+                        </ul>
+                    </li>
+                    @if (HCF.Web.Base.UserSession.IsInRole("organization_notifications"))
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("notificationMatrix")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "NotificationSettings".ToLower() ? "active" : "")">
+
+                                <span class="spritebg sprite-notificationsettings" title="Notification Settings"></span>
+                                <span>Notification Settings</span>
+                            </a>
+                        </li>
+
+
+                    }
+
+
+                    @if (HCF.Web.Base.UserSession.IsInRole("setup_floorAssets"))
+                    {
+                        <li>
+
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "Asset" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-assets" title="Assets"></span>
+                                <span>Assets</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                <li>
+                                    <a href="@Url.RouteUrl("floorAssets")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "floorassets" ? "active" : "")">
+                                        <span class="spritebg maintain-assets" title="Assets"></span>
+                                        <span>Maintain Asset</span>
+                                    </a>
+                                    @*<a href="@Url.RouteUrl("floorAssets")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "floorassets" ? "active" : "")">
+                                            <span class="spritebg maintain-assets" title="Assets"></span>
+                                            <span>Maintain Asset</span>
+                                        </a>*@
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("configurefloorassets")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "confugurefloorassetsteps" ? "active" : "")">
+
+                                        <span class="spritebg conats-assets" title="Configure ATS"></span>
+                                        <span>Configure ATS</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("TrackingAssets")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "trackingassets" ? "active" : "")">
+
+                                        <span class="spritebg trackings-assets" title="Tracking Assets"></span>
+                                        <span>Tracking Assets</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+
+                    @if (HCF.Web.Base.UserSession.IsInRole("setup_round_roundcategories") || HCF.Web.Base.UserSession.IsInRole("setup_round_roundcategories"))
+                    {
+                        <li>
+
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "round" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-roundsetup" title="Round Setup"></span>
+                                <span>Round Setup</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                <li>
+                                    <a href="@Url.RouteUrl("roundcategories")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "roundcategories" ? "active" : "")">
+
+                                        <span class="spritebg sprite-roundcategory" title="Round Category"></span>
+                                        <span>Round Category</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("roundQuest")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "roundquestionnaire" ? "active" : "")">
+
+                                        <span class="spritebg sprite-roundQuestionnaires" title="Round Questionnaires"></span>
+                                        <span>Round Questionnaires</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("roundschedulerflow")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "roundschedular" ? "active" : "")">
+
+                                        <span class="spritebg sprite-roundQuestionnaires" title="Round Scheduler"></span>
+                                        <span>Round Scheduler</span>
+                                    </a>
+
+
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    <li>
+                        @if (HCF.Web.Base.UserSession.IsInRole("setup_constructionmaster") || HCF.Web.Base.UserSession.IsInRole("setup_constructionriskarea"))
+                        {
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "construction" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-icra" title="ICRA"></span>
+                                <span>ICRA</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                @if (HCF.Web.Base.UserSession.IsInRole("setup_constructionmaster"))
+                                {
+                                    <li>
+                                        <a href="@Url.RouteUrl("constructiontype")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "constructiontype" ? "active" : "")">
+
+                                            <span class="spritebg sprite-constructiontype" title="Construction Type"></span>
+                                            <span>Construction Type</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("constructionrisk")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "constructionrisk" ? "active" : "")">
+
+                                            <span class="spritebg sprite-constructionrisk" title="Construction Risk"></span>
+                                            <span>Construction Risk</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("constructionclass")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "constructionclass" ? "active" : "")">
+
+                                            <span class="spritebg sprite-constructionclass" title="Construction Class"></span>
+                                            <span>Construction Class</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("icrasteps")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "icrasteps" ? "active" : "")">
+
+                                            <span class="spritebg sprite-icrasteps" title="ICRA Steps"></span>
+                                            <span>ICRA Steps</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("icramatrixv1")" id="icramatrix1" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "icramatixprecautions" ? "active" : "")">
+
+                                            <span class="spritebg sprite-icramatrix" title="ICRA Matrix version 1"></span>
+                                            <span>ICRA Matrix version 1</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("icramatrixv2")" id="icramatrix2" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "icramatixprecautions" ? "active" : "")">
+
+                                            <span class="spritebg sprite-icramatrix" title="ICRA Matrix version 2"></span>
+                                            <span>ICRA Matrix version 2</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="@Url.RouteUrl("reportcheckpoints")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "reportcheckpoints" ? "active" : "")">
+
+                                            <span class="spritebg sprite-icrareportscheck" title="ICRA Report CheckPoints"></span>
+                                            <span>ICRA Report CheckPoints</span>
+                                        </a>
+                                    </li>
+
+                                }
+
+
+                            </ul>
+                        }
+                    </li>
+                    <li>
+                        @if (HCF.Web.Base.UserSession.IsInRole("setup_constructionmaster") || HCF.Web.Base.UserSession.IsInRole("setup_constructionriskarea"))
+                        {
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "construction" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-pcra" title="PCRA"></span>
+                                <span>PCRA</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                @if (HCF.Web.Base.UserSession.IsInRole("setup_constructionriskarea"))
+                                {
+                                    <li>
+                                        <a href="@Url.RouteUrl("questionPCRA")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "icrariskarea" ? "active" : "")">
+
+                                            <span class="spritebg sprite-Constructionarea" title="PCRA Questionnaire"></span>
+                                            <span>PCRA Questionnaire</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </li>
+
+                    <li>
+                        <a href="javascript:void(0);" class="tree-toggle">
+
+                            <span class="spritebg sprite-generalsettings" title="Hot Work Permit"></span>
+                            <span>Hot Work Permit</span>
+                            <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                        </a>
+                        <ul class="tree">
+
+
+                            <li>
+                                <a href="@Url.Action("PermitSettings", "Permit")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "permitsettings" ? "active" : "")">
+                                    <span class="spritebg sprite-questionnaire" title="BBI Tracking"></span>
+                                    <span>Notice </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+                    @if (HCF.Web.Base.UserSession.HasRoleForMenu("permit_getallpermits") && HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra"))
+                    {
+
+                        <li class="">
+                            <a href="@Url.RouteUrl("permit_workflow")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "permit_workflow" ? "active" : "")">
+
+                                <span class="spritebg sprite-sitemanagement" title="Permit WorkFlow"></span>
+                                <span>Permit WorkFlow</span>
+                            </a>
+                        </li>
+                    }
+                    @if (HCF.Web.Base.UserSession.IsInRole("common_TMSRefresh") && HCF.Web.Base.UserSession.CurrentOrg.IsTmsWo)
+
+
+                    {
+                        <li>
+                            <a href="@Url.RouteUrl("TMSRefresh")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "tmsrefresh" ? "active" : "")">
+
+                                <span class="spritebg sprite-Constructionarea" title="Construction Risk Area"></span>
+                                <span>CMMS Sync</span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        @if (HCF.Web.Base.UserSession.IsInRole("vendor_UpdateContactDetails"))
+                        {
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "updatecontactdetails" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-vendorConfiguration" title="Vendor Configuration"></span>
+                                <span>Vendor Configuration</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+                                @if (HCF.Web.Base.UserSession.IsInRole("vendor_UpdateContactDetails"))
+                                {
+                                    <li>
+                                        <a href="@Url.RouteUrl("vendordashboard")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "vendordashboard" ? "active" : "")">
+                                            <span class="spritebg sprite-roundcategory" title="Edit Contact Details for Vendor"></span>
+                                            <span>Edit Contact Details for Vendor</span>
+                                        </a>
+                                    </li>
+                                    @*<li>
+                                    <a href="@Url.RouteUrl("updateContactDetails")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "updatecontactdetails" ? "active" : "")">
+                                        <span class="spritebg sprite-roundcategory" title="Edit Contact Details for Vendor"></span>
+                                        <span>Edit Contact Details for Vendor</span>
+                                    </a>
+                                    </li>*@
+                                    <li>
+                                        <a href="@Url.RouteUrl("VendorResources")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "VendorResources" ? "active" : "")">
+                                            <span class="spritebg sprite-roundcategory" title="Edit Resource Details for Vendor"></span>
+                                            <span>Edit Resource Details for Vendor</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </li>
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+                    {
+                        <li>
+                            <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "round" ? "tree-toggle active" : "tree-toggle")">
+
+                                <span class="spritebg sprite-CRxSettings" title="CRx Settings"></span>
+                                <span>CRx Settings</span>
+                                <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                            </a>
+                            <ul class="tree" style="display:none;">
+
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("usermenuConfigurations")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "usermenu")">
+
+                                        <span class="spritebg sprite-generalsettings" title="Hospital Menu"></span>
+                                        <span>Hospital Menu</span>
+                                    </a>
+                                </li>
+
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("setup_fireextinguisher_manufacturer"))
+                                {
+                                    <li class="hide hidden">
+                                        <a href="@Url.RouteUrl("manufactures")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "manufactures" ? "active" : "")">
+
+                                            <span class="spritebg sprite-roundcategory" title="Manufacturer"></span>
+                                            <span>Manufacturer</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("usergroup"))
+                                {
+                                    <li class="hide hidden">
+                                        <a href="@Url.RouteUrl("usergroup")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "usergroup" ? "active" : "")">
+
+                                            <span class="spritebg sprite-vendorConfiguration" title="User Group"></span>
+                                            <span>User Group</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                <li>
+                                    <a href="@Url.RouteUrl("orgsettings")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "orgsettings" ? "active" : "")">
+
+                                        <span class="spritebg sprite-generalsettings" title="Org Settings"></span>
+                                        <span>Org Settings</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="@Url.RouteUrl("tips")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "tips" ? "active" : "")">
+
+                                        <span class="spritebg sprite-tips" title="Tips"></span>
+                                        <span>Tips</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="NewsItem" asp-area="News" asp-action="News"
+                                       class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "news" ? "active" : "")">
+                                        <span class="spritebg sprite-news" title="News"></span>
+                                        <span>News</span>
+                                    </a>
+                                </li>
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("documenttype")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "documenttype" ? "active" : "")">
+
+                                        <span class="spritebg sprite-assetstype" title="Documents"></span>
+                                        <span>Documents</span>
+                                    </a>
+                                </li>
+                                <li style="display:none;">
+                                    <a href="@Url.RouteUrl("schedules")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "schedules" ? "active" : "")">
+
+                                        <span class="spritebg sprite-schedules" title="Schedules"></span>
+                                        <span>Schedules</span>
+                                    </a>
+                                </li>
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("EPGroups")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "epgroups")">
+
+                                        <span class="spritebg sprite-generalsettings" title="EP Groups"></span>
+                                        <span>EP Groups</span>
+                                    </a>
+                                </li>
+                                @if (HCF.Web.Base.UserSession.IsInRole("setup_AssetsType"))
+                                {
+                                    <li class="hide hidden">
+                                        <a href="@Url.RouteUrl("assetsType")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "AssetsType".ToLower() ? "active" : "")">
+
+                                            <span class="spritebg sprite-assetstype" title="Assets Type"></span>
+                                            <span>Assets Type</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (HCF.Web.Base.UserSession.IsInRole("Userrole"))
+                                {
+                                    <li class="hide hidden">
+                                        <a href="@Url.RouteUrl("UserRole")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "userrole")">
+                                            <span class="spritebg sprite-generalsettings" title="User Roles"></span>
+                                            <span>User Roles</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                <li class="hide hidden">
+                                    <a href="@Url.Action("Index","Menu")">
+                                        <span class="spritebg sprite-generalsettings" title="Menus"></span>
+                                        <span>Menus</span>
+                                    </a>
+                                </li>
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("goal_IlsmScore") || HCF.Web.Base.UserSession.IsInRole("goal_IlsmMatrix"))
+                                {
+                                    @*<li>
+                                        <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "ilsm" ? "tree-toggle active" : "tree-toggle")">
+                                            <img src="@Url.Content("/dist/Images/SetupImages/ilsm.png")" alt="" title="ILSM" /> <span>ILSM</span>
+                                        </a>
+                                        <ul class="tree" style="display:none;">*@
+                                    if (HCF.Web.Base.UserSession.IsInRole("goal_IlsmScore"))
+                                    {
+                                        <li class="hide hidden">
+                                            <a href="@Url.RouteUrl("ilsmScore")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "ilsmscore" ? "active" : "")">
+
+                                                <span class="spritebg sprite-riskScoring" title="Risk Scoring"></span>
+                                                <span>Risk Scoring</span>
+                                            </a>
+                                        </li>
+                                    }
+                                    if (HCF.Web.Base.UserSession.IsInRole("goal_IlsmMatrix"))
+                                    {
+                                        <li class="hide hidden">
+                                            <a href="@Url.RouteUrl("ilsm")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "ilsmmatrix" ? "active" : "")">
+
+                                                <span class="spritebg sprite-ilsmmatrix" title="ILSM Matrix"></span>
+                                                <span>ILSM Matrix</span>
+                                            </a>
+                                        </li>
+                                    }
+
+
+                                    @*</ul>
+                                        </li>*@
+                                }
+                                <li class="hide hidden">
+                                    <a href="@Url.Action("Roles","Menu")">
+                                        <span class="spritebg sprite-generalsettings" title="Roles"></span>
+                                        <span>Roles</span>
+                                    </a>
+                                </li>
+                                <li class="hide hidden">
+                                    <a href="@Url.Action("InboxSetup","Organization")">
+                                        <span class="spritebg sprite-generalsettings" title="Inbox Settings"></span>
+                                        <span>Inbox Settings</span>
+                                    </a>
+                                </li>
+
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("State")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "State" ? "active" : "")">
+
+                                        <span class="spritebg sprite-states" title="State"></span>
+                                        <span>State</span>
+                                    </a>
+                                </li>
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("City")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "State" ? "active" : "")">
+
+                                        <span class="spritebg sprite-sitemanagement" title="City"></span>
+                                        <span>City</span>
+                                    </a>
+                                </li>
+
+
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("rounds_FireDrillQuestionnaries"))
+                                {
+                                    <li class="hide hidden">
+                                        <a href="javascript:void(0);" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "Questionnaires" ? "tree-toggle active" : "tree-toggle")">
+
+                                            <span class="spritebg sprite-questionnaire" title="Questionnaires"></span>
+                                            <span>Questionnaires</span>
+                                            <i class="fa fa-angle-down more-submenu" id="more-submenu" aria-hidden="true"></i>
+                                        </a>
+                                        <ul class="tree" style="display:none;">
+                                            @if (HCF.Web.Base.UserSession.IsInRole("rounds_FireDrillQuestionnaries"))
+                                            {
+                                                <li>
+                                                    <a href="@Url.RouteUrl("firedrillCommonCateg")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "firedrillcategories" ? "active" : "")">
+
+                                                        <span class="spritebg sprite-FireDrillCat" title="FireDrillCat"></span>
+                                                        <span>FireDrill Category</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.RouteUrl("firedrillQues")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "firedrillquestionnaries" ? "active" : "")">
+
+                                                        <span class="spritebg sprite-FireDrill" title="FireDrill"></span>
+                                                        <span>Fire Drill Questionnaire</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.RouteUrl("roundcommoncategories")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "roundcategories" ? "active" : "")">
+
+                                                        <span class="spritebg sprite-roundcategory" title="Round Category"></span>
+                                                        <span>Round Category</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="@Url.RouteUrl("roundcommonques")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "roundquestionnaire".ToLower())">
+
+                                                        <span class="spritebg sprite-roundQuestionnaires" title="Round Common Questionnaires"></span>
+                                                        <span>
+                                                            Rounds Questionnaire
+                                                        </span>
+                                                    </a>
+                                                </li>
+
+
+                                            }
+
+                                        </ul>
+                                    </li>
+                                }
+                                <li class="hide hidden">
+                                    <a href="@Url.RouteUrl("CMSEpMapping")" class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "CMSEpMapping" ? "active" : "")">
+
+                                        <span class="spritebg sprite-epFrequency" title="CMS EpMapping"></span>
+                                        <span>CMS EPMapping</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a asp-controller="ModuleTraining" asp-area="ModuleTraining" asp-action="Index"
+                                       class="@(ViewContext.RouteData.Values["Action"].ToString().ToLower() == "ModuleTraining" ? "active" : "")">
+                                        <span class="spritebg sprite-news" title="ModuleTraining"></span>
+                                        <span>Manage Implementation Status</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</div>
+<div class="cneterCol-setting">
+    <p id="general-settcolapps" class="general-arrow">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+    </p>
+</div>
+
+<script>
+    $('.tree-toggle').click(function () {
+        $(this).parent().children('ul.tree').toggle(200);
+    });
+
+    $('.profile_setting_left').each(function () {
+        $(this).find('li').each(function () {
+            if ($(this).find("ul.tree").length > 0) {
+                $(this).find("ul.tree").each(function () {
+                    var liControl = $(this);
+                    $(this).find('li').each(function () {
+                        var ctr = $(this).find("a");
+                        if (ctr.hasClass("active"))
+                            liControl.toggle();
+                    });
+                });
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        debugger;
+        var pathname = window.location.pathname;
+        debugger;
+        if (pathname.indexOf("icra/matrix/1") != -1) {
+            $("#icramatrix2").removeClass("active");
+        } else {
+            $("#icramatrix1").removeClass("active");
+        }
+    });
+
+    $(document).ready(function(){
+        $('#general-settcolapps').click(function(){
+            $('.leftcol-setting').toggleClass('active');
+        });
+        $('.general-arrow').click(function () {
+            $('.general-arrow').toggleClass('arrow-rotate')
+        });
+
+        $(window).resize(function () {
+            var width = $(window).width();
+            if (width < 992) {
+                $('.leftcol-setting').addClass('active');
+            }
+        });
+    });
+</script>
+

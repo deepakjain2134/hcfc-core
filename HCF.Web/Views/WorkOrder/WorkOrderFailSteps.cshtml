@@ -1,0 +1,323 @@
+﻿@model List<HCF.BDO.Inspection>
+@{
+    ViewBag.Title = "Work Order Fail Steps";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var activities = new List<Guid>();
+    var epdetailId = new List<int>();
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Work Order Fail Steps
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    @using (Html.BeginForm("CreateWOFailSteps", "WorkOrder", FormMethod.Post, new { id = "Woform" }))
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row tablelist-topform">
+                        <div class="col-lg-12 text-right">
+                            <input type="button" value="Create Work Order" class="button1" id="btnSubmit" />&nbsp;
+                            @if (TempData.Get<string>("TilsmId") != null)
+                            {
+                                if (Convert.ToInt32(TempData.Get<string>("TilsmId")) > 0)
+                                {
+                                    <a href='@Url.Action("GetIlsmInspection","Goal", new { tilsmId =TempData.Get<string>("TilsmId").ToString() })' class="button1">Cancel</a>
+                                }
+                            }
+                            @*else if (Session["IsExistTagDeficiency"].ToString() == "True" && Session["IsGuestUser"].ToString() == "True")
+                                {
+                                    <a href='@Url.Action("Deficiencies","Home", new { taggedId = Session["taggedid"].ToString(), orgId = Session["OrganizationId"].ToString() })' class="button1">Cancel</a>
+                                }*@
+                            else
+                            {
+                                <a href='@HCF.Web.Base.UISession.GetBackPageInspection("assets_GetTfloorAssets")' class="button1">Cancel</a>
+                            }
+                        </div>
+                    </div>
+                    <input type="hidden" name="TilsmId" id="TilsmId" value="@(TempData.Get<string>("TilsmId") != null? Convert.ToInt32(TempData.Get<string>("TilsmId")) : 0)">
+                    <input type="hidden" name="Tinsids" id="Tinsids" value="">
+
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        for (int j = 0; j < Model[i].TInspectionActivity.Count; j++)
+                        {
+                            //if (Model[i].TInspectionActivity[j].ActivityType == 2)
+                            //{
+                            var list = activities.Contains(Model[i].TInspectionActivity[j].ActivityId);
+                            if (!list)
+                            {
+                                <div class="tble_shadow1">
+                                    @for (int o = 0; o < Model[i].TInspectionActivity[j].EPDetails.Count; o++)
+                                    {
+                                        var eps = epdetailId.Contains(Model[i].TInspectionActivity[j].EPDetails[o].EPDetailId);
+                                        if (!eps)
+                                        {
+                                            if (Model[i].TInspectionActivity[j].EPDetails[o].EPDetailId > 0)
+                                            {
+                                                epdetailId.Add(Model[i].TInspectionActivity[j].EPDetails[o].EPDetailId);
+                                                <div>
+                                                    @Html.HiddenFor(m => Model[i].EPDetailId)
+                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].EPDetails[o].EPDetailId)
+                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].EPDetails[o].StandardEp)
+                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].EPDetails[o].Description)
+                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].EPDetails[o].Standard.TJCStandard)
+                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].EPDetails[o].EPNumber)
+                                                    <input type="hidden" name="ePDetailId" value="@Model[i].EPDetailId">
+                                                </div>
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="display:none;">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td height="30" width="15%" valign="top" class="@commonModelFactory.GetTranStatus(Model[i].TInspectionActivity[j].EPDetails[o].EpTransStatus)">
+                                                                <span title=" @Localizer["StandardEP"] ">
+                                                                    @Model[i].TInspectionActivity[j].EPDetails[o].StandardEp
+                                                                </span><br />
+                                                                <ep-risk-score risk-score="@Model[i].TInspectionActivity[j].EPDetails[o].Scores.Name">
+                                                                </ep-risk-score>
+                                                            </td>
+                                                            <td height="30" width="80%" class="">
+                                                                @*@Model[i].TInspectionActivity[j].EPDetails[o].Description*@
+                                                                @*@await Html.PartialAsync("_EpDescription", Model[i].TInspectionActivity[j].EPDetails[o].Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @Model[i].TInspectionActivity[j].EPDetails[o].StandardEp } })*@
+
+                                                                @await Html.PartialAsync("_EpDescription", Model[i].TInspectionActivity[j].EPDetails[o].Description,
+                           new ViewDataDictionary(
+                           new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                           new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                           {{ "minLength", "100" }, { "standardEp", @Model[i].TInspectionActivity[j].EPDetails[o].StandardEp }}
+                          )
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        }
+                                    }
+                                </div>
+
+                                activities.Add(Model[i].TInspectionActivity[j].ActivityId);
+                                if (Model[i].TInspectionActivity[j].TFloorAssets != null)
+                                {
+                                    <div class="row">
+                                        <div class="col-md-12 assetInfo">
+                                            <table class="table table-striped">
+                                                <tbody>
+                                                    <tr>
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].ActivityId)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.FloorAssetsId)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Name)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.AssetNo)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.DeviceNo)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.TmsReference)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.Building.BuildingId)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.FloorCode)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.Building.BuildingName)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.Building.BuildingCode)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.Building.SiteCode)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.FloorName)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Floor.FloorId)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TFloorAssets.Assets.Name)
+                                                        <td width="30%"><strong>Asset Name:</strong> @Model[i].TInspectionActivity[j].TFloorAssets.Assets.Name</td>
+                                                        <td width="30%"><strong> @Localizer["AssetNo"] :</strong> @Model[i].TInspectionActivity[j].TFloorAssets.AssetNo</td>
+                                                        <td width="30%"><strong>Location: </strong>@commonModelFactory.GetFloorAssetLocation(Model[i].TInspectionActivity[j].TFloorAssets)</td>
+                                                        <td>
+                                                            <input type="hidden" id="hfloorAssetId" value="@Model[i].TInspectionActivity[j].TFloorAssets.FloorAssetsId" />
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                }
+
+                                if (i == 0 && j == 0)
+                                {
+                                    <div class="row">
+                                        <div class="col-lg-12 align-left">
+                                            <div style="display:inline-block; padding-left:12px;">
+                                                <input type="checkbox" id="checkAll" value="Select All" />
+                                                <span> </span>Select All
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <ul class="activity_history stylish">
+                                            @for (int k = 0; k < Model[i].TInspectionActivity[j].TInspectionDetail.Count(); k++)
+                                            {
+                                                if (Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps.Any(x => x.Status == 0 && x.IssueId == null))
+                                                {
+                                                    <li>
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionDetailId)
+                                                        @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].MainGoal.Goal)
+                                                        <strong>@Model[i].TInspectionActivity[j].TInspectionDetail[k].MainGoal.Goal</strong>
+                                                        <ul>
+                                                            @for (int l = 0; l < Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps.Count(); l++)
+                                                            {
+                                                                if (Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Status == 0 && Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].IssueId == null)
+                                                                {
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].TInsStepsId)
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].DeficiencyCode)
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Steps.Step)
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Comments)
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].IsRA)
+                                                                    @Html.HiddenFor(m => Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Status)
+                                                                    <li class="@(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Steps.IsRA ? "editor-field rastep" : "editor-field")">
+
+                                                                        <input type="checkbox" id="tinsstepId"
+                                                                               class="checkBox" value="@Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].TInsStepsId"
+                                                                               @*data-floorassetid="@Model[i].TInspectionActivity[j].TFloorAssets.FloorAssetsId"*@
+                                                                               data-drtime="@(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].DRTime > 0 ? "1" : "0" )" /><span></span>
+
+                                                                        <input type="button" class="ins_check3_btn" value="@Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Status" />
+                                                                        @Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Steps.Step
+
+
+                                                                        @await Html.PartialAsync("_inspAttachment", Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l])
+                                                                        @*@if (!string.IsNullOrEmpty(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Comments))
+                                                                            {
+                                                                                <a href="@Url.Action("CommentPopUp", "Common", new { Title = "Steps Comment", description = Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Comments })" class="modal-link">
+                                                                                    <img src="@Url.Content("~/dist/img/message_icon.png")"
+                                                                                         alt=""
+                                                                                         tempname='@Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].Comments'
+                                                                                         class="commentIcon text" style="float:right" />
+                                                                                </a>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right; margin-right:5px;" />
+                                                                            }
+                                                                            @if (!string.IsNullOrEmpty(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].FilePath))
+                                                                            {
+                                                                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].FilePath, title = "Image Preview" })" class="modal-link">
+                                                                                    <img class="@(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].FilePath != string.Empty ? "img_prev_upload" : "img_prev")" id="imagePreview_@Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].StepsId"
+                                                                                         src="@commonModelFactory.FilePath(Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].FilePath)" style="float:right; margin-right:5px;">
+                                                                                </a>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float:right; margin-right:5px;" class="commentIcon disable" />
+                                                                            }*@
+
+
+                                                                        @if (Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].DRTime > 0)
+                                                                        {
+                                                                            <span style="float:right; margin-right:50px;">Time to Resolve (@Model[i].TInspectionActivity[j].TInspectionDetail[k].InspectionSteps[l].DRTime) Hrs</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span style="float:right; margin-right:50px;">Deficient </span>
+                                                                        }
+                                                                    </li>
+                                                                }
+                                                            }
+                                                        </ul>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                        @await Html.PartialAsync("_InspectionFiles", Model[i].TInspectionActivity[j])
+                                    </div>
+                                </div>
+                            }
+                        }
+                        // }
+                    }
+                </div>
+            </div>
+        </div>
+        <input type="hidden" value="@(TempData.Get<string>("activityType"))" id="activityType" name="activityType" />
+        <input type="hidden" value="@(TempData.Get<string>("epDetailId"))" id="epdetailId" name="epDetailId" />
+        <input type="hidden" value="@(TempData.Get<string>("activityId"))" id="activityId" name="activityId" />
+        @*<input type="hidden" value="@ViewBag.activityType" id="activityType" name="activityType" />
+            <input type="hidden" value="@ViewBag.epDetailId" id="epdetailId" name="epDetailId" />
+            <input type="hidden" value="@ViewBag.activityId" id="activityId" name="activityId" />*@
+    }
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //debugger
+        var IsExistTagDeficiency = '@session.IsExistTagDeficiency';
+        var isGuestUser = '@session.IsGuestUser'
+        if (IsExistTagDeficiency == 'True' && isGuestUser =="True") {
+            $(".breadcrumb-arrow").remove($("<li>").hasClass('backbtn'))
+            $('.chkpassword').hide()
+            $('.liprofile').hide()
+        }
+    });
+
+    @if (ViewBag.TilsmId != null)
+    {
+    @:$("#TilsmId").val(@ViewBag.TilsmId);
+    }
+
+
+    $("#checkAll").click(function () {
+        var isChecked = $(this).prop('checked');
+        $('.checkBox').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+    });
+
+    $(".checkBox").click(function () {
+        var totalnumberOfChecked = $('input.checkBox:checkbox:checked').length;
+        var totalNoCheckboxes = $('input.checkBox:checkbox').length;
+        if (totalnumberOfChecked === totalNoCheckboxes) {
+            $("#checkAll").prop("checked", true)
+        } else {
+            $("#checkAll").prop("checked", false)
+        }
+    });
+
+
+
+    $("#btnSubmit").click(function () {
+        var Ids = "";
+        //var floorAssetId = "";
+        var data = "";
+        var count = 0;
+        var descriptionval = $('#Description').val();
+        $('input:checkbox[id^="tinsstepId"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    Ids = Ids + $(this).val() + ",";
+                   // floorAssetId = floorAssetId + $(this).data("floorassetid") + ",";
+                    count++;
+                }
+            }
+        });
+
+
+        if (count > 0) {
+            $("#Tinsids").val(Ids);
+            $("#Woform").submit();
+        } else {
+            AlertWarningMsg("Please select at least one steps!");
+        }
+    })
+
+</script>
+<style>
+    .activity_history li ul li {
+        padding: 6px 6px 6px 10px;
+        width: 100%;
+        margin-left: 0;
+        background-color: #f5f5f5;
+        margin-bottom: 2px;
+    }
+</style>

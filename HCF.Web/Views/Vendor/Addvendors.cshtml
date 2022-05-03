@@ -1,0 +1,337 @@
+﻿@model HCF.BDO.Vendors
+
+@{
+    ViewBag.Title = "Add Vendor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    if (Model.VendorId == 0)
+    {
+        Model.IsActive = true;
+    }
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @ViewBag.PageTitle
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-lg-12">
+                <div class="box box-primary">
+
+                  
+                        @using (Html.BeginForm("Addvendors", "Vendor", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            @Html.ValidationSummary(true)
+                            <input id="submitType" name="submitType" value="@ViewBag.SubmitValue" style="display:none;">
+                            <input id="VendorId" name="VendorId" value="@Model.VendorId" style="display:none;">
+
+                            <p><span style="color:green;">Fill out the required information to @(Model.VendorId > 0 ? " edit " : "create a new ")  vendor.</span></p>
+                            
+
+
+                            <div class="@(Model.VendorId > 0 ? "row hidden" : "row ")">
+                                <div class="col-lg-12 form-group">
+                                        Search if the vendor you are looking for already has a CRx account using the Vendor List
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Vendor List</label>
+                                    <div class="clearable">
+                                        <input type="text" placeholder="Please enter Text to Search vendor" id="txtvendor" class="form-control" maxlength="50" />
+                                        <span class="barcodebtn hidden">
+                                            <a href="#" class="clearable__clear"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></a>
+                                            <a href="#" id="txtSearch"><i class="fa fa-search" id=""></i></a>
+                                        </span>
+                                        <p id="empty-message"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row list-Contacts">
+                                <div class="col-md-4 form-group">
+                                    <label>Vendor Name</label><em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control alphaonly", required = "required", maxlength = 50, TabIndex = 1 })
+                                    @Html.ValidationMessageFor(model => model.Name)
+                                </div>
+
+                                <div class="col-md-4 form-group">
+                                    <label>Email</label><em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", required = "required", maxlength = 50, @type = "email", TabIndex = 3 })
+                                    @Html.ValidationMessageFor(model => model.Email)
+                                </div>
+
+                                <div class="col-md-4 form-group">
+                                    @*<label>Registration #</label><em class="required-field"> *</em>*@
+                                    <label>Organization ID</label>
+                                    @Html.TextBoxFor(model => model.RegistrationNo, new { @class = "form-control", maxlength = 50, TabIndex = 5 })
+                                    @Html.ValidationMessageFor(model => model.RegistrationNo)
+                                </div>
+
+
+
+                                <div class="col-md-4 form-group">
+                                    <label>Address</label><em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control", maxlength = 150, TabIndex = 2, required = "required" })
+                                    @Html.ValidationMessageFor(model => model.Address)
+                                </div>
+
+                                <div class="col-md-4 form-group">
+                                    <label>Phone #</label><em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.PhoneNo, new
+                                    {
+                                   @class = "form-control phone",
+                                   maxlength = 10,
+                                   pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                   title = "Please enter a valid phone # with area code.",
+                                   TabIndex = 4,
+                                   required = "required"
+                                    })
+                                    @Html.ValidationMessageFor(model => model.PhoneNo)
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Cell #</label>@*<em class="required-field"> *</em>*@
+                                    @Html.TextBoxFor(model => model.CellNo, new
+                                    {
+                                   @class = "form-control phone",
+                                   maxlength = 15,
+                                   pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                   title = "Please enter a valid cell #.",
+                                        TabIndex = 5
+                                    })
+                                    @Html.ValidationMessageFor(model => model.CellNo)
+                                </div>
+                                <div class="col-md-4 form-group comman_checkbox">
+
+                                    @*@Html.LabelFor(model => model.IsActive)*@
+                                    @Html.CheckBoxFor(x => x.IsActive, Model.IsActive)
+                                    @*@Html.EditorFor(model => model.IsActive,true)<span></span>*@
+                                    @Html.ValidationMessageFor(model => model.IsActive)
+                                    @Html.Label("Active")
+                                </div>
+                                <div class="@(Model.VendorId > 0 ? "form-group hidden" : "form-group col-md-6")">
+
+                                    @Html.CheckBox("invitationEmail", true)<span></span>
+                                    <label>Send Invitation Email</label>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 vendorMelti-Select">
+                                    @*<label>Allow Access :</label>*@
+
+                                    <div class="userchecklist">
+                                        <div class="userchecklist-col1"><strong>Allow Access :</strong></div>
+                                        <div class="checkSetpsicon userchecklist-col1">
+                                            <div>
+                                                <img src="../dist/Images/User/checkbox-step1.svg" />
+                                                Campus assigned to user
+                                            </div>
+                                            <div>
+                                                <img src="../dist/Images/User/checkbox-step2.svg" />
+                                                Primary Campus for user
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*(Select which campuses, buildings & drawings you want this vendor to be able to access/see)<br />*@
+                                    @*@await Html.PartialAsync("~/Views/User/_userSites.cshtml",Model.VendorSites)*@
+                                    @*@Html.Action("UserSiteView", "User", new { vendorId = Model.VendorId })*@
+                                    @await Component.InvokeAsync("UserUserSiteView", new { vendorId = Model.VendorId })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <label>
+                                        Select Drawings
+                                    </label>
+                                    @Html.ListBoxFor(model => model.DrpDrawingsIds, new MultiSelectList(Model.DrawingTypes, "Value", "Text"), new {
+                                   @class = "form-control selectpicker",
+                                   multiple = "multiple",
+                                 //  @data_actions_box = "true",
+                                   id = "DrpDrawingsIds" })
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-md-12 text-right button_Div">
+                                    <button type="submit" class="comm-button submit" title='@ViewBag.SubmitValue'>@ViewBag.SubmitValue</button>
+                                    @*<button type="button" class="comm-button" onclick="">Cancel</button>*@
+                                      <a href="@Url.Action("Vendors", "Vendor", new { id = "" })" class="comm-Cancelbutton">Cancel</a>
+                                    <input type="hidden" name="masterVendorId" id="selectedvendor" />
+                                    <button type="button" class="comm-bluebutton resetbutton">Reset</button>
+                                </div>
+                            </div>
+                        }
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sendorganizationId" role="dialog">
+        <div class="modal-dialog" id="loadpartial">
+
+        </div>
+    </div>
+
+@section Scripts{
+    <script>
+    $(document).ready(function () {
+
+        var drpBuildings = $(".drpBuildings");
+        drpBuildings.hide();
+
+        $(".clearable").each(function () {
+            const $inp = $(this).find("input:text"),
+                $cle = $(this).find(".clearable__clear");
+            $inp.on("input", function () {
+                $cle.toggle(!!this.value);
+            });
+            $cle.on("touchstart click", function (e) {
+                e.preventDefault();
+                $inp.val("").trigger("input");
+            });
+        });
+
+        $("#shareOrgid").click(function () {
+
+         var vendorId=$("#selectedvendor").val();
+            $.ajax({
+                url: '@Url.Action("SendOrganizationIdModal", "Vendor")' + "?vendorId=" + vendorId,
+                method: "GET",
+                dataType: "html",
+                success: function (data) {
+                    $("#loadpartial").empty();
+                    $("#loadpartial").append(data);
+                    $("#sendorganizationId").modal('show');
+                },
+                error: function (e) {
+                    console.warn(e);
+                }
+            })
+        });
+
+        if ($("#txtvendor") != undefined) {
+            console.log($("#txtvendor"));
+
+            $("#txtvendor").autocomplete({
+                minLength: 0,
+                source: function (request, response) {
+                    $.ajax({
+                        url: CRxUrls.Vendor_GetVendorByPrefix, //"/Vendor/GetVendorByPrefix",
+                        type: "POST",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        global: false,
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                console.log(item);
+                                return {
+                                    value: item.VendorId,
+                                    label: item.Name,
+                                    VendorName: item.Name,
+                                    VendorEmail: item.Email,
+                                    RegistrationNo: item.RegistrationNo,
+                                    PhoneNo: item.PhoneNo,
+                                    CellNo: item.CellNo,
+                                    Address: item.Address
+
+
+                                };
+                            }))
+                        }
+                    })
+                },
+                search: function (e, u) {
+                    $(this).addClass('loader');
+                },
+                response: function (e, ui) {
+                    $(this).removeClass('loader');
+                    if (ui.content.length === 0) {
+                        $("#empty-message").html("No results found");
+                        drpBuildings.hide();
+                        $("#selectedvendor").val(0);
+                        $("#Name").removeClass("disable");
+                    } else {
+                        $("#empty-message").empty();
+                        drpBuildings.show();
+                    }
+                },
+
+                select: function (event, ui) {
+                    $("#selectedvendor").val(ui.item.value);
+                    $("#txtvendor").val(ui.item.label);
+                    $("#Name").val(ui.item.label);
+                    $("#Name").addClass("disable");
+                    $("#Email").val(ui.item.VendorEmail);
+                    $("#RegistrationNo").val(ui.item.RegistrationNo);
+                    $("#Address").val(ui.item.Address);
+                    $("#CellNo").val(ui.item.CellNo);
+                    $("#PhoneNo").val(ui.item.PhoneNo);
+
+                    return false;
+                }
+            })
+                .autocomplete("instance")._renderItem = function (ul, item) {
+                    var newClass = (item.FloorId > 0 && item.FloorId != undefined) ? "" : "disable";
+                    return $("<li>")
+                        .append("<div class='vendor-list'><div class='vendorList-item'><div><span><strong>Vendor Name :</strong> " + item.label + "</span> <span><strong>Email :</strong> " + item.VendorEmail + "</span></div><div> <span><strong>Phone :</strong> " + item.PhoneNo + "</span> <span><strong>Address :</strong> " + item.Address + "</span></div></div>" +
+                            "<div class='barcodeiconbox'>" +
+                            "</div></div>")
+                        .appendTo(ul);
+                };
+        }
+
+
+        $(".resetbutton").click(function () {
+            debugger;
+            if ('@ViewBag.SubmitValue'== 'Add') {
+                // $('.box-body').find('input:text').val('');
+                $("#Email").val('');
+                $("#RegistrationNo").val('');
+                $("#Address").val('');
+                $("#PhoneNo").val('');
+                $("#CellNo").val('');
+                $("#txtvendor").val('');
+                $("#Name").val('');
+                $("#DrpDrawingsIds").val('').trigger("change");
+            }
+            else
+            {
+                $("#RegistrationNo").val('');
+                $("#CellNo").val('');
+                $("#DrpDrawingsIds").val('').trigger("change");
+            }
+           // $('.box-body').find('input:text').removeClass('disable');
+        });
+
+        //$('.submit').click(function () {
+        // $('#submit_handle').click();
+
+        //})
+    })
+
+
+    var count = 0;
+
+    $(document).on('click', '.shownewVendorBox', function () {
+        $(".box-body").removeClass("hidden");
+        $(".codeSearch").addClass("hidden");
+    });
+
+    $(document).on('click', '.backToList', function () {
+        $(".box-body").addClass("hidden");
+        $(".codeSearch").removeClass("hidden");
+        $("#empty-message").empty();
+        $("#txtvendor").val('');
+    });
+
+    </script>
+
+}

@@ -1,0 +1,158 @@
+﻿@model List<HCF.BDO.TExercises>
+@{
+    Layout = null;
+    int currentYear = Convert.ToInt32(DateTime.Now.Year.ToString());
+}
+@*<div id="menu-outer" class="text-right">
+        <ul class="Yearbtn-innerlist">
+            <li id="Month_12" value="-1" class="yerabtn">Last 12 Months</li>
+            <li id="CurrentYear" value="@currentYear" class="yerabtn active">@currentYear</li>
+            <li id="LastYear" value="@(currentYear - 1)" class="yerabtn">@(currentYear - 1)</li>
+            <li id="BeforeLastYear" value="@(currentYear - 2)" class="yerabtn">@(currentYear - 2)</li>
+        </ul>
+        <input type="hidden" id="hiddendate" />
+    </div>*@
+<table id="filesTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none">
+            </th>
+            <th style="display:none">
+            </th>
+            <th>Quarter</th>
+            <th>Shift</th>
+            <th>File Name</th>
+            <th>Fire Drill Date</th>
+            @*<th>Uploaded Date</th>*@
+            <th>Uploaded By</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var exercise in Model)
+        {
+            foreach (var file in exercise.TExerciseFiles)
+            {
+                <tr>
+                    <td style="display:none">@exercise.Date.Value.Year</td>
+                    <td style="display:none">@exercise.QuarterNo</td>
+
+                    @*@if ((DateTime.Now - file.CreatedDate).Days < 365)
+                        {
+                            <td style="display:none" days="@((DateTime.Now - file.CreatedDate).Days)">
+                                1
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="display:none"></td>
+                        }*@
+                    <td>
+                        @{
+                            HCF.BDO.Enums.QuarterNo enums = (HCF.BDO.Enums.QuarterNo)exercise.QuarterNo;
+                        }
+                        <p>
+                            @enums.GetDescription()
+                        </p>
+                    </td>
+                    <td>@exercise.Shift.Name</td>
+                    <td>@file.FileName</td>
+                    <td data-sort="@exercise.Date.Value.Ticks">@exercise.Date.Value.ToFormatDate()</td>
+                    @*<td data-sort="@file.CreatedDate.Ticks">@file.CreatedDate.ToClientTime().ToFormatDate()</td>*@
+                    <td>@exercise.CreatedByUser.FullName</td>
+                    <td>
+                        <a href="@commonModelFactory.FilePath(file.FilePath)" title="Preview" target="_blank">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentBlueIcon)" class="" title="View" alt="" />
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<script>
+
+    $(document).ready(function () {
+        $(".loadingModal").hide();
+        $("#dvextrafilter").show();
+    });
+
+    var dtable = $('#filesTable').DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [],
+        "bPaginate": $('#filesTable tbody tr').length > 20,
+        "bInfo": false,
+        "language": {
+            emptyTable: "No data available in table",
+            search: "_INPUT_", //To remove Search Label
+            searchPlaceholder: ""
+        }
+    });
+
+    $("#Yearbtn").click(function () {
+        filterData();
+    });
+
+    $("#QuarterNo").click(function () {
+        filterData();
+    })
+
+
+    function filterData() {
+        debugger;
+        dtable.columns(0).search("").draw();
+        dtable.columns(1).search("").draw();
+        var year = $("#Yearbtn").val();
+        var quarter = $("#QuarterNo").val();
+        if (year > 0 && quarter > 0)
+            dtable.columns(0).search(year).columns(1).search(quarter).draw();
+        else if (year > 0)
+            dtable.columns(0).search(year).columns(1).search("").draw();
+        else
+            dtable.columns(0).search("").columns(1).search(quarter).draw();
+    }
+
+    //function filterData(ctr) {
+    //    dtable.columns(0).search("").draw();
+    //    dtable.columns(1).search("").draw();
+    //    $(".yerabtn").removeClass('active');
+    //    ctr.addClass('active');
+    //    var year = ctr.attr("value");
+    //    console.log(year);
+    //    if (year > 0) {
+    //        dtable.columns(0).search(year).draw();
+    //    } else
+    //        dtable.columns(1).search("1").draw();
+    //}
+</script>
+<style>
+    #filesTable_filter {
+        float: right;
+        margin-bottom: 4px;
+    }
+
+    .Yearbtn-innerlist li {
+        width: 142px;
+        height: 34px;
+        border: 2px solid #00000082;
+        margin-bottom: 4px;
+        border-radius: 11px;
+        align-items: center;
+        justify-content: center;
+        display: inline-flex;
+        cursor: pointer;
+    }
+
+        .Yearbtn-innerlist li.active {
+            background-color: green;
+            color: #fff;
+        }
+
+    .Yearbtn-innerlist {
+        padding: 0;
+        margin: 0;
+        margin-bottom: 5px;
+    }
+</style>

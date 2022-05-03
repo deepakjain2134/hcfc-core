@@ -1,0 +1,96 @@
+﻿@model HCF.Web.Models.LoginModel
+@{
+    var recentUsers = (List<HCF.Web.Models.RecentLoginModel>)ViewBag.RecentUsers;
+}
+@if (recentUsers.Count > 0)
+{
+    string lastLoginUser = recentUsers.FirstOrDefault().Email;
+    <div id="recent-login" class="userlogin-list">
+        <h4 class="threedot-heading" style="margin-bottom: 24px;">Choose an account</h4>
+        <div class="form-group has-feedback error-div">
+            <span class="error-content"></span>
+        </div>
+        <ul>
+            @foreach (var item in recentUsers.Take(3))
+            {
+                <li class="userLi" ispin="@(((!string.IsNullOrEmpty(item.PassCode)) && item.IsPassCodeLogin) ? "true" :"false")">
+                    <div class="user-col1">
+                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UserDefaultIcon)"
+                     title="@item.Name"
+                     onerror="this.onerror = null; this.src = '@Url.Content(HCF.Web.Models.ImagePathModel.UserDefaultIcon)';" alt="">
+                    </div>
+                    <div class="user-col2">
+                        <h4 style="text-transform:capitalize">@item.Name</h4>
+                        <p class="email">@item.Email</p>
+                    </div>
+                    <div class="user-col3">
+                        <span class="removeUser">Remove</span>
+                    </div>
+                </li>
+            }
+            <li class="userLi newaccount">
+                Use another account
+                <span class="email"></span>
+            </li>
+        </ul>
+    </div>
+    <div id="login-using-pin">
+        <div class="user-pinbox1">
+            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UserDefaultIcon)" title=""
+             onerror="this.onerror = null; this.src = '@Url.Content(HCF.Web.Models.ImagePathModel.UserDefaultIcon)';" alt="">
+            <p class="userBack">
+                <span class="email">
+                    @lastLoginUser
+                </span>
+                <span class="email-angle">
+                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                </span>
+            </p>
+        </div>
+        <div class="user-pin-login hide">
+            <div id="loginpin" class="text-center"></div>
+            <div class="form-group has-feedback error-div">
+                <span class="error-content"></span>
+            </div>
+            <div class="gologin userLi"><a href="#">Login using password</a></div>
+        </div>
+        <div class="user-pwd-password">
+            <form asp-controller="Auth" asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                <input type="hidden" id="UserName" name="UserName" value="@lastLoginUser" />
+                <input type="hidden" name="dToken" />
+                <input type="hidden" name="LoginMode" id="LoginMode" value="recentbox">
+                @Html.AntiForgeryToken()
+                <div class="form-group has-feedback">
+                    <div class="input-group">
+                        <div class="input-group-addon"><img src="/dist/Images/login/password.png"></div>
+                        <input type="password" required="required" id="password" name="password" class="form-control password-control pwd" />
+                        <div class="input-group-addon seepassword">
+                            <span class="hideShowpass"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group has-feedback error-div">
+                        <span class="error-content-pin"></span>
+                    </div>
+                </div>
+                <div class="form-group has-feedback error-div">
+                    <span class="error-content"></span>
+                </div>
+                <div class="row fogsub-box">
+                    <div class="col-lg-12">
+                        <button type="submit" class="btn login-button" title="Login" id="btnlogin2"
+                            data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                            Log On
+                        </button>
+                    </div>
+                    <div class="col-lg-12">
+                        <a href="#" id="redarget-forget" class="redarget-forget loginremember text-right"><span>Forgot Password?</span></a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="">
+            @await Component.InvokeAsync("MicrosoftLogin")
+        </div>
+    </div>
+}

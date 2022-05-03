@@ -1,0 +1,249 @@
+﻿@model IEnumerable<HCF.BDO.Vendors>
+@{
+    ViewBag.Title = "vendors";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Localizer["TitleVendor"]
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                   
+                        <div class="row tablelist-topform">
+                            <div class="col-md-6 col-sm-4">
+                                @await Html.PartialAsync("~/Views/User/_userViewSelect.cshtml")
+                            </div>
+                            <div class="col-md-6 col-sm-8 text-right">
+                                <a class="btn comm-bluebutton" href="@Url.Action("UserCertificates", "User", new {UserId = ""})" title="Certificates">
+                                    <span>Certificates</span>
+                                </a>
+                                
+                            </div>
+                        </div>
+                   
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="vendorTable" class="table table-bordered table-striped comman_checkbox1">
+                                    <thead>
+                                        <tr>
+                                            <th title="Add User" class="hidden">
+                                                See User
+                                            </th>
+                                            <th title="Organization ID">
+                                                Organization ID
+                                            </th>
+                                            <th title="Vendor Name">
+                                                <img src="@Url.Content("~/dist/Images/Icons/vendor_building_icon.png")" alt="vendor_building_icon" title="Vendor Name" />
+                                            </th>
+                                            <th title="Address">
+                                                <img src="@Url.Content("~/dist/Images/Icons/vendor_location_icon.png")" alt="vendor_location_icon" title="Address" />
+                                            </th>
+                                            <th title="PhoneNo " style="width:9em;">Phone #</th>
+                                            <th title="CellNo " style="width:9em;">Cell #</th>
+                                            <th title="Status">
+                                                <img src="@Url.Content("~/dist/Images/Icons/internal_user_status_icon.png")" alt="internal_user_status_icon" title="Status" />
+                                            </th>
+                                            <th style="width:120px;">Action</th>
+                                            <th><img src="/dist/Images/Icons/internal_user_certificate_icon.png" alt="Certificates" title="Certificates" class="align-right"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                @if (item.Users.Any())
+                                                {
+                                                    <td class="details-control hidden" rel='@item.VendorId'></td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="details-control disable hidden" rel='@item.VendorId'></td>
+                                                }
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.RegistrationNo)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Name)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Address)
+                                                </td>
+                                                <td class="mask-phone-div">
+                                                    @Html.DisplayFor(modelItem => item.PhoneNo)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CellNo)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                                    <span style="display:none">@item.IsActive</span>
+                                                </td>
+                                                <td>
+
+                                                    <img onclick="location.href ='@Url.Action("Addvendors", "Vendor", new { vendorId = item.VendorId })'"
+                                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" />
+                                                    @if (item.Users.Any())
+                                                    {
+
+                                                        <span class="span-details"><img src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" rel='@item.VendorId' /></span>
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <span><img src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" class="disable" rel='@item.VendorId' /></span>
+
+                                                    }
+
+                                                    @if (item.IsActive)
+                                                    {
+                                                        <img onclick="location.href ='@Url.Action("Register", "User", new { vendorId = item.VendorId })'"
+                                                             src="@Url.Content("~/dist/Images/Icons/add_user_icon.png")" title="Add User" />
+                                                    }
+
+                                                </td>
+                                                <td>
+                                                    @if (item.VendorCertificates.Any())
+                                                    {
+                                                        <img onclick="location.href ='@Url.Action("UserCertificates", "User", new { userId="" ,vendorid = item.VendorId, view = "UserView"})'"
+                                                             src="@Url.Content("~/dist/Images/Icons/internal_user_certificate_icon.png")" alt="Certificates"
+                                                             title="View Certificates" class="align-right" />
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+   
+
+@section   scripts{
+    <script>
+    $("[type=radio]").on('change', function () {
+        if ($(this).val() == "user") {
+            window.location.href = "users";
+        }
+    });
+        $(".span-details").click(function () {
+            $(this).parent().parent().children(':first').trigger('click');
+        });
+
+    $(document).ready(function () {
+       // debugger;
+        $(".mask-phone-div").each(function (index) {
+            if ($(this).html().trim().length > 0) {
+                $(this).mask("(000) 000-0000");
+            }
+        });
+
+       var table = $('#vendorTable').DataTable({
+          "searching":true,
+          "pageLength": 15,
+          "lengthChange": false,
+          "bPaginate": $('#vendorTable tbody tr').length > 10,
+          "bInfo": false,
+          "aaSorting": [],
+          "language": {
+              "emptyTable": "No data available in table"
+          },
+          aoColumnDefs: [
+               {
+                 orderSequence: ["desc", "asc"],
+                 aTargets: ['_all']
+               }
+          ],
+          initComplete: function () {
+              $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("", "addVendor"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Vendor" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-12 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+       });
+
+      $('#vendorTable tbody').on('click', 'td.details-control', function () {
+          var tr = $(this).closest('tr');
+          var row = table.row(tr);
+          if (row.child.isShown()) {
+            $('div.slider', row.child()).slideUp(function () {
+                row.child.hide();
+                tr.removeClass('shown');
+            });
+          }
+        else {
+            var vendorId = $(this).attr("rel");
+            var url = '@Url.Action("VendorUsers", "Vendor")';
+            $.get(url + "?vendorId=" + vendorId, function (users) {
+                row.child(users, 'no-padding').show();
+                tr.addClass('shown');
+            });
+            $('div.slider', row.child()).slideDown();
+          }
+      });
+
+        function filtervendor(value) {
+            table.columns(6).search(value).draw();
+        }
+
+        $("#showallvendor").change(function () {
+            if ($(this).is(':checked')) {
+                filtervendor("");
+            } else {
+                filtervendor("True");
+            }
+        });
+       
+    });
+
+        @if (!HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+        {
+            @:$(".add-commanBtn").remove();
+
+        }
+
+    </script>
+    <style>
+        .col-sm-6 .dataTables_filter {
+            margin-right: 45px;
+        }
+
+        div#vendorTable_paginate {
+            margin-right: 15px;
+        }
+
+        .add_button_comman {
+            position: absolute;
+            right: 12px;
+            top: 67px !important;
+        }
+
+        .vender_page {
+            padding-bottom: 15px;
+        }
+
+        #loadpartial {
+            width: 90%;
+            display: inherit;
+            clear: both;
+            top: 5em;
+        }
+
+        .draftemail-control tags.tagify.customLook {
+            min-height: 34px;
+        }
+    </style>
+}

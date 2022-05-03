@@ -1,0 +1,46 @@
+﻿@model HCF.BDO.RoundCategory
+@using (Html.BeginForm("AddRoundCommonCategory", "Round", FormMethod.Post, new { id = "addroundform" }))
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            Add Round Category
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="col-md-12" style="padding-top: 18px;">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(x => x.RoundCatId)
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label>Round Category</label>
+                    @Html.TextBoxFor(model => model.CategoryName, null, new { @class = "form-control", required = "required", oninput = "validate(this)" })
+                    @Html.ValidationMessageFor(model => model.CategoryName)
+                </div>
+                <div class="form-group comman_checkbox">
+
+                    @Html.CheckBoxFor(model => model.IsActive)
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                    <label>Active</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer button_Div">
+        <div class="col-md-12">
+            <button type="submit" class="comm-button" title="Save" id="btn_submit">
+                Save
+            </button>
+            <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+}
+
+<script>
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+</script>
+

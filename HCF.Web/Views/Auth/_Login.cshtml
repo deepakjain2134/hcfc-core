@@ -1,0 +1,58 @@
+﻿@model LoginModel
+<h4 class="threedot-heading" style="margin-bottom: 12px;">Sign in to start your session</h4>
+
+<form asp-controller="Auth" asp-action="Login" method="post">
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    <input type="hidden" name="dToken" id="dToken" />
+    <input type="hidden" name="LoginMode" id="up_box" value="upbox">
+    @Html.AntiForgeryToken()
+    <div class="form-group has-feedback">
+        <div class="input-group">
+            <div class="input-group-addon"><img src="/dist/Images/login/username.png"></div>
+            <input class="form-control" type="email" placeholder="UserName" asp-for="UserName" required="required" autofocus>
+        </div>
+    </div>
+    <div class="form-group has-feedback">
+        <div class="input-group">
+            <div class="input-group-addon"><img src="/dist/Images/login/password.png"></div>
+            <input type="password" class="form-control password-control" placeholder="Password" asp-for="Password" required="required" autocomplete="off">
+            <div class="input-group-addon seepassword">
+                <span class="hideShowpass"><i class="fa fa-eye" aria-hidden="true"></i></span>
+            </div>
+        </div>
+    </div>
+    <div class="form-group has-feedback error-div" id="div_id">
+        <span class="error-content"></span>
+    </div>
+
+    <div class="row fogsub-box">
+        <div class="col-xs-12">
+            <button type="submit" class="btn login-button" title="Login" id="btnlogin"
+                    data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                Log On
+            </button>
+        </div>
+    </div>
+    <div class="row loginremember">
+        <div class="col-xs-6">
+            <div class="comman_checkbox">
+                <label asp-for="RememberMe">
+                    <input asp-for="RememberMe" checked="checked">
+                    <strong>Remember Me</strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-xs-6 text-right">
+            <a href="#" id="redarget-forgetLogin" class="redarget-forget "><span>Forgot Password?</span></a>
+        </div>
+    </div>
+</form>
+<div class="col-xs-12">
+    @await Component.InvokeAsync("MicrosoftLogin")
+</div>
+<script>
+
+    setTimeout(function () {
+        $("#div_id span").text('');
+    }, 15000);
+</script>

@@ -1,0 +1,385 @@
+﻿@model List<HCF.BDO.WorkOrder>
+<div class="text-right">
+    <div class="deficiens-btn12">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="dash-actvity-box hide" style="display:flex; justify-content:flex-start; padding-left:4px;">
+                    <div class="">
+                        <button type="button" id="tag_round_users" class="button1">Tag Users</button>
+                    </div>
+                    <div class="mytageditembtn">
+                        <img src="~/dist/Images/Icons//yellow_tag.png" title="Info tag">
+                        <input type="button" class="button1" value="My tagged items" id="btnMytaggeditem" style="margin:4px !important;" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="rfilter" class="dashboard_filter">
+                    <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                        <label class="btn active">
+                            @Html.RadioButton("roundfliter", "FI")@Html.Label("Time To Resolve")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("roundfliter", "FD")@Html.Label("Deficient")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("roundfliter", "-1", false)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                    </div>
+                </div>
+                <div id="rfilter" class="dashboard_filter">
+                    <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                        <label class="btn">
+                            @Html.RadioButton("roundfliterStatus", "ACTIV", true)@Html.Label("Active")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("roundfliterStatus", "CMPLT", false)@Html.Label("Complete")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("roundfliterStatus", "CANCL", false)@Html.Label("Cancelled")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    
+    
+</div>
+<table id="roundTable" class="table table-bordered table-striped dataTable no-footer">
+    <thead>
+        <tr>
+            <th style="display:none">Deficiency Code</th>
+            <th style="display:none">Status Code</th>
+            <th style="width: 110px; min-width: 60px;">@Localizer["Date"]</th>
+            <th style="min-width:30px;" class="hide">
+                <div class="mytageditembtn">
+                    <img src="~/dist/Images/Icons/yellow_tag.png" title="Info tag" style="top: -9px; filter: invert(36%) sepia(60%) saturate(3327%) hue-rotate(56deg) brightness(84%) contrast(90%);">
+                   
+                </div>
+            </th>
+            <th>Location Group</th>
+            <th>Round Type</th>
+            <th>@Localizer["Type"]  </th>
+            <th>@Localizer["WorkOrderNo"]  </th>
+            <th>@Localizer["Problem"] </th>
+            <th>@Localizer["Location"]  </th>
+            <th>@Localizer["Inspector"]  </th>
+            <th>@Localizer["Status"] </th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var wo in Model.OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.DateCompleted))
+        {
+
+        <tr>
+            <td style="display:none">
+                @if (wo.IsTimeToResolve)
+                {
+                    <span>FI</span>
+                }
+                else
+                {
+                    <span>FD</span>
+                }
+            <td style="display:none">@wo.StatusCode</td>
+            <td data-sort="@wo.DateCreated.DateSort()">
+                @wo.DateCreated.ToFormatDate()
+            </td>
+            <td class="text-center hide">
+                @if (wo.RoundCategory != null && wo.RoundCategory.RoundCatId > 0)
+                {
+                            if (wo.TaggedResource.Any())
+                            {
+                <img src="~/dist/Images/Icons//yellow_tag.png" title="Info tag" style="width: 20px; filter: invert(36%) sepia(60%) saturate(3327%) hue-rotate(56deg) brightness(84%) contrast(90%);">
+
+                            }
+                            else
+                            {
+                            <input type="checkbox" id="rountActivity" value="@wo.IssueId" />
+                            <input type="hidden">
+                            <span></span>
+                            }
+                }
+            </td>
+                <td>
+                        @if (wo.RoundIssueWorkOrderCategory != null && wo.RoundIssueWorkOrderCategory.Any())
+                        {
+                        <span>
+                                @string.Join(" , ",wo.RoundIssueWorkOrderCategory.FirstOrDefault().RoundGroupName)
+                        </span>
+                        }
+                </td>
+                <td>
+                        @if (wo.RoundIssueWorkOrderCategory != null && wo.RoundIssueWorkOrderCategory.Any())
+                        {
+                        <span>
+                                @string.Join(" , ",wo.RoundIssueWorkOrderCategory.GroupBy(x=>x.RoundCatId).Select(x=>x.FirstOrDefault().CategoryName))
+                        </span>
+                        }
+                </td>
+
+            <td>
+                @if (wo.IsTimeToResolve)
+                {
+                    <span class="roundTimeToResolve">@($"{"Time to Resolve"}")</span>
+                    <div class="timer" time="@if (wo.CreatedDate != null){
+                    @wo.CreatedDate.Value.AddHours(wo.TimetoResolve)
+}">
+                    </div>
+                }
+                else
+                {
+                    <span>
+                        Deficient
+                    </span>
+                }
+                
+            </td>
+
+            <td>
+                @if (wo.WorkOrderId > 0)
+                {
+                    <a href="#" class="issueId" id='@wo.IssueId' type="U" onclick="RedirecttoWorkOrders('@wo.IssueId','U')">
+                        <span>@Html.DisplayFor(modelitem => wo.WorkOrderNumber)</span>
+                    </a>
+
+                }
+                else if ((wo.StatusCode == "ACTIV" || wo.StatusCode == "PENDG") && (string.IsNullOrEmpty(wo.WorkOrderNumber) || wo.WorkOrderId == 0))
+                {
+                    <span>
+                        <a href="#" class="issueId" id='@wo.IssueId' type="N">
+                            <span>Create Work Order</span>
+                        </a><b>/</b>
+                        <a id="@wo.IssueId" onclick="CloseRoundDeficiency(this)">
+                            <span>Resolve</span>
+                        </a>
+                    </span>
+                }
+            </td>
+
+            <td>
+                @wo.Description.Substring(0, Math.Min(wo.Description.Length, 40))
+                @if (wo.Description.Length > 40)
+                {
+                    <a href="javascript:void(0);"
+                       tabindex="0"
+                       data-trigger="focus"
+                       class="descriptions" rel='popover'
+                       data-placement='auto'
+                       data-html="true"
+                       data-original-title='Description'
+                       data-content='@wo.Description'>...See More</a>
+                }
+
+            </td>
+            <td>@($"{wo.Floor.FloorName} , {wo.Floor.Building.BuildingName}")</td>
+            <td>@Html.DisplayFor(modelItem => wo.UserProfile.FullName)</td>
+            <td>@Html.DisplayFor(modelItem => wo.StatusCode)</td>
+            <td>
+                @if (wo.TaggedResource.Any() && wo.TaggedResource.Any(x=>x.Email== HCF.Web.Base.UserSession.CurrentUser.Email))
+                    {
+                <img src="~/dist/Images/Icons//yellow_tag.png" title="Info tag" style="filter: invert(36%) sepia(60%) saturate(3327%) hue-rotate(56deg) brightness(84%) contrast(90%); width: 20px;">
+                    }
+
+                @if (wo.TRoundId == 0)
+                {
+                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)"
+                         title="Details"
+                         alt="" onclick="redirecttopage('@wo.DeficiencyCode','@wo.FloorId','@wo.IssueId')" />
+                }
+                else
+                {
+                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)"
+                         title="Details"
+                         alt="" onclick="redirecttoRoundSchedular('@wo.TRoundId')" />
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+<script>
+        $(document).ready(function() {
+            var roundTables = $('#roundTable').DataTable({
+                "searching": true,
+                "lengthChange": false,
+                "pageLength": 20,
+                "bPaginate": $('#roundTable tbody tr').length > 20,
+                "bInfo": false,
+                "aaSorting": [],
+                "language": {
+                    "emptyTable": "No data available in table",
+                    "search": "_INPUT_",
+                    "searchPlaceholder": "Search.."
+                },
+                dom: "<'row'<'col-sm-3'l><'col-sm-9'><'col-sm-12 deficienciesshorting'p f>>" +
+                    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7 text-right'p>>",
+            });
+
+            $('.descriptions').popover({ trigger: 'focus' });
+            roundTables.columns(1).search("ACTIV").draw();
+
+            $("input[name=roundfliter]:radio").change(function () {
+                //debugger
+                var val = $("input[name='roundfliter']:checked").val();
+                if (val != "-1")
+                    roundTables.columns(0).search(val).draw();
+                else
+                    clearSearch();
+            });
+
+            $("input[name=roundfliterStatus]:radio").change(function() {
+                var val = $("input[name='roundfliterStatus']:checked").val();
+                if (val != "-1")
+                    roundTables.columns(1).search(val).draw();
+                else
+                    clearSearch();
+            });
+
+            var clearSearch = function () {
+                roundTables.columns(1).search("").draw();
+                roundTables.columns(0).search("").draw();
+            }
+
+        });
+
+        function redirecttopage(type, floorId, issueId) {
+            var urlAction = '@Url.Action("FloorRoundInspection", "Rounds")';
+            window.location.href = urlAction + "?floorId=" + floorId + "&issueId=" + issueId;
+        }
+
+        function redirecttoRoundSchedular(TroundId) {
+            //debugger;
+            var url = '@Url.Action("RoundInspection", "Round")';
+            window.location.href = url + "?rid=" + TroundId;
+        }
+
+        function RedirecttoWorkOrders(id, type) {
+            if (type == "N") {
+                urlAction = '/WorkOrder/CreateWO';
+                window.location.href = urlAction + "?issueId=" + id;
+            } else {
+                urlAction = '/WorkOrder/UpdateWorkOrder';
+                window.location.href = urlAction + "?issueId=" + id;
+            }
+        }
+
+        $(".issueId").click(function(event) {
+            event.preventDefault();
+            var id = $(this).attr("id");
+            var type = $(this).attr("type");
+            RedirecttoWorkOrders(id, type);
+            return false;
+        });
+
+        jQuery(document).ready(function($) {
+            $(".timer").each(function() {
+                $(this).empty();
+                var control = $(this);
+                var endTime = new Date($(this).attr('time'));
+                var startTime = new Date('@DateTime.UtcNow');
+                if (endTime < startTime) {
+                    $(this).closest("tr").find(".roundTimeToResolve").html("Deficient");
+                }
+                $(this).dsCountDown({
+                    startDate: startTime,
+                    endDate: endTime,
+                    theme: 'flat',
+                    onFinish: function () {
+
+                        control.hide();
+                        $(this).closest("tr").find(".roundTimeToResolve").html("Deficient");
+                    }
+                });
+            });
+        });
+
+
+        function CloseRoundDeficiency($this) {
+         
+            var issueId = $($this).attr('id');
+             urlAction = "@Url.Action("CloseRoundDeficiency", "Rounds")";
+            window.location.href = urlAction + "?IssueId=" + issueId;
+        }
+
+        $("#tag_round_users").click(function () {
+            var selectedLength=$('input:checkbox[id^="rountActivity"]:checked').length;
+                var valueArray = [];
+                if (selectedLength == 0) {
+                    AlertWarningMsg("You must first select one or more deficiencies prior to using the tag feature.");
+                } else {
+                    $('input:checkbox[id^="rountActivity"]:checked').each(function () {
+                         valueArray.push($(this).val());
+                    });                   
+                    if (valueArray.length != 0) {
+                       openTaggedUsersPopUp(valueArray)
+                    }
+                }
+            });
+
+            function openTaggedUsersPopUp(valueArray) {
+                var  taggedMaster={};
+                var tageededResources=[];
+                valueArray.forEach(function (issueId) {
+            tageededResource={
+                IssueId:parseInt(issueId),
+                TaggedType:2,
+                IsActive:1
+            };
+            tageededResources.push(tageededResource);
+        });
+        taggedMaster.TaggedType=4;
+        console.log(tageededResources);
+
+        taggedMaster.Resource=tageededResources;
+        console.log(taggedMaster);
+
+        $.ajax({
+            url: "/Home/TaggedUsersPopUp",
+            method: "POST",
+            data: { taggedMaster: taggedMaster, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+            success: function (data) {
+                    $('#common-modal').html(data);
+                    $('#common-modal').fadeIn('fast');
+                    $('#modal-container').show();
+                    $('#modal-container').modal('show');
+            }
+        });
+
+            };
+
+</script>
+
+<style>
+    .dashboard_filter {
+        float: initial;
+        margin-right: 0;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    table.table-bordered th:last-child, table.table-bordered td:last-child {
+        border-right-width: 1px;
+    }
+
+    .tabbable #roundTable {
+        min-width: 100%;
+    }
+
+    #roundTable_filter,
+    div#myTable2_paginate {
+        margin-right: 5px;
+    }
+
+    .deficienciesshorting {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+</style>

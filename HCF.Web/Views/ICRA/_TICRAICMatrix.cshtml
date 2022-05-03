@@ -1,0 +1,16 @@
+﻿@{
+    var Version = this.ViewData["Version"] != null && this.ViewData.ContainsKey("Version") ? this.ViewData["Version"].ToString() : string.Empty;
+    var classlist = this.ViewData["classlist"] != null && this.ViewData.ContainsKey("classlist") ? this.ViewData["classlist"].ToString() : string.Empty;
+}
+<p>
+    Based on selections of Patient Risk Group and planned Construction Project Type, the Class of Precautions( @classlist ) identified in below table.<br />
+
+    <b>IC Matrix - Class of Precautions: Construction Project by Patient Risk</b>
+</p>
+<p style="text-align:center;"></p>
+
+@{
+    @await Component.InvokeAsync("ICRAICRAMatrix", Version)
+    //Html.RenderAction("ICRAMatrix", "ICRA");
+
+}

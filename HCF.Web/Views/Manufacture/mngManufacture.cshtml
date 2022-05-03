@@ -1,0 +1,57 @@
+﻿@model HCF.BDO.Manufactures
+@{
+    ViewBag.Title = "Add Manufacturer";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add Manufacturer
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            @Html.HiddenFor(model => model.ManufactureId)
+                            
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            @Html.LabelFor(model => model.ManufactureName)<em class="required-field"> *</em>
+                                            @Html.TextBoxFor(model => model.ManufactureName, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                            @Html.ValidationMessageFor(model => model.ManufactureName)
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group comman_checkbox">
+                                            @Html.LabelFor(m => m.IsActive)
+                                            @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                            @Html.ValidationMessageFor(m => m.IsActive)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="button_Div">
+                                    <input type="submit" value='@Localizer["Save"]' class="comm-button" />
+                                    @Html.HiddenFor(x => x.ManufactureId)
+                                    @Html.ActionLink("Cancel ", "Manufactures", "Manufacture", new { @class = "comm-Cancelbutton" })
+                                </div>
+                            
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+

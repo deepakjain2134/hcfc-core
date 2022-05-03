@@ -1,0 +1,218 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var userlist = Model.userList;
+    var roundLocationGroup = Model.roundLocationGroup;
+}
+
+@if (ViewBag.ispopup != null && ViewBag.ispopup == 1)
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            Reassign Volunteer(s)
+            <button type="button" class="close"  onclick="openViewAssignment()">&times;</button>
+        </h4>
+        <ul style="display:none;">
+            <li id="step3">
+                <a class="roundActive">
+                    <span>Step 3</span><br />
+                    Select Volunteer(s)
+                </a>
+            </li>            
+        </ul>
+    </div>
+<input type="hidden" id="hdn_locationgroupId" value="@(ViewBag.grproundid!=null?ViewBag.grproundid:0)" />
+}
+
+
+
+    <div class="rowNo" id="locationgroup">
+        <br />
+        <div class="@(ViewBag.ispopup!=null?"col-md-12":"col-md-6")" id="Setting_Content">
+            <div class="round-buttonHeading">
+                <h4>Volunteers</h4>
+                @if (ViewBag.ispopup != null && ViewBag.ispopup == 1)
+                {
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                    {
+                        <a href="@Url.RouteUrl("users")" class="comm-button"> Go to Users</a>
+                    }
+                }
+            </div>
+            <p class="step1 roundBlue">Add users as volunteers for rounds. In later steps, you will choose the buildings and types of rounds to which volunteers are assigned.</p>
+           
+            <p class="step3 roundBlue">
+                To edit your location group, return to the previous step
+            </p>           
+            <div class="form-group step3">
+                <input type="hidden" id="Userddl" />
+
+            </div>
+            <input type="hidden" name="issavedata" id="issavedata" value="0" />
+
+            <input type="text" placeholder="Search" class="form-control" id="searchUser" />
+            <br />
+            <table class="table table-bordered table-striped" id="userTable">
+
+                @foreach (var volunteers in userlist.Where(x => x.IsUserRole(HCF.BDO.Enums.UserRole.RoundVolunteer)))
+                {
+                    <tr class="usertr" id="@string.Format("tr_user_{0}", volunteers.UserId)">
+                        <td class="name">
+                            @string.Format("{0} ({1})", volunteers.Name, volunteers.Email)
+                        </td>
+                        <td class="text-center step3">
+                            <a class="volunteers button1" id="@string.Format("user_{0}", volunteers.UserId)"> Select </a>
+                        </td>
+                    </tr>
+                }
+            </table>
+
+            <div id="loadextrausers">
+
+            </div>
+        </div>
+        <div class="col-md-6 step1" style="@(ViewBag.ispopup != null || ViewBag.RoundType == 2 ? "display:none;" : "display:block;visibility: hidden; ")">
+            @await Html.PartialAsync("_locationGrouplist", Model)
+        </div>
+        <div class="col-md-6 step3" id="step3_part2" style="@(ViewBag.ispopup == null ? "display:block;" : "display:none;visibility: hidden; ")">
+            <h4 id="lbllocationgrp">Available Location Groups</h4>            
+            <p class="step3 roundBlue">First, select the Location Group below. To add a new Location Group, go to Step 1.</p>          
+            @await Html.PartialAsync("_locationGroup", Model,
+                new ViewDataDictionary(
+                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                {{ "type", ViewBag.Roundtype }}
+               )
+
+        </div>
+    </div>
+    <div id="locationgrouplst" style="display:none;">
+        @await Html.PartialAsync("_locationGrouplist", Model)
+    </div>
+
+
+    <div class="modal-body">
+        <div class="modal fade" id="OpenReplaceUsersPopup" role="dialog">
+            <div class="modal-dialog" style="width:90%">
+                <div id="replaceUserRounds">
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    $('#searchUser').bind('keyup', function () {
+        var searchString = $(this).val();
+        $("#userTable tr td.name").each(function (index, value) {
+            currentName = $(value).text()
+            if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                $(value).closest(".usertr").show();
+            } else {
+                $(value).closest(".usertr").hide();
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        //debugger;
+        var roundGroupId = $("#hdn_locationgroupId").val();
+        if (roundGroupId > 0) {
+            if ($("li[id=step3] a").hasClass("roundActive")) {
+
+                $("#loadgroupusers").show();
+                $('#ddlroundgroup').val(roundGroupId).trigger('change');
+            }
+
+        }
+    });
+
+
+
+
+
+
+
+    $("#lbllocationgrp").click(function () {
+        $("#locationgroup").hide();
+        $("#locationgrouplst").show();
+    });
+</script>
+@if (ViewBag.ispopup != null && ViewBag.ispopup == 1)
+{
+<script>
+    $(document).on("click", ".removevolunteers", function (event) {
+
+       // debugger
+        var userid = $(this).attr("userid");
+        var groupid = $("#ddlroundgroup").val();
+
+
+        swal({
+        html: true,
+                title: "Message",
+                text: "<label> Do you want to remove volunteer? </label>",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+            }, function(isConfirm) {
+            if (isConfirm)
+            {
+                if (groupid > 0 && userid > 0)
+                {
+
+                    var url = '@Url.Action("UpdateandSaveGroup", "Round")';
+                        $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&isActive=false', function(data) {
+                        successAlert('Removed Successfully');
+                            $("#user_" + userid).removeClass("disable");
+                        //debugger
+                            getGroupUsers();
+
+                    });
+                }
+            }
+            else { }
+        });
+    });
+        function openViewAssignment() {
+            //debugger;
+        var particleView = $('#roundgroup');
+            $(".loadingModal").show();
+           window.location.href = '@Url.Action("Index", "Round")';
+    }
+    $(document).on("click", ".round-groupname", function (event) {
+        //debugger;
+            $('.round-groupname').not(this).removeClass('panel-active');
+            $(this).toggleClass('panel-active');
+    });
+
+    $(document).on("click", ".volunteers", function (event) {
+        //debugger;
+        var userid = $(this).attr("id").split("_")[1];
+        var groupid = $("#ddlroundgroup").val();
+        if (groupid > 0 && userid > 0)
+        {
+            var url = '@Url.Action("UpdateandSaveGroup", "Round")';
+                $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&IsActive=true', function(data) {
+                successAlert('Saved Successfully');
+                    $(this).addClass("disable");
+                   // debugger;
+                  //  openViewAssignment();
+                  getGroupUsers();
+
+            });
+        }
+        else
+        {
+            AlertWarningMsg("Select a location group prior to selecting a volunteer.");
+        }
+        });
+</script>
+   
+}
+<style>
+    .modal-dialog {
+        max-width: 70%;
+    }
+</style>

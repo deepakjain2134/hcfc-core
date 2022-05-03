@@ -1,0 +1,78 @@
+﻿@model HCF.BDO.TRounds
+@{
+    var isnpStatus =Model.Inspections != null && Model.Inspections.Any(x => x.IsOpen) && Model.Status != 1 ? "2" : "1";
+}
+<div>
+    <strong>@Model.CategoryName</strong>
+    <div class="add-commanBtn">
+        <a class="pull-right modal-link quest-addbtn" catId="@Model.RoundCatId">
+            <img src="/dist/Images/Icons/3d_add_button.png" title="Add Round Questionnaire" alt="3d_add_button">
+        </a>
+    </div>
+</div>
+
+<table id="@string.Format("round_cat_{0}",Model.RoundCatId)"
+       class="@(Model.Inspections.Any(x=> x.IsOpen) && Model.Status != 1 ? "table floorRoundtbl" : "table floorRoundtbl disabled")">
+    @for (int j = 0; j < Model.Inspections.FirstOrDefault().Questionnaires.Count(); j++)
+    {
+        var model = Model.Inspections.FirstOrDefault().Questionnaires[j];
+        model.TRoundId = Model.TRoundId;
+
+        @Html.Partial("_RoundCategoryStepInspection",model,new ViewDataDictionary(
+    new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+    new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+    { { "troundId", Model.TRoundId },
+    { "inspStatus", isnpStatus }
+    }
+    )
+        @*@await Component.InvokeAsync("RoundCategoryStepInspection", model)*@
+        @* <tr id=@($"tr_{Model.Inspections.FirstOrDefault().Questionnaires[j].RoundsQuestionnaires.RouQuesId}")
+            class="details @(@Model.Inspections.FirstOrDefault().Questionnaires[j].RoundsQuestionnaires.IsShared ? "shareQuestr" : "Questr")">
+            <td width="10%">
+            @Html.HiddenFor(x => Model.TRoundId)
+            <input id="InsStatus_@Model.Inspections.FirstOrDefault().Questionnaires[j].RouQuesId"
+            type="button" class="ins_check3_btn"
+            onclick="showstepsOptions('@Model.Inspections.FirstOrDefault().Questionnaires[j].RouQuesId')"
+            value="@Model.Inspections.FirstOrDefault().Questionnaires[j].Status"
+            tempname='@string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}",j,Model.RoundCatId)' />
+
+            <div id="round_steps_@Model.Inspections.FirstOrDefault().Questionnaires[j].RouQuesId" class="dropdown-content ddlilsm"
+            tempname='@string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}",j,Model.RoundCatId)'>
+            <a val="-1">Pending</a>
+            <a val="1">Compliant</a>
+            <a val="0">Not Compliant</a>
+            <a val="-3">Not Applicable</a>
+            </div>
+
+            @Html.HiddenFor(x => Model.Inspections.FirstOrDefault().Questionnaires[j].Status, new { @id = string.Format("Model.Inspections.FirstOrDefault().Questionnaires[{0}].Status_{1}", j, Model.RoundCatId) })
+            </td>
+            <td width="55%" style="vertical-align: middle;">
+            @Html.HiddenFor(x => Model.Inspections.FirstOrDefault().Questionnaires[j].RoundsQuestionnaires.RouQuesId)
+            @Model.Inspections.FirstOrDefault().Questionnaires[j].RoundsQuestionnaires.RoundStep
+            </td>
+            <td style="vertical-align: middle;" width="30%">
+            @Html.TextBoxFor(x => Model.Inspections.FirstOrDefault().Questionnaires[j].Comment, null, new { @class = "form-control stepComment" })
+            </td>
+            <td>
+            @await Html.PartialAsync("_roundStepFileAttach", Model.Inspections.FirstOrDefault().Questionnaires[j],
+            new ViewDataDictionary(
+            new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+            new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+            { { "inspStatus", "1" },
+            { "stepIndex", 0 },
+            { "stepmode", 1 }}
+            )
+            </td>
+            </tr>*@
+    }
+    @if (Model.Inspections.FirstOrDefault().Questionnaires.Any())
+    {
+        <tr>
+            <td><label>Comment:</label></td>
+
+            <td colspan="2">
+                @Html.TextAreaFor(x => Model.Inspections.FirstOrDefault().Comment, new { @class = "form-control comment", @troundid = Model.TRoundId })
+            </td>
+        </tr>
+    }
+</table>

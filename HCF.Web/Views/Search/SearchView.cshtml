@@ -1,0 +1,55 @@
+﻿@model HCF.BDO.SearchFilter
+@{
+    ViewBag.Title = "Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Advanced Search
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    
+                        @*@using (Ajax.BeginForm("SearchResults", "Search", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "searchResults" }))
+        {*@
+
+                        <form asp-controller="Search" asp-action="SearchResults"
+                              UpdateTargetId="searchResults"
+                              data-ajax="true" data-ajax-method="POST">
+
+                            <div class="col-lg-10">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="SearchMode" value="4" />
+                                @await Component.InvokeAsync("SearchSearchFilters"
+                                      , new { objSearchFilter = Model })
+                                @*@{Html.RenderAction("SearchFilters", "Search", new { objSearchFilter = Model });}*@
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="align-left">
+                                    <input type="submit" value="Search" class="button1" />
+                                </div>
+                            </div>
+                            @*}*@
+                        </form>
+                            <div class="col-lg-12">
+                                <div id="searchResults">
+                                    @if (Model.SearchMode == "1")
+                                    {
+                                        @await Component.InvokeAsync("SearchSearchResults"
+                                     , new { searchLists = Model })
+                                        //Html.RenderAction("SearchResults", "Search", new { searchLists = Model });
+                                    }
+                                </div>
+                            </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,76 @@
+﻿@model HCF.BDO.Documents
+
+
+    <div class="modal-header">
+        <h4 class="modal-title">Send Sample Doc
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+
+
+        <script>
+            function OnSuccess(data) {
+                if (JSON.parse(data.Result).Success) {
+                    successAlert($.Constants.Email_Sent_Successfully, "Message");
+                    // swal($.Constants.Email_Sent_Successfully);
+                    $("#common-modal .close").click();
+                } else {
+                    AlertWarningMsg($.Constants.EMAIL_FAILED_MSG, "Message");
+                    //swal($.Constants.EMAIL_FAILED_MSG);
+                }
+            }
+        </script>
+
+        @*@using (Ajax.BeginForm(new AjaxOptions { OnSuccess = "OnSuccess" }))
+        {*@
+
+        <form asp-controller="Common" asp-action="ForwardDocument"
+              data-ajax-success="OnSuccess"
+              data-ajax="true" data-ajax-method="POST">
+            
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="row">
+                    <div class="forward_mail">
+                        <input type="hidden" name="EPdetailId" id="EPdetailId" value="@TempData["epDetailId"]" />
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.To, new { @class = "control-label col-md-3" })
+                            @Html.TextBoxFor(model => model.To, new { @required = "required", type = "email" })
+                            @Html.ValidationMessageFor(model => model.To)
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Subject, new { @class = "control-label col-md-3" })
+                            @Html.TextBoxFor(model => model.Subject, new { @required = "required" })
+                            @Html.ValidationMessageFor(model => model.Subject)
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Details, new { @class = "control-label col-md-3" })
+                            @Html.EditorFor(model => model.Details, new { htmlAttributes = new { @class = "form-control", required = "required" } })
+                            @Html.ValidationMessageFor(model => model.Details)
+                        </div>
+                        <div class="form-group">
+                            <label>Doc Attached</label>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in Model.Attachments)
+                                {
+
+                                    <li>
+                                        <a href="@commonModelFactory.CommonFilePath(attachment.FilePath)" target="_blank">
+                                            <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" alt="" id='@attachment.Id'> <br />
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                            <label id="DocumentName"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button_Div">
+                    <button type="submit" name="submitButton" value="SEND" class="comm-button">Send</button>
+                    <input type="submit" name="submitButton" value="Cancel" data-dismiss="modal" class="comm-Cancelbutton" />
+                </div>
+            
+
+        </form>
+    </div>

@@ -1,0 +1,46 @@
+﻿@model HCF.BDO.ICRASteps
+@using (Html.BeginForm())
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle"> Add ICRA Step</span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12">
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.ICRAStepId)
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Alias)<em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.Alias, new { @class = "form-control", required = "required", maxlength = 500 })
+                    @Html.ValidationMessageFor(model => model.Alias)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Steps)<em class="required-field"> *</em>
+                    @Html.TextAreaFor(model => model.Steps, new { @class = "form-control", required = "required", maxlength = 500 })
+                    @Html.ValidationMessageFor(model => model.Steps)
+                </div>
+                <div class="form-group comman_checkbox">
+
+                    @*@Html.LabelFor(model => model.IsActive)*@
+                    @Html.EditorFor(model => model.IsActive)<span></span>
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                    <label>Active</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <input type="submit" value="Save" class="comm-button" />
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+

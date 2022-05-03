@@ -1,0 +1,122 @@
+﻿@model HCF.BDO.TFloorAssets
+@{
+    var FrequencyId = this.ViewData.ContainsKey("FrequencyId") ? this.ViewData["FrequencyId"] : 0;
+    var inspectionActivity = Model.TInspectionActivity.Where(x => x.EPDetailId == Convert.ToInt32(Model.EpDetailId) && x.Status != 2).FirstOrDefault();
+}
+
+
+
+<td style="display:none">
+    Inspection Group
+</td>
+<td style="display:none">
+    <div class="@($"epsection eps{Model.EpDetailId}")">
+        @Model.EpDetailId
+    </div>
+</td>
+<td>
+    <div class="@($"epsection eps{Model.EpDetailId}")" title='@(Model.SubStatus == "DE" || Model.SubStatus == "RA" ? "Inspection complete with fail status " + Model.SubStatus : "")'>
+        @{
+            var status = "-1";
+            var subStatus = "NA";
+            var IsworOrder = -3;
+            if (inspectionActivity != null)
+            {
+                status = Convert.ToString(inspectionActivity.Status);
+                subStatus = inspectionActivity.SubStatus;
+                IsworOrder = inspectionActivity.IsWorkOrder;
+            }
+
+                <span>
+                    @*@await Html.PartialAsync("_InspectionBtn", new ViewDataDictionary {
+            { "status", status },
+            { "subStatus", subStatus },
+            { "OpenIlsmsCount", Model.OpenIlsmsCount },
+            { "OpenWorkOrdersCount", Model.OpenWorkOrdersCount },
+            { "floorAssetsId", Model.FloorAssetsId },
+            { "ePDetailId", Model.EpDetailId },
+             { "frequencyid", FrequencyId },
+              { "IsworOrder", IsworOrder }
+
+        })*@
+
+                    @await Html.PartialAsync("_InspectionBtn", 
+                                   new ViewDataDictionary(
+                                   new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                   new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                   {{ "status", status },
+            { "subStatus", subStatus },
+            { "OpenIlsmsCount", Model.OpenIlsmsCount },
+            { "OpenWorkOrdersCount", Model.OpenWorkOrdersCount },
+            { "floorAssetsId", Model.FloorAssetsId },
+            { "ePDetailId", Model.EpDetailId },
+             { "frequencyid", FrequencyId },
+              { "IsworOrder", IsworOrder }}
+                                  )
+
+
+                </span>
+        }
+    </div>
+</td>
+<td>
+    <a target="_blank" href='@Url.RouteUrl("asseteps", new { floorassetId = Model.FloorAssetsId, epId = 0, ismultipleEP = 1 })'>
+        @Model.AssetNo
+    </a>
+</td>
+<td>
+    @if (Model.Floor.FloorName != null)
+    {
+        @commonModelFactory.GetFloorAssetLocation(Model)
+      
+    }
+    else
+    {
+        <span>N/A</span>
+    }
+</td>
+<td>
+    @Model.NearBy.CastToNA()
+</td>
+<td>
+
+    <div class="@($"epsection eps{Model.EpDetailId}")">
+        @{
+
+            if (inspectionActivity != null)
+            {
+                <span>@inspectionActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDate()</span>
+            }
+            else
+            {
+                <span>NA</span>
+            }
+
+        }
+    </div>
+</td>
+<td class="floorAssetsBtn">
+
+    @if (Model.OpenWorkOrdersCount > 0)
+    {
+        <a class="goto-assets-wo button1" style="cursor:pointer" assetId="@Model.FloorAssetsId">Go to Work Orders</a> 
+    }
+    @if (inspectionActivity != null && inspectionActivity.SubStatus != "NA" && inspectionActivity.SubStatus != "IN" && inspectionActivity.IsWorkOrder !=1)
+    {
+        <span class="button1">Pending WorkOrders</span>
+    }
+    @if (Model.OpenIlsmsCount > 0)
+    {
+        <a class="goto-assets-ilsm button1" style="cursor:pointer" assetId="@Model.FloorAssetsId">Go to ILSM</a> 
+    }
+    else
+    {
+        <a class="addremove-assets button1" style="cursor:pointer">Remove</a>
+    }
+
+</td>
+<style>
+    div#myTable_filter {
+        float: right;
+    }
+</style>

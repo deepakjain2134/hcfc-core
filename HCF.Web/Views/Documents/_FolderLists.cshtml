@@ -1,0 +1,55 @@
+﻿@model List<HCF.BDO.BinderFolders>
+
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle">Folders</span>
+            <input type="hidden" name="fileId" id="fileId" value='@ViewBag.FileId' />
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body epinsppopup-user" id="loadData">
+        @await Html.PartialAsync("~/Views/Documents/_folderListView.cshtml", Model)
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(document).on('click', ".addtoFolder", function () {
+            var folderId = $(this).data("id");
+            var fileId = $("#fileId").val(); //$(this).data("fileid");
+            var fileFolders = [];
+            var fileFolder = {
+                FolderId: 0,
+                FolderName: '',
+                CommonName: '',
+                ParentFolderId: folderId,
+                TFileId: fileId,
+                IsSurveyPrepBinder: true
+            };
+            fileFolders.push(fileFolder);
+
+            $.ajax({
+                url: "/Documents/UpdateFileFolder",
+                method: "POST",
+                data: JSON.stringify({ folders: fileFolders }),
+                contentType: 'application/json',
+                success: function (data) {
+                    $("#modal-container").modal('hide');
+                    successAlert("file added successfully.");
+                }
+            });
+        });
+        $(document).on('click', ".folderName", function () {
+        //$(".folderName").unbind("click").bind("click", function (e) {
+            var folderId = $(this).attr("folderId");
+            callGetAjax("loadData", '@Url.Action("FolderListsView","Documents")'+ "?folderId=" + folderId + "&isSurveyPrepBinder=true","");
+            //getFolderDocs(folderId);
+        });
+       
+    });
+</script>

@@ -1,0 +1,46 @@
+﻿@model List<HCF.BDO.Site>
+<h4 class="custome-crxheading">Sites:</h4>
+
+<div id="sitesList" class="sitelist">
+    <ul class="list" style="list-style-type: none;">
+        @foreach (var item in Model.Where(x => x.IsActive).OrderBy(x => x.SiteTypeId))
+        {
+            <li class="siteinnerlist">
+                <input checked type="checkbox" id="sitecheck" class="siteCheck"
+                       sitecode="@item.Code" siteid="@item.SiteId" SiteTypeID="@item.SiteTypeId" /><span></span>
+                <a>@item.Name.ToTitleCase() (@item.BuildingCount)</a>
+
+            </li>
+        }
+    </ul>
+</div>
+@*<style>
+
+    .sitelist ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .sitelist li {
+        float: left;
+        display: flex;
+        align-items: center;
+        
+    }
+
+        .sitelist li a {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+        }
+
+    .sitelist .list {
+        list-style-type: none;
+        display: flex;
+        flex-wrap: wrap;
+    }
+</style>*@

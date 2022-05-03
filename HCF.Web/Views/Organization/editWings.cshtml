@@ -1,0 +1,57 @@
+﻿@model HCF.BDO.Wing
+
+@{
+    ViewBag.Title = Localizer["UpdateWing"];
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["UpdateWing"]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    @Html.HiddenFor(model => model.WingId)
+                                    @*<div class="form-group">
+                                        @Resources.Resource.Property
+
+                                        @Html.DropDownListFor(model => model.PropertyId, new SelectList(ViewBag.Properties, "PropertyId", "Name"),
+                                        "Select Property",
+                                        new { @class = "form-control", @onchange = "FillBuildings()" })
+                                        @Html.ValidationMessageFor(model => model.PropertyId)
+                                    </div>*@
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.BuildingId)
+
+                                        @Html.DropDownListFor(model => model.BuildingId, new SelectList(ViewBag.Buildings, "BuildingID", "BuildingName"),
+                                        "Select Building",
+                                        new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.BuildingId)
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.WingName)
+                                        @Html.EditorFor(model => model.WingName, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.WingName)
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="submit" value='Update' class="btn btn-primary" />
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>

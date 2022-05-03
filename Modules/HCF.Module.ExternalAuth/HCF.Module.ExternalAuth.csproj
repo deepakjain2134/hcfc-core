@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.10" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.21.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.21.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\HCF.BAL\HCF.BAL.csproj" />
+    <ProjectReference Include="..\HCF.Module.Core\HCF.Module.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Shyjus.BrowserDetector">
+      <HintPath>..\..\HCF.Web\bin\Debug\net5.0\Shyjus.BrowserDetector.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

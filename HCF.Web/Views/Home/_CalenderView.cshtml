@@ -1,0 +1,265 @@
+﻿@{
+    Layout = null;
+    int currentUserID = HCF.Web.Base.UserSession.CurrentUser.UserId;
+}
+
+<div class="row cal-calenderBox">
+    <div class="col-lg-12 col-md-12">
+        <div id="rdnOption">
+            <div class="dashboardViewCalender">
+                <div class="ViewCalenderRadio">
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                        <label class="btn">
+                            @Html.RadioButton("rdnCalenderViewOptions", "EP", new { @rndoption = "EP" })@Html.Label("EP Review")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("rdnCalenderViewOptions", "Rounds", new { @rndoption = "Rounds" })@Html.Label("Rounds")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("rdnCalenderViewOptions", "Firedrill", new { @rndoption = "Firedrill" })@Html.Label("Fire Drills")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn active">
+                            @Html.RadioButton("rdnCalenderViewOptions", "All", true, new { @rndoption = "All" })@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                    </div>
+                    <div id="calenderType">
+                        <select id="drpCalenderType" name="drpCalenderType" class="ddlbox">
+                            <option value="1">Weekly</option>
+                            <option value="2">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div id='calendar' class="calender" style="overflow: auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="daycalender">
+    <div class="col-md-12" style="margin-top: 18px;">
+        <div class="panel panel-default" id="calenderReviews">
+            <div class="panel-heading">
+                <i class="fa fa-bar-chart-o fa-fw"></i>EP Reviews
+            </div>
+            <div class="panel-body">
+                <div id='EpReviews' class="EpReviews"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default " id="calenderfiredrill">
+            <div class="panel-heading">
+                <i class="fa fa-bar-chart-o fa-fw"></i>Fire Drills
+            </div>
+            <div class="panel-body">
+                <div id='firedrill' class="firedrill"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default" id="calenderRounds">
+            <div class="panel-heading">
+                <i class="fa fa-bar-chart-o fa-fw"></i>Rounds
+            </div>
+            <div class="panel-body">
+                <div id='rounds' class="rounds">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<link rel="stylesheet" href="@Url.Content("~/dist/plugins/fullcalendar/fullcalendar.min.css")">
+<script src="@Url.Content("~/dist/plugins/fullcalendar/moment.min.js")"></script>
+<script src="@Url.Content("~/dist/plugins/fullcalendar/fullcalendar.min.js")"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#rdnCalenderViewOptions').val("All");
+        var rndid = $('#rdnCalenderViewOptions').val();
+        if (rndid == "All") {
+            $('#calenderReviews').hide();
+            $('#calenderfiredrill').hide();
+            $('#calenderRounds').hide();
+        }
+        refreshCalender();
+
+
+        $("[name=rdnCalenderViewOptions]").on('change', function () {
+            var view = $(this).val();
+            debugger;
+            var value = $(this).attr("rndoption");
+            view = value;
+            var calenderType = $('#drpCalenderType').val();
+            if (view != "" && calenderType == "2") {
+                $('#rdnCalenderViewOptions').val(view);
+                $('#calenderReviews').hide();
+                $('#calenderfiredrill').hide();
+                $('#calenderRounds').hide();
+                $('#calendar').fullCalendar('destroy');
+                refreshCalender();
+                $('#calendar').fullCalendar('changeView', 'month');
+            } else {
+                $('#rdnCalenderViewOptions').val(view);
+                $('#calenderReviews').hide();
+                $('#calenderfiredrill').hide();
+                $('#calenderRounds').hide();
+                $('#calendar').fullCalendar('destroy');
+                refreshCalender();
+                $('#calendar').fullCalendar('changeView', 'basicWeek');
+            }
+        });
+    });
+
+    $('#drpCalenderType').on('change', function () {
+
+        var val = $(this).val();
+        if (val == "2") {
+            $('#calenderReviews').hide();
+            $('#calenderfiredrill').hide();
+            $('#calenderRounds').hide();
+            $('#calendar').fullCalendar('destroy');
+            refreshCalender();
+            $('#calendar').fullCalendar('changeView', 'month' );
+        } else {
+            $('#calenderReviews').hide();
+            $('#calenderfiredrill').hide();
+            $('#calenderRounds').hide();
+            $('#calendar').fullCalendar('destroy');
+            refreshCalender();
+            $('#calendar').fullCalendar('changeView','basicWeek' );
+        }
+    });
+
+    function refreshCalender() {
+        $('#calendar').fullCalendar('destroy');
+        $('#calendar').fullCalendar({
+            header: {
+                left: '',
+                center: '',
+                right: 'prevYear,prev,title,next,nextYear'
+            },
+            eventRender: function (event, element, view) {
+                // debugger
+                // console.log(event);
+                if (event.text == "Fire Drills ") {
+                    return $('<div> Fire Drills ' + '</div> <div style="float: right;display: inline-block;padding: 2px 8px; color:' + event.textColor + '; background:' + event.color + ';">' + event.title + '</div>');
+                } else if (event.text == "Rounds ") {
+                    return $('<div> Rounds ' + '</div> <div style="float: right;display: inline-block;padding: 2px 8px; color:' + event.textColor + '; background:' + event.color + ';">' + event.title + '</div>');
+                } else {
+                    ///console.log(JSON.parse(event.title));
+                    var eventObject = JSON.parse(event.title);
+                    var eventString = "<div>EP Review </div>";
+                    $.each(eventObject, function (k, eventProperty) {
+                        //console.log(eventProperty)
+                        eventString = eventString + '<div style="float: right;display: inline-block;padding: 2px 8px; color:' + eventProperty.textColor + '; background:' + eventProperty.color + ';">' + eventProperty.count + '</div>'
+                    });
+                    return eventString;
+
+                    //return $('<div> EP Review  ' +  '</div> <div style="float: right;display: inline-block;padding: 2px 8px; color:' + event.textColor + '; background:' + event.color + ';">'  + event.title + '</div>');
+                }
+            },
+            defaultView: 'basicWeek',
+            firstDay: 0,
+            slotMinutes: 0,
+           // events: getdata(),
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: getdata(),
+                    dataType: 'json',
+                    global:false,
+                    data: {
+                        start: formatDate(start._d),
+                        end: formatDate(end._d)
+                    },
+                    success: function (events) {
+                        callback(events);
+                    }
+                });
+            },
+            dateClick: function (date, jsEvent, view) {
+                alert("Called !");
+                loadCalenderData(date);
+                $("td").removeClass("activeDate");
+                $(this).addClass("activeDate");
+            },
+        });
+    }
+
+
+    var formatDate = function (date) {
+        var dd = date.getDate();
+        var mm = date.getMonth() + 1;
+        var yyyy = date.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function loadCalenderData(date) {
+
+        debugger;
+        var rndbtn = $("#rdnCalenderViewOptions").val();
+        if (rndbtn == "All" || rndbtn == "EP") {
+
+            var newdate = date;
+            openHistoryPage(newdate, 'dayClick');
+        }
+        if (rndbtn == "All" || rndbtn == "Rounds") {
+            date = date.format();
+            var url = '@Url.Action("GetRoundByDate", "Round")';
+            $.get(url + "?start=" + date + "&locationGroupId=" + 0 + "&userId=" + 0,
+                function (data) {
+                    $('#calenderRounds').show();
+                    $("#rounds").html(data);
+                    $("#rounds").fadeIn('fast');
+                });
+        }
+
+        if (rndbtn == "All" || rndbtn == "Firedrill") {
+
+            date = date.format();
+            date = date.replace(/\-/g, '/');
+            var newdate = date.split("/").reverse().join("/");
+            newdate = newdate.toString('d/m/yyyy');
+            var url = '@Url.Action("firedrillCalender", "Rounds")';
+            $.get(url + "?start=" + newdate,
+                function (data) {
+                    $('#calenderfiredrill').show();
+                    $("#firedrill").html(data);
+                    $("#firedrill").fadeIn('fast');
+                });
+        }
+    }
+
+
+    function openHistoryPage(timeSpan, mode) {
+
+        $.ajax({
+            url: CRxUrls.Inspection_GetInspectionCalDetails + "?userId=" + @currentUserID + "&timeSpan=" + timeSpan,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $(this).addClass("activeDate");
+                $('#calenderReviews').show();
+                $('#EpReviews').empty();
+                $('#EpReviews').html(data);
+                $('#EpReviews').fadeIn('fast')
+            }
+        });
+    }
+
+    function getdata() {
+
+        var filterType = $('#rdnCalenderViewOptions').val();
+        var url = '@Url.Action("CalenderView", "Home")' + '?filterType=' + filterType;
+        return url;
+    }
+</script>
+

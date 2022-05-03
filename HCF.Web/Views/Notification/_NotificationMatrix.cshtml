@@ -1,0 +1,175 @@
+﻿@model List<HCF.BDO.NotificationCategory>
+<div class="notification-menubox">
+    <ul class="notfi-menuSubmenulist">
+        @foreach (var item in Model)
+        {
+            <li>
+                <span class="noti-menuicon">
+                    <span class="noti-icon-details">
+                        <i class="notification-icon" aria-hidden="true" title="Details"></i>
+                        <h4>
+                            <span style="display:inline;">@item.CategoryName <span class="tooltipcontent">@item.CategoryDescription</span> </span>
+                            <span class="noti-subtitle">@(string.Join(",", item.NotificationMappings.Select(x => x.NotificationEvent.EventDescription)))</span>
+
+                        </h4>
+
+                    </span>
+                    <span class="tomailBox">
+                        <ul class="notification-tomails">
+                            @if (item.NotifyEmails != null)
+                            {
+                                foreach (var emails in item.NotifyEmails.NotificationEmail.Split(','))
+                                {
+                                    if (!string.IsNullOrEmpty(emails) && emails.IsValidEmailAddress())
+                                    {
+                                        <li>
+                                            @($"To: {emails} ")
+                                        </li>
+                                    }
+                                }
+                            }
+                        </ul>
+                       
+                    </span>
+                    
+                </span>
+                
+                <div class="notification-ulitems innerBoxNoti" style="padding-top:0px;">
+                    <ul class="addnotificationEmails">
+                        <li class="mainlistemails notfi-emailBox">
+                                <div class="notification-row">
+                                    <div class="notification-tabs">
+                                        <span class="mailcate-btn defaultmail-bg">Default</span>
+                                    </div>
+                                    <div class="assignmail-btn">
+                                        <span>
+                                            <a data-toggle="modal"
+                                               data-target="#addEmailModel"
+                                               class="addEmail button1"
+                                               title="Assign User"
+                                               id="@item.NotificationCatId" eventId="0" href="javascript:void(0);">Assign Emails</a><br />
+                                        </span>
+                                    </div>
+                                </div>
+                                <span>
+                                    <ul class="innernotification">
+                                        @if (item.NotifyEmails != null)
+                                        {
+                                            foreach (var emails in item.NotifyEmails.NotificationEmail.Split(','))
+                                            {
+                                                if (!string.IsNullOrEmpty(emails) && emails.IsValidEmailAddress())
+                                                {
+                                                    <li class="toemails">
+                                                        @($"To: {emails} ")
+                                                    </li>
+                                                }
+                                            }
+
+                                            foreach (var emails in item.NotifyEmails.NotificationCCEmail.Split(','))
+                                            {
+                                                if (!string.IsNullOrEmpty(emails) && emails.IsValidEmailAddress())
+                                                {
+                                                    <li class="ccemails">
+                                                        @($"Cc: {emails} ")
+                                                    </li>
+                                                }
+                                            }
+                                        }
+                                    </ul>
+                                </span>
+                            </li>
+
+
+                        @foreach (var notificationMappings in item.NotificationMappings)
+                        {
+                            <li class="mainlistemails notfi-emailBox">
+                                <div class="notification-row">
+                                    <div class="notification-tabs">
+                                        <span class="mailcate-btn defaultmail-bg"> @notificationMappings.NotificationEvent.EventDescription</span>
+                                    </div>
+                                    <div class="assignmail-btn">
+                                        <span>
+                                            <a data-toggle="modal"
+                                               data-target="#addEmailModel"
+                                               class="addEmail button1"
+                                               title="Assign User"
+                                               id="@item.NotificationCatId" eventId="@notificationMappings.NotificationEventId" href="javascript:void(0);">Assign Emails</a><br />
+                                        </span>
+                                    </div>
+                                </div>
+                                <span>
+                                    @if (notificationMappings.NotificationEmails != null)
+                                    {
+                                        <ul class="innernotification">
+                                            @foreach (var emails in notificationMappings.NotificationEmails.NotificationEmail.Split(','))
+                                            {
+                                                if (!string.IsNullOrEmpty(emails))
+                                                {
+                                                    <li class="toemails">
+                                                        @($"To: {emails}")
+                                                    </li>
+                                                }
+                                            }
+
+                                            @foreach (var emails in notificationMappings.NotificationEmails.NotificationCCEmail.Split(','))
+                                            {
+                                                if (!string.IsNullOrEmpty(emails))
+                                                {
+                                                    <li class="ccemails">
+                                                        @($"Cc: {emails}")
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="modal fade" id="addEmailModel" role="dialog">
+    <div class="modal-dialog toemails-popup" id="modelContent">
+    </div>
+</div>
+
+<style>
+.notfi-menuSubmenulist li h4 {
+position: relative;
+}
+.notfi-menuSubmenulist li h4 .tooltipcontent {
+visibility: hidden;
+min-width: 260px;
+background-color: #464646;
+color: #fff;
+border-radius: 6px;
+padding: 6px 6px;
+position: absolute;
+z-index: 1;
+bottom: 110%;
+left: 0;
+text-align: center;
+display: block;
+line-height: 18px;
+right: 0;
+font-size: 13px;
+font-weight: 600;
+}
+.notfi-menuSubmenulist li h4 .tooltipcontent::after {
+content: "";
+position: absolute;
+top: 100%;
+left: 12%;
+margin-left: -5px;
+border-width: 5px;
+border-style: solid;
+border-color: #464646 transparent transparent transparent;
+}
+.notfi-menuSubmenulist li h4:hover .tooltipcontent {
+visibility: visible;
+}
+</style>

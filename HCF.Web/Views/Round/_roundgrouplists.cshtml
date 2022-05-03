@@ -1,0 +1,236 @@
+﻿@model List<HCF.BDO.RoundGroup>
+@{
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <table id="capTable" class="table table-bordered table-striped" style="width:100%;">
+            <thead>
+                <tr>
+
+                    <th>Round Name</th>
+                    @if (ViewBag.RoundType == 2)
+                    {
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    }
+                    <th>Status</th>
+                    <th>Edit</th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td> @item.Name</td>
+                        @if (ViewBag.RoundType == 2)
+                        {
+                            <td width="100px" data-sort="@item.StartDate.DateSort()">
+                                @item.StartDate.CastLocaleDate()
+                            </td>
+                            <td width="100px" data-sort="@item.EndDate.DateSort()">
+                                @item.EndDate.CastLocaleDate()
+                            </td>
+                        }
+                        <td>
+                            @if (item.IsActive == 1)
+                            {
+                                <span>Active</span>
+                            }
+                            else if (item.IsActive == 0)
+                            {
+                                <span>Inactive</span>
+                            }
+                            else
+                            {
+                                <span>Archived </span>
+                            }
+                        </td>
+
+
+                        <td style="display:flex;" class="mopmoredot">
+
+                            @if (ViewBag.RoundType == 2)
+                            {
+                                <a onclick='openStep1(@item.RoundGroupId)'>
+
+                                    <span>
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="" />
+                                    </span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class='pull-right modal-link' href="@Url.Action("AddRoundGroup","Round",new { roundUserGroupId = item.RoundGroupId,mode="1",IsRoundlistRequest=1 })">
+
+                                    <span>
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="" />
+                                    </span>
+                                </a>
+                            }
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+        var RoundType = '@ViewBag.RoundType';
+    var cols;
+    var tableWidth;
+        if (RoundType == 2) {
+            cols = [0, 1, 2, 3];
+            tableWidth = ['35%', '35%', '15%', '15%'];
+        }
+        else {
+            cols = [0, 1];
+            tableWidth = ['50%', '50%'];
+        }
+    var dataTables = $('#capTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [],
+        "pageLength": 20,
+        "bPaginate": $('#capTable tbody tr').length > 20,
+        "bInfo": false,
+        //"order": [[3, "desc"]],
+        "oSearch": { "bSmart": false },
+        "language": {
+            "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+        },
+        initComplete: function () {
+
+
+            if (@ViewBag.RoundType == 2) {
+                $("div.toolbar").html('<div class="add-commanBtn"><a onclick="openStep1(0)" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Round" alt="3d_add_button"></a></div >');
+            }
+            else {
+                $("div.toolbar").html('<div class="add-commanBtn"><a  href="@Url.Action("AddRoundGroup","Round",new { IsRoundlistRequest=1 })" class="pull-right modal-link" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Round" alt="3d_add_button"></a></div >');
+
+            }
+
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                orientation: 'portrait',
+                //pageSize:'LEGAL',
+                title: 'Round Report',
+                exportOptions: {
+                    columns: cols
+                },
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                customize: function (doc) {
+                    //genereateRpeort(doc)
+                    //Remove the title created by datatTables
+                    //doc.content.splice(0, 1);
+                    //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                    var now = new Date();
+                    var jsDate = setDateFormat(now);
+                    //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                    // Logo converted to base64
+                    //var logo = $("#logoimgbase64").val();
+                    //debugger;
+                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+
+                    doc.pageMargins = [20, 60, 20, 30];
+                    // Set the font size fot the entire document
+                    doc.defaultStyle.fontSize = 8;
+                    doc.content[1].table.widths = tableWidth;
+                    // Set Table aligment in center
+                    doc.defaultStyle.alignment = 'middle';
+                    doc.styles.tableHeader.alignment = 'middle';
+                    // Set the fontsize for the table header
+                    doc.styles.tableHeader.fontSize = 7;
+                    // Create a header object with 3 columns
+                    // Left side: Logo
+                    // Middle: brandname
+                    // Right side: A document title
+                    doc['header'] = (function () {
+                        return {
+                            columns: [
+                                { image: logo, width: 40 },
+                                {
+                                    alignment: 'left',
+                                    italics: true,
+                                    text:'', @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'),
+                                    margin: [0, 6, 0, 0]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Create a footer object with 2 columns
+                    // Left side: report creation date
+                    // Right side: current page and total pages
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Created on: ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated from: ', { text: 'CRx' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Change dataTable layout (Table styling)
+                    // To use predefined layouts uncomment the line below and comment the custom lines below
+                    // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+            {
+                extend: 'excel',
+                title: 'Round Report',
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                exportOptions: {
+                    columns: cols,
+                    orthogonal: 'export'
+                }
+            }
+        ]
+    });
+</script>

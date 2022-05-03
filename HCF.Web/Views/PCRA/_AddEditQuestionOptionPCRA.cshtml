@@ -1,0 +1,147 @@
+﻿@model List<HCF.BDO.QuestionOptionPCRA>
+
+@using (Html.BeginForm("QuestionPCRA", "PCRA"))
+{
+    @Html.AntiForgeryToken()
+    if (Model.Any())
+    {
+        <div class="row">
+            <div class="col-md-5">
+                @Html.Label("Text")<em class="required-field"> *</em>
+            </div>
+            <div class="col-md-2 pull-left">
+                @Html.Label("IsReadOnly")
+            </div>
+            <div class="col-md-1">
+                <label title="Can Comment">Cmnt</label>
+                @*@Html.Label("Cmnt",new { @title="Can Comment"})*@
+            </div>
+            <div class="col-md-1">
+                @Html.Label("Active")
+            </div>
+            <div class="col-md-2 col-md-offset-1">
+                @Html.Label("Action")
+            </div>
+        </div>
+    }
+    for (int i = 0; i < Model.Count(); i++)
+    {
+        @Html.HiddenFor(m => Model[i].PCRAOptionId)
+        @Html.HiddenFor(m => Model[i].QuesPCRAId)
+        <div class="questionOptionPCRAList">
+            <div class="row questionOptionPCRA" id="@i">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        @Html.TextBoxFor(m => Model[i].Text, new { @class = "form-control", @textField = Model[i].PCRAOptionId, @required = "required" })
+                        @Html.ValidationMessageFor(m => Model[i].Text)
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        @Html.CheckBoxFor(m => Model[i].IsReadOnly, new { @class = "form-control", @isReadOnlyField = Model[i].PCRAOptionId })<span></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        @Html.CheckBoxFor(m => Model[i].CanComment, new { @class = "form-control", @canCommentField = Model[i].PCRAOptionId })<span></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        @Html.CheckBoxFor(m => Model[i].IsActive, new { @class = "form-control", @isActiveField = Model[i].PCRAOptionId })<span></span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    @if (ViewBag.Mode == "edit")
+                    {
+                    <div class="row">
+                       
+                            <div class="col-md-12 text-center">
+                                <button type="button" class="btn comm-bluebutton" onclick="EditQuestionOptionPCRA('@Model[i].PCRAOptionId', '@Model[i].QuesPCRAId')">
+                                    Edit
+                                </button>
+                            
+                                <button type="button" class="btn comm-Cancelbutton" onclick="DeleteQuestionOptionPCRA('@Model[i].PCRAOptionId', '@Model[i].QuesPCRAId')">
+                                    Del
+                                </button>
+                            </div>
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button type="button" class="add-button button1">Add</button>
+                            
+                                <button type="button" class="remove-button button1">Remove</button>
+                            </div>
+                        </div>
+                        }
+                    </div>
+            </div>
+            </div>
+        }
+
+        <div class="modal-footer">
+                @if (ViewBag.Mode != "edit")
+                {
+                    <input type="submit" class="btn comm-button" />
+                }
+                <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Close</button>
+           
+        </div>
+    }
+        <script>
+    function EditQuestionOptionPCRA(pCRAOptionId, quesPCRAId) {
+        debugger;
+        var text = $('input[type="text"][textField="' + pCRAOptionId + '" ]')[0].value;
+        var isReadOnly = $('input[type="checkbox"][isReadOnlyField="' + pCRAOptionId + '" ]')[0].checked;
+        var canComment = $('input[type="checkbox"][canCommentField="' + pCRAOptionId + '" ]')[0].checked;
+        var isActive = $('input[type="checkbox"][isActiveField="' + pCRAOptionId + '" ]')[0].checked;
+        var url = CRxUrls.PCRA_EditQuestionOptionPCRA;
+        $.get(url + "?pCRAOptionId=" + pCRAOptionId + "&quesPCRAId=" + quesPCRAId + "&text=" + text + "&isReadOnly=" + isReadOnly + "&canComment=" + canComment + "&isActive=" + isActive, function (data) {
+            debugger;
+            $("#loadpartial").html('');
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+    }
+
+    function DeleteQuestionOptionPCRA(pCRAOptionId, quesPCRAId) {
+        var url = CRxUrls.PCRA_DeleteQuestionOptionPCRA;
+        $.get(url + "?pCRAOptionId=" + pCRAOptionId + "&quesPCRAId=" + quesPCRAId + "", function (data) {
+            debugger;
+            $("#loadpartial").html('');
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+
+    }
+
+    $(document).on('click', '.add-button', function () {
+        debugger;
+        count = parseInt($('.questionOptionPCRA:last').attr('id'))
+        var newID = count + 1;
+        var template = $(this).parent("div").parent("div").parent("div").parent("div").clone().attr("id", newID);
+        template.find('input[type=text]').val(null);
+        template.find('input[type=text]').attr("name", "[" + newID + "].Text");
+        template.find('input[type=checkbox][isReadOnlyField]').attr("checked", false);
+        template.find('input[type=checkbox][isReadOnlyField]').attr("name", "[" + newID + "].IsReadOnly");
+        template.find('input[type=checkbox][canCommentField]').attr("checked", false);
+        template.find('input[type=checkbox][canCommentField]').attr("name", "[" + newID + "].CanComment");
+        template.find('input[type=checkbox][isActiveField]').attr("checked", true);
+        template.find('input[type=checkbox][isActiveField]').attr("name", "[" + newID + "].IsActive");
+
+        $('.questionOptionPCRAList').append(template);
+    });
+
+    $(document).on('click', '.remove-button', function () {
+        count = parseInt($('.questionOptionPCRA:last').attr('id'))
+        debugger;
+        if (count > 0) {
+            var template = $(this).parent("div").parent("div").parent("div").parent("div");
+            template.remove();
+        }
+    });
+
+        </script>

@@ -1,0 +1,79 @@
+﻿@model  List<HCF.BDO.ActivityData>
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Recent Changes Log
+            </h1>
+        </section>
+    }
+   
+            <div class="settingnewBox">
+                <div class="rightcol-setting">
+                    
+                        <div class="row">
+                            <div class="col-md-12">
+
+
+                                <table id="myRecentlogTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="50%">Recent Changes</th>
+                                            <th>Round Effective Date</th>
+                                            <th>Date Modified</th>
+                                            <th>Organized By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr>
+                                                <td style="width: 200px">
+                                                    @Html.DisplayFor(modelItem => item.DataLine)
+                                                </td>
+                                                <td style="width: 200px">
+                                                    @item.EffectiveDate.ToFormatDate()
+                                                </td>
+                                                <td style="width: 200px">
+                                                    @item.CreatedDate.ToFormatDate()
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.user.FullName)<span></span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    
+                </div>
+            </div>
+      
+
+<script>
+    $(document).ready(function () {
+        debugger
+        var mylogTable = $('#myRecentlogTable').DataTable({
+            "searching": false,
+            "pageLength": 15,
+            "lengthChange": false,
+            "bPaginate": $('#myRecentlogTable tbody tr').length > 15,
+            "bInfo": false,
+            "aaSorting": [],
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_", //To remove Search Label
+                "searchPlaceholder": "Search..."
+            }
+        });
+    })
+</script>
+
+<style>
+    .dataTables_paginate.paging_simple_numbers{
+        float:right;
+    }
+</style>
+

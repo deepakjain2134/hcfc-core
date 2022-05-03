@@ -1,0 +1,274 @@
+﻿@{
+    ViewBag.Title = "Work Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>@Localizer["TitleWorkOrder"]</h1>
+    </section>
+        }
+    <section class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="row tablelist-topform form-inline">
+                        <div class="col-md-4 col-sm-4 form-group" style="display: flex; align-items: center;">
+                            <label style="white-space: nowrap; padding-right: 10px;">Work Order #</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Work Order #" class="form-control" id="txtWoSearch" maxlength="15" />
+                                <div class="input-group-btn">
+                                    <button id="btnwoSearch" class="btn btn-default" type="submit">
+                                        <i class="glyphicon glyphicon-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-4 form-group">
+                            <label>Status</label>
+                            @await Component.InvokeAsync("WorkOrderWoStatusMultiSelect")
+                        </div>
+                        <input type="hidden" name="fltrstatuscode" id="fltrstatuscode" />
+                        <input type="hidden" value='@ViewBag.FlootAssetId' id="floorAssetId" />
+                        <input type="hidden" value='@ViewBag.EPdetailId' id="EPdetailId" />
+                        <input type="hidden" value='@ViewBag.Activityid' id="ActivityId" />
+                        <div class="col-md-5 col-sm-4 form-group" style="float: right;">
+                            <a><i class="fas fa-sync-alt"></i></a>
+                            <a href='@(Url.RouteUrl("wocreate"))' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Work Order" alt="Add WorkOrder" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="" class="table-responsive">
+                                @if (HCF.Web.Base.UserSession.CurrentOrg.IsTmsWo)
+                                {
+                                    <div id="newResult" class="text-center sync-box"><i class="fa fa-cloud-upload"></i>&nbsp;&nbsp; Sync Work Order System </div><br />
+                                }
+                                <table id="woTable" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th onclick="SetSortingOrder('WorkOrderNumber')" class="sorting1" id="WorkOrderNumber" width="8%">
+                                                @Localizer["WorkOrderNo"]
+                                            </th>
+                                            <th onclick="SetSortingOrder('DateCreated')" class="sorting1" id="DateCreated" width="8%">
+                                                Created Date
+                                            </th>
+                                            <th onclick="SetSortingOrder('Description')" class="sorting1" id="Description">
+                                                Description
+                                            </th>
+                                            <th onclick="SetSortingOrder('AssetNo')" class="sorting1" id="AssetNo" width="10%">
+                                                @Localizer["AssetNo"]
+                                            </th>
+                                            <th>
+                                                Location
+                                            </th>
+                                            <th onclick="SetSortingOrder('RequesterName')" class="sorting1" id="RequesterName" width="8%">
+                                                @Localizer["Requester"]
+                                            </th>
+                                            <th onclick="SetSortingOrder('TypeCode')" class="sorting1" id="TypeCode" width="5%">
+                                                Type
+                                            </th>
+                                            <th onclick="SetSortingOrder('StatusCode')" class="sorting1" id="StatusCode" width="5%">
+                                                @Localizer["Status"]
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="partialContents"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<div class="modal fade" id="showAssetInfo" role="dialog">
+    <div class="modal-dialog model_big">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span class="modelTitle">Assets Detail</span>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </h4>
+            </div>
+            <div class="modal-body" id="modelContent">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="totalPage_hdn" value="1" />
+<input type="hidden" id="pageIndex_hdn" value="1" />
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+     
+        $(document).ready(function() {
+           
+
+            $(window).scroll(function () {
+               // debugger;
+                if ($(window).scrollTop() + $(window).height() > $(document).height() - 400) {
+                    var totalPage = $("#totalPage_hdn").val(); 
+                    var PageIndex = $("#pageIndex_hdn").val();
+                    if (parseInt(totalPage) >= parseInt(PageIndex)) {
+                        console.log("totalPage", totalPage);
+                        console.log("PageIndex", PageIndex);
+                        //debugger;
+                        var oldnum = 1;
+                        if (localStorage.getItem("WoPageIndex") != null) {
+                            oldnum = parseInt(localStorage.getItem("WoPageIndex"));
+                        }
+                        localStorage.setItem("isScroll", true);
+                        getWorkOrders(oldnum + 1);
+                        localStorage.setItem("WoPageIndex", oldnum + 1);
+                    }
+                }
+            });
+
+
+            var popOverSettings = {
+                placement: 'bottom',
+                container: 'body',
+                html: true,
+                selector: '[rel="popover"]',
+                trigger: 'auto'
+
+            }
+            $('body').popover(popOverSettings);
+
+
+        });
+
+        function SetSortingOrder(Order) {
+            var sortOrder = localStorage.getItem("WOSortOrder");
+            var orderbySort = localStorage.getItem("WOOrderbySort");
+            if (sortOrder == Order && orderbySort == "ASC") {
+                localStorage.setItem("WOOrderbySort", "DESC");
+            } else if (sortOrder == Order && orderbySort == "DESC") {
+                localStorage.setItem("WOOrderbySort", "ASC");
+            } else {
+                localStorage.setItem("WOSortOrder", Order);
+                localStorage.setItem("WOOrderbySort", "ASC");
+            }
+            getWorkOrders(1);
+        }
+
+        $("#btnwoSearch").click(function() {
+            var searchval = $("#txtWoSearch").val();
+            localStorage.setItem("Searchby", searchval);
+            getWorkOrders(1);
+        });
+
+        $("#txtWoSearch").keyup(function() {
+            var searchval = $(this).val();
+            if (searchval == "") {
+                localStorage.setItem("Searchby", searchval);
+                getWorkOrders(1);
+            }
+        });
+
+        function getWorkOrders(index) {
+            var sortOrder = localStorage.getItem("WOSortOrder");
+            var orderbySort = localStorage.getItem("WOOrderbySort");
+            var isScroll = localStorage.getItem("isScroll");
+            var searchby = "";
+            if ($("#txtWoSearch").val() != "") {
+                searchby = localStorage.getItem("Searchby");
+                if (searchby == null || searchby == "") {
+                    searchby = "";
+                }
+            }
+            if (sortOrder == null) {
+                sortOrder = "";
+            }
+            if (orderbySort == null) {
+                orderbySort = "";
+            }
+            var floorAssetId = $("#floorAssetId").val();
+            var activityId = $("#ActivityId").val();
+            var epdetailId = $("#EPdetailId").val();
+            var filterStatuscode = $("#fltrstatuscode").val();
+            $.get(CRxUrls.WorkOrder_WorkOrders +
+                '?page=' +
+                index +
+                "&floorAssetId=" +
+                floorAssetId +
+                "&EPdetailId=" +
+                epdetailId +
+                "&sortOrder=" +
+                sortOrder +
+                "&OrderbySort=" +
+                orderbySort +
+                "&searchparam=" +
+                searchby +
+                "&isScroll=" +
+                isScroll +
+                "&activityid=" +
+                activityId +
+                "&fltrstatuscode=" +
+                filterStatuscode,
+                function (data) {
+                  ///  console.log(data);
+                    debugger;
+                    if (isScroll == "false") {
+                        $('#partialContents').empty();
+                    }
+                    $('#partialContents').append(data);
+                    $('#partialContents').fadeIn('fast');
+                    localStorage.setItem("isScroll", false);
+                    sortOrder = localStorage.getItem("WOSortOrder");
+                    orderbySort = localStorage.getItem("WOOrderbySort");
+                    if (orderbySort == "ASC") {
+                        $("#" + sortOrder).addClass("sorting_asc1");
+                    } else {
+                        $("#" + sortOrder).addClass("sorting_desc1");
+                    }
+                    if (index === 1) {
+                        loadSyncData();
+                    }
+                });
+        }
+
+        $('body').on('click',
+            '.show_asset_info',
+            function () {
+                var issueid = $(this).attr('id');
+                $('#modelContent').empty();
+                $.ajax({
+                    url: CRxUrls.WorkOrder_GetWorkOrdertfloorassets + "?IssueId=" + issueid,
+                    method: "GET",
+                    success: function (data) {
+                        $('#modelContent').html($(data));
+                    }
+                });
+            });
+
+        function loadSyncData() {
+            debugger;
+            $.ajax({
+                url: CRxUrls.WorkOrder_SyncWorkOrders + "?searchParam=",
+                type: "GET",
+                global: false,
+                success: function (data) {
+                    $('#partialContents').append(data);
+                   // console.log(data);
+                }
+            });
+        }
+
+    </script>
+
+
+
+}

@@ -1,0 +1,148 @@
+﻿@model HCF.BDO.TIcraLog
+@{
+    ViewBag.Title = "TICRAObservationReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Observation Report
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    
+                        <icralistDropDownList name="icraDDL" firsttext="Select ICRA Project Name" selectedvalue="@Model.TicraId" class="form-control"></icralistDropDownList>
+                    
+                        @*@Html.ICRAListDropDownList("icraDDL", Model.TicraId, "Select ICRA Project Name", new { @class = "form-control" })*@
+
+                        @if (Model.TicraId > 0)
+                        {
+                            using (Html.BeginForm("TICRAObservationReport", "ICRA", FormMethod.Post, new { id = "ICRAform" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @await Html.PartialAsync("_TICRAReportInfo", Model)
+
+                                <div id="loadpartial">
+                                    @await Html.PartialAsync("_TICRAObservationReport", Model.ObservtionReport)
+                                </div>
+                                if (Model.ObservtionReport != null)
+                                {
+                                <div class="button_Div">
+                                    <input type="submit" value=' @Localizer["Save"]' class="comm-button" id="btnSave" />
+                                    @*@Html.ActionLink("Cancel ", "IcraPermit", "ICRA", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "IcraPermit", new { controller = "ICRA" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                                }
+                            }
+                            using (Html.BeginForm("ICRAObserverReport", "Pdf"))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="button_Div">
+                                    <input type="hidden" name="icraId" value="@Model.TicraId" />
+                                    <input type="hidden" name="reportId" value="@Model.ObservtionReport.TICRAReportId" />
+                                    @if (Model.ObservtionReport.TICRAReportId > 0)
+                                    {
+                                        <button id="submitButton" type="submit" class="comm-button">Create Pdf</button>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span>Select Project Name to Create Report</span>
+                        }
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<input type="hidden" id="hdn_icraId" value="@Model.TicraId" />
+<script>
+
+    $(document).ready(function () {
+        debugger;
+        var hdn_icraId = $("#hdn_icraId");
+        if (parseInt(hdn_icraId.val()) > 0) {
+            pageLoad();
+        }
+    });
+
+    function pageLoad() {
+        var SelectedDates = {};
+         $("#ticraobsReports").append($('<option></option>').val(0).html('New Report'));
+        @foreach (var item in Model.ObservtionReports)
+        {
+            var reportDate = $"{item.ReportDate.Month}/{item.ReportDate.Day}/{item.ReportDate.Year}";
+            @:SelectedDates[new Date('@reportDate')] = new Date('@reportDate').toString()
+            @:$("#ticraobsReports").append($('<option></option>').val(@item.TICRAReportId).html('@item.ReportDate.ToFormatDate()'));
+        }
+
+        var reportId = getParameterByName('reportId');
+        if (reportId) {
+            $("#ticraobsReports").val(reportId);
+            $("#ticraobsReports").trigger("change");
+        }
+
+        $('#reportdatetime').datepicker({
+            minDate: new Date(@Model.StartDate.Value.Year, @Model.StartDate.Value.Month -1, @Model.StartDate.Value.Day),
+            maxDate: new Date(),
+            beforeShowDay: function (date) {
+                var Highlight = SelectedDates[date];
+                if (Highlight) {
+                    return [true, "highlighted", Highlight];
+                }
+                else {
+                    return [true, '', ''];
+                }
+            }
+        });
+    }
+
+    var icraDDL = $("#icraDDL");
+
+    icraDDL.change(function () {
+        var icraId = $(this).val();
+        var url = '@Url.Action("TICRAObservationReport", "ICRA")' + "?icraId=" + icraId;
+        window.location.href = url;
+
+    });
+
+    $("#ticraobsReports").change(function () {
+        var reportId = $(this).val();
+        //alert(reportId);
+        if (reportId > 0) {
+            var text = $("#ticraobsReports option:selected").text();
+            $("#reportdatetime").val(text);
+            $("#reportdatetime").addClass("disable");
+            $.ajax({
+                url: CRxUrls.icra_ObservationReport + "?icraId=" +@Model.TicraId + "&reportId=" + reportId,
+                type: "GET",
+                dataType: "HTML",
+                success: function (data) {
+                    if (data) {
+                        $('#loadpartial').empty().html(data).fadeIn('fast');
+                    }
+                }
+            });
+        } else {
+            window.location.reload(true);
+        }
+    })
+
+</script>
+<style>
+
+    .highlighted a {
+        background-color: #00FF00 !important;
+        background-image: none !important;
+        color: #000 !important;
+    }
+</style>

@@ -1,0 +1,259 @@
+﻿@model IEnumerable<HCF.BDO.AssetType>
+
+<h4 class="uploadAssets-heading">Asset Type</h4>
+<p class="addremove-data"><span class="uploadAssets-dynamic"></span><a class="assetsPlus" style="font-size:20px;margin-top: -4px;" title="View List" href="#" id="uploadlistShow" class="float-right"><img src="/dist/Images/Icons/edit_button2.png" title="" alt=""></a></p>
+<ul>
+    <li>
+        @foreach (var item in Model.OrderBy(x => x.Name))
+        {
+            <ul class="list">
+                <li>
+                    <a style="cursor:pointer" class="assetcat" title="Click to expand">
+                        <label for="@($"cb1{item.Name}")" id="lbl">
+                            <i class="fa fa-angle-right" aria-hidden="true"></i>
+                            @item.Name
+                        </label>
+                    </a>
+                    <ul class="crxcheckbox assetsList">
+                        @foreach (var asset in item.Assets.Where(y => y.Count > 0 && y.StandardEps.Any()).OrderBy(x => x.Name))
+                        {
+                            <li class="uploadInspList">
+                                <div class="crxcheckbox-success">
+
+                                    <a class="assetsListLi" style="cursor:pointer" title="Click to expand">
+
+                                        <input type="checkbox" id="@($"cb2{asset.AssetId}")" value=@asset.AssetId name="AssetsId" class="foo" />
+                                        <label for="@($"cb2{asset.AssetId}")">
+                                            <img class="img" src="@commonModelFactory.CommonFilePath(asset.IconPath)" height="25"
+                                                 width="25" alt="" />
+
+                                            @asset.Name (@asset.Count)
+                                        </label>
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        }
+
+    </li>
+</ul>
+
+
+<script>
+
+    $(function () {
+        $(".assetsListLi").click(function () {
+            //debugger
+            $(".uploadAssets-dynamic").text($(this).text());
+            $(".uploadAssets-dynamic").val($(this).text());
+            var assetstypes = $(this).parent(".crxcheckbox-success").find(".img").attr("src");
+            $(".uploadAssets-dynamic").prepend('<img src="' + assetstypes + '" height="25" width="25" alt="">');
+            // $(this).find('input[type=checkbox]').prop("checked", true);
+        });
+
+        $('.assetsPlus').click(function () {
+            $('.uploadAssets-dynamic').empty();
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#uploadlistShow').click(function () {
+            $('.list').removeClass("uploadShowhide");
+        });
+
+        $('.uploadInspList').click(function () {
+            $('.list').addClass("uploadShowhide");
+            $(this).closest(".list").addClass('activeinsplist').siblings().removeClass('activeinsplist');
+        });
+
+        $('.uploadInspList').click(function () {
+            $('#uploadlistShow').addClass("plusShowhide");
+        });
+        $('#uploadlistShow').click(function () {
+            $('#uploadlistShow').removeClass("plusShowhide");
+        });
+    });
+
+    $(".foo").click(function () {
+        if ($(this).closest("li").hasClass('activeUl')) {
+            $(this).find('input[type=checkbox]').prop("checked", true);
+            return false;
+        };
+        var checked = $(this).prop("checked");
+        if (checked) {
+            $(".foo").not(this).attr("checked", false);
+        }
+        $("li").removeClass("activeUl");
+        $(this).closest("li").addClass("activeUl");
+    });
+
+    $('.list > li a').click(function () {
+        //debugger;
+        $(this).parent().find('ul.assetsList').toggle();
+    });
+
+    $('.assetsListLi').click(function () {
+        $(this).parent().find('ul.assetsubCategoryList').toggle();
+    });
+
+</script>
+
+<style>
+    /*.list.uploadShowhide.activeinsplist {
+        display:block;
+    }*/
+    .list.uploadShowhide {
+        display: none;
+    }
+
+    .assetsPlus {
+        display: none;
+        float: right;
+    }
+
+        .assetsPlus.plusShowhide {
+            display: inline-block;
+            float: right;
+        }
+
+
+
+
+
+    #lbl {
+        display: list-item;
+    }
+
+    ul.assetsList {
+        display: none;
+    }
+
+    ul.assetsubCategoryList {
+        display: none;
+    }
+
+    .asset_list_view ul.list ul {
+        margin-left: 14px !important;
+    }
+
+    ul.crxcheckbox.assetsList {
+        padding-left: 24px;
+    }
+
+    .crxcheckbox label {
+        width: 100%;
+        -ms-border-radius: 3px;
+        border-radius: 3px;
+        font-weight: normal;
+    }
+
+
+
+
+    .crxcheckbox input[type="checkbox"]:empty {
+        display: none;
+    }
+
+        .crxcheckbox input[type="checkbox"]:empty ~ label {
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+        }
+
+    ul.crxcheckbox.assetsList .crxcheckbox-success {
+        display: flex;
+        width: 100%;
+        padding-top: 5px;
+    }
+
+        ul.crxcheckbox.assetsList .crxcheckbox-success label {
+            border-top: none;
+        }
+
+    .crxcheckbox.assetsList li {
+        border-top: 1px solid #e4e4e4;
+    }
+
+    .crxcheckbox input[type="checkbox"]:empty ~ label:before {
+        position: absolute;
+        display: block;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        content: '';
+        /*width: 2.5em;*/
+        background: #D1D3D4;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .crxcheckbox input[type="checkbox"]:hover:not(:checked) ~ label {
+        color: #888;
+    }
+
+
+    .crxcheckbox input[type="checkbox"]:empty ~ label {
+        padding-left: 6px;
+    }
+
+    .crxcheckbox input[type="checkbox"]:hover:not(:checked) ~ label:before {
+        /*content: '\2714';*/
+        text-indent: 0.25em;
+        color: #C2C2C2;
+    }
+
+    a.assetsListLi label:hover {
+        background-color: aliceblue;
+    }
+
+    .crxcheckbox input[type="checkbox"]:checked ~ label {
+        z-index: 0;
+    }
+
+        .crxcheckbox input[type="checkbox"]:checked ~ label:before {
+            /*content: '\2714';*/
+            text-indent: .9em;
+            color: #333;
+            background-color: #ccc;
+        }
+
+    .crxcheckbox input[type="checkbox"]:focus ~ label:before {
+        box-shadow: 0 0 0 3px #999;
+    }
+
+    .crxcheckbox-default input[type="checkbox"]:checked ~ label:before {
+        color: #333;
+        background-color: #ccc;
+    }
+
+    .crxcheckbox-primary input[type="checkbox"]:checked ~ label:before {
+        color: #fff;
+        background-color: #337ab7;
+    }
+
+    .crxcheckbox-success input[type="checkbox"]:checked ~ label:before {
+        color: #fff;
+        background-color: #54aad3;
+        width: 100%;
+        z-index: -1;
+    }
+
+    .crxcheckbox-danger input[type="checkbox"]:checked ~ label:before {
+        color: #fff;
+        background-color: #d9534f;
+    }
+
+    .crxcheckbox-warning input[type="checkbox"]:checked ~ label:before {
+        color: #fff;
+        background-color: #f0ad4e;
+    }
+
+    .crxcheckbox-info input[type="checkbox"]:checked ~ label:before {
+        color: #fff;
+        background-color: #5bc0de;
+    }
+</style>

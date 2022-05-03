@@ -1,0 +1,1436 @@
+﻿@model HCF.BDO.QuarterMaster
+@using System.Data;
+@{
+    /**/
+    var date = string.Empty;
+    var listItems = new List<object>
+
+{
+new  { Text = "1", Value="1" },
+new  { Text = "2", Value="2" },
+new  { Text = "3", Value="3" },
+new  { Text = "4", Value="4" },
+new  { Text = "5", Value="5" }
+};
+}
+<div id="partialbody">
+    @*@using (Ajax.BeginForm("FireDrill", "Rounds", FormMethod.Post, new AjaxOptions {
+             OnSuccess = "OnRoundSuccess", OnBegin = "onRoundBegin" }, new { id = "texercisequesform" }))
+        {*@
+    <form asp-controller="Rounds" asp-action="FireDrill"
+          data-ajax-begin="onRoundBegin" data-ajax-success="OnRoundSuccess" id="texercisequesform"
+          data-ajax="true" data-ajax-method="POST">
+        @Html.AntiForgeryToken()
+        <div class="modal-body">
+            <div class="row tablelist-topform firedocument-step1 @((HCF.Web.Base.UserSession.HasRoles("add_firedrill_schedule,edit_fire_drill"))?"":"disable")">
+                <input type="hidden" name="hdnselcntrlId" id="hdnselcntrlId" />
+                <div class="col-lg-3 form-group">
+                    <label>Date of Drill:</label>
+                    @if (Model.Buildings[0].Shifts[0].Exercises[0].Date.HasValue && Model.Buildings[0].Shifts[0].Exercises[0].Date != null)
+                    {
+                        //  date = Convert.ToDateTime(Model.Date).ToString("ddd, MMM d, yyyy");
+                        date = Model.Buildings[0].Shifts[0].Exercises[0].Date.Value.ToString("MMM d, yyyy");
+
+                    }
+                    <input type="text" name="Buildings[0].Shifts[0].Exercises[0].Date" value="@date" class="form-control datepicker" readonly autocomplete="off" placeholder="Enter Date" />
+
+
+                </div>
+                <div class="col-lg-3 form-group">
+                    <label>Time of Drill:</label>
+                    <div class="input-group clockpicker" data-placement="left" data-align="top" data-autoclose="true">
+                        <input type="hidden" id="starttime" value="@ViewBag.StartTime" />
+                        <input type="hidden" id="endtime" value="@ViewBag.Endtime" />
+                        <input type="text" name="Buildings[0].Shifts[0].Exercises[0].StartTime" class="form-control timepicker" id="selecttime" value="@Model.Buildings[0].Shifts[0].Exercises[0].StartTime" />
+                    </div>
+                </div>
+                <div class="col-lg-6 form-group">
+                    <label>Location of Drill:</label>
+                    @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[0].NearBy, new { @class = "form-control alphaonly", maxlength = 50, TabIndex = 3 })
+                </div>
+
+                <div class="col-lg-6 form-group">
+                    <label>Drill Conducted By:</label>
+                    @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[0].ConductedBy, new { @class = "form-control alphaonly", required = "required", maxlength = 50, TabIndex = 4 })
+                </div>
+                <div class="col-lg-6 form-group">
+                    <label>Observers:</label>
+                    @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[0].Observers, new { @class = "form-control alphaonly", maxlength = 50, TabIndex = 5 })
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="form-group">
+                        <label>Was the fire drill unannounced?</label>
+                        <span>
+                            <span>Yes</span>@Html.RadioButtonFor(m => Model.Buildings[0].Shifts[0].Exercises[0].Announced, true)
+                            <span>No</span>@Html.RadioButtonFor(m => Model.Buildings[0].Shifts[0].Exercises[0].Announced, false)
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label>Was the fire drill announcement/notification audible?</label>
+                        <span>
+                            <span>Yes</span>@Html.RadioButtonFor(m => Model.Buildings[0].Shifts[0].Exercises[0].IsAudible, true)
+                            <span>No</span>@Html.RadioButtonFor(m => Model.Buildings[0].Shifts[0].Exercises[0].IsAudible, false)
+                        </span>
+                    </div>
+                </div>
+
+                @*<div class="col-lg-6 form-group">
+                        <span>
+                            @Html.CheckBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[0].Announced, new { @class = "alphaonly", TabIndex = 6 })<span></span>
+                        </span>
+                        <label>Was the fire drill unannounced?</label>
+                    </div>
+                    <div class="col-lg-6 form-group">
+
+                        <span>
+                            @Html.CheckBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[0].IsAudible, new { @class = "alphaonly", TabIndex = 7 }) <span></span>
+                        </span>
+                        <label>Was the fire drill announcement/notification audible?</label>
+                    </div>*@
+            </div>
+            @if (Model.Buildings[0].Shifts[0].Exercises[0].TExerciseQuestionnaires.Any())
+            {
+                for (var i = 0; i < Model.Buildings[0].Shifts[0].Exercises.Count(); i++)
+                {
+                    <div class="row">
+                        <div class="col-md-12 form-gorup tabfir-drill @((HCF.Web.Base.UserSession.HasRoles("add_firedrill_schedule,edit_fire_drill"))?"":"disable") ">
+
+                            <div id="tabs">
+                                <ul class="firdrilltabs-list">
+                                    <li data-val="1" data-text="Evaluation"><a href="#tabs-1">Step 1: Evaluation</a></li>
+                                    <li data-val="2" data-text="Critique"><a href="#tabs-2">Step 2: Critique</a></li>
+                                    <li data-val="3" data-text="Education"><a href="#tabs-3">Step 3: Education</a></li>
+                                    <li class="form-group form-inline" style="float:right;">
+                                        <label><strong>Status:</strong></label>
+                                        @{ HCF.BDO.Enums.FiredrillDocStatus enums = (HCF.BDO.Enums.FiredrillDocStatus)Model.Buildings[0].Shifts[0].Exercises[i].FiredrillDocStatus;}
+                                        <button type="button" class="firedrilldocstatus" value="@Model.Buildings[0].Shifts[0].Exercises[i].FiredrillDocStatus">@enums.GetDescription()</button>
+                                        <!--<select id="Buildings[0].Shifts[0].Exercises[@i].FiredrillDocStatus" name="Buildings[0].Shifts[0].Exercises[@i].FiredrillDocStatus" class="form-control firedrillDocStatus">-->
+                                        @*<option value="">Select</option>*@
+                                        <!--<option value="-1">Documentation Pending</option>
+                                            <option value="2">Documentation In progress</option>
+                                            <option value="1">Documentation Completed</option>
+                                        </select>-->
+                                    </li>
+                                </ul>
+
+
+                                <div id="tabs-1">
+                                    <div class="evaluation-table">
+                                        <div class="evaluationthead">
+                                            <div class="evaluation-col1"><b>Questions</b></div>
+                                            <div class="evaluation-col2"><b>Status</b></div>
+                                            <div class="evaluation-col3"><b>Score (out of 5)</b></div>
+                                            <div class="evaluation-col4"><b>Comment</b></div>
+                                        </div>
+                                        <div class="evaluationbody">
+                                            <input name="texerciseId" id="texerciseId" type="hidden" value="@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseId" />
+                                            @*@Html.HiddenFor(m => m.QuarterId, new { @class = "selQuarterId" })*@
+                                            @Html.HiddenFor(m => m.Year)
+                                            @Html.HiddenFor(m => m.QuarterNo)
+                                            @Html.HiddenFor(m => m.BuildingTypeId)
+                                            @Html.HiddenFor(m => m.Buildings[0].BuildingId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].ShiftId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].TExerciseId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].Status)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].NearBy)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].StartTime)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].Announced)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].Date)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].ShiftId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].BuildingId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].LocationGroupId)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].Status)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].DrillType)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].Name)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].FireDrillType)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].IsAdditional)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].IsAudible)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].DateTimeSpan)
+                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].QuarterNo)
+                                            @{
+                                                List<HCF.BDO.TExerciseQuestionnaires> texercisequest = new List<HCF.BDO.TExerciseQuestionnaires>();
+                                                List<HCF.BDO.FireDrillCategory> firedrillcat = new List<HCF.BDO.FireDrillCategory>();
+                                                texercisequest = Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires.GroupBy(x => x.FireDrillQuestionnaires.FireDrillCategory.FiredrillCatId).Select(grp => grp.First()).ToList();
+                                                foreach (var item in texercisequest)
+                                                {
+                                                    HCF.BDO.FireDrillCategory obj = new HCF.BDO.FireDrillCategory();
+                                                    obj.FiredrillCatId = item.FireDrillQuestionnaires.FireDrillCatId.Value;
+                                                    obj.CategoryName = item.FireDrillQuestionnaires.FireDrillCategory.CategoryName;
+                                                    firedrillcat.Add(obj);
+                                                }
+                                            }
+                                            @{
+                                                var index = 0;
+                                                for (int j = 0; j < firedrillcat.Count(); j++)
+                                                {
+
+                                                    List<HCF.BDO.TExerciseQuestionnaires> filterquest = new List<HCF.BDO.TExerciseQuestionnaires>();
+                                                    filterquest = Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires.Where(x => x.FireDrillQuestionnaires.FireDrillCatId == firedrillcat[j].FiredrillCatId).ToList();
+
+                                                    <div class="@(firedrillcat[j].CategoryName == "Fire Alarm Equipment & Response" ? "HideQuestions" : "notHideQuestions")">
+
+                                                        <div>
+                                                            <strong>@firedrillcat[j].CategoryName</strong>
+                                                        </div>
+                                                        @for (var l = 0; l < filterquest.Count(); l++)
+                                                        {
+                                                            <div class="evaluation-row" id=@($"tr{Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].FireDrillQuestionnaires.FireDrillQuesId}")>
+                                                                <div class="evaluation-col1">
+                                                                    @Html.HiddenFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].FireDrillQuesId)
+                                                                    @Html.HiddenFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].TExerciseQuestId)
+                                                                    @Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].FireDrillQuestionnaires.Questionnaries
+                                                                </div>
+                                                                <div class="evaluation-col2">
+                                                                    <input id="InsStatus"
+                                                                           type="button"
+                                                                           class="ins_check_btn_yes_no"
+                                                                           onclick="showstepsOptions('@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].FireDrillQuesId')"
+                                                                           value="@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Status"
+                                                                           tempname='Buildings[0].Shifts[0].Exercises[@i].TExerciseQuestionnaires[@index].Status' />
+                                                                    <div id="firedrill_quest_@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].FireDrillQuesId" class="dropdown-content ddlilsm" tempname='Buildings[0].Shifts[0].Exercises[@i].TExerciseQuestionnaires[@index].Status'>
+                                                                        <a href="#" val="-1">Pending</a>
+                                                                        <a href="#" val="1">Yes</a>
+                                                                        <a href="#" val="0">No</a>
+                                                                    </div>
+
+                                                                    @Html.HiddenFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Status)
+                                                                </div>
+                                                                <div class="evaluation-col3 @(ViewBag.IsEditable == 1 ? "" : "disable")">
+
+                                                                    @Html.DropDownListFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Ratings, new SelectList(listItems, "Value", "Text", Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Ratings),
+                                                                    "Select", new { @class = "score form-control" })
+                                                                </div>
+
+                                                                <div class="evaluation-col4"><img src="/dist/img/message_icon.png" alt="" class="@(Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Comments != "" ?  "filledCommentIcon" : "commentIcon")"></div>
+                                                                <div class="evaluation-colFull @(ViewBag.IsEditable == 1 ? "" : "disable")">
+                                                                    @Html.TextAreaFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseQuestionnaires[index].Comments, new { @class = "form-control commentshow", @placeholder = "Comment", oninput = "validate(this)" })
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="evaluation-row">
+                                                            </div>
+                                                            index++;
+                                                        }
+
+                                                    </div>
+                                                }
+
+                                            }
+                                            <div style="margin-top: 22px; display: flex; align-items: center;">
+                                                <label>Overall Score </label>&nbsp;
+                                                <span class="@(ViewBag.IsEditable == 1 ? "" : "disable")">
+                                                    <input type="text" class="form-control" id="totalScore" readonly style="width: 60px; text-align: center;" />
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <label>Total Score </label>&nbsp;<label id="lbltotalScore"></label>
+                                            </div>
+
+                                            <div style="margin-top:15px;">
+                                                <b>Final Comment</b>
+                                                <br />
+                                                <span class="@(ViewBag.IsEditable == 1 ? "" : "disable")">
+                                                    @Html.TextAreaFor(model => Model.Buildings[0].Shifts[0].Exercises[i].Comment, 5, 10, new { @class = "form-control", @placeholder = "Comment", oninput = "validate(this)" })
+                                                </span>
+                                            </div>
+                                            <div class="row">
+                                                <div class="list-firedrillfiles" id="divsignature">
+                                                    @for (var p = 0; p < Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature.Count(); p++)
+                                                    {
+
+                                                        <div id="@($"DigitalSignature{p}")" count="@p" class="col-lg-2 firedrillfilediv">
+                                                            @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].FilePath)
+
+
+                                                            <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileName"
+                                                                   name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileName"
+                                                                   value="@Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].FileName"
+                                                                   class="filename" />
+
+                                                            <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].DigSignatureId"
+                                                                   name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].DigSignatureId"
+                                                                   value="@Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].DigSignatureId"
+                                                                   class="digSignatureId" />
+
+                                                            <input type="hidden"
+                                                                   id="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileContent"
+                                                                   name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileContent"
+                                                                   class="filecontent" />
+
+                                                            <input type="hidden" id="@($"hdn_imgSignPreview{p}_LocalSignDateTime")" name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].LocalSignDateTime" />
+                                                            <input type="hidden" id="@($"hdn_imgSignPreview{p}_CreatedBy")" name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].CreatedBy" />
+
+                                                            @if (!string.IsNullOrEmpty(Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].FilePath))
+                                                            {
+                                                                <a class="sign-img @(ViewBag.IsEditable ==1 ? $"imgSignPreview{p}" : $"imgSignPreview{p} disabled")" id="@($"imgSignPreview{p}")">
+                                                                    <img src="@commonModelFactory.FilePath(Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].FilePath)" class="viewSignBy" fileContent="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileContent" fileName="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileName" imgPreview="@($"imgSignPreview{p}")" alt="" />
+                                                                    <p class="imgSignName">@($"{Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].FileName.Split('.')[0]}")</p>
+                                                                    <span class="signaturebyName">@Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].SignByUserName</span>
+                                                                    <span class="signaturelocaltime">(@Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</span>
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <a class="sign-img @($"imgSignPreview{p}")" id="@($"imgSignPreview{p}")">
+                                                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)" class="SignBy" height="50px;"
+                                                                         fileContent="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileContent"
+                                                                         fileName="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].FileName"
+                                                                         imgPreview="@($"imgSignPreview{p}")" alt="" />
+                                                                    <p class="imgSignName"></p>
+                                                                    <span class="signaturebyName"></span>
+                                                                    <span class="signaturelocaltime"></span>
+                                                                </a>
+
+                                                            }
+
+                                                            @{ var Isdeleted = false;
+                                                                Isdeleted = Convert.ToBoolean(@Model.Buildings[0].Shifts[0].Exercises[i].DigitalSignature[p].IsDeleted);
+                                                            }
+                                                            <span class="deleteMeetingClose" id="@($"spancross{p}")" onclick="RemoveSignature(this)">&times;</span>
+                                                            <input type="hidden" class="deletedsign" name="Buildings[0].Shifts[0].Exercises[@i].DigitalSignature[@p].IsDeleted"
+                                                                   value='@Isdeleted' />
+                                                        </div>
+
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="tabs-2">
+                                    <div class="row form-group">
+                                        <div class="col-md-9">&nbsp;</div>
+                                        <div class="col-md-3 form-inline">
+                                            <label>Critique Date:</label>
+                                            @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDate, $"{Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDate:MMM d, yyyy}", new { @class = "form-control datepicker", @autocomplete = "off" })
+                                        </div>
+                                    </div>
+
+                                    <p><label>Comments/Critique:</label></p>
+                                    <p>
+                                        @Html.TextAreaFor(model => Model.Buildings[0].Shifts[0].Exercises[i].CritiquesComment, 5, 10, new { @class = "form-control", @placeholder = "Comments/Critique", oninput = "validate(this)" })
+                                    </p>
+                                    <div class="issueandAction">
+                                        <label><strong>Issue And Action:</strong></label><input type="button" class="comm-button" value="Add New" id="btnaddnew" />
+                                        <div id="tblaction">
+                                            <div class="isue-actions">
+                                                <div class="action-col1">Issue</div>
+                                                <div class="action-col1">Recommendation/Action to be Taken</div>
+                                                <div class="action-col2"></div>
+                                            </div>
+                                            <div class="list-Actions">
+                                                @{ int k = 0;
+                                                    foreach (var item in Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions)
+                                                    {
+                                                        @Html.HiddenFor(x => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions[k].TExerciseActionId)
+                                                        <div tempid="@k" class="actiondiv" texerxiseindex="@i" id="dv_@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions[k].TExerciseActionId">
+                                                            <div class="action-col1">
+                                                                @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions[k].Issue, new { @class = "issues form-control", maxlength = 500 })
+                                                            </div>
+                                                            <div class="action-col1">
+                                                                @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions[k].Action, new { @class = "actions form-control", maxlength = 500 })
+                                                            </div>
+                                                            <div class="action-col2">
+                                                                <a href="#" class="delete" id="@Model.Buildings[0].Shifts[0].Exercises[i].TExerciseActions[k].TExerciseActionId" tempid="@k">
+                                                                    <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" />
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        k++;
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="list-Critiquefiredrillfiles" id="Critiquedivsignature">
+                                            @for (var p = 0; p < Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature.Count(); p++)
+                                            {
+
+                                                <div id="@($"CritiqueDigitalSignature{p}")" count="@p" class="col-lg-2 Critiquefiredrillfilediv">
+                                                    @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].FilePath)
+
+
+                                                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileName"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileName"
+                                                           value="@Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].FileName"
+                                                           class="filename" />
+
+                                                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].DigSignatureId"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].DigSignatureId"
+                                                           value="@Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].DigSignatureId"
+                                                           class="digSignatureId" />
+
+                                                    <input type="hidden"
+                                                           id="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileContent"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileContent"
+                                                           class="filecontent" />
+                                                    <input type="hidden" id="@($"hdn_critiqueimgSignPreview{p}_LocalSignDateTime")" name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].LocalSignDateTime" />
+                                                    <input type="hidden" id="@($"hdn_critiqueimgSignPreview{p}_CreatedBy")" name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].CreatedBy" />
+
+
+                                                    @if (!string.IsNullOrEmpty(Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].FilePath))
+                                                    {
+                                                        <a class="sign-img @(ViewBag.IsEditable ==1 ? $"critiqueimgSignPreview{p}" : $"critiqueimgSignPreview{p} disabled")" id="@($"critiqueimgSignPreview{p}")">
+                                                            <img src="@commonModelFactory.FilePath(Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].FilePath)" class="viewSignBy"
+                                                                 fileContent="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileContent"
+                                                                 fileName="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileName"
+                                                                 imgPreview="@($"critiqueimgSignPreview{p}")"
+                                                                 alt="" />
+                                                            <p class="imgSignName">@($"{Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].FileName.Split('.')[0]}")</p>
+                                                            <span class="signaturebyName">@Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].SignByUserName</span>
+                                                            <span class="signaturelocaltime">(@Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</span>
+
+
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a class="sign-img @($"critiqueimgSignPreview{p}")" id="@($"critiqueimgSignPreview{p}")">
+                                                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)" class="SignBy" height="50px;"
+                                                                 fileContent="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileContent"
+                                                                 fileName="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].FileName"
+                                                                 imgPreview="@($"critiqueimgSignPreview{p}")" alt="" />
+                                                            <p class="imgSignName"></p>
+                                                        </a>
+                                                        <span class="signaturebyName"></span>
+                                                        <span class="signaturelocaltime"></span>
+
+                                                    }
+
+                                                    @{ var Isdeleted = false;
+                                                        Isdeleted = Convert.ToBoolean(@Model.Buildings[0].Shifts[0].Exercises[i].CritiqueDigitalSignature[p].IsDeleted);
+                                                    }
+                                                    <span class="deleteMeetingClose" id="@($"critiquespancross{p}")" onclick="RemoveSignature(this)">&times;</span>
+                                                    <input type="hidden" class="deletedsign" name="Buildings[0].Shifts[0].Exercises[@i].CritiqueDigitalSignature[@p].IsDeleted"
+                                                           value='@Isdeleted' />
+                                                </div>
+
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="tabs-3">
+                                    <div class="row form-group">
+                                        <div class="col-md-9"> &nbsp;</div>
+                                        <div class="col-md-3 form-inline">
+                                            <label>Education Date:</label>
+                                            @Html.TextBoxFor(m => Model.Buildings[0].Shifts[0].Exercises[i].EducationDate, $"{Model.Buildings[0].Shifts[0].Exercises[i].EducationDate:MMM d, yyyy}", new { @class = "form-control datepicker", @autocomplete = "off" })
+                                        </div>
+                                    </div>
+
+                                    <p><label>Comments:</label></p>
+
+                                    <p>
+                                        @Html.TextAreaFor(model => Model.Buildings[0].Shifts[0].Exercises[i].EducationComment, 5, 10, new { @class = "form-control", @placeholder = "Education Comment", oninput = "validate(this)" })
+                                    </p>
+                                    <div class="row">
+                                        <div class="col-lg-12 list-Educationfiredrillfiles" id="Educationdivsignature">
+                                            @for (var p = 0; p < Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature.Count(); p++)
+                                            {
+
+                                                <div id="@($"EducationDigitalSignature{p}")" count="@p" class="col-lg-2 Educationfiredrillfilediv">
+                                                    @Html.HiddenFor(m => m.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].FilePath)
+
+
+                                                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileName"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileName"
+                                                           value="@Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].FileName"
+                                                           class="filename" />
+
+                                                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].DigSignatureId"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].DigSignatureId"
+                                                           value="@Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].DigSignatureId"
+                                                           class="digSignatureId" />
+
+                                                    <input type="hidden"
+                                                           id="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileContent"
+                                                           name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileContent"
+                                                           class="filecontent" />
+
+                                                    <input type="hidden" id="@($"hdn_educationimgSignPreview{p}_LocalSignDateTime")" name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].LocalSignDateTime" />
+                                                    <input type="hidden" id="@($"hdn_educationimgSignPreview{p}_CreatedBy")" name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].CreatedBy" />
+
+
+
+                                                    @if (!string.IsNullOrEmpty(Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].FilePath))
+                                                    {
+                                                        <a class="sign-img @(ViewBag.IsEditable ==1 ? $"educationimgSignPreview{p}" : $"critiqueimgSignPreview{p} disabled")" id="@($"educationimgSignPreview{p}")">
+                                                            <img src="@commonModelFactory.FilePath(Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].FilePath)" class="viewSignBy" fileContent="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileContent" fileName="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileName" imgPreview="@($"educationimgSignPreview{p}")" alt="" />
+                                                            <p class="imgSignName">@($"{Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].FileName.Split('.')[0]}")</p>
+                                                            <span class="signaturebyName">@Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].SignByUserName</span>
+                                                            <span class="signaturelocaltime">(@Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</span>
+
+
+                                                        </a>
+
+                                                    }
+                                                    else
+                                                    {
+                                                        <a class="sign-img @($"educationimgSignPreview{p}")" id="@($"educationimgSignPreview{p}")">
+                                                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)" class="SignBy" height="50px;"
+                                                                 fileContent="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileContent"
+                                                                 fileName="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].FileName"
+                                                                 imgPreview="@($"educationimgSignPreview{p}")" alt="" />
+                                                            <p class="imgSignName"></p>
+                                                        </a>
+                                                        <span class="signaturebyName"></span>
+                                                        <span class="signaturelocaltime"></span>
+
+                                                    }
+
+                                                    @{ var Isdeleted = false;
+                                                        Isdeleted = Convert.ToBoolean(@Model.Buildings[0].Shifts[0].Exercises[i].EducationDigitalSignature[p].IsDeleted);
+                                                    }
+                                                    <span class="deleteMeetingClose" id="@($"educationspancross{p}")" onclick="RemoveSignature(this)">&times;</span>
+                                                    <input type="hidden" class="deletedsign" name="Buildings[0].Shifts[0].Exercises[@i].EducationDigitalSignature[@p].IsDeleted"
+                                                           value='@Isdeleted' />
+                                                </div>
+
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                <div class="firedrillUpload-btn">
+                    <button type="button" class="comm-button" name="upload_btn" id="uploaddiv"><span name="file_Uploader" id="btnuploadfile" data-toggle="modal" data-target="#modal-container">Upload Evaluation</span></button>
+                </div>
+                <div class="row" id="loadchildpartial">
+                </div>
+            }
+            else
+            {
+                <div class="norecord">
+                    No Questionnaire found
+                </div>
+            }
+        </div>
+        <div class="col-md-12 text-right">
+            <button type="submit" class="comm-button" name="submitButton" id="btnExercisequesSaveIncomplete" value="0">Save Evaluation</button>
+        </div>
+        <div class="col-lg-12 list-texercisefiles" id="divtexercisefiles">
+            @for (var p = 0; p < Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles.Count(); p++)
+            {
+                <div id="@($"TExerciseFiles{p}")" count="@p" class="texercisefilediv">
+                    <label id="@($"uploadfileName{p}")" class="lblfilename"></label>
+                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FileName"
+                           name="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FileName"
+                           value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[p].FileName"
+                           class="filename" />
+
+                    <input type="hidden" id="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FilesContent"
+                           name="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FilesContent"
+                           value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[p].FilesContent"
+                           class="filecontent" />
+
+                    <input type="hidden"
+                           id="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].DrillFileType"
+                           name="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].DrillFileType"
+                           value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[p].DrillFileType"
+                           class="drillfiletype" />
+
+                    <input type="hidden"
+                           id="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FilePath"
+                           name="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].FilePath"
+                           value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[p].FilePath"
+                           class="FilePath" />
+
+                    <input type="hidden"
+                           id="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].TFileIds"
+                           name="Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[@p].TFileIds"
+                           value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[p].TFileIds"
+                           class="TFileIds" />
+                </div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <div class="row">
+                <div class="col-md-12">
+                    @*<button type="submit" class="comm-button" name="submitButton" id="btnExercisequesSaveIncomplete" value="0">Save Evaluation</button>*@
+                    <button type="button" class="comm-button" name="submitButton" id="btnExercisequesSavedone" value="1">Save and File to Binder</button>
+                    <button type="button" class="comm-Cancelbutton" data-dismiss="modal" id="btnpopClose">Close</button>
+                </div>
+            </div>
+        </div>
+        @*}*@
+    </form>
+    <div class="@(ViewBag.IsEditable == 1?"printfiredrill":"editPrintfiredrill")">
+        @using (Html.BeginForm("FireDrillReport", "Pdf", FormMethod.Post, new { id = "firedrillsquest" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="texerciseId" value="@Model.Buildings[0].Shifts[0].Exercises[0].TExerciseId" />
+            <input type="submit" value='Print Fire Drill Report' class="@(Model.Buildings[0].Shifts[0].Exercises[0].TExerciseId > 0 ? "comm-button" : "disable comm-button")" id="btnprintexercise" />
+        }
+    </div>
+</div>
+
+<input type="hidden" id="isFiredrillFiles" name="isFiredrillFiles" value="" />
+
+<style>
+
+    td {
+        position: relative;
+    }
+
+
+    .show {
+        display: block;
+    }
+</style>
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+
+<script>
+    $(document).on('click', '#btnuploadfile', function () {
+        debugger
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+        $('#isFiredrillFiles').val(true);
+    });
+
+    var seltabval = 1;
+    $(document).ready(function () {
+        debugger;
+
+        $(".datepicker").datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: $.CRx_DateFormat,
+            maxDate: 0,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        });
+        calculatetotalScore();
+
+        //$('.datepicker').datepicker({
+        //    changeYear: false,
+        //    dateFormat: 'M d, yy'
+        //});
+
+
+        if ('@ViewBag.IsEditable' == '0') {
+            $("#texercisequesform").find("input,textarea,select").attr("disabled", "disabled");
+        }
+
+        $(".firedrillDocStatus").val('@Model.Buildings[0].Shifts[0].Exercises[0].FiredrillDocStatus');
+
+        $("#tabs").tabs({
+            activate: function (event, ui) {
+                //debugger;
+                seltabval = parseInt($('#tabs ul li.ui-tabs-active').attr('data-val'));
+                var activetabtext = $('#tabs ul li.ui-tabs-active').attr('data-text');//.html();
+                //alert(seltabval);
+                debugger;
+                $("#btnuploadfile").text("Upload " + activetabtext);
+                $("#btnExercisequesSaveIncomplete").text("Save " + activetabtext);
+                showfileName(seltabval)
+                if ($('#texerciseTable').length) {
+                    filterTexerciseFiles(seltabval);
+                }
+            }
+        });
+
+        //var isaudible = $("input[name='Buildings[0].Shifts[0].Exercises[0].IsAudible'][type=hidden]").val();
+        var isaudible = '@Model.Buildings[0].Shifts[0].Exercises[0].IsAudible';
+        if (isaudible == 'False') {
+            $('.HideQuestions').hide();
+        } else {
+            $('.HideQuestions').show();
+        }
+    });
+
+    $("input[name='Buildings[0].Shifts[0].Exercises[0].IsAudible']").on('change', function () {
+        debugger;
+        quesIndex = []
+        var checked = $(this).prop("checked");
+        if (checked == true && $('.HideQuestions').length >= 1) {
+            $('.HideQuestions').show();
+        } else {
+            $('.HideQuestions').hide();
+            $('.HideQuestions').find('.evaluation-col3').find('.score').prop('selectedIndex', 0);
+            $('.HideQuestions').find('.evaluation-colFull').find('.commentshow').val('')
+            $('.HideQuestions').find('.evaluation-col4').children('img').removeClass('filledCommentIcon').addClass('commentIcon')
+            $('.HideQuestions').find('.evaluation-col2').find('.dropdown-content a').each(function () {
+                var control = $(this);
+                debugger;
+                var statusVal = "-1";
+                var controlId = control.parent("div").attr("tempname");
+                $("input[tempname='" + controlId + "']").val(statusVal);
+                $("input[name='" + controlId + "'][type=hidden]").val(statusVal);
+            });
+            calculateScore();
+        }
+    });
+
+    function onRoundBegin() {
+        //debugger;
+        //alert("onRoundBegin");
+        $(".loadingModal").show();
+    }
+
+    function showfileName(val){
+        $(".lblfilename").hide();
+        $(".drilltype" + val).show();
+    }
+
+    $("#btnExercisequesSavedone").click(function () {
+        var isfireDrillReportCreated = $("#IsFireDrillReportCreated").val();
+        if (isfireDrillReportCreated == 1) {
+            swal({
+                html: true,
+                title: "Filling this report again in the binder will overwrite the previously filled report",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "File",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    //  debugger;
+                    $("#texercisequesform").submit();
+                }
+            });
+        } else {
+            $("#texercisequesform").submit();
+        }
+    });
+
+    function OnRoundSuccess(data) {
+        debugger;
+        $(".loadingModal").hide();
+        var texerciseId = 0;
+        var quarterId = 0;
+        if (data.texerciseId > 0) {
+            texerciseId = data.texerciseId;
+            quarterId = data.quarterId;
+        }
+        if (data.IsGenerateReport) {
+            GenerateFiredrillDoc(texerciseId);
+        }
+        if (data.Isload) {
+            //swalalert("Saved Successfully!");
+            $("#Firedrillquestionnaire").modal('toggle');
+            window.location.reload();
+        } else {
+            debugger;
+            var hdncntrlId = $("#hdnselcntrlId").val();
+            var arry = hdncntrlId.split('_');
+
+            $("input[name='" + 'Buildings[' + arry[0] + '].Shifts[' + arry[1] + '].Exercises[' + arry[2] + '].TExerciseId' + "'][type=hidden]").val(texerciseId);
+            $("input[name='" + 'Buildings[' + arry[0] + '].Shifts[' + arry[1] + '].Exercises[' + arry[2] + '].Date' + "'][type=text]").val(data.date);
+            $("input[name='" + 'Buildings[' + arry[0] + '].Shifts[' + arry[1] + '].Exercises[' + arry[2] + '].StartTime' + "'][type=text]").val(data.QuarterMasterSetting.Exercises[0].StartTime);
+            $("input[name='" + 'Buildings[' + arry[0] + '].Shifts[' + arry[1] + '].Exercises[' + arry[2] + '].NearBy' + "'][type=text]").val(data.QuarterMasterSetting.Exercises[0].NearBy);
+
+            var readonlyView = $("#div_" + hdncntrlId);
+            readonlyView.find("span.date_view").html(data.date);
+            readonlyView.find("span.time_view").html(data.QuarterMasterSetting.Exercises[0].StartTime);
+            readonlyView.find("span.view_location").html(data.QuarterMasterSetting.Exercises[0].NearBy);
+            if (readonlyView.find("span.view_Announced").html() == "") {
+                readonlyView.find("span.view_Announced").html("No");
+            }
+            if (readonlyView.find("span.view_Status").html() == "") {
+                readonlyView.find("span.view_Status").html("Plan");
+            }
+            var image = "<img src='/dist/Images/Icons/missing_doc_icon.png' class='' title='View' alt='' />";
+            readonlyView.find("span.view_Comments").html(image);
+
+            //$("input[name='" + hdncntrlId + "'][type=hidden]").val(tExerciseId);
+            $("#texerciseId").val(texerciseId);
+            $(".selQuarterId").val(quarterId);
+            $("#QuarterId").val(quarterId);
+            $(".lblfilename").html('');
+            getTExercisFiles(texerciseId);
+            swalalert("Saved Successfully!");
+        }
+    }
+
+
+
+    function GenerateFiredrillDoc(texerciseId) {
+        debugger
+        var url = '@Url.Action("GenerateFiredrillDoc", "Rounds")'
+        $.get(url + '?TExerciseId=' + texerciseId, function (data) {
+        });
+    }
+
+    function getTExercisFiles(texerciseId) {
+        var url = CRxUrls.rounds_loadtexercise;
+        $.get(url + '?exerciseId=' + texerciseId, function (data) {
+            $('#loadchildpartial').html(data);
+            $('#loadchildpartial').fadeIn('fast');
+            seltabval = parseInt($('#tabs ul li.ui-tabs-active').attr('data-val'));
+            filterTexerciseFiles(seltabval);
+        });
+    }
+
+
+    $("#btnpopClose, .close").click(function () {
+        //window.location.reload();
+    });
+
+    var signCount = '@Model.Buildings[0].Shifts[0].Exercises[0].DigitalSignature.Count(x=>x.DigSignatureId == 0)';
+    var critiqueSignCount = '@Model.Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature.Count(x => x.DigSignatureId == 0)';
+    var educationSignCount = '@Model.Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature.Count(x => x.DigSignatureId== 0)';
+
+    $(document).ready(function () {
+        debugger;
+
+        //*************************************************************************//
+        if (signCount === "0") {
+           addFireDrillSignImage();
+        }
+        $('#divsignature').find('input[type=hidden]:last').val(false);
+        $("#divsignature span:last").hide();
+
+        //*************************************************************************//
+        if (critiqueSignCount === "0") {
+            addCritiqueFireDrillSignImage();
+        }
+        $('#Critiquedivsignature').find('input[type=hidden]:last').val(false);
+        $("#Critiquedivsignature span:last").hide();
+
+        //*************************************************************************//
+        if (educationSignCount === "0") {
+            addEducationFireDrillSignImage();
+        }
+        $('#Educationdivsignature').find('input[type=hidden]:last').val(false);
+        $("#Educationdivsignature span:last").hide();
+
+        //*************************************************************************//
+
+        calculateScore();
+    });
+
+    function addFireDrillSignImage() {
+        //debugger;
+        var lastSign = $('.firedrillfilediv:last').find(".digSignatureId").val();
+        if (lastSign === "0" || lastSign === "") {
+            // AlertWarningMsg("First add previous sign", "Message");
+            return false;
+        }
+        count = parseInt($('.firedrillfilediv:last').attr('count'));
+        var newId = count + 1;
+        var template = $("#DigitalSignature" + count).clone().attr("id", "DigitalSignature" + newId).attr('count', newId);
+
+        $(".list-firedrillfiles").append(template);
+        template.find('input[type=hidden]').val('');
+        template.find('img').attr('src', '@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)').addClass("SignBy");
+        template.find('.imgSignName').html('');
+        $.each(template.find('input[type=hidden]'), function () {
+            if ($(this).hasClass("filename")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].DigitalSignature[" + newId + "].FileName";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("filecontent")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].DigitalSignature[" + newId + "].FileContent";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("digSignatureId")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].DigitalSignature[" + newId + "].DigSignatureId";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            }
+
+        });
+        $.each(template.find('a'), function () {
+            if ($(this).hasClass("imgSignPreview" + count)) {
+                $(this).attr('id', "imgSignPreview" + newId);
+                $(this).attr('class', "sign-img imgSignPreview" + newId);
+            }
+        });
+        $.each(template.find('img'), function () {
+            if ($(this).hasClass("SignBy")) {
+                var fileContent = "Buildings[0].Shifts[0].Exercises[0].DigitalSignature[" + newId + "].FileContent";
+                var fileName = "Buildings[0].Shifts[0].Exercises[0].DigitalSignature[" + newId + "].FileName";
+                $(this).attr('fileContent', fileContent);
+                $(this).attr('fileName', fileName);
+                $(this).attr('imgPreview', "imgSignPreview" + newId);
+            }
+        });
+        //debugger;
+        $('#divsignature').find('input[type=hidden]:last').val(false);
+        $("#divsignature span").show();
+        $("#divsignature span:last").hide();
+    }
+
+    function addCritiqueFireDrillSignImage() {
+        //debugger;
+        var lastSign = $('.Critiquefiredrillfilediv:last').find(".digSignatureId").val();
+        if (lastSign === "0" || lastSign === "") {
+           // AlertWarningMsg("First add previous sign", "Message");
+            return false;
+        }
+        count = parseInt($('.Critiquefiredrillfilediv:last').attr('count'));
+        var newId = count + 1;
+        var template = $("#CritiqueDigitalSignature" + count).clone().attr("id", "CritiqueDigitalSignature" + newId).attr('count', newId);
+
+        $(".list-Critiquefiredrillfiles").append(template);
+        template.find('input[type=hidden]').val('');
+        template.find('img').attr('src', '@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)').addClass("SignBy");
+        template.find('.imgSignName').html('');
+        $.each(template.find('input[type=hidden]'), function () {
+            if ($(this).hasClass("filename")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature[" + newId + "].FileName";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("filecontent")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature[" + newId + "].FileContent";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("digSignatureId")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature[" + newId + "].DigSignatureId";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            }
+
+        });
+        $.each(template.find('a'), function () {
+            if ($(this).hasClass("critiqueimgSignPreview" + count)) {
+                $(this).attr('id', "critiqueimgSignPreview" + newId);
+                $(this).attr('class', "sign-img critiqueimgSignPreview" + newId);
+            }
+        });
+        $.each(template.find('img'), function () {
+            if ($(this).hasClass("SignBy")) {
+                var fileContent = "Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature[" + newId + "].FileContent";
+                var fileName = "Buildings[0].Shifts[0].Exercises[0].CritiqueDigitalSignature[" + newId + "].FileName";
+                $(this).attr('fileContent', fileContent);
+                $(this).attr('fileName', fileName);
+                $(this).attr('imgPreview', "critiqueimgSignPreview" + newId);
+            }
+         });
+         //debugger;
+        $('#Critiquedivsignature').find('input[type=hidden]:last').val(false);
+        $("#Critiquedivsignature span").show();
+        $("#Critiquedivsignature span:last").hide();
+    }
+
+    function addEducationFireDrillSignImage() {
+        //debugger;
+        var lastSign = $('.Educationfiredrillfilediv:last').find(".digSignatureId").val();
+        if (lastSign === "0" || lastSign === "") {
+           // AlertWarningMsg("First add previous sign", "Message");
+            return false;
+        }
+        count = parseInt($('.Educationfiredrillfilediv:last').attr('count'));
+        var newId = count + 1;
+        var template = $("#EducationDigitalSignature" + count).clone().attr("id", "EducationDigitalSignature" + newId).attr('count', newId);
+
+        $(".list-Educationfiredrillfiles").append(template);
+        template.find('input[type=hidden]').val('');
+        template.find('img').attr('src', '@Url.Content(HCF.Web.Models.ImagePathModel.SignIcon)').addClass("SignBy");
+        template.find('.imgSignName').html('');
+        $.each(template.find('input[type=hidden]'), function () {
+            if ($(this).hasClass("filename")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature[" + newId + "].FileName";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("filecontent")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature[" + newId + "].FileContent";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("digSignatureId")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature[" + newId + "].DigSignatureId";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            }
+
+        });
+        $.each(template.find('a'), function () {
+            if ($(this).hasClass("educationimgSignPreview" + count)) {
+                $(this).attr('id', "educationimgSignPreview" + newId);
+                $(this).attr('class', "sign-img educationimgSignPreview" + newId);
+            }
+        });
+        $.each(template.find('img'), function () {
+            if ($(this).hasClass("SignBy")) {
+                var fileContent = "Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature[" + newId + "].FileContent";
+                var fileName = "Buildings[0].Shifts[0].Exercises[0].EducationDigitalSignature[" + newId + "].FileName";
+                $(this).attr('fileContent', fileContent);
+                $(this).attr('fileName', fileName);
+                $(this).attr('imgPreview', "educationimgSignPreview" + newId);
+            }
+         });
+         //debugger;
+        $('#Educationdivsignature').find('input[type=hidden]:last').val(false);
+        $("#Educationdivsignature span").show();
+        $("#Educationdivsignature span:last").hide();
+    }
+
+
+    $(document).off('click', '.SignBy').on('click', '.SignBy', function () {
+        var fileName = $(this).attr("fileName");
+        var fileContent = $(this).attr("fileContent");
+        var imgPreview = $(this).attr("imgPreview");
+        loadSignView(fileName, fileContent, imgPreview);
+        $('#signAndSave').modal('show');
+    });
+
+    function Uploadfile(file) {
+        fileExtensionas = ['pdf'];
+        var filelist = file;
+        swal({
+            html: true,
+            title: "Are you sure want to upload a file?",
+            //text: '<input type=\"checkbox\" id=\"Isfinalreport\" name=\"Isfinalreport\" checked=\"true\" style="width:30px;height:14px;">This is final report',
+            text: '<input type=\"checkbox\" id=\"Isfinalreport\" name=\"Isfinalreport\" checked=\"false\" style="width:30px;height:14px;display:none;"><span style="display:none;">This is final report</span>',
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                //  debugger;
+                if (filelist.files.length > 0) {
+                    debugger;
+                    var file = filelist.files[0];
+                    var fileName = file.name;
+                    var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                    if ($.inArray(fileExtension.toLowerCase(), fileExtensionas) == -1) {
+                        swalalert("Only Pdf formats are allowed!");
+                        return false;
+                    } else {
+                        swal.close();
+                        var drillDate = $("input[name='Buildings[0].Shifts[0].Exercises[0].Date'][type=hidden]").val();
+                        var isFutureDate = new Date(drillDate) > new Date();
+                        var value = $("#Isfinalreport").prop('checked');
+                        if (value && !isFutureDate) {
+                           //$("input[name='Buildings[0].Shifts[0].Exercises[0].Status'][type=hidden]").val(1);
+                        }
+                        addTexerciseFiles();
+                        count = parseInt($('.texercisefilediv:last').attr('count'));
+                        var control = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + count + "].FilesContent";
+                        var fileControl = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + count + "].FileName";
+                        var drillfiletype = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + count + "].DrillFileType";
+                        var filepath = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + count + "].FilePath";
+                        var reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = function () {
+                            //  debugger;
+                            seltabval = parseInt($('#tabs ul li.ui-tabs-active').attr('data-val'));
+                            $("#uploadfileName" + count).html(fileName);
+                            var array = reader.result.split(",");
+                            $("input[name='" + control + "'][type=hidden]").val(array[1]);
+                            $("input[name='" + fileControl + "'][type=hidden]").val(fileName);
+                            //$("input[name='" + filepath + "'][type=hidden]").val("");
+                            $("input[name='" + drillfiletype + "'][type=hidden]").val(seltabval);
+                            $("#uploadfileName" + count).addClass("drilltype" + seltabval);
+                            showfileName(seltabval);
+                            var fdatatable = $('#texerciseTable').DataTable();
+                            var col3 = '<a href="" title="Preview" class="disabled"><img src="/dist/Images/Icons/document_blue-icon.png"  title="View" alt="" /></a>'
+                            var todayDate = '@System.DateTime.Now.ToFormatDate()';
+                            fdatatable.row.add([seltabval, fileName, todayDate, col3]).draw();
+                            //$('#Firedrilldocuments').modal('hide');
+                            //addTexerciseFiles();
+                        };
+                        reader.onerror = function (error) {
+                            console.log('Error: ', error);
+                            $("#FileContent").val("");
+                        };
+                    }
+                }
+            }
+        });
+    }
+
+    function addTexerciseFiles() {
+        debugger;
+        count = parseInt($('.texercisefilediv:last').attr('count'));
+        var newId = count + 1;
+        var template = $("#TExerciseFiles" + count).clone().attr("id", "TExerciseFiles" + newId).attr('count', newId);
+        $(".list-texercisefiles").append(template);
+        template.find('input[type=hidden]').val('');
+        template.find('label').html('');
+        $.each(template.find('input[type=hidden]'), function () {
+            if ($(this).hasClass("filename")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + newId + "].FileName";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("filecontent")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + newId + "].FilesContent";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("drillfiletype")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + newId + "].DrillFileType";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("FilePath")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + newId + "].FilePath";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            } else if ($(this).hasClass("TFileIds")) {
+                var name = "Buildings[0].Shifts[0].Exercises[0].TExerciseFiles[" + newId + "].TFileIds";
+                $(this).attr('id', name);
+                $(this).attr('name', name);
+            }
+        });
+        $.each(template.find('label'), function () {
+            if ($(this).hasClass("lblfilename")) {
+                $(this).removeClass();
+                $(this).attr('id', "uploadfileName" + newId);
+                $(this).addClass('lblfilename');
+            }
+        });
+    }
+
+
+    function validate(input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+
+
+    function showstepsOptions(firedrillquesId) {
+        document.getElementById("firedrill_quest_" + firedrillquesId).classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.ins_check_btn_yes_no')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            //debugger;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+
+    $(".dropdown-content a").click(function () {
+        var control = $(this);
+        debugger;
+        var statusVal = control.attr("val");
+        var controlId = control.parent("div").attr("tempname");
+        $("input[tempname='" + controlId + "']").val(statusVal);
+        $("input[name='" + controlId + "'][type=hidden]").val(statusVal);
+        //saveData(control);
+    });
+
+
+
+    function calculateScore() {
+        var overallScore = 0;
+        debugger;
+        $(".score").each(function () {
+            debugger;
+            if ($(this).val() != "" && $(this).val() != undefined) {
+                overallScore = overallScore + parseInt($(this).val());
+            }
+        });
+        $("#totalScore").val(overallScore);
+    }
+
+    $(".score").change(function () {
+        calculateScore();
+    });
+
+    function calculatetotalScore() {
+        var totalScore = 0;
+        debugger;
+        $(".notHideQuestions").each(function () {
+            $(this).find(".score").each(function () {
+                debugger;
+                totalScore = totalScore + 5;
+            });
+        });
+        $("#lbltotalScore").text(totalScore);
+    }
+
+    var count = 0;
+    $("#btnaddnew").click(function () {
+        //debugger;
+        var texerxiseindex = parseInt($('.actiondiv:last').attr('texerxiseindex'))
+        count = parseInt($('.actiondiv:last').attr('tempid'))
+        var newID = count + 1;
+        var template = $('.actiondiv:last').clone().attr("tempid", newID);
+        template.find('input[type=text]').val(null);
+        $.each(template.find('input[type=text]'), function () {
+            if ($(this).hasClass("issues")) {
+                var name = $(this).attr('name');
+                name = "Buildings[0].Shifts[0].Exercises[" + texerxiseindex + "].TExerciseActions[" + newID + "].Issue";
+                $(this).attr('name', name);
+                $(this).attr('id', 'Buildings_0__Shifts_0__Exercises_' + texerxiseindex+'__TExerciseActions_' + newID + '__Issue');
+            } else if ($(this).hasClass("actions")) {
+                var name = $(this).attr('name');
+                name = "Buildings[0].Shifts[0].Exercises[" + texerxiseindex + "].TExerciseActions[" + newID + "].Action";
+                $(this).attr('name', name);
+                $(this).attr('id', 'Buildings_0__Shifts_0__Exercises_' + texerxiseindex+'__TExerciseActions_' + newID + '__Action');
+            }
+        });
+        template.find('a').attr('id', 0);
+        template.find('a').attr('tempid', newID);
+        $('.list-Actions').append(template);
+    });
+
+
+    $(document).on('click', 'a.delete', function (e) {
+        e.preventDefault();
+        debugger;
+        var divcount = $(".actiondiv").length;
+        if (divcount > 1) {
+            var cntrl = $(this);
+            debugger;
+            var texerciseActionId = cntrl.attr("id");
+            var tempId = cntrl.attr("tempid");
+            swal({
+                title: "Are you sure?",
+                text: "You will not be able to recover this reocrd!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                closeOnConfirm: false
+            },
+                function () {
+                    if (texerciseActionId > 0) {
+                        $.ajax({
+                            type: "GET",
+                            url: CRxUrls.Rounds_DeleteTExerciseActions + "?TExerciseActionId=" + texerciseActionId,
+                            success: function (data) {
+                                swal("Deleted!", "Your record has been deleted.", "success");
+                                $("#dv_" + texerciseActionId).remove();
+                            },
+                            dataType: "json",
+                            traditional: true
+                        });
+                    } else {
+                        //debugger;
+                        swal("Deleted!", "Your record has been deleted.", "success");
+                        cntrl.parent().parent("div").attr("tempid", tempId).remove();
+                    }
+                });
+        } else {
+            swalalert("last record can not be deleted!");
+            return false;
+        }
+    });
+
+
+    $('textarea').on('input', function () {
+        $(this).outerHeight(80).outerHeight(this.scrollHeight);
+    });
+
+
+    $('.commentshow').hide();
+
+    $(".commentIcon").click(function () {
+        //debugger;
+        //var cntrl = $(this);
+        $(this).parent().siblings().find('.commentshow').toggle();
+        //$(".commentshow").toggle();
+        //$(".commentshow").toggle();
+    });
+
+    $(".commentshow").on('blur', function (e) {
+        debugger;
+        var text = $(this).val();
+        if (text != "") {
+            $(this).parent().parent().find("img").addClass("filledCommentIcon").removeClass("commentIcon");
+            //alert("Called !");
+        }
+    });
+
+
+    $(".filledCommentIcon").click(function () {
+        $(this).parent().siblings().find('.commentshow').toggle();
+    });
+
+    var input = $('.timepicker');
+    input.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+            debugger
+            var control = $('#selecttime').val();
+            var startTime  = $('#starttime').val();
+            var endTime = $('#endtime').val();
+
+            if (control != "") {
+                var time = control;
+                var time1 = time.split(" ")[0];
+                var previoustime = time1.split(":")[1];
+                var time2 = time1.split(":")[1];
+                var startchangeTime = tConvert(startTime.replace(":00", ""));
+                var endchangeTime = tConvert(endTime.replace(":00", ""));
+                debugger;
+                if (time == endchangeTime) {
+                    debugger;
+                    if (time.split(':')[1].split(' ')[0] == "00") {
+                        var hr = time.split(':')[0];
+                        var _time = parseInt(time.split(':')[0]) - 1
+                        if (_time.toString().length == 1) { _time = "0" + _time }
+                        time = time.replace(hr, _time)
+                        time = time.replace("00", "45")
+                    } else if (time.split(':')[1].split(' ')[0] == "15") {
+                        time = time.replace("15", "00")
+                    } else if (time.split(':')[1].split(' ')[0] == "30") {
+                        time = time.replace("30", "15")
+                    } else {
+                        time = time.replace("45", "30")
+                    }
+                }
+                //else {
+                //    if (time2 >= "01" && time2 <= "14") {
+                //        time2 = "15"
+                //    } else if (time2 >= "16" && time2 <= "29") {
+                //        time2 = "30"
+                //    } else if (time2 >= "31" && time2 <= "44") {
+                //        time2 = "45"
+                //    } else if (time2 >= "46" && time2 <= "59") {
+                //        time2 = "45"
+                //    } else {
+                //    }
+                //}
+
+                time = time.replace(previoustime, time2);
+                //$('.timepicker').val(time);
+                $(this).val(time);
+                var currentTime = getTwentyFourHourTime(time);
+
+                console.log(time)
+                var status = validateTime(startTime, endTime, currentTime);
+                //console.log(status);
+
+                if (status == false) {
+                    $('.timepicker').val("");
+                    //swalalert('Completed time must be between time slots');
+                    swalalert('please select time between ' + startchangeTime + ' and ' + endchangeTime);
+                }
+            }
+        }
+    });
+
+
+    function tConvert(time) {
+        // Check correct time format and split into components
+        time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+        if (time.length > 1) { // If time format correct
+            time = time.slice(1);  // Remove full string match value
+            time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+            time[0] = +time[0] % 12 || 12; // Adjust hours
+            if (time[0].toString().length == 1) { time[0] = "0" + time[0] }
+        }
+        return time.join(''); // return adjusted time or original string
+    }
+
+    function getTwentyFourHourTime(amPmString) {
+        var d = new Date(parseInt(new Date().getMonth() + 1) + "/" + new Date().getDate() + "/" + new Date().getFullYear() + " " + amPmString);// pick date from date field
+        return d;
+    }
+
+
+    var validateTime = function (startTime, endTime, currentDate) {
+        startDate = new Date(currentDate.getTime());
+        startDate.setHours(startTime.split(":")[0]);
+        startDate.setMinutes(startTime.split(":")[1]);
+        startDate.setSeconds(startTime.split(":")[2]);
+
+        //console.log(startDate);
+
+        endDate = new Date(currentDate.getTime());
+        endDate.setHours(endTime.split(":")[0]);
+        endDate.setMinutes(endTime.split(":")[1]);
+        endDate.setSeconds(endTime.split(":")[2]);
+        // console.log(endDate);
+        // debugger;
+        var dateDiff = diff_minutes(endDate, startDate);
+        var dateDiff2 = diff_minutes(endDate, currentDate);
+        if (dateDiff < 0) {
+            endDate.setDate(endDate.getDate() + 1);
+            if (dateDiff2 > 0) {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        valid = startDate <= currentDate && endDate >= currentDate;
+        return valid;
+    }
+
+
+    function diff_minutes(dt2, dt1) {
+        var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+        diff /= 60;
+        return diff;
+    }
+
+</script>
+<style>
+    a.disabled {
+        pointer-events: none;
+        cursor: default;
+    }
+
+    /*.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+            background-image: linear-gradient(45deg, #3c8dbc, #387598);
+        }*/
+
+    /*.commentIcon {
+            margin-right: 25px;
+        }*/
+
+    /*.sweet-alert input {
+            display: initial;
+            width: auto;
+            height: auto;
+            margin: auto;
+        }
+
+        .modal-content {
+            margin: 0px auto;
+        }
+    */
+    .sweet-alert fieldset input[type="text"] {
+        display: none;
+    }
+
+    /*.modal-dialog {
+            max-width: 1310px;
+            width: 100%;
+        }
+
+        .evaluation-col2 .ddlilsm {
+            left: 8px;
+            top: 30px;
+        }
+
+        .sign-img {
+            margin: 0 15px 0 0;
+            overflow: hidden;
+        }
+
+            .sign-img img {
+                max-width: 100%;
+            }
+
+        #signAndSave .modal-dialog .modal-content {
+            width: 780px !important;
+            max-width: 780px !important;
+            min-width: 780px !important;
+        }*/
+    /*.modal-open .modal {
+        overflow-y: hidden;
+    }*/
+
+    .tabfir-drill .ui-widget.ui-widget-content {
+        z-index: auto !important;
+    }
+</style>

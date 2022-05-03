@@ -1,0 +1,91 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@{
+    Layout = null;
+    //var AssetInspectionFrequency = AssetsRepository.GetAssetFrequency();
+}
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">Search Result
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @if (Model.Any())
+        {           
+            <table class="table inpetion_table" id="myTable">
+                <thead>
+                    <tr>
+                    <tr>
+                        <th>@Localizer["Asset"]</th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.AssetNo)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.BarCodeNo)
+                        </th>
+                        <th>@Localizer["Location"]</th>
+                        <th width="60px" colspan="2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Assets.Name)</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DeviceNo)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SerialNo)
+                            </td>
+                            <td>@commonModelFactory.GetFloorAssetLocation(item)</td>
+                            <td>
+                                @if (!item.Assets.IsRouteInsp)
+                                {
+                                    <a href='@Url.RouteUrl("asseteps", new { floorassetId = item.FloorAssetsId, epId = 0, ismultipleEP = 0 })'>
+                                        <img style="cursor:pointer" src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)" title="Inspection" />
+                                    </a>
+                                }
+                                else
+                                {
+                                    var routeId = -2;
+                                    if (item.Routes.Count > 0)
+                                    {
+                                        routeId = item.Routes.FirstOrDefault().RouteId;
+                                    }
+                                    var inspType = 7;
+                                    if (item.Assets != null && item.Assets.AssetFrequency.Any())
+                                    {
+                                        inspType = item.Assets.AssetFrequency.FirstOrDefault().FrequencyId;
+                                    }
+                                    <img style="cursor:pointer"
+                                         onclick="GoTOPage(0 ,'@routeId' ,'@item.AssetId',@item.FloorAssetsId,'@item.StopId', @inspType)" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")"
+                                         title="Route Based Inspection" />
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="tble_shadow text-center">No assets found with this Asset #</div>
+        }
+    </div>
+</div>
+<script>
+    function GoTOPage(floorId, routeId, assetId,floorAssetId,locationId,inspType) {
+        var drpInspTypes = inspType; //7;
+        var url = CRxUrls.fireExtinguisher_SerachIndex;//'@Url.Action("SerachIndex", "FireExtinguisher", new { area = "RoundInsp" })';       
+        url = url + '?floorId=' + floorId + "&inspType=" + drpInspTypes + "&assetId=" + assetId + "&routeId=" + routeId + "&floorAssetId=" + floorAssetId + "&locationId=" + locationId;
+        window.location.href = url;
+    }
+</script>
+

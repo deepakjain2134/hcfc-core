@@ -1,0 +1,267 @@
+﻿
+@model List<HCF.BDO.Tips>
+@{
+    Layout = null;
+}
+
+<div id="floatcontent">
+    <div id="slider">
+        <ul>
+            @if (Model.Any())
+            {
+                var index = 1;
+                foreach (var item in Model)
+                {
+                    var paggingInfo = index + " / " + Model.Count();
+                    index++;
+                    var tipBackgroundStyle = "";
+                    var titleOrFooterStyle = "";
+                    if (item.TipType == HCF.BDO.Enums.TipTypes.CRxCrowdSource)
+                    {
+                        tipBackgroundStyle = "background:#fdfd96";
+                        titleOrFooterStyle = "background:blue;";
+                    }
+                    else
+                    {
+                        tipBackgroundStyle = "background:#fdfd96;";
+                        titleOrFooterStyle = "background:orange;";
+                    }
+
+
+                    <li class="tips_li">
+                        <table width="100%">
+                            <tr class="title" style="@titleOrFooterStyle">
+                                <td width="50%"><span class="td-strip-left">@item.Title</span></td>
+                                <td width="50%">
+                                    <span class="td-strip-right">
+                                        <a href="#" title="Add new tip" class="btnAddTip" style="color:#FFF;font-size: 25px;">+</a>&nbsp;&nbsp;
+                                        <a href="#" class="control_prev1" style="color:#FFF">&lt;</a>&nbsp;&nbsp;
+                                        <label style="color:#FFF;font-size: 18px;">@paggingInfo</label>&nbsp;&nbsp;
+                                        <a href="#" class="control_next1" style="color:#FFF">&gt;</a>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="content2">
+                                <td colspan="2">
+                                    <div class="tipContent" style="@tipBackgroundStyle">
+                                        @Html.Raw(item.Description)
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="title li-footer" style="@titleOrFooterStyle">
+                                @{
+                                    var contributorInfo = "Contributor: {name} {pos} {org}";
+                                    if (item.ShowContributorName)
+                                    {
+                                        contributorInfo = contributorInfo.Replace("{name}", item.ContributorName + ",");
+                                    }
+                                    if (item.ShowContributorPosition)
+                                    {
+                                        contributorInfo = contributorInfo.Replace("{pos}", item.ContributorPosition + ",");
+                                    }
+                                    if (item.ShowContributorOrg)
+                                    {
+                                        contributorInfo = contributorInfo.Replace("{org}", item.ContributorOrg);
+                                    }
+                                    contributorInfo = contributorInfo.Replace("{name}", "Anonymous").Replace("{pos}", "").Replace("{org}", "");
+                                }
+                                <td colspan="2"><span class="td-strip-left">@contributorInfo</span></td>                                
+                            </tr>
+                        </table>
+                    </li>
+                }
+            }
+            else
+            {
+                var tipBackgroundStyle = "background:#fdfd96";
+                var titleOrFooterStyle = "background:blue;";
+                <li class="tips_li">
+                    <table width="100%">
+                        <tr class="title" style="@titleOrFooterStyle">
+                            <td width="50%"><span class="td-strip-left"></span></td>
+                            <td width="50%">
+                                <span class="td-strip-right">
+                                    <a href="#" title="Add new tip" class="btnAddTip" style="color:#FFF;font-size: 25px;">+</a>&nbsp;&nbsp;
+                                    <a href="#" class="control_prev1" style="color:#FFF">&lt;</a>&nbsp;&nbsp;
+                                    <label style="color:#FFF;font-size: 18px;">0 / 0</label>&nbsp;&nbsp;
+                                    <a href="#" class="control_next1" style="color:#FFF">&gt;</a>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr class="content2">
+                            <td colspan="2">
+                                <div class="tipContent" style="@tipBackgroundStyle">
+                                    No tips added.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="title li-footer" style="@titleOrFooterStyle">
+                            <td><span class="td-strip-left"></span></td>
+                            <td><span class="td-strip-right"></span></td>
+                                                    
+                    </table>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+
+
+<style>
+    .control_prev1, .control_next1 {
+        font-size: 25px;
+    }
+
+    .add-new-tip {
+        display: block;
+        margin: 0 auto;
+        margin-top: 20%;
+    }
+
+    .td-strip-left {
+        padding-left: 10px;
+    }
+
+    .td-strip-right {
+        float: right;
+        padding-right: 10px;
+    }
+
+    .tipContent {
+        padding: 2px;
+        height: 249px;
+        overflow-y: auto;
+        text-align: justify;
+    }
+
+    .title {
+        /*height: 30px;*/
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #337ab7;
+    }
+
+    #slider {
+        position: relative;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+        #slider ul {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            height: 270px;
+            list-style: none;
+        }
+
+            #slider ul li.tips_li h2 {
+                text-align: center;
+            }
+
+            #slider ul li.tips_li p {
+                font-size: 14px;
+                padding: 0px 10px 2px 10px;
+            }
+
+            #slider ul li.tips_li {
+                position: relative;
+                display: block;
+                float: left;
+                margin: 0;
+                padding: 0;
+                width: 500px;
+                background: #ccc;
+            }
+
+    a.control_prev, a.control_next {
+        position: absolute;
+        top: 90%;
+        z-index: 999;
+        display: block;
+        padding: 1% 1%;
+        width: auto;
+        height: auto;
+        background: #2a2a2a;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 18px;
+        opacity: 0.8;
+        cursor: pointer;
+    }
+
+        a.control_prev:hover, a.control_next:hover {
+            opacity: 1;
+            -webkit-transition: all 0.2s ease;
+        }
+
+    a.control_prev {
+        border-radius: 0 2px 2px 0;
+    }
+
+    a.control_next {
+        right: 0;
+        border-radius: 2px 0 0 2px;
+    }
+
+    .slider_option {
+        position: relative;
+        margin: 10px auto;
+        width: 160px;
+        font-size: 18px;
+    }
+    
+</style>
+<script>
+    $(function () {
+
+        var slideCount = $('#slider ul li.tips_li').length;
+        var slideWidth = $('#slider ul li.tips_li').width();
+        var slideHeight = $('#slider ul li.tips_li').height();
+        var sliderUlWidth = slideCount * slideWidth;
+
+        $('#slider').css({
+            width: slideWidth
+            /*height: slideHeight*/
+        });
+        
+        $('#slider ul').css({
+            width: sliderUlWidth,
+            marginLeft: (slideCount==1) ? 0 : -slideWidth
+        });
+
+        $('#slider ul li.tips_li:last-child').prependTo('#slider ul');
+
+        function moveLeft() {
+            $('#slider ul').animate({
+                left: +slideWidth
+            }, 200, function () {
+                $('#slider ul li.tips_li:last-child').prependTo('#slider ul');
+                $('#slider ul').css('left', '');
+            });
+        };
+
+        function moveRight() {
+            $('#slider ul').animate({
+                left: -slideWidth
+            }, 200, function () {
+                $('#slider ul li.tips_li:first-child').appendTo('#slider ul');
+                $('#slider ul').css('left', '');
+            });
+        };
+
+        $('a.control_prev1').click(function () {
+            moveLeft();
+        });
+
+        $('a.control_next1').click(function () {
+            moveRight();
+        });
+    });
+
+    $('.btnAddTip').click(function () {
+        location.href = '@Url.Content("~/Tips/AddOrEditTips?RouteUrl=")'+location.pathname.replace("/","")
+    })
+</script>

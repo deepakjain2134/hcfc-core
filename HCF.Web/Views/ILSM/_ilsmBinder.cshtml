@@ -1,0 +1,172 @@
+﻿@model IEnumerable<HCF.BDO.TIlsm>
+<table class="table table-bordered table-striped" id="ilsmbinderTable" style="width:100%;">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th style="display:none"></th>
+            <th width="10%">
+                @Localizer["IncidentNo"]
+            </th>
+            <th width="10%">
+                @Localizer["ILSMDate"]
+            </th>
+            <th width="10%">
+                ILSM
+            </th>
+            <th width="20%">
+                Reason for ILSM
+            </th>
+            <th width="10%">
+                @Localizer["Asset"]
+            </th>
+            <th width="15%">
+                @Localizer["Location"]
+            </th>
+            <th width="10%">
+                @Localizer["CreatedBy"]
+            </th>
+            <th width="10%">
+                @Html.DisplayNameFor(model => model.CompletedDate)
+            </th>
+            <th width="5%">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+            {
+                <tr id="@item.TIlsmId">
+                    <td style="display:none">
+                        @Html.Encode(item.Status)
+                    </td>
+                    <td style="display:none">
+                        @if (item.Buildings != null)
+                        {
+                            <span>@string.Join(",", item.Buildings.Select(x => x.SiteCode))</span>
+                        }
+                    </td>
+                    <td class="@((HCF.BDO.Enums.ILSMStatus)item.Status)">
+                        <span>
+                            <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = item.TIlsmId })" target="_blank">
+                                <span>@item.IncidentId</span>
+                            </a>
+                        </span>
+                    </td>
+                    <td data-sort="@item.llsmDate.Ticks">
+                        @item.llsmDate.ToClientTime().ToFormatDate() <br />
+                        @item.llsmStartTime
+                    </td>
+                    <td>
+                        @item.Name.CastToNA()
+                    </td>
+
+                    <td>
+                        @item.Notes.CastToNA()
+                    </td>
+                    <td>
+                        @if (item.Assets.Count > 0)
+                        {
+                            <span>
+                                @string.Join(",", item.Assets.Select(x => x.Name))
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.Floor != null)
+                        {
+                            <span>@($"{item.Floor.FloorLocation}")</span>
+                        }
+                    </td>
+                    <td>@item.Inspector.FullName</td>
+                    <td data-sort="@item.CompletedDate.DateSort()">
+                        @if ((int)item.Status == 1 && item.CompletedDate.HasValue)
+                        {
+                            <span>@item.CompletedDate.Value.ToClientTime().ToFormatDate() </span>
+                        }
+                        else
+                        {
+                            <span></span>
+                        }
+                    </td>
+                    <td>
+                        <div class="dropdown icratable-drop">
+                            <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </button>
+                            @await Html.PartialAsync("~/Views/Shared/_ilsmbindermoreoptions.cshtml", item)
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<script>
+    var dtable = $('#ilsmbinderTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [[3, 'desc']],
+        "bPaginate": $('#ilsmbinderTable tbody tr').length > 20,
+        "bInfo": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        'columnDefs': [
+            {
+                targets: -1,
+                searchable: true,
+                orderable: false
+            }],
+        "searching": true
+    });
+
+
+    $('#YearFilter').on('change', function () {
+        if ($(this).val() == "All") {
+            dtable.columns(3).search("").draw();
+        }
+        else {
+            dtable.columns(3).search($(this).val()).draw();
+        }
+    });
+    var currentYear = $('#YearFilter').val();
+    $("#YearFilter").val(currentYear);
+    dtable.columns(3).search(currentYear).draw();
+
+    $('#SiteCode').on('change',
+        function () {
+            if ($(this).val() == "-1") {
+            dtable.columns(1).search("").draw();
+        }
+        else {
+            dtable.columns(1).search($(this).val()).draw();
+        }
+     });
+
+    //$.fn.dataTable.ext.search.push(
+    //    function (settings, data, dataIndex) {
+    //       // debugger;
+    //        var sitecodes = data[1];
+    //        var sitecode = $('#SiteCode').val();
+    //        if (sitecode === "") {
+    //            return true;
+    //        } else if (sitecode != "") {
+    //            if (sitecodes) {
+    //                var sitecodesArray = sitecodes.split(',');
+    //                if (sitecodesArray.indexOf(sitecode) > -1) {
+    //                    return true;
+    //                } else {
+    //                    return false;
+    //                }
+    //            }
+    //        }
+    //    }
+    //);
+
+</script>
+<style>
+    .dataTables_paginate.paging_simple_numbers {
+        float: right;
+    }
+</style>

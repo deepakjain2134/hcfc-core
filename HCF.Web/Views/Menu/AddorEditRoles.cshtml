@@ -1,0 +1,136 @@
+﻿@model HCF.BDO.UserRoles
+
+@{
+    ViewBag.Title = "AddEditUserRoles";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                AddEditUserRoles
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="col-md-12">
+                        <div class="box box-primary">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.HiddenFor(m => m.CreatedBy)
+                                @Html.HiddenFor(m => m.ParentId)
+                                
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                @Html.DisplayName("Parent Role")
+                                                <parentroledropdownlist name="ParentRole" firsttext="Select Parent" class="form-control">
+
+                                                </parentroledropdownlist>
+                                                @*@Html.ParentRoleDropDownList("ParentRole", "", "Select Parent", new { ParentId = Model.ParentId, @class = "form-control" })*@
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group hide">
+                                                @Html.DisplayName("Controller Name")
+
+                                                <controllernamedropdownlist name="ControllerName" firsttext="Select Controller" class="form-control">
+
+                                                </controllernamedropdownlist>
+                                                @*@Html.ControllerNameDropDownList("ControllerName", "", "Select Controller", new { @class = "form-control" })*@
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.DisplayNameFor(m => m.RoleName)
+                                                @Html.TextBoxFor(m => m.RoleName, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.DisplayNameFor(m => m.IsActive)
+                                                @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                                            </div>
+                                            <div class="form-group">
+                                                @*Is Child Checkboxes*@
+                                                @Html.DisplayNameFor(m => m.IsChild)
+                                                @Html.CheckBoxFor(m => m.IsChild, false)<span></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group hide">
+                                                @Html.DisplayName("Action Name")
+                                                <div id="loadpartial-ActionName">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.DisplayNameFor(m => m.DisplayText)
+                                                @Html.TextBoxFor(m => m.DisplayText, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group comman_checkbox" style="margin-top:25px;margin-bottom:25px">
+                                                @Html.DisplayNameFor(m => m.IsUserRole)
+                                                @Html.CheckBoxFor(m => m.IsUserRole)<span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="button_Div pull-left">
+                                        <input type="submit" value="@(Model.RoleId.HasValue ? "Update" : "Add")" class="comm-button" />
+                                        @Html.ActionLink("Cancel ", "Roles", "Menu", new { @class = "comm-Cancelbutton" })
+                                    </div>
+                                
+                                }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        //SetActionNameDropdown("Home");
+        $('#ControllerNameDropDownList').val("Home")
+    });
+
+    $('#ControllerName').on("change", function () {
+        let controllerName = $(this).val();
+        // SetActionNameDropdown(controllerName);
+    });
+
+    function SetActionNameDropdown(controllerName) {
+        let url = CRxUrls.Menu_ActionNameDropdown;
+        $.get(url + "?controllerName=" + controllerName, function (data) {
+            $('#loadpartial-ActionName').html('');
+            $('#loadpartial-ActionName').html(data);
+            $('#loadpartial-ActionName').fadeIn("fast");
+        });
+    }
+
+    $(document).ready(function () {
+        let el = $('input#IsChild[type="checkbox"]');
+        let isChecked = el[0].checked;
+        HideShowParentRole(isChecked);
+    });
+    $('input#IsChild[type="checkbox"]').change(function () {
+        HideShowParentRole(this.checked);
+    });
+
+    function HideShowParentRole(isChecked) {
+        if (isChecked) {
+            let el = $('select#ParentRole').parent();
+            $(el).show();
+        } else {
+            $('select#ParentRole').parent().hide();
+            $('select#ParentRole').val('');
+        }
+    }
+
+    $('select#ParentRole').change(function () {
+        let el = $('input#ParentId[type="hidden"]');
+        $(el).val($(this).val());
+    });
+</script>
+<style>
+    .hide {
+        display: none;
+    }
+</style>

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<HCF.BDO.TICRAReports>
+@{
+    ViewBag.Title = "Observation Reports";
+    Layout = null;
+}
+@foreach (var reports in Model)
+{
+    <tr>
+        <td title="@(reports.TIlsmId > 0 ? "Report is already link with ilsm": "")">
+            <input type="checkbox" id="TICRAReportId" name="TICRAReportId" value="@reports.TICRAReportId" class="@(reports.TIlsmId > 0 ? "disable" : "")" @(reports.TIlsmId > 0 ? "checked" : "") />
+            <input type="hidden">
+            <span></span>
+        </td>
+        <td>
+            @reports.ProjectNos
+        </td>
+        <td>
+            @reports.ProjectNames
+        </td>
+        <td>
+            @reports.ReportName
+        </td>
+        <td data-sort="@reports.ReportDate.Ticks">
+            @reports.ReportDate.ToFormatDate()
+        </td>
+        <td>
+            @if (reports.ContractorUser != null)
+            {
+                @reports.ContractorUser.Name
+            }
+        </td>
+        <td>
+            @if (reports.ObserverUser != null)
+            {
+                @reports.ObserverUser.Name
+            }
+        </td>
+    </tr>
+}
+

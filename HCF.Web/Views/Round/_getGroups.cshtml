@@ -1,0 +1,11 @@
+﻿@model List<HCF.BDO.RoundSchedules>
+
+<div>
+    <ul class="nav roundsPanel">
+        @foreach (var group in Model)
+        {
+            <li><a href="#">@group.Name</a></li>
+        }
+    </ul>
+</div>
+

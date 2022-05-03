@@ -1,0 +1,388 @@
+﻿@model List<HCF.BDO.Assets>
+@{
+    /**/
+
+    ViewBag.Title = "Signed Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //List<HCF.BDO.UserProfile> allusers = Users.GetUsers().Where(x => x.IsActive && !string.IsNullOrEmpty(x.Email)).OrderBy(x => x.FullName).ToList();
+    //List<HCF.BDO.UserProfile> filterUsers = HCF.Web.Base.Common.RemoveCRxUsers(allusers);
+    var selectedValues = "0";
+    string concat = string.Empty;
+    int[] values = new int[] { };
+    if (@ViewBag.SignedAssetIDs != null) { selectedValues = @ViewBag.SignedAssetIDs; }
+    //var lists = Model; //AssetsRepository.Get().Where(x => x.IsActive).ToList();
+    if (Model != null && Model.Count > 0)
+    {
+        values = Model.Select(x => x.AssetId).ToArray();
+        concat = String.Join(",", values.ToArray());
+    }
+
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Signed Reports
+        </h1>
+    </section>
+}
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-lg-6 searchItem1">
+                        <div class="search_options">
+                            <label>Assets (<strong>Select the assets for which you want the signed report</strong>)</label>
+                            @*@Html.AssetsDownList("AssetId", selectedValues, "All", new { @class = "form-control ddlboxLive",
+                                multiple = "multiple",
+                                data_live_search = "true",
+                                data_selected_text_format = "count > 1" })*@
+                            <assetsdownlist multiple="multiple" name="AssetId" selectedvalue="@selectedValues"
+                                            firsttext="All" class="form-control ddlboxLive">
+
+                            </assetsdownlist>
+                        </div>
+                        <input type="hidden" value="@ViewBag.AssetsId" id="assetids" />
+                    </div>
+                    <div class="col-lg-6 searchItem1">
+                        <label>Signed By : </label>
+                        @*<select id="userList" class="form-control selectyear">
+                                <option value="-1">All</option>
+
+                                @foreach (var user in filterUsers)
+                                {
+                                    <option value="@user.UserId">@user.Name (@user.Email)</option>
+                                }
+                            </select>*@
+                        <userepsdropdownlist class="form-control selectyear"
+                                             firsttext="All"
+                                             name="userList"
+                                             selectedvalue="@HCF.Web.Base.UserSession.CurrentUser.UserId"></userepsdropdownlist>
+                        @*@Html.UserDropDownList("userList", 0, "All", new { @class = "form-control selectyear" })*@
+
+                        <input type="hidden" value="@ViewBag.UserId" id="UserId" />
+                    </div>
+                    <div class="col-lg-3 searchItem1">
+                        <div>
+                            <label>From</label>
+                            <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 searchItem1">
+                        <div>
+                            <label>To</label>
+                            <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 searchItem2">
+                        <div>&nbsp;</div>
+                        <button class="comm-button" id="btnrunreport" onclick="loadData();">Run Report</button>
+                        <button class="comm-button" id="btnrefresh">Refresh</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="partialContents">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+
+
+
+    $(document).ready(function () {
+        //alert("call");
+        var li = $("ul.Certificate_list li").first();
+        var certId = li.attr("id");
+        var path = li.attr("tempname");
+        if ('@ViewBag.AssetsId' != '') {
+            var assetsId = '@ViewBag.AssetsId';
+            var assetId = assetsId.split(",");
+            for (var i = 0; i < assetId.length; i++) {
+                $('.mutliSelect input[type=checkbox]').each(function () {
+                    var control = $(this);
+                    var val = control.attr("id");
+                    if (assetId[i] == val) {
+                        control.prop("checked", true);
+                   }
+                });
+            }
+            $(".multiSelStaus").empty().text(assetId.length + " assets selected");
+        }
+
+        if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+            $("#divnopreview").hide();
+            $("#divdocpreview").show();
+        }
+        else {
+            $("#divnopreview").show();
+            $("#divdocpreview").hide();
+        }
+        debugger;
+        var from = localStorage.getItem("from");
+        var todate = localStorage.getItem("todate");
+        var assetids = localStorage.getItem("assetids");
+        var IDS = localStorage.getItem("assetids");
+        var userList = localStorage.getItem("userList");
+        var data = localStorage.getItem("SignedData");
+
+
+        if (from != "" && todate != "" && assetids != null) {
+            debugger;
+            ids = IDS.split(',').length
+
+
+            if (ids > 0) {
+                $(".multiSelStaus").empty().text(ids + " assets selected");
+            } else {
+                $(".multiSelStaus").empty().text("Select");
+            }
+
+            //$("#assetids").val(assets.join(","))
+
+            $("#assetids").val(assetids);
+            $("#from").val(from);
+            $("#todate").val(todate);
+            $("#userList").val(userList);
+            if (data != null) {
+                $('#partialContents').html(data);
+                $('#partialContents').fadeIn('fast');}
+            //loadData();
+        } else {
+            SetDefaultDate();
+        }
+        Opendiv(certId, path, li);
+    });
+
+
+
+     $(document).on("change", "#AssetId", function () {
+        ///debugger;
+        Array.prototype.Remove = function () {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+        var previousvalue = localStorage.getItem("values");
+        var value = $(this).val();
+        var str2 = "-1"
+        if (value != null) {
+            if (value.indexOf(str2) == -1 && value.length == @concat.Split(',').Length ) {
+                getSelectedAsset("0")
+                localStorage.clear()
+                return;
+            }
+            if (value == "-1") {
+                getSelectedAsset(value)
+                localStorage.setItem("values", value);
+                return
+            }
+            if (value.length <= @values.Length && value[0] == "-1") {
+                value.Remove("-1")
+                if (previousvalue.split(',').length == value.length) {
+                    getSelectedAsset("-1")
+                } else {
+                    getSelectedAsset(value)
+                }
+                localStorage.setItem("values", value);
+                return
+            }
+            if (value.length <= @values.Length && value[0] != "-1") {
+                getSelectedAsset(value)
+                localStorage.setItem("values", value);
+                return
+            }
+        }
+    });
+
+    function getSelectedAsset(value) {
+        debugger;
+         var url = "@Url.Action("Reports", "Reports")";
+        //window.location.href = url + '?epId=' + value;
+    }
+
+
+    $('.mutliSelect input[type="checkbox"]').on('click', function () {
+        var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+            title = $(this).val() + ",";
+
+        console.log();
+        if ($(this).val() === "0") {
+            console.log($(this).is(':checked'))
+            var status = $(this).is(':checked');
+            $('input:checkbox[class=assetChekcBox]').each(function () {
+                $(this).prop("checked", status);
+                //.prop('checked', false)
+            });
+        } else {
+            if ($(this).is(':checked')) {
+                $(this).addClass("mulSelect");
+            } else {
+                $(this).removeClass("mulSelect");
+            }
+        }
+
+        if ($('.assetChekcBox:checkbox:checked').length == $('.assetChekcBox:checkbox').length) {
+            $(".selectAll:checkbox").prop("checked", true);
+        } else {
+            $(".selectAll:checkbox").prop("checked", false);
+
+        }
+        //return false;
+        //$(".dropdown dd ul").hide();
+
+        var assets = [];
+        $('.assetChekcBox:checkbox:checked').each(function () {
+            assets.push($(this).attr("id"));
+        });
+
+
+        if (assets.length > 0) {
+            $(".multiSelStaus").empty().text(assets.length + " assets selected");
+        } else {
+            $(".multiSelStaus").empty().text("Select");
+        }
+
+        $("#assetids").val(assets.join(","))
+        //LoadData();
+        //LoadData(assets.join(","));
+    });
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        var startDate = new Date(currentTime.setMonth(currentTime.getMonth() - 3));
+        var dateFormat = "mm/d/yy",
+            from = $("#from")
+                .datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    dateFormat: 'M d, yy',
+                    maxDate: new Date(new Date().setMonth(12)),
+                    //minDate: new Date(2016, 0, 1),
+                    numberOfMonths: 1,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    //to.datepicker("option", "minDate", getDate(this));
+                    $("#todate").datepicker("option", "minDate", $("#from").datepicker("getDate"));
+                    $("#from").datepicker("option", "maxDate", $("#todate").datepicker("getDate"));
+                }),
+            to = $("#todate").datepicker({
+                changeMonth: true,
+                numberOfMonths: 1,
+                changeYear: true,
+                dateFormat: 'M d, yy',
+                maxDate: new Date(new Date().setMonth(12)),
+                minDate: startDate,
+                buttonImage: ImgUrls.datepicker_calendar,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+    function Opendiv(certId, src, li) {
+        debugger;
+        $("ul.Certificate_list li").removeClass('active');
+        $(li).addClass('active');
+        $(li).addClass('divselected');
+        var _certid = certId;
+        $('.tableRow').hide(); // hide all rows
+        $("#div_" + _certid).show();
+        document.getElementById("Crframe").setAttribute("src", getfileUrl(src));
+        if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+            $("#divnopreview").hide();
+            $("#divdocpreview").show();
+        }
+        else {
+            $("#divnopreview").show();
+            $("#divdocpreview").hide();
+        }
+
+    }
+    var firstload = 0;
+    function loadData() {
+        debugger;
+        var assetids = $("#AssetId").val();
+
+        var from = $("#from").val();
+        var todate = $("#todate").val();
+        var signedby = $("#userList").val();
+        localStorage.setItem("from", from);
+        localStorage.setItem("todate", todate);
+        localStorage.setItem("assetids", assetids);
+        localStorage.setItem("userList", signedby);
+        if (assetids != null) {
+            assetids = assetids.join(',');
+            $.ajax({
+                url: CRxUrls.Reports_ReportsPartial + '?fromdate=' + from + "&todate=" + todate + "&assetids=" + assetids + "&signedby=" + signedby,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    localStorage.setItem("SignedData", data);
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                    if ($("iframe").attr("src") != "" && typeof $("iframe").attr("src") !== "undefined") {
+                        $("#divnopreview").hide();
+                        $("#divdocpreview").show();
+                    }
+                    else {
+                        $("#divnopreview").show();
+                        $("#divdocpreview").hide();
+                    }
+                }
+            });
+        } else {
+            AlertWarningMsg("Please select assets")
+        }
+    }
+
+    $("#btnrefresh").click(function () {
+        ClearAllFields();
+    });
+
+    function ClearAllFields() {
+        $(".ddlboxLive").selectpicker('val', 0);
+        $('#userList').val('-1')
+        SetDefaultDate();
+        //loadData();
+    }
+</script>
+<style>
+    .col-lg-6.searchItem1 {
+        min-height: 78px;
+    }
+
+    .divselected {
+        background: #f6fafd !important;
+        box-shadow: 0px 0px 1px #cfe2f1 !important;
+        border-bottom: 1px solid #0f69ac !important;
+    }
+
+    #bs-select-1 {
+        max-height: 294px !important;
+    }
+</style>

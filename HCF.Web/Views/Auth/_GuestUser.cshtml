@@ -1,0 +1,46 @@
+﻿@*@using (Ajax.BeginForm("GuestUser", "Account", new AjaxOptions { HttpMethod = "POST", OnSuccess = "loginSuccess", OnBegin = "AjaxBegin" }))
+    {*@
+
+<form asp-controller="Account" asp-action="GuestUser"
+      data-ajax-begin="AjaxBegin"
+      data-ajax-success="loginSuccess" data-ajax="true" data-ajax-method="POST">
+    <h4 class="threedot-heading" style="margin-bottom: 12px;">Login As Guest User.</h4>
+    @Html.AntiForgeryToken()
+    <div>
+        <input type="hidden" name="returnUrl" id="returnUrl" value="@ViewBag.ReturnUrl" />
+    </div>
+    <div class="form-group has-feedback">
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-envelope" aria-hidden="true" style="color: #8d8d8d;font-size: 16px;"></i></div>
+            @Html.TextBox("Email", null, new { @class = "form-control", @placeholder = "Email Id", required = "required", @type = "email" })
+        </div>
+        <span class="form-control-feedback"></span>
+    </div>
+    <div class="form-group has-feedback">
+        <div class="input-group">
+            <div class="input-group-addon"><img src="/dist/Images/login/username.png"></div>
+            @Html.TextBox("FirstName", null, new { @class = "form-control", @placeholder = "First Name", required = "required", @type = "text" })
+        </div>
+        <span class="form-control-feedback"></span>
+    </div>
+    <div class="form-group has-feedback">
+        <div class="input-group">
+            <div class="input-group-addon"><img src="/dist/Images/login/username.png"></div>
+            @Html.TextBox("LastName", null, new { @class = "form-control", @placeholder = "Last Name", required = "required", @type = "text" })
+        </div>
+        <span class="form-control-feedback"></span>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button type="submit" class="btn login-button" title="GuestUser" id="btnloginwithGuest"
+                    data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Loading">
+                Login
+            </button>
+        </div>
+    </div>
+    <div class="row" style="padding-top:8px;">
+        <div class="col-lg-12 text-right">
+            <a href="#" id="back-to-login" class="login-show-main"><span>Back to login</span></a>
+        </div>
+    </div>
+</form>

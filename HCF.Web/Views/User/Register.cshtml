@@ -1,0 +1,642 @@
+﻿@model HCF.Web.ViewModels.Users.UserAddViewModel
+@{
+    ViewBag.Title = @ViewBag.PageTitle;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @ViewBag.PageTitle
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm("Register", "User", FormMethod.Post, new { id = "Registerform" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="row trackingUserchebox">
+
+                        <input type="hidden" name="hdnEmail" id="hdnEmail" value="@Model.Email" />
+                        <input type="hidden" name="hdnvendor" id="hdnvendor" value="@Model.VendorId" />
+                        <div class="col-lg-12">
+                            <div class="form-group">
+
+                                <h4 style="color:green;" id="spaninstruction">Fill out the required information to  @(Model.UserId > 0 ? "edit" : "create a new")   @(!Model.VendorId.HasValue ? "internal" : "vendor") user.</h4>
+
+                                <div class="btn-group btn-group-vertical user-type-button hide" data-toggle="buttons">
+                                    <label class="btn active">
+                                        <input @(Convert.ToBoolean(Model.IsVendorUser) == false ? "checked='checked'" : string.Empty) name="users" value="user" type="radio" />
+                                        @Html.Label("Internal Users")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+
+                                    </label>
+
+                                    <label class="btn">
+                                        <input @(Convert.ToBoolean(Model.IsVendorUser) == true ? "checked='checked'" : string.Empty) name="users" value="vendor" type="radio" />
+                                        @Html.Label("Vendor User")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="tracking-lenged">
+                                <h3>Basic Information:</h3>
+                                <div class="form-group col-md-4">
+                                    @*<div class="row">*@
+                                    @*<div class="col-md-6">*@
+                                    <label>Email</label><em class="required-field"> *</em>
+                                    @*<input type="text" id="txtUserDomain" class="form-control" maxlength="50" minlength="3" autocomplete="off" required="required" onfocusout="EmailAmed()" />*@
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control ", maxlength = 50, autocomplete = "off", @type = "email", required = "required", TabIndex = 3 })
+                                    @Html.ValidationMessageFor(m => m.Email)
+                                    @* </div>
+                                               <div class="userCol-2">
+                                                <label>Domain</label><em class="required-field"> *</em>
+
+                                        <select class="form-control" id="ddlUserdomain" onchange="EmailAmed()"></select>
+                                        </div></div>*@
+                                </div>
+                                <div class="form-group col-md-4">
+                                    @Html.HiddenFor(x => x.UserId)
+                                    @Html.LabelFor(m => m.FirstName)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control alphaonly", required = "required", maxlength = 50, TabIndex = 1 })
+                                    @Html.ValidationMessageFor(m => m.FirstName)
+                                </div>
+                                <div class="form-group col-md-4">
+                                    @Html.LabelFor(m => m.LastName)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control alphaonly", required = "required", maxlength = 50, TabIndex = 2 })
+                                    @Html.ValidationMessageFor(m => m.LastName)
+                                </div>
+                                <div class="form-group col-md-4">
+                                    @Html.LabelFor(m => m.PhoneNumber)
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new
+                                    {
+                                        @class = "form-control phone",
+                                        pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                        title = "Please enter a valid phone # with area code.",
+                                        maxlength = 15,
+                                        @onkeypress = "ValidateNumber(event);",
+                                        TabIndex = 5
+                                    })
+                                    @Html.ValidationMessageFor(m => m.PhoneNumber)
+                                </div>
+                                <div class="form-group col-md-4">
+                                    @Html.LabelFor(m => m.CellNumber)
+                                    @Html.TextBoxFor(m => m.CellNumber, new
+                                    {
+                                        @class = "form-control phone",
+                                        maxlength = 15,
+                                        pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                        title = "Please enter a valid cell #.",
+                                        @onkeypress = "ValidateNumber(event);",
+                                        TabIndex = 6
+                                    })
+                                    @Html.ValidationMessageFor(m => m.CellNumber)
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Resource #</label><em class="required-field"> (Required for assignment of workorder)</em>
+                                    @Html.TextBoxFor(m => m.ResourceNumber, new { @class = "form-control", maxlength = 20, TabIndex = 4 })
+                                    @Html.ValidationMessageFor(m => m.ResourceNumber)
+                                </div>
+                                @*@if (!Model.VendorId.HasValue)
+                                    {*@
+                                <div class="form-group col-md-4">
+                                    <label>Role Group</label><em class="required-field"> *</em>
+                                    @Html.ListBoxFor(model => model.DrpUserGroupsIds, new MultiSelectList(Model.DrpUserGroups, "Value", "Text"), new { @class = "form-control selectpicker", multiple = "multiple", id = "DrpUserGroupsIds", required = "required" })
+                                    @Html.ValidationMessageFor(m => m.DrpUserGroupsIds)
+                                </div>
+                                @if (!Model.VendorId.HasValue)
+                                {
+                                    <div class="form-group col-md-4">
+                                        <label>Role</label>
+                                        @Html.ListBoxFor(model => model.DrpUserAdditionRoleIds, new MultiSelectList(Model.DrpUserAdditionRole, "Value", "Text"),
+                                       new { @class = "form-control selectpicker", multiple = "multiple", id = "DrpUserAdditionRoleIds" })
+                                        @Html.ValidationMessageFor(m => m.DrpUserAdditionRoleIds)
+                                    </div>
+                                }
+                                <div class="@(Model.VendorId.HasValue?"form-group col-md-4" : "form-group col-md-4 hide")">
+                                    <label>Orientation Date</label><em class="required-field"></em>
+                                    @Html.TextBoxFor(m => m.OrientationDate, $"{Model.OrientationDate:MMM d, yyyy}", new { @class = "form-control datepicker" })
+                                    @Html.ValidationMessageFor(m => m.OrientationDate)
+                                </div>
+
+                                @*}*@
+                                @if (Model.VendorId.HasValue)
+                                {
+                                    <div class="form-group col-md-4">
+                                        <label>Vendor Name</label><em class="required-field"> *</em>
+                                        @Html.DropDownListFor(m => m.VendorId, new SelectList(Model.DrpVendors, "Value", "Text", Model.VendorId), "Select Vendor", new { @class = "selectpicker form-control disable", required = "required" })
+                                        @Html.ValidationMessageFor(m => m.VendorId)
+                                    </div>
+                                }
+                                <div class="form-group col-md-4">
+                                    <div>&nbsp;</div>
+                                    <span>
+                                        @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                                        @Html.ValidationMessageFor(m => m.IsActive)
+                                        @Html.LabelFor(m => m.IsActive)
+                                    </span>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    @if (Model.UserId >= 0)
+                                    {
+                                        <span class="dvPassword @(Model.VendorId > 0 ? " hide" : " show")">
+                                            @Html.CheckBoxFor(m => m.IsPowerUser)<span></span>
+                                            @Html.ValidationMessageFor(m => m.IsPowerUser)
+                                            <label> Power User (<i class="fa fa-info" data-toggle="tooltip" title="Mark power user check if you want to assign all the EPs and Assets"></i>)</label>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="userpassword-row col-md-12 hide">
+                            <div class="tracking-lenged">
+                                <h3>Password:</h3>
+                                <div class="col-lg-6">
+                                    <div class="dvPassword @(Model.UserId > 0 ? " hide" : " show")">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.Password)<em class="required-field"> *</em>(<label>Must change password at next logon</label>
+                                            @Html.CheckBoxFor(m => m.IsPwdChange)<span></span>)
+                                            <div class="form-group has-feedback">
+                                                @Html.PasswordFor(m => m.Password, new { @class = "form-control password-strength", maxlength = 50, autocomplete = "off", minlength = 6, TabIndex = 4, @onkeyup = "CheckPassword();" })
+                                                <span class="hideShowpass" id="hideShow1"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.Password)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="dvPassword @(Model.UserId > 0 ? " hide" : " show")">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.ConfirmPassword)<em class="required-field"> *</em>
+                                            <div class="form-group has-feedback">
+                                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control confirm-password-verify", maxlength = 50, autocomplete = "new-password", minlength = 6, TabIndex = 4 })
+                                                <span class="hideShowpass" id="hideShow2"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                            </div>
+                                            @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 vendorMelti-Select">
+                            <div class="tracking-lenged">
+                                <h3>Assigned:</h3>
+                                <div class="userchecklist">
+
+                                    <div class="userchecklist-col1"><strong>Campus Assigned:</strong></div>
+
+                                    <div class="checkSetpsicon userchecklist-col1">
+                                        <div>
+                                            <img src="/dist/Images/User/checkbox-step1.svg" />
+                                            Campus assigned to user
+                                        </div>
+                                        <div>
+                                            <img src="/dist/Images/User/checkbox-step2.svg" />
+                                            Primary Campus for user
+                                        </div>
+                                    </div>
+                                </div>
+                                @await Component.InvokeAsync("UserUserSiteView", new { userId = Model.UserId })
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="tracking-lenged">
+                                <h3>
+                                    Drawings Assigned:
+                                </h3>
+                                @await Component.InvokeAsync("UserUserDrawingView",
+                               new { userId = Model.UserId, vendorId = Model.VendorId, selectedValues = Model.DrpDrawingsIds })
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="tracking-lenged">
+                                <h3>
+                                    Permit Assigned:
+                                </h3>
+                                @await Component.InvokeAsync("UserUserPermitView",
+                              new { userId = Model.UserId, vendorId = Model.VendorId, selectedValues = Model.PermitTypeIds })
+                                @*@{Html.RenderAction("UserPermitView", "User", new { userId = Model.UserId, vendorId = Model.VendorId, selectedValues = Model.PermitTypeIds });}*@
+                            </div>
+                        </div>
+                        <div class="col-md-12 text-right button_Div">
+                            @if (Model.UserId > 0 && Model.LoginCount == 0 && HCF.Web.Base.UserSession.CurrentUser.IsPowerUserOrSystemAdmin)
+                            {
+                                <a class="comm-Backbutton" id="btnDeleteUser" onclick="DeleteUser(@Model.UserId)">Delete User</a>
+                            }
+                            @if (@ViewBag.SubmitValue == "Update")
+                            {
+                                <a class="comm-bluebutton" id="btnResetPwd" onclick="ResetPwd(this)">Reset Password</a>
+                            }
+                            <input type="submit" value='@ViewBag.SubmitValue' class="comm-button" name="submitType" id="btnSubmit" />
+
+                            @if (Model.VendorId > 0)
+                            {
+                                <a asp-controller="Vendor" id="Vencan" asp-action="Vendors" style="display:none" class="comm-Cancelbutton">Cancel</a>
+                            }
+                            else
+                            {
+                                <a asp-controller="User" asp-action="Users" class="comm-Cancelbutton">Cancel</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        var count = 0;
+        //
+        var userdomalin = '@Model.Organization.UserDomain';
+        var array = userdomalin.split(",");
+        //Email Domain Suggetions
+    var EmailDomainSuggester =
+    {
+        domains: array,
+        bindTo: $('#Email'),
+        init: function() {
+        this.addElements();
+        this.bindEvents();
+
+  },
+
+    addElements: function()
+    {
+    // Create empty datalist
+    this.datalist = $("<datalist />", {
+      id: 'email-options'
+    }).insertAfter(this.bindTo);
+    // Corelate to input
+    this.bindTo.attr("list", "email-options");
+    },
+    bindEvents: function()
+    {
+    this.bindTo.on("keyup", this.testValue);
+    },
+    testValue: function(event)
+    {
+    var el = $(this),
+    value = el.val();
+    // email has
+    // remove != -1 to open earlier
+    if (value.indexOf("@@")!=-1) {
+      value = value.split("@@")[0];
+        EmailDomainSuggester.addDatalist(value);
+    } else {
+      // empty list
+      EmailDomainSuggester.datalist.empty();
+    }
+},
+
+    addDatalist: function(value)
+    {
+    var i, newOptionsString = "";
+    for (i = 0; i < this.domains.length; i++) {
+      newOptionsString +=
+        "<option value='" +
+          value +
+          "@@" +
+          this.domains[i] +
+        "'>";
+    }
+    // add new ones
+    this.datalist.html(newOptionsString);
+    }
+}
+    EmailDomainSuggester.init();
+        //Bind Domain name in DDL
+        var array = userdomalin.split(",");
+        $.each(array, function (i)
+        {
+            $("#ddlUserdomain").append($("<option></option>").val(array[i]).html(array[i]));
+        });
+        //Bind Domain name in DDL
+        function EmailAmed()
+        {
+            var userdomain = $('#txtUserDomain').val();
+            var domainName = $('#ddlUserdomain option').filter(":selected").val();
+            var UserEmail = userdomain + '@@' + domainName;
+           // alert(UserEmail);
+            $('#Email').val(UserEmail);
+        }
+       // console.log(roleIds);
+
+    var btnSubmit = $("#btnSubmit");
+    var userTypeChk = $("#userType");
+    var userId = @Model.UserId;
+
+        var chkPassword = $("#chkPassword");
+        if (parseInt(userId) > 0 && chkPassword.val() != true) {
+            btnSubmit.removeClass("disable");
+        }
+
+        function CheckPassword() {
+            var password = $("#Password").val();
+            if (password != "") {
+                $('#ConfirmPassword').attr('required', true);
+            } else {
+                $('#ConfirmPassword').attr('required', false);
+            }
+        }
+
+        $("#btnSubmit").click(function () {
+
+            var drpDrawingsIds = $(".drawingTypeChk:checkbox:checked").map(function () {
+                return $(this).val();
+            }).get();
+
+            $("#drawingsIds").val(drpDrawingsIds.join(','));
+
+
+            var permitAssigneeType = $(".permitTypeChk:checkbox:checked").map(function () {
+                return $(this).val();
+            }).get();
+
+            $("#permitIds").val(permitAssigneeType.join(','));
+
+            var isCheckPasswordCheck = $("#chkPassword").is(":checked");
+            if (isCheckPasswordCheck) {
+                var newPassword = $("#NPassword").val();
+                var newConfirmPassword = $("#confirmPassword").val();
+                if (newPassword.length == 0) {
+                    AlertWarningMsg("please enter new password");
+                    $("#NPassword").focus();
+                    return false;
+                }
+                else if (newPassword.length < 6) {
+                    AlertWarningMsg("Passwords must be at least 6 characters long.");
+                    return false;
+                }
+                else if (newConfirmPassword.length == 0) {
+                    AlertWarningMsg("please enter new confirm password"); $("#confirmPassword").focus();
+                    return false;
+                }
+                else if (newPassword != newConfirmPassword) {
+                    AlertWarningMsg("confirm password must be same new password"); $("#confirmPassword").focus();
+                    return false;
+                }
+            }
+            //checking Final Email Address
+            //debugger;
+            //CheckExistingEmail();
+            //
+        });
+
+        var password = document.getElementById("Password");
+        var confirm_password = document.getElementById("ConfirmPassword");
+
+        function validatePassword() {
+            if (password.value != confirm_password.value) {
+                confirm_password.setCustomValidity("Passwords Don't Match");
+            } else {
+                confirm_password.setCustomValidity('');
+            }
+        }
+
+        password.onchange = validatePassword;
+        confirm_password.onkeyup = validatePassword;
+
+        $(".alphaonly").on("keypress", function (e) {
+            if (e.which === 32 && !this.value.length)
+                e.preventDefault();
+        });
+
+        $("#Email").focusout(function ()
+        {
+          CheckExistingEmail();
+        });
+
+
+        function setDefaultValues(isResetddlValue) {
+
+        }
+
+        $('input[type=radio][name=users]').change(function () {
+            var addoredit = "";
+            if (userId == '0') {
+                addoredit = " create a new";
+            }
+            else {
+                addoredit = " edit ";
+            }
+            var username = "";
+            if ($(this).val() == "user") {
+                username = " internal user. ";
+            }
+            else {
+                username = " vendor user. ";
+            }
+            var msg = "Fill out the required information to" + addoredit + username;
+            $("#spaninstruction").html(msg);
+            //debugger;
+            // setDefaultValues(1);
+        });
+
+        function CheckExistingEmail() {
+
+            var vendorsid = "@Model.VendorId"
+            var oldEmail = $("#hdnEmail").val();
+            var email = $("#Email").val();
+            var userId = $("#UserId").val();
+            var Domains = "@Model.Organization.UserDomain";
+
+
+            if (oldEmail != email && vendorsid > '0') {
+                $.get(CRxUrls.user_CheckExistingEmail + '?Email=' + email + '&UserId=' + userId, function (data) {
+                    if (data == 1) {
+                        InvalidInputHelper(document.getElementById("Email"), {
+                            defaultText: "Please enter an email address!",
+                            emptyText: "Please enter an email address!",
+                            invalidText: function (input) {
+                                return "This e-mail Id is " + input.value + " already exists";
+                            }
+                        });
+                    }
+
+                });
+            }
+            else if (oldEmail != email) {
+                $.get(CRxUrls.user_CheckExistingEmail + '?Email=' + email + '&UserId=' + userId, function (data) {
+                    if (data == 1) {
+                        InvalidInputHelper(document.getElementById("Email"), {
+                            defaultText: "Please enter an email address!",
+                            emptyText: "Please enter an email address!",
+                            invalidText: function (input) {
+                                return "This e-mail Id is " + input.value + " already exists";
+                            }
+                        });
+                    }
+                    else if (data == 2) {
+                        InvalidInputHelper(document.getElementById("Email"), {
+                            defaultText: "Please enter an email address!",
+                            emptyText: "Please enter an email address!",
+                            invalidText: function (input) {
+                                return "User can not create with other than  this domain " + '"' + "" + Domains + "" + '"' + "";
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+
+        $(document).ready(function () {
+
+            if (userId == 0) {
+                $(".user-type-button").hide();
+            }
+            if (userId > 0) {
+                $("#Email").addClass('disabled');
+            }
+            ////Hide Model Bind Email
+            //$("#Email").hide();
+            $("#chkPassword").click(function () {
+                if ($(this).is(":checked")) {
+                    $(".dvPassword").removeClass("hide");
+                    $("#Password").prop('required', true);
+                    $("#ConfirmPassword").prop('required', true);
+                    //btnSubmit.addClass('disable');
+                } else {
+                    $(".dvPassword").addClass("hide");
+                    $("#Password").prop('required', false);
+                    $("#ConfirmPassword").prop('required', false);
+                    btnSubmit.removeClass("disable");
+                }
+            });
+
+            PasswordValidator.setup('Password', 'ConfirmPassword');
+
+            setDefaultValues(0);
+
+        @if (Model.VendorId != null)
+            {
+                @:$("#VendorId").val('@Model.VendorId');
+
+            }
+            $('#Vencan').show();
+            $("#hideShow1").on('click', function () {
+                var $pwd = $("#Password");
+                if ($pwd.attr('type') === 'password') {
+                    $pwd.attr('type', 'text');
+                } else {
+                    $pwd.attr('type', 'password');
+                }
+            });
+            $("#hideShow1").click(function () {
+                $("#hideShow1 .fa").toggleClass("fa-eye-slash");
+            });
+            $("#hideShow2").on('click', function () {
+                var $pwd = $("#ConfirmPassword");
+                if ($pwd.attr('type') === 'password') {
+                    $pwd.attr('type', 'text');
+                } else {
+                    $pwd.attr('type', 'password');
+                }
+            });
+            $("#hideShow2").click(function () {
+                $("#hideShow2 .fa").toggleClass("fa-eye-slash");
+            });
+        });
+
+        var ResetPwd = function (e) {
+            var emailid = e.getAttribute('emailid')
+            swal({
+                html: true,
+                title: "",
+                text: "You are about to reset the password for this user. Would you like to send an email to the user?",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: '@Url.Action("ResetPassword", "User")',
+                            type: "GET",
+                            data: $('#Registerform').serialize(),
+                            dataType: 'json',
+                            contentType: "application/json; charset=utf-8",
+                            success: function (result) {
+                                if (result == "Done") {
+                                    swalalert("Email Sent Successfully.")
+                                    //  location.reload()
+                                } else {
+                                    swalalert("Email Sent Failed!")
+                                }
+                            }
+                        });
+                    }
+                });
+        };
+
+        function DeleteUser(ID)
+        {
+           // window.location.href = "/users";
+            if (ID > 0) {
+                swal({
+                html: true,
+                title: "Delete User",
+                text: "Would You like to delete this user?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm)
+		        {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteUser", "User")' + "?id=" + ID,
+                            type: "POST",
+                            data: {
+                                id: ID,__RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val()
+                            },
+                            success: function (res) {                              
+                                if (res.result == 1) {                             
+                                    AlertSuccessMsg(res.msg);                                   
+                                     window.location.href = '@Url.RouteUrl("users")';
+                                }
+                                else {
+                                    AlertWarningMsg(res.msg);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+        }
+
+    </script>
+}
+
+<style>
+    .show {
+        display: inline-block !important;
+    }
+
+    .userenameEmialBox {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .userCol-1 {
+        width: 70%;
+    }
+
+    .userCol-2 {
+        width: 30%;
+    }
+</style>

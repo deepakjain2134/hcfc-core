@@ -1,0 +1,272 @@
+﻿@model HCF.BDO.InspectionReport
+@{ 
+    HCF.BDO.Enums.Frequency frequencyValue = (HCF.BDO.Enums.Frequency)ViewBag.FrequencyId;
+}
+<div class="compliancePadding"></div>
+<div class="row">
+    <div class="col-md-4">
+        <label>Active Year : <span id="spnactiveyear"></span></label>
+    </div>
+    <div class="col-md-8 text-right">
+        <label>Select a previous EP Review date to add a document to that review period</label>
+    </div>
+</div>
+<div class="row">
+
+
+    <div class="col-md-122">
+        <div class="sliderArrowBox">
+            <a class="inspectionsSlider"><span class="prev">&#10094;</span></a>
+            <div class="calendarMainBox">
+                <div class="calender-header">
+                    <div class="monthName" title="January">Jan</div>
+                    <div class="monthName" title="February">Feb</div>
+                    <div class="monthName" title="March">Mar</div>
+                    <div class="monthName" title="April">Apr</div>
+                    <div class="monthName" title="May">May</div>
+                    <div class="monthName" title="June">Jun</div>
+                    <div class="monthName" title="July">Jul</div>
+                    <div class="monthName" title="August">Aug</div>
+                    <div class="monthName" title="September">Sep</div>
+                    <div class="monthName" title="October">Oct</div>
+                    <div class="monthName" title="November"> Nov</div>
+                    <div class="monthName" title="December">Dec</div>
+                </div>
+                <div class="calender-body">
+                    @{
+                        foreach (var yr in Model.Years.OrderBy(x => x.YearId))
+                        {
+                            var startDate = new DateTime(Convert.ToInt32(yr.Name), 1, 1);
+                            // var endDate = new DateTime();
+                            var numberNames = GetColumnColumnCount(ViewBag.FrequencyId);
+                            int columCOunt = numberNames["columCount"];
+                            int colSpanCount = numberNames["colspan"];
+                            if (Convert.ToInt32(frequencyValue) != 8)
+                            {
+                                for (int i = 0; i < columCOunt; i++)
+                                {
+                                    var endDate = startDate.AddMonths(colSpanCount).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+                                    <div startdate="@startDate.ToFormatDate()" enddate="@endDate" class="monthDates @string.Format("frequency_{0}", ViewBag.FrequencyId)">
+                                        @{
+
+                                            var inspections = yr.Months.SelectMany(x => x.Inspections);
+                                            var data = inspections.Where(x => x.StartDate >= startDate && x.StartDate <= endDate && x.Status == 1).OrderBy(x => x.StartDate).ToList();
+                                            if (colSpanCount > 1)
+                                            {
+                                                var latestinspection = data.GroupBy(x => x.StartDate.Date).OrderByDescending(x => x.Key).FirstOrDefault();
+                                                if (latestinspection != null)
+                                                {
+
+                                                    <a href="@Url.Action("InspectionDateSelect", "Inspection" ,new { epId=Model.EPDetailId ,StartDate=startDate,EndDate=endDate})"
+
+                                                       title=""
+                                                       data-toggle="modal" data-target="#modal-container"
+                                                       class="inspectionBtn">
+                                                        @string.Format("Completed {0}/{1}", latestinspection.Key.Month, latestinspection.Key.Day)
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    if (DateTime.Now >= startDate && DateTime.Now <= endDate)
+                                                    {
+                                                        <a href="@Url.Action("EPstate", "Goal", new {epId = Model.EPDetailId})"
+                                                           title=""
+                                                           class="@string.Format(" inspectionBtn")">
+                                                            Current Inspection
+                                                        </a>
+
+                                                    }
+                                                    else if (endDate < DateTime.Now)
+                                                    {
+
+                                                        <a href="@Url.Action("InspectionDateSelect", "Inspection" ,new { epId=Model.EPDetailId, StartDate=startDate,EndDate=endDate })"
+
+                                                           title=""
+                                                           data-toggle="modal" data-target="#modal-container"
+                                                           class="@string.Format(" inspectionBtn")">
+                                                            Previous Inspection
+                                                        </a>
+                                                    }
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var latestinspection = data.GroupBy(x => x.StartDate.Date).OrderByDescending(x => x.Key).FirstOrDefault();
+                                                if (latestinspection != null)
+                                                {
+                                                    <a href="@Url.Action("InspectionDateSelect", "Inspection" ,new{ epId = Model.EPDetailId,StartDate=startDate,EndDate=endDate })"
+                                                       title=""
+                                                       data-toggle="modal" data-target="#modal-container"
+                                                       class="inspectionBtn">
+                                                        @string.Format("Completed {0}/{1}", latestinspection.Key.Month, latestinspection.Key.Day)
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    if (DateTime.Now >= startDate && DateTime.Now <= endDate)
+                                                    {
+                                                        <a href="@Url.Action("EPstate", "Goal", new {epId = Model.EPDetailId})"
+                                                           title=""
+                                                           class="@string.Format(" inspectionBtn")">
+                                                            Current Inspection
+                                                        </a>
+
+                                                    }
+                                                    else if (endDate < DateTime.Now)
+                                                    {
+                                                        <a href="@Url.Action("InspectionDateSelect", "Inspection" ,new { epId = Model.EPDetailId,StartDate=startDate,EndDate=endDate })"
+                                                           title=""
+                                                           data-toggle="modal" data-target="#modal-container"
+                                                           class="@string.Format(" inspectionBtn")">
+                                                            Previous Inspection
+                                                        </a>
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                        @{startDate = startDate.AddMonths(colSpanCount);}
+                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                for (int i = 1; i <= columCOunt; i++)
+                                                {
+                                     var monthendDate = startDate.AddMonths(colSpanCount).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59);
+                                    <div startdate="@startDate.ToFormatDate()" enddate="@monthendDate" class="monthDates @string.Format("frequency_{0}", ViewBag.FrequencyId)">
+
+                                        @foreach (var m in yr.Months.Where(x=>x.MonthId==i))
+                                        {
+
+                                        var weeks = commonModelFactory.GetWeeks(Convert.ToInt32(yr.Name), m.MonthId);
+                                        foreach (var item in weeks.OrderBy(x => x.weekNum))
+                                        {
+                                        startDate= item.weekStart;
+
+                                        <div startdate="@startDate.ToFormatDate()" enddate="@item.weekFinish" class="@string.Format("frequency_{0}", ViewBag.FrequencyId)">
+                                            @{
+                                                var endDate = item.weekFinish;
+                                                var inspections = yr.Months.SelectMany(x => x.Inspections);
+                                                var data = inspections.Where(x => x.StartDate >= startDate && x.StartDate <= endDate && x.Status == 1).OrderBy(x => x.StartDate).ToList();
+                                                var latestinspection = data.GroupBy(x => x.StartDate.Date).OrderByDescending(x => x.Key).FirstOrDefault();
+                                                if (latestinspection != null)
+                                                {
+                                                    <a href="@Url.Action("InspectionDateSelect", "Inspection", new { epId = Model.EPDetailId,StartDate=startDate,EndDate=endDate })"
+                                                       title=""
+                                                       data-toggle="modal" data-target="#modal-container"
+                                                       class="inspectionBtn">
+                                                        @string.Format("Completed {0}/{1}", latestinspection.Key.Month, latestinspection.Key.Day)
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    if (DateTime.Now >= startDate && DateTime.Now <= endDate)
+                                                    {
+                                                        <a href="@Url.Action("EPstate", "Goal", new { epId = Model.EPDetailId })"
+                                                           title=""
+                                                           class="@string.Format("inspectionBtn")">
+                                                            Current Inspection
+                                                        </a>
+
+                                                    }
+                                                    else if (endDate < DateTime.Now)
+                                                    {
+                                                        <a href="@Url.Action("InspectionDateSelect", "Inspection", new { epId = Model.EPDetailId,StartDate=startDate,EndDate=endDate })"
+                                                           title=""
+                                                           data-toggle="modal" data-target="#modal-container"
+                                                           class="@string.Format(" inspectionBtn")">
+                                                            Previous Inspection
+                                                        </a>
+                                                    }
+
+                                                }
+
+
+                                            }
+
+                                        </div>
+
+                                        }
+                                        }
+
+                                    </div>
+                                }
+
+                            }
+
+
+                        }
+                    }
+                </div>
+            </div>
+            <a class="inspectionsSlider"><span class="next"> &#10095;</span></a>
+        </div>
+    </div>
+    <input type="hidden" id="Startyear" value="@DateTime.Now.Year" />
+    <input type="hidden" id="Activeyear" value="" />
+</div>
+
+@functions{
+
+    public static IDictionary<string, int> GetColumnColumnCount(int frquencyId)
+    {
+        IDictionary<string, int> numberNames = new Dictionary<string, int>();
+
+        var frequency = (HCF.BDO.Enums.Frequency)frquencyId;
+        switch (frequency)
+        {
+            case HCF.BDO.Enums.Frequency.Annually:
+                numberNames.Add("columCount", 1);
+                numberNames.Add("colspan", 12);
+                break;
+            case HCF.BDO.Enums.Frequency.Quarterly:
+                numberNames.Add("columCount", 4);
+                numberNames.Add("colspan", 3);
+                break;
+            case HCF.BDO.Enums.Frequency.SemiAnnually:
+                numberNames.Add("columCount", 2);
+                numberNames.Add("colspan", 6);
+                break;
+            case HCF.BDO.Enums.Frequency.ThreeMonths:
+                numberNames.Add("columCount", 3);
+                numberNames.Add("colspan", 12);
+                break;
+            default:
+                numberNames.Add("columCount", 12);
+                numberNames.Add("colspan", 1);
+                break;
+        }
+        return numberNames;
+    }
+}
+<script>
+    $("#Activeyear").val($("#Startyear").val());
+    var Activeyear = $("#Activeyear").val();
+    $("#spnactiveyear").text($("#Activeyear").val());
+    $('.prev').on('click', function () {
+        debugger
+        var Activeyear = $("#Activeyear").val();
+        var Startyear = $("#Startyear").val();
+        if (Activeyear <= Startyear) {
+            var Year = parseInt(Activeyear) - 1;
+            $("#Activeyear").val(Year);
+            $("#spnactiveyear").text($("#Activeyear").val());
+            loadYearData(Year);
+        }
+    });
+
+    $('.next').on('click', function () {
+        debugger
+        var Activeyear = $("#Activeyear").val();
+        var Startyear = $("#Startyear").val();
+        if (Activeyear != Startyear) {
+            var Year = parseInt(Activeyear) + 1;
+            $("#Activeyear").val(Year)
+            $("#spnactiveyear").text($("#Activeyear").val());
+            loadYearData(Year);
+        }
+    });
+</script>
+

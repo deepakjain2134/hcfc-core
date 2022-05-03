@@ -1,0 +1,186 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+     string pagemode = ViewBag.Pagemode;
+}
+
+<table class="table table-bordered table-striped" id=@($"{(pagemode == "Page" ? "frequencyTable" : "frequencyTablePopUp")}")>
+    <thead>
+        <tr>
+            <th style="display:none">TjcFreqId</th>
+            @if (pagemode == "PopUp")
+            {
+                <th></th>
+            }
+                <th>
+                    Standard,EP
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th style="display:none">
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th class=@($"{(pagemode == "Page" ? "" : "hide")}")>Document</th>
+                <th class=@($"{(pagemode == "Page" ? "" : "hide")}")>
+                    Asset
+                </th>
+                <th>
+                    TJC Freq
+                </th>
+                <th>
+                    Custom Freq
+                </th>
+                @if (pagemode == "Page")
+                {
+                    <th>
+                        Scheduled Date
+                    </th>
+                    <th style="display:none">Search Text</th>
+                }
+
+            </tr>
+    </thead>
+    <tbody>
+        @{int i = 0; }
+        @foreach (var item in Model.Where(x => x.IsUpComingEp == false))
+        {
+        <tr id="@item.EPDetailId">
+            @if (pagemode == "PopUp")
+            {
+                <td style="display:none">
+                    @foreach (var epFrequency in item.EPFrequency.Where(x => x.IsActive))
+                    {
+                        <span>@epFrequency.TjcFrequency.FrequencyId</span>
+                    }
+                </td>
+            }
+            else
+            {
+                <td style="display:none">
+                    @item.EPFrequency.FirstOrDefault().FrequencyId
+                </td>
+            }
+
+            @if (pagemode == "PopUp")
+            {
+                <td style="position: relative;">
+                    @Html.CheckBox("epidCheckbox", new { @epid = item.EPDetailId })<span></span>
+                </td>
+            }
+        <td>
+            @commonModelFactory.GetEpStandard(item)
+            <br />
+            @if (pagemode == "PopUp")
+            {
+                <span>
+                    <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="Document Required" />
+                </span>
+                if (item.IsAssetsRequired)
+                {
+        <span>
+            <img src="@Url.Content("~/dist/Images/Icons/default.png")" style="height: 31px; width: 38px;" class="tooltiplock"  />
+            <strong class="tooltipTitlelock">@string.Join(" , ", item.Assets.Where(x => x.Name != "").Select(x => x.Name))</strong>
+        </span>
+                }
+
+            }
+        </td>
+        <td class="">
+            @*@await Component.InvokeAsync("EpDescription", new { epDetailId = item.EPDetailId, maxLength = 90, epdetails = item })*@
+
+            @await Html.PartialAsync("_EpDescription", item.Description,
+                         new ViewDataDictionary(
+                         new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                         new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                       {{ "minLength", "100" }, { "standardEp", @item.StandardEp }}
+                        )
+
+
+
+
+        </td>
+                <td style="display:none">
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td class=@($"{(pagemode == "Page" ? "" : "hide")}")>
+                    @if (item.IsDocRequired)
+                    {
+                        <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="Document Required" />
+                    }
+                </td>
+                <td class=@($"{(pagemode == "Page" ? "" : "hide")}")>
+                    @string.Join(" , ", item.Assets.Where(x => x.Name != "").Select(x => x.Name))
+                </td>
+                <td>
+                    @foreach (var epFrequency in item.EPFrequency.Where(x => x.IsActive))
+                    {
+                        <span>@epFrequency.TjcFrequency.DisplayName</span>
+                    }
+                </td>
+                <td class="text-left">
+                    @foreach (var epFrequency in item.EPFrequency.Where(x => x.IsActive))
+                    {
+                        <button type="button"
+                                class="open-AddDialog table-button @(pagemode == "PopUp" ? "disabled" : "")"
+                                id='@($"ep_{item.EPDetailId}")'
+                                data-epdetailid='@item.EPDetailId'
+                                data-epfrequencyid='@epFrequency.EpFrequencyId'
+                                data-frequencyid='@epFrequency.Frequency.FrequencyId'
+                                data-days="@epFrequency.TjcFrequency.Days"
+                                data-toggle="modal" data-target="#myModal">
+                            @Html.DisplayFor(modelItem => epFrequency.Frequency.DisplayName)
+                        </button>
+                    }
+                </td>
+                @if (pagemode == "Page")
+                {
+                    <td>
+                        @Html.TextBoxFor(m => item.InspectionDate, $"{item.InspectionDate:MM/dd/yyyy}",
+                        new
+                        {
+                            @class = "form-control datepicker epSceduleDate",
+                            id = "InspectionDate_" + i,
+                            @autocomplete = "off"
+                        })
+                    </td>
+                    <td style="display:none">@item.EPSearchText</td>
+                }
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
+<script>
+    $(function () {
+        $('.epSceduleDate').datepicker({               
+            dateFormat: 'mm/dd/yy',
+            maxDate: '0',
+            beforeShow: function () {
+                jQuery(this).datepicker({ maxDate: 0 });
+            },
+                onSelect: function () {
+                   
+                    $.ajax({
+                        url: '@Url.Action("UpdateEpInspStartDate", "Goal")',
+                        type: "POST",
+                        contentType: 'application/x-www-form-urlencoded',
+                        data: {
+                            epdetailId: $(this).parent().parent()[0].id,
+                            frequencyId: $(this).closest("tr").find(".table-button ").data("frequencyid"),
+                            inspectiondate: $(this).val()
+                        },
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Result) {
+                                AlertSuccessMsg("Inspection date added successfully!")
+                                //$("#" + result.EPDetailId).addClass("disabled");
+                            }
+                            //alert("Call");
+                        }
+                    });
+                    //alert('Datepicker Closed' + $(this).val());
+                }
+        });
+    
+    });
+</script>

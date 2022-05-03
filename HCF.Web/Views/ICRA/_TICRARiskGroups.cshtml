@@ -1,0 +1,37 @@
+﻿@model List<HCF.BDO.ConstructionRisk>
+@*<span class="stepNo">
+    Step 2:
+</span><br />*@
+    Using the following table, identify the Patient Risk Groups that will be affected. <br />
+    If more than one risk group will be affected, select the higher risk group:
+
+
+<table class="table table-bordered comman_checkbox1">
+    <tr>
+        @foreach (var item in Model.Where(x => x.IsActive))
+        {
+            <td align="center" class="riskgroup" rel="@item.ConstructionRiskId">
+                @item.RiskName
+            </td>
+        }
+    </tr>
+    <tr>
+        @foreach (var item in Model.Where(x => x.IsActive))
+        {
+            <td valign="top">
+                <ul>
+                    @foreach (var riskArea in item.RiskArea.Where(x => x.IsActive == true && x.ApprovalStatus == 1).OrderBy(x=>x.Name).ToList())
+                    {
+                        <li>
+                            <input type="checkbox" value="@item.ConstructionRiskId" rel="@riskArea.RiskAreaId" class="constrisk" 
+                                   classname="@item.RiskName"                                    
+                                   riskName="@item.RiskName"
+                                   /><span></span>
+                            @riskArea.Name
+                        </li>
+                    }
+                </ul>
+            </td>
+        }
+    </tr>
+</table>

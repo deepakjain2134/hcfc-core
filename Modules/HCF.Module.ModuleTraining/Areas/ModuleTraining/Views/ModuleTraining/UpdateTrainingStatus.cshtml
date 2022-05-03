@@ -1,0 +1,359 @@
+﻿@model HCF.BDO.ModuleTraining.OrgTrainingSessions
+@using HCF.BDO.Enums
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Training Session</h4>
+</div>
+<form asp-action="UpdateTrainingStatus" data-ajax-success="OnSuccess" asp-controller="ModuleTraining"
+      asp-area="ModuleTraining" data-ajax-method="POST" id="saveForm">
+
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(x => x.ModuleSessionId)
+                @Html.HiddenFor(x => x.Id)
+
+
+                <div class="form-group">
+                    @*@Html.LabelFor(Model=>Model.TrainingSessionMaster.Name)*@
+                    <label>@Model.TrainingSessionMaster?.Name</label>
+                </div>
+                <div class="form-group">
+                    <label>@Model.TrainingSessionMaster?.ShortDescription</label>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label>Date: <em class="required-field">*</em></label>
+                        @Html.TextBoxFor(x => x.Date, $"{Model.Date:MM/dd/yyyy}", new { @class = "form-control datepicker", onkeydown = "return false", autocomplete = "off" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label>Status: <em class="required-field">*</em></label>
+
+                        @*<select asp-for="Status" asp-items="Html.GetEnumSelectList<TrainingSessionStatus>()" required="required" class="form-control">
+                                <option selected="selected" value="@Model.Status">--Select Status--</option>
+                            </select>*@
+
+                        <select class="form-control" data-val="true" data-val-required="The Status field is required." id="Status" name="Status">
+                            <option selected="selected" value="0">--Select--</option>
+                            <option value="NotStarted">Not Started</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Notcompleted">Not completed</option>
+                            <option value="CustomerDeferred">Customer Deferred</option>
+                        </select>
+                        @*@Html.DropDownListFor(model => model.Status, Html.GetEnumSelectList<TrainingSessionStatus>(), "-- Select Status --", new { @class = "form-control", required = "required" })*@
+
+                        @*@Html.DropDownListFor(model=>model.Status,Html.GetEnumSelectList(typeof(TrainingSessionStatus)),"Select Status",new { @class = "form-control" })*@
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Participants <em class="required-field">*</em></label>
+
+                    <div class="titleplusbox">
+                        <label class="customLook">Tag users you wish to take action:</label>
+                        <button type="button" id="btn1">+</button>
+                    </div>
+                    <div class="draftemail-control actionTaken">
+                        <input class='customLook' id="Participants" name="Participants" value='@Model.Participants' />
+                        <button type="button" class="getInfo hidden">Get Tagged Info</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Comments</label>
+                    @Html.TextAreaFor(x => x.Comments, new { @class = "form-control", @maxlength = 300 })
+                </div>
+            </div>
+        </div>
+        @*@Html.HiddenFor(x => x.Participants)*@
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn comm-button" id="saveButton">Save</button>
+        <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+
+    </div>
+
+</form>
+
+
+
+    <script>
+    function OnSuccess(data) {
+        debugger;
+        console.log(data);
+        swalalert(data)
+       var status = $("#TrainingSessionStatus").val();
+        $("#btn_status_" + data.ModuleSessionId).html(status);
+        $("#modal-container .close").click();
+        window.location.href = '@Url.Action("ModuleTrainingLists", "ModuleTraining")';
+    }
+
+    $(document).ready(function () {
+
+       // $('#Date').datepicker({
+         //   dateFormat: "dd-mm-yy"
+           // minDate: new Date()
+      /// });
+
+    $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: "mm-dd-yy",
+          //  maxDate: 0,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker();
+
+        if ('@Model.Status' != '')
+        {
+            $("#Status").val('@Model.Status');
+        }
+        else
+        {
+            $("#Status").val('0');
+        }
+
+    });
+
+
+
+
+    var input = document.querySelector('#Participants');
+    debugger;
+    tagify = new Tagify(input, {
+        pattern: /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+
+        callbacks: {
+            "invalid": onInvalidTag
+        },
+        dropdown: {
+            position: 'text',
+            enabled: 1
+        }
+    });
+    var button = document.querySelector('#btn1');
+
+    function onInvalidTag(e) {
+        console.log("invalid", e.detail)
+    }
+
+    button.addEventListener("click", onAddButtonClick);
+    function onAddButtonClick() {
+        tagify.addEmptyTag()
+    }
+
+    $("#saveButton").click(function () {
+        debugger;
+        var Dates = $('#Date').val();
+        
+        var date = new Date(Dates),
+            yr = date.getFullYear(),
+            month = date.getMonth()+1/* < 10 ? '0' + date.getMonth() : date.getMonth()*/,
+            day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate(),
+            newDate = yr + '-' + month + '-' + day;
+       // console.log(newDate);
+
+
+       // var Dates = $('#Date').val();
+        var Dates= newDate
+        var Statuse=$("#Status").val()
+        if (tagify.value.length == 0) {
+            AlertWarningMsg("Please select atleast one user you wish to notify");
+            return false;
+        }
+        else
+            if (Dates == 'NaN-NaN-NaN') {
+                AlertWarningMsg("Please Enter Date");
+                return false;
+            }
+            else if (Statuse == '0')
+            {
+                AlertWarningMsg("Please Select Status");
+                return false;
+            }
+           else {
+
+                debugger;
+                takenmails = [];
+                debugger;
+                for (let i = 0; i < tagify.value.length; i++) {
+                    takenmails.push(tagify.value[i].value);
+                    console.log(tagify.value[i].value);
+                }
+
+                $("#Date").val(newDate)
+                var mails = (takenmails.join(','));
+                $("#Participants").val(mails);
+                $("#saveForm").submit();
+            }
+    });
+    </script>
+    <style>
+
+
+        .ui-widget.ui-widget-content {
+            z-index: 9999 !important;
+        }
+
+        .modal-dialog {
+            max-width: 60%;
+        }
+
+        .customLook {
+            --tag-bg: #0052BF;
+            --tag-hover: #CE0078;
+            --tag-text-color: #FFF;
+            --tags-border-color: silver;
+            --tag-text-color--edit: #111;
+            --tag-remove-bg: var(--tag-hover);
+            --tag-pad: .6em 1em;
+            --tag-inset-shadow-size: 1.3em;
+            --tag-remove-btn-bg--hover: black;
+            display: inline-block;
+            min-width: 0;
+            border: none;
+        }
+
+            .customLook .tagify__tag {
+                margin-top: 0;
+            }
+
+                .customLook .tagify__tag > div {
+                    border-radius: 25px;
+                }
+
+                /* Do not show the "remove tag" (x) button when only a single tag remains */
+                .customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
+                    /*display: none;*/
+                }
+
+            .customLook .tagify__tag__removeBtn {
+                opacity: 0;
+                transform: translateX(-6px) scale(.5);
+                margin-left: -3ch;
+                transition: .12s;
+            }
+
+            .customLook .tagify__tag:hover .tagify__tag__removeBtn {
+                transform: translateX(-6px) scale(.5);
+                opacity: 1;
+                margin-left: -1ch;
+            }
+
+            .customLook + button {
+                color: #0052BF;
+                font: bold 1.4em/1.65 Arial;
+                border: 0;
+                background: none;
+                box-shadow: 0 0 0 2px inset currentColor;
+                border-radius: 50%;
+                width: 1.65em;
+                height: 1.65em;
+                cursor: pointer;
+                outline: none;
+                transition: .1s ease-out;
+                margin: 0 0 0 5px;
+                vertical-align: top;
+            }
+
+                .customLook + button:hover {
+                    box-shadow: 0 0 0 5px inset currentColor;
+                }
+
+            .customLook .tagify__input {
+                display: none;
+            }
+
+        .titleplusbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .tagify {
+            --tag-bg: #0052BF !important;
+            --tag-text-color: white !important;
+            --tag-pad: 0.5em 0.9em !important;
+            --tag-hover: #438bea !important;
+            padding: 6px 2px !important;
+            --tag-inset-shadow-size: 3.1em !important;
+            --tag-remove-bg: rgb(0 82 191) !important;
+        }
+
+        .customLook .tagify__tag {
+            margin-top: 0 !important;
+            padding: 2px !important;
+        }
+
+        .tagify__tag {
+            margin: 0 4px !important;
+        }
+
+        .tagify__tag__removeBtn {
+            order: 5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 54px;
+            cursor: pointer;
+            font: 29px/1 Arial;
+            background: var(--tag-remove-btn-bg,none);
+            color: var(--tag-remove-btn-color,#000);
+            width: 40px;
+            height: 40px;
+            margin-right: 7.66667px;
+            overflow: hidden;
+        }
+
+        .draftemail-control .selectBoxs {
+            padding: 0 0 9px 0;
+        }
+
+        .draftemail-control .bootstrap-tagsinput {
+            width: 100%;
+            border-radius: 0px;
+        }
+
+
+        .ullistitem {
+            z-index: 99;
+            position: static;
+            background: rgb(245, 245, 245);
+            left: 0px;
+            right: 0px;
+            border-top: none;
+            top: 32px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            max-height: 317px;
+            overflow: auto;
+        }
+
+        .selectBoxsfornotify .ullistitemfornotify li {
+            display: inline-block;
+            float: left;
+            width: 33.33%;
+            padding: 4px 10px;
+            position: relative;
+        }
+
+        .ullistitemfornotify {
+            z-index: 99;
+            position: static;
+            background: rgb(245, 245, 245);
+            left: 0px;
+            right: 0px;
+            border-top: none;
+            top: 32px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            max-height: 317px;
+            overflow: auto;
+        }
+    </style>
+

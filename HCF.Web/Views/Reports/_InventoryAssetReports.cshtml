@@ -1,0 +1,415 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+
+
+<table width="100%">
+    <tr>
+        <td>
+            <span id="totalResult"></span>
+        </td>
+    </tr>
+</table>
+<div class="">
+    <table id="c_myTable" class="table table-bordered table-striped" style="width:100%;">
+        <thead>
+            <tr>
+                @*<th style="display:none">Status</th>
+                    <th style="display:none">CategoryId</th>
+                    <th style="display:none">Year</th>*@
+                @*<th style="display:none">AssetId</th>*@
+                <th>
+                    Asset Name
+                </th>
+                <th>
+                    @Localizer["AssetNo"]
+                </th>
+                <th>
+                    Barcode #12
+                </th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>
+                    Location
+                </th>
+                <th>
+                    @Localizer["NearBy"]
+                </th>
+                <th>
+                    Status
+                </th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(x => x.IsDeleted == false))
+            {
+
+                <tr>
+                    @*<td style="display:none"></td>
+                        <td style="display:none"></td>
+                        <td style="display:none"></td>*@
+                    @*<td style="display:none">@item.Assets.AssetId</td>*@
+                    <td>
+                        @item.Assets.Name
+                    </td>
+                    <td>
+                        @item.AssetNo
+                    </td>
+                    <td>
+                        @item.BarCodeNo
+                    </td>
+                    <td>@item.Make.ManufactureName.CastToNA()</td>
+                    <td>@item.Model.CastToNA()</td>
+                    <td>
+                        @if (item.Floor.FloorName != null)
+                        {
+                            @commonModelFactory.GetFloorAssetLocation(item)
+                        }
+                        else
+                        {
+                            <span>NA</span>
+                        }
+                    </td>
+                    <td>
+                        @item.NearBy
+                    </td>
+                    <td>
+                        @item.StatusCode
+                    </td>
+                    
+                </tr>
+
+
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $(".comment").shorten({
+            "showChars": 150,
+            "moreText": "See More",
+        });
+
+        var dtable = $('#c_myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [[1, 'desc']],
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            //dom: 'Blfrtip',
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            //    "<'row'<'col-sm-12'tr>>" +
+            //    "<'row'<'col-sm-5'i>>" + "Blfrtip",
+
+            dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'lfp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    messageTop: function() {
+                        return $("#totalResult").text();
+                    },
+                    orientation: 'portrait',
+                    //pageSize:'LEGAL',
+                    title: 'Assets Inventory Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    //exportOptions: {
+                    //    columns: [5, 6, 7, 9, 10, 11, 12, 13],
+                    //    orthogonal: 'export'
+                    //},
+                   customize: function (doc) {
+                        //Remove the title created by datatTables
+                        doc.content.splice(0, 1);
+                        //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                        var now = new Date();
+                        var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                        // Logo converted to base64
+                        //var logo = $("#logoimgbase64").val();
+                       debugger;
+                       //var logo = sessionStorage.getItem('logoimgbase64');
+                       var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                       // console.log(logo);
+                        // The above call should work, but not when called from codepen.io
+                        // So we use a online converter and paste the string in.
+                        // Done on http://codebeautify.org/image-to-base64-converter
+                        // It's a LONG string scroll down to see the rest of the code !!!
+                        //var logo = '';
+                        // A documentation reference can be found at
+                        // https://github.com/bpampuch/pdfmake#getting-started
+                        // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                        // or one number for equal spread
+                        // It's important to create enough space at the top for a header !!!
+                        doc.pageMargins = [20, 60, 50, 30];
+                        // Set the font size fot the entire document
+                        doc.defaultStyle.fontSize = 8;
+                        // Set the fontsize for the table header
+                       doc.styles.tableHeader.fontSize = 7;
+                       doc.content[1].table.widths = ['15%', '15%', '12%', '10%', '15%', '15%', '15%','10%'];
+                       //doc.content[1].width = [10,10,10,10,10,10,10,10];
+                        // Create a header object with 3 columns
+                        // Left side: Logo
+                        // Middle: brandname
+                        // Right side: A document title
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: '',
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width:200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n Inventory Assets Report',
+                                        margin: [0, 6 , 0 , 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        // Create a footer object with 2 columns
+                        // Left side: report creation date
+                        // Right side: current page and total pages
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Created on: ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated from: ', { text: 'CRx' }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    }
+                                    //{
+                                    //    alignment: 'right',
+                                    //    text: [{ text: $.Constants.PDF_Footer_Msg_Fire_Watch_Portal_module }]
+                                    //}
+                                ],
+                                margin: 20
+                            }
+                        });
+                        // Change dataTable layout (Table styling)
+                        // To use predefined layouts uncomment the line below and comment the custom lines below
+                        // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    messageTop: function () {
+                        return $("#totalResult").text();
+                    },
+                    title: 'Assets Inventory Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [5,6,7,9,10,11,12,13],
+                        orthogonal: 'export'
+                    }
+                }
+            ],
+            drawCallback: function () {
+                var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+                $('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+            }
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+
+        showCount(0);
+        function showCount(assetType) {
+            debugger
+            $("#totalResult").html("");
+            var floorAssets = convertTableToArrayObject();
+
+            if (assetType > 0) {
+                floorAssets = jQuery.grep(floorAssets, function (product, i) {
+                    return product[3] == assetType;
+                });
+            }
+
+            var passFloorAssets = jQuery.grep(floorAssets, function (product, i) {
+                //console.log(product)
+                return product[0] == "1";
+            });
+
+            var failFloorAssets = jQuery.grep(floorAssets, function (product, i) {
+                //console.log(product[0])
+                return product[0] == "0";
+            });
+
+
+            var totalInspection = passFloorAssets.length + failFloorAssets.length;
+            var totalfailed = (failFloorAssets.length / totalInspection) * 100;
+            if (isNaN(totalfailed)) {
+                totalfailed = 0;
+            }
+            var buildingName = $("#drpBuildings option:selected").text();
+            var floorsName = $("#floorId option:selected").text();
+            var location = buildingName + "," + floorsName;
+            if (buildingName == "All" && floorsName == "All") {
+                location = "All";
+            }
+
+            var activeFloorAssets = jQuery.grep(floorAssets, function (product, i) {
+               // console.log(product[11])
+                return product[7] == "ACTIV";
+            });
+            var inActiveFloorAssets = jQuery.grep(floorAssets, function (product, i) {
+                //console.log(product[11])
+                return product[7] == "INACT";
+            });
+
+            var retireFloorAssets = jQuery.grep(floorAssets, function (product, i) {
+                //console.log(product[11])
+                return product[7] == "RETIR";
+            });
+
+            //var notInspected = floorAssets.length - totalInspection;
+            $("#totalResult").html("<b>Location: </b>" + location + " <b>Total Assets: </b>" + floorAssets.length + "  <b>  Total Active Assets: </b> " + activeFloorAssets.length + "  <b>   Total InActive Assets: </b> " + inActiveFloorAssets.length + "  <b>  Total Retired Assets: </b> " + retireFloorAssets.length);
+
+        }
+
+        function MathRound(input) {
+            if (Math.round(input) !== input) {
+                input = input.toFixed(2);
+            }
+            return input;
+        }
+
+
+        $(document).on("click", "div.insstatus", function () {
+            var activityId = $(this).attr("activityId");
+            var url = '@Url.Action("ActivityHistory","Assets")';
+            window.open(url + "?activityId=" + activityId);
+            //$.get(url + "?activityId=" + activityId, function () { });
+        });
+
+
+        $('#btn_all').on('click', function () {
+            debugger;
+            //localStorage.setItem("btnValue", "");
+            Searching();
+        });
+
+        $('#btn_pastdue').on('click', function () {
+            debugger;
+           // localStorage.setItem("btnValue", "-1");
+            Searching();
+        });
+
+        $('a.filter_due_within').on('click', function (e) {
+            debugger;
+            e.preventDefault();
+            var days = parseInt($(this).text());
+            $(this).parent().parent().siblings('button').val("Due with in " + days + " Days")
+            //localStorage.setItem("CustomSearch", true);
+            //localStorage.setItem("Datein", days);
+            dtable.draw();
+            //localStorage.setItem("CustomSearch", "");
+        });
+
+        $('#btn_upcoming').on('click', function () {
+           
+            Searching();
+        });
+
+        $("input[name=EPCat]:radio").change(function () {
+            var catId = $("input[name='EPCat']:checked").val();
+            //localStorage.setItem("EPCatId", catId);
+            Searching();
+        });
+
+        function Searching() {
+          
+        }
+
+        $('#AssetTypeList').on('change', function () {
+            if ($(this).val() == "0") {
+                dtable.columns(3).search("").draw();
+            }
+            else {
+                dtable.columns(3).search("^" + $(this).val() + "$", true, false, true).draw();
+            }
+            showCount($(this).val());
+        });
+
+        function convertTableToArrayObject() {
+            debugger
+            var employeeObjects = [];
+            var table = $('#c_myTable').DataTable();
+            var data = table.rows().data();
+
+            for (var i = 0; i < data.length; i++) {
+                employeeObjects.push(data[i]);
+            }
+
+            return employeeObjects;
+        }
+    });
+
+
+
+
+</script>
+<style>
+    
+
+    
+    .status0 {
+        background-color: #ed1c24;
+    }
+
+    .status1 {
+        background-color: green;
+    }
+
+    .insstatus {
+        display: inline-block;
+        padding: 2px 7px;
+        color: #fff;
+        border-radius: 10px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    #totalResult {
+        display: block;
+        padding-top: 5px;
+    }
+</style>
+

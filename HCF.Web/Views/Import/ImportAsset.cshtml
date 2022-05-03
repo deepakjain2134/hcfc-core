@@ -1,0 +1,255 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@{
+    ViewBag.Title = "Import Asset Data";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Import Asset Data
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header"></div>
+                    @using (Html.BeginForm("ImportAsset", "Import", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        
+
+                            <div class="workOrder-search">
+                                <div class="row csvfeild-item">
+
+                                    <div class="form-group col-md-2 leftMargin">
+                                        <label class="control-label"><b>Select File Type</b></label>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        @{
+                                            List<SelectListItem> lst = new List<SelectListItem> { new SelectListItem { Value = "0", Text = "Select File Type" }, new SelectListItem { Value = "Assest", Text = "Assest", Selected = true } };
+                                            @Html.DropDownList("ddlFiletype", lst, new { @class = "form-control" });
+                                        }
+                                    </div>
+                                </div>
+                                <div class="row csvfeild-item">
+                                    <div class="form-group col-md-2 leftMargin">
+                                        <label class="control-label"><b>Browse file for Import #</b></label>
+                                    </div>
+                                    <div class="form-group col-md-5">
+                                        <input class="form-control" type="file" id="FileUpload1" name="FileUpload1" accept=".csv" required />
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <input type="submit" value="Import File" class="btn btn-primary" />
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <table id="tblsample-file-import-floorAssets" style="display:none">
+                                            <thead>
+                                                <tr>
+                                                    <td>AssetName</td>
+                                                    <td>LocationName</td>
+                                                    <td>AssetsCategory</td>
+                                                    <td>AssetsSubCategory</td>
+                                                    <td>AssetNo</td>  @*AssetNo is Device No.*@
+                                                    <td>BarcodeNo</td>  @*Barcode # is Serial No.*@
+                                                    <td>Rating</td>
+                                                    <td>Model</td>
+                                                    <td>NearBy</td>
+                                                    <td>Description</td>
+                                                    <td>Building</td>
+                                                    <td>Floor</td>
+                                                    <td>Stops</td>
+                                                    <td>Status</td>
+                                                    <td>WallRating</td>
+                                                    <td>DoorRating</td>
+                                                    <td>FrameRating</td>
+                                                    <td>Make</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Fire Door</td>
+                                                    <td>USA-Florida</td>
+                                                    <td>Select Asset Type</td>
+                                                    <td>All</td>
+                                                    <td>1729</td>
+                                                    <td>1729</td>
+                                                    <td>NULL</td>
+                                                    <td>UF</td>
+                                                    <td>USA-Florida</td>
+                                                    <td>Asset is located in USA</td>
+                                                    <td>FORTIS HOSPITAL - New</td>
+                                                    <td>RESIDENCEs1 Updated 22/04/2020</td>
+                                                    <td>Green_Field</td>
+                                                    <td>ACTIVE -In Use</td>
+                                                    <td>NULL</td>
+                                                    <td>NULL</td>
+                                                    <td>NULL</td>
+                                                    <td>Amerex</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*This table is not in use*@
+                            <table id="export" class="table table-bordered table-striped" style="display:none">
+                                <tbody>
+                                    @if (ViewBag.Data != null)
+                                    {
+                                        foreach (System.Data.DataColumn column in (ViewBag.Data as System.Data.DataTable).Columns)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <select class="dllDocument form-control" name="dllDocuments" id="dllDocumenttype">
+                                                        <option value="">None</option>
+                                                        @foreach (System.Data.DataColumn columns in (ViewBag.Data as System.Data.DataTable).Columns)
+                                                        {
+                                                            <option value="">@columns.ColumnName</option>
+                                                        }
+                                                    </select>
+                                                </td>
+
+                                                <td>
+                                                    <select class="dllDocument form-control" name="dllDocuments" id="dllDocumenttype">
+                                                        <option value="">None</option>
+                                                        @foreach (System.Data.DataColumn columns in (ViewBag.Data as System.Data.DataTable).Columns)
+                                                        {
+                                                            <option value="">@columns.ColumnName</option>
+                                                        }
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    @if (ViewBag.Error != null)
+                                    {
+                                        <tr>
+                                            <td style="color:red;">
+
+                                                @(ViewBag.Error != null ? ViewBag.Error.ToString() : "")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    @if (Model != null)
+                                    {
+                                        <h3>Imported Record</h3>
+                                        <table id="tblImportAssetData" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        @Html.CheckBox("chkAllExportData", false, new { @class = "check-box", @title = "Select All" })
+                                                        <span></span>
+                                                    </th>
+                                                    @foreach (DataColumn col in Model.Columns)
+                                                    {
+                                                        <th>@col.ColumnName</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (DataRow dr in Model.Rows)
+                                                {
+                                                    <tr>
+                                                        <td class="text-center">
+                                                            @Html.CheckBox("chkExportData", false, new { @class = "check-box chkExportData" })
+                                                            <span></span>
+                                                        </td>
+                                                        @foreach (DataColumn col in Model.Columns)
+                                                        {
+                                                            <td>@dr[col.ColumnName]</td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                        <button type="button" class="btn btn-primary" onclick="UpdateFloorAssets()">Upload Data</button>
+
+                                        <div id="dvAssetsRecordsAfterUpload">
+                                            @*Div fills with assets records after upload partial view*@
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#tblsample-file-import-floorAssets').DataTable({
+            bInfo: false,
+            searching: false,
+            paging: false,
+            dom: "Blfrtip",
+            buttons: ['csv']
+        });
+        $(".dt-button.buttons-csv.buttons-html5 span").text("Download sample file");
+
+        $('#chkAllExportData').prop('checked', true);
+        $('#chkAllExportData').click(function () {
+            SelectAllRecords();
+        });
+        SelectAllRecords();
+        $('#btnUpdateData').css('display', 'none');
+        $('#tblImportAssetData').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "aaSorting": [],
+            "bInfo": false,
+            "language": { "emptyTable": "No data available in table" },
+            "paging": false,
+            "scrollY": "400px",
+            "scrollX": true,
+            "scrollCollapse": true
+        });
+    });
+
+
+    function SelectAllRecords() {
+        $('#tblImportAssetData tbody tr').each(function () {
+            $(this).find('td:eq(0) input[type=checkbox]').prop('checked', $('#chkAllExportData').is(':checked'));
+        });
+    }
+
+    function UpdateFloorAssets() {
+        debugger;
+        const url = CRxUrls.Import_ConvertToFloorAssetsData;
+        $.get(url , function(response) {
+            debugger;
+            $('#dvAssetsRecordsAfterUpload').empty();
+            $('#dvAssetsRecordsAfterUpload').html(response);
+            $('#dvAssetsRecordsAfterUpload').fadeIn('fast');
+        });
+    }
+</script>
+
+<style>
+    .row {
+        margin-top: 10px;
+    }
+
+    #btnUpdateData {
+        display: none;
+    }
+
+    .leftMargin {
+        margin-left: 20px !important;
+    }
+</style>

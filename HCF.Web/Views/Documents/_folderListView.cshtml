@@ -1,0 +1,54 @@
+﻿@model List<HCF.BDO.BinderFolders>
+
+@{
+    List<HCF.BDO.BinderFolders> breadcumList = (List<HCF.BDO.BinderFolders>)ViewBag.Routs;
+    int? parentId = 0;
+}
+<div class="foldercrumbs" style="margin-bottom: 15px;border-bottom: 1px solid #ececec;">
+    <span folderId="0" class="folder-crumb folderName">Home</span>
+    @foreach (var item in breadcumList)
+    {
+        <span class="folder-crumb-separator"></span>
+        <span class="folder-crumb folderName" folderId="@item.FolderId">@item.FolderName</span>
+    }
+    @if (ViewBag.CurrentPage != null && !string.IsNullOrEmpty(ViewBag.CurrentPage.FolderName))
+    {
+        <span class="folder-crumb-separator"></span>
+        <span class="folder-crumb">
+            @ViewBag.CurrentPage.FolderName
+            @{ parentId = ViewBag.CurrentPage.FolderId;}
+        </span>
+    }
+</div>
+<table id="c_myTable" class="table">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th>Name</th>
+            <th>Created By</th>
+            <th>Date Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model.Where(x => x.IsFolder).OrderBy(x => x.FolderName))
+        {
+            <tr class="details @(@item.TFileId.HasValue  ? "file" : "folder")" folderName="@item.FolderName" filepath="@item.File.FilePath"
+                folderType="@((item.IsPublic)?"1":"0")">
+                <th style="display:none">@item.FolderId</th>
+                <td class="details @(@item.TFileId.HasValue  ? "file" : "folderName")" folderId="@item.FolderId">
+                    <img src="@Url.Content("~/dist/Images/Icons/folder_icon_colour.png")" alt="folder" title="folder" />
+                    <span class="ahjFilename">@item.FolderName</span>
+                </td>
+                <td>@((item.CreatedByUserProfile != null) ? item.CreatedByUserProfile.FullName : "System")</td>
+                <td>@item.CreatedDate.ToClientTime().ToFormatDateTime()</td>
+                <td>
+                    <img data-id="@item.FolderId" class="addtoFolder"
+                         alt="Add file to this Survey prep binder folder." title="Add file to this Survey prep binder folder." data-fileid='@ViewBag.FileId'
+                         src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

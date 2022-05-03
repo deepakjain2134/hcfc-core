@@ -1,0 +1,1211 @@
+﻿@model HCF.BDO.CeilingPermit
+@{ ViewBag.Title = "AddCeilingPermit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Model.TDrawingViewerId = "0";
+    Random rand = new Random(Environment.TickCount);
+    List<HCF.BDO.UserProfile> lstUserProfile = (List<HCF.BDO.UserProfile>)ViewBag.lstUserProfile;
+    string tempermit = (Model.CeilingPermitId > 0) ? Model.PermitNo : "TEMP_CP" + rand.Next();
+    int MinSequence = Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence > 0 ? Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : 0;
+    int MaxSequence = Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.OrderByDescending(x => x.Sequence).ToList().FirstOrDefault().Sequence > 0 ? Model.TPermitWorkFlowDetails.OrderByDescending(x => x.Sequence).ToList().FirstOrDefault().Sequence : 0;
+    int CurrentSignSequence = Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 || x.LabelSignId == null).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 || x.LabelSignId == null).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence;
+    if (CurrentSignSequence > 0)
+    {
+        bool CheckCurrentSequenceIsRequired = Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 || x.LabelSignId == null).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 || x.LabelSignId == null).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Required : Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Required;
+        if (!CheckCurrentSequenceIsRequired && Model.TPermitWorkFlowDetails.Any(x => x.Sequence == CurrentSignSequence && (x.LabelSignId != 0 || x.LabelSignId == null)))
+        {
+
+            CurrentSignSequence = Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Where(x => x.Sequence != CurrentSignSequence && (x.LabelSignId == 0 || x.LabelSignId == null)).OrderBy(x => x.Sequence).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.Sequence != CurrentSignSequence && (x.LabelSignId == 0 || x.LabelSignId == null)).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : MaxSequence;
+        }
+    } }
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add Ceiling Permit
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+
+
+                @*@using (Ajax.BeginForm("AddCeilingPermit", "Permit", new AjaxOptions { OnSuccess = "OnSuccess" }, new { @id = "ceilingform", @autocomplete = "off" }))
+                    {*@
+                <form asp-controller="Permit" asp-action="AddCeilingPermit"
+                      data-ajax-success="OnSuccess" id="ceilingform" autocomplete="off"
+                      data-ajax="true" data-ajax-method="POST">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+
+
+                    @Html.HiddenFor(m => Model.CeilingPermitId)
+                    @Html.HiddenFor(m => Model.RequesterSignId)
+                    @Html.HiddenFor(m => Model.ApproversignId)
+                    @Html.HiddenFor(m => Model.TFileIds)
+                    @Html.HiddenFor(m => m.TDrawingFields, new { id = "attachdrawingFiles" })
+                    @Html.HiddenFor(m => m.TDrawingViewerId, new { id = "hdnDrawingViewerval" })
+
+                    @Html.HiddenFor(m => m.PermitNo)
+                    <input type="hidden" id="DSRequesterSign.FileName" name="DSRequesterSign.FileName" value="" />
+                    <input type="hidden" id="DSRequesterSign.FileContent" name="DSRequesterSign.FileContent" value="" />
+                    <input type="hidden" id="DSApproverSign.FileContent" name="DSApproverSign.FileContent" value="" />
+                    <input type="hidden" id="DSApproverSign.FileName" name="DSApproverSign.FileName" value="" />
+                    <input type="hidden" id="DSRequesterSign.DigSignatureId" name="DSRequesterSign.DigSignatureId" value="" />
+                    <input type="hidden" id="DSApproverSign.DigSignatureId" name="DSApproverSign.DigSignatureId" value="" />
+                    <input type="hidden" name="AttachFiles" value="" id="attachFiles" />
+                    <input type="hidden" name="TempPermitNumber" value="@tempermit" id="TempPermitNumber" />
+                    <input type="hidden" id="hdn_DSRequesterSign_LocalSignDateTime" name="DSRequesterSign.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSRequesterSign_CreatedBy" name="DSRequesterSign.CreatedBy" />
+
+                    <input type="hidden" id="hdn_DSApproverSign_LocalSignDateTime" name="DSApproverSign.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSApproverSign_CreatedBy" name="DSApproverSign.CreatedBy" />
+                    <div class="row tablelist-topform">
+                        <div class="col-md-6 form-group">
+                            Select project name from list of projects in drop down.  If desired project does not appear or you are unsure as to which project should be chosen, select “unsure” in drop down
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @await Html.PartialAsync("_PermitCommonMsg")
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="permitNumber">Permit #:  @(Model.CeilingPermitId > 0 ? Model.PermitNo : Localizer["PermitNumber"])</label>
+                            @*<label class="permitNumber">Permit #: <span style="@(Model.CeilingPermitId>0 ? "display:block;" :"display:none;")">@Model.PermitNo</span></label>*@
+                        </div>
+                        <div class="col-md-6 text-right form-group">
+                            @if (Model.ProjectId > 0)
+                            {
+                                <div class="dropdown icratable-drop">
+                                    <button class="btn dropdown-toggle button1" type="button" data-toggle="dropdown">
+                                        See Associated Permits
+                                    </button>
+                                    @await Html.PartialAsync("~/Views/Shared/_projectPermitoptions.cshtml", Model.TIcraProject)
+                                </div>}
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6" id="ceilingProjectN">
+                            <label>Project Name :<em class="required-field"> *</em></label>
+                            <input type="hidden" name="ProjectId" id="ProjectId" />
+                            @await Component.InvokeAsync("CommonProjectCustomDDL", new { type = "SINGLE", ProjectId = (Model.ProjectId > 0 ? Model.ProjectId.ToString() : "0") })
+
+                            @*@Html.Action("ProjectCustomDDL", "Common", new { type = "SINGLE", ProjectId = (Model.ProjectId > 0 ? Model.ProjectId : 0) })*@
+                            <input type="text" id="txtprojectName" name="txtprojectName" class="ddlproject" required />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Work area:</label><em class="required-field">*</em>
+                            @Html.TextBoxFor(model => model.WorkArea, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.WorkArea)
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Scope of work:</label><em class="required-field">*</em>
+                            @Html.TextBoxFor(model => model.Scope, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.Scope)
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>
+                                Additional items (circle):
+                            </label>
+                            @Html.DropDownListFor(model => model.AdditionalItems, (SelectList)ViewBag.additionalItems, "-- Select Additional Items --", new { @class = "form-control" })
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Will penetrations in the existing structure be made?:<em class="required-field">*</em></label>
+                            <select id="IsPenetrationStructure" name="IsPenetrationStructure" required="required" class="form-control">
+                                <option value="">Select</option>
+                                <option value="2">No</option>
+                                <option value="1">Yes</option>
+                                <option value="3">Smoke</option>
+                                <option value="4">Fire</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Type of sealant used:</label>
+                            @Html.TextBoxFor(model => model.TypeofSealant, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.TypeofSealant)
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Pictures/verification of sealed penetrations:</label>
+                            @Html.ValidationMessageFor(model => model.IsPenetrationsVerified)
+                            <select id="IsPenetrationsVerified" name="IsPenetrationsVerified" class="form-control">
+                                <option value="">Select</option>
+                                <option value="1">Yes</option>
+                                <option value="2">No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label>Organization/Dept:<em class="required-field">*</em></label>
+                            @Html.TextBoxFor(model => model.RequestedDept, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.RequestedDept)
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Building(s): <em class="required-field">*</em></label>
+
+                            <input type="hidden" id="Buildingddl" name="BuildingId" />
+                            <input type="hidden" id="buildingIdName" name="BuildingName" />
+                            <input type="hidden" name="lstBuildingDetails" id="lstBuildingDetails" />
+
+                            <div class="asset_list_affected" id="ceilingBuildings">
+                                @await Component.InvokeAsync("CommonbuildingCustomddl", new { type = "MULTI" })
+                                @*@Html.Action("buildingCustomddl", "Common", new { type = "MULTI" })*@
+                                <input type="text" id="txtbuilding" name="txtbuilding" class="ddlproject" required />
+                            </div>
+
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Floor(s): <em class="required-field">*</em></label>
+
+                            <input type="hidden" id="Floorddl" name="FloorId" />
+                            @*<input type="hidden" id="floorIdName" name="FloorName" />*@
+                            <input type="hidden" name="lstFloorDetails" id="lstFloorDetails" />
+
+
+                            <div class="asset_list_affected">
+                                @Html.TextBoxFor(m => m.FloorName, new { @class = "form-control", required = "required" })
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Zone(s):</label>
+                            @Html.TextBoxFor(m => m.Zones, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group col-md-6">
+                            @Html.LabelFor(model => model.StartTime)<em class="required-field">*</em>
+                            <div class="input-group clockpicker col-md-12" data-placement="left" data-align="top" data-autoclose="true">
+                                <input type="text" name="Stime" id="Stime" class="timepicker readonly form-control" autocomplete="off" required="required" value="@commonModelFactory.ConvertToAMPM(Model.StartTime)" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            @Html.LabelFor(model => model.EndTime)<em class="required-field">*</em>
+                            <div class="input-group clockpicker col-md-12" data-placement="left" data-align="top" data-autoclose="true">
+                                <input type="text" name="Etime" id="Etime" class="timepicker readonly form-control" autocomplete="off" required="required" value="@commonModelFactory.ConvertToAMPM(Model.EndTime)" />
+                            </div>
+                            @Html.ValidationMessageFor(model => model.EndTime, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Work start date:<em class="required-field">*</em></label>
+                            @Html.TextBoxFor(model => Model.StartDate, $"{Model.StartDate:MMM d, yyyy}", new { @class = "form-control startDate readonly", @autocomplete = "off", required = "required" })
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Estimated completion date:</label>
+                            @Html.TextBoxFor(model => Model.CompletionDate, $"{Model.CompletionDate:MMM d, yyyy}", new { @class = "form-control endDate readonly", @onchange = "CheckDate()", @autocomplete = "off" })
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Responsible party for sealing the penetrations:<em class="required-field">*</em></label>
+                            @Html.TextBoxFor(model => model.Responsible, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.Responsible)
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Telephone #:<em class="required-field">*</em></label>
+                            @Html.TextBoxFor(model => model.PhoneNo, new { @class = "form-control phone", required = "required" })
+                            @Html.ValidationMessageFor(model => model.PhoneNo)
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div>&nbsp;</div>
+
+                            @Html.CheckBoxFor(model => model.ULApproved)
+                            @Html.ValidationMessageFor(model => model.ULApproved)
+                            <label>UL approved for use?</label>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="attachedfile-lable">Add Attachments:</label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnuploadfile" data-toggle="modal" data-target="#modal-container" /><sup id="attchFileCount" style="display:none;"></sup>
+                            <div id="file-upload-list">
+                                <div id="file-lists">
+                                    <ul class="attachfileitems">
+                                        @foreach (var item in Model.Attachments)
+                                        {
+                                            <li class="list-group-item files" id="lidv_@item.TFileId">
+                                                @if (!string.IsNullOrEmpty(item.FileName))
+                                                {
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc =item.FilePath, title = "Preview" })" class="modal-link allowclick">
+
+                                                        @item.FileName
+                                                    </a>
+                                                    <a data-id="@item.TFileId" class="deletefile allowclick">
+                                                        <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                    </a>}
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 divattachment">
+                            <label class="attachedfile-lable">Attach Drawings:</label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnattachingdrawings" data-toggle="modal" data-target="#modal-container1" />
+
+                            <div id="drawing-upload-list">
+                                <div id="drawing-lists">
+                                    <ul class="attachdrawingfiles ">
+                                        @foreach (var item in Model.DrawingAttachments)
+                                        {
+                                            <li class="list-group-item files" id="lidrawingdv_@item.FloorPlanId">
+                                                @if (!string.IsNullOrEmpty(item.FullFileName))
+                                                {@*<a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = item.FloorName + " , " + item.BuildingName })" title="@item.FileName" class="modal-link allowclick">*@
+                                                <a href="@Url.Action("DrawingPreview", "Common", new { floorPlanId = item.FloorPlanId, mode = "drawing" ,permitId = tempermit})" title="@item.FileName" class="modal-link allowclick">
+                                                    @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FullFileName" />*@
+                                                    @item.FullFileName
+                                                </a>
+
+                                                <a data-id="@item.FloorPlanId" class="deletedrawing allowclick">
+                                                    <img id="deletedrawing" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                </a>}
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Comment: </label>
+                            @Html.TextAreaFor(model => model.Comment, new { @class = "form-control", @rows = "3" })
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "form-group" :"form-group disable")">
+                                    <label>Status:<em class="required-field">*</em></label>
+                                    @*@Html.ApprovalStatusDropDownList("Status", Model.Status, new { @class = "form-control hdnapprovalstatus", required = "required", @onchange = "checkAppprovalStatus();" })*@
+                                    <approvalstatusdropdownlist name="Status" selectedvalue="@Model.Status" class="form-control hdnapprovalstatus" required="required"></approvalstatusdropdownlist>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email: <em class="required-field"> *</em></label>
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", maxlength = 150, autocomplete = "off", @type = "email", required = "required", TabIndex = 3 })
+                                    @Html.ValidationMessageFor(m => m.Email)
+                                </div>
+
+                            </div>
+                            <div class="form-group showonreject">
+                                <label id="lbltext"></label>
+                                @Html.TextAreaFor(model => model.Reason, new { @class = "form-control", @rows = "3" })
+                            </div>
+
+                        </div>
+
+
+                        <div id="divWorkFlow" class="cra-signatureBox">
+
+                            @for (int i = 0; i < Model.TPermitWorkFlowDetails.Count; i++)
+                            {
+                                <div class="col-lg-6 divpermitworkflow" isRequired="@Model.TPermitWorkFlowDetails[i].Required" sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" id="@string.Format("divSequence_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i)" signindex="@i">
+
+                                    <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileName" id="@string.Format("DSPermitSignature_{0}_{1}.FileName", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                    <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileContent" id="@string.Format("DSPermitSignature_{0}_{1}.FileContent", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                    <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.DigSignatureId" id="@string.Format("DSPermitSignature_{0}_{1}.DigSignatureId", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                    <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_LocalSignDateTime", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.LocalSignDateTime" value="@DateTime.Now" />
+                                    <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_CreatedBy", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.CreatedBy" value="0" />
+                                    <div class="form-group">
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].FormSettingId)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Id)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Sequence)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].LabelSignId)
+                                        <label>@Model.TPermitWorkFlowDetails[i].LabelText:<em style="@((Model.CeilingPermitId>0  && Model.TPermitWorkFlowDetails[i].Required) ||  (i==0)?"display:inline-block;":"display:none;")" class="required-field"> *</em></label>
+                                        @*@Html.UsersList(string.Format("TPermitWorkFlowDetails[{0}].LabelValue",
+                                            Convert.ToInt32(i)),
+                                            (Model.TPermitWorkFlowDetails[@i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[@i].LabelValue.Value > 0) ? Model.TPermitWorkFlowDetails[@i].LabelValue.Value : 0,
+                                            "-- Select --", new {
+                                                @class = "form-control",
+                                                @id = string.Format("selectSignBy_{0}_{1}",Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i) })*@
+
+                                        @*<userslist name="@string.Format("TPermitWorkFlowDetails[{0}].LabelValue",Convert.ToInt32(i))"
+                                                      id= "@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence), i)"
+                                                       isVendorUseronly="true"
+                                                       class="form-control"
+                                                       required="required"
+                                                        isworkflow="true"
+                                                       selectedvalue="@((Model.TPermitWorkFlowDetails[i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[i].LabelValue.Value > 0) ? Model.TPermitWorkFlowDetails[i].LabelValue.Value :-1)"
+                                                       firsttext="-- Select --">
+                                            </userslist>*@
+                                        <select name="TPermitWorkFlowDetails[@i].LabelValue" class="@(i==0?"form-control disable":"form-control")" id="@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+                                            <option value="">-- Select --</option>
+                                            @foreach (var item in lstUserProfile.OrderBy(x => x.FullName))
+                                            {
+                                                if (item.UserId == (Model.TPermitWorkFlowDetails[i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[i].LabelValue.Value > 0 ? Model.TPermitWorkFlowDetails[i].LabelValue.Value : -1))
+                                                {
+
+                                                    <option value="@item.UserId" selected="selected">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.UserId">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+
+
+
+                                    <div class="form-group">
+                                        <label>
+                                            @Model.TPermitWorkFlowDetails[i].LabelText Signature Date :
+                                            <em style="@((Model.CeilingPermitId>0  && Model.TPermitWorkFlowDetails[i].Required) ||  (i==0)?"display:inline-block;":"display:none;")" class="required-field"> *</em>
+                                        </label>
+                                        @Html.TextBoxFor(m => m.TPermitWorkFlowDetails[i].LabelSignDate, Model.TPermitWorkFlowDetails[i].LabelSignDate.ToFormatDate(), new { id = string.Format("txtSignatureDate_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence), @i), @class = "form-control datepicker readonly", @autocomplete = "off" })
+                                    </div>
+                                    <div class="form-group div-forworkflow">
+                                        <div class="crxSignBox">
+                                            <div class="div-forworkflow @string.Format("sign_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+
+
+                                                @await Component.InvokeAsync("ViewDigitalSign", new HCF.Web.ViewModels.DigitalSignatureViewModel()
+                                           {
+                                               signs = Model.TPermitWorkFlowDetails[i].DSPermitSignature,
+                                               MainSignatureClass = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                               //ImgSignatureClass = "approverbysign",
+                                               HiddenFileControl = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                               ApprovalStatus = Model.Status,
+                                               SignIndex = i,
+                                               SignSequence = Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),
+                                               SignatureControlId = ($"{string.Format("TPermitWorkFlowDetails_{0}__LabelSignId", @i)}")
+                                           })
+
+                                            </div>
+
+                                            <input isrequiredctl="@(Model.TPermitWorkFlowDetails[i].Required && Model.TPermitWorkFlowDetails[i].LabelSignId.HasValue && Model.TPermitWorkFlowDetails[i].LabelSignId.Value>0?"1":"0")" isRequired="@Model.TPermitWorkFlowDetails[i].Required" type="text" value="@(Model.TPermitWorkFlowDetails[i].DSPermitSignature != null && Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId > 0?Model.TPermitWorkFlowDetails[i].DSPermitSignature.FileName:"")" @(i == 0 ? "required" : string.Empty) id=@string.Format("hdn_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i) sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" class="ddlproject assigned hdnRequired" />
+                                        </div>
+                                    </div>
+                                </div>}
+
+
+
+                        </div>
+                        <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "row" :"row disable")" style="margin:0px;">
+                            <div class="col-md-6">
+                                <label>Section 2:  @(commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)) ? "ICRA" : "CRA") checklist  </label>
+                                <table width="100%" class="table table-bordered table-striped">
+                                    @for (int i = 0; i < Model.TCeilingPermitDetail.Count; i++)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.HiddenFor(x => x.TCeilingPermitDetail[i].TCeilingPermitDetailId)
+                                                @Html.HiddenFor(x => x.TCeilingPermitDetail[i].CeilingPermitId)
+                                                @Html.HiddenFor(x => x.TCeilingPermitDetail[i].CeilingFormId)
+                                                @if (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)))
+                                                {
+
+                                                    @Html.HiddenFor(x => x.TCeilingPermitDetail[i].TPermitLinkForms.Description)
+                                                    @Html.HiddenFor(x => x.TCeilingPermitDetail[i].TPermitLinkForms.Name) }
+                                                else
+                                                {
+                                                    @Html.HiddenFor(x => x.TCeilingPermitDetail[i].TPermitLinkForms.Description, new { @value = "CRA" })
+                                                    @Html.HiddenFor(x => x.TCeilingPermitDetail[i].TPermitLinkForms.Name, new { @value = "Construction Risk Assessment [CRA]" })}
+                                                @Html.CheckBoxFor(x => x.TCeilingPermitDetail[i].RespondStatus, new { @class = "chBox icralink" })<span></span>
+                                            </td>
+                                            <td>
+                                                @if (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)))
+                                                {
+                                                    @Html.DisplayFor(x => x.TCeilingPermitDetail[i].TPermitLinkForms.Name) }
+                                                else
+                                                {
+                                                    <span>Construction Risk Assessment [CRA]</span>}
+                                            </td>
+                                            <td>
+                                                @for (int j = 0; j < Model.TCeilingPermitDetail[i].TPermitMapping.Count; j++)
+                                                {
+                                                    if (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)))
+                                                    {
+                                                        @Html.ActionLink(Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitNumber, "AddInspectionIcra", "ICRA", new { icraId = Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitId2.Trim(), linkicra = 1, iseditable = true, ceilingPermitId = Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitId1.Trim() }, null) }
+                                                    else
+                                                    {
+                                                        @Html.ActionLink(Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitNumber, "addtcra", "cra", new { icraId = Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitId2.Trim(), linkicra = 1, mode = "edit", ceilingPermitId = Model.TCeilingPermitDetail[i].TPermitMapping[j].PermitId1.Trim() }, null) }
+                                                    <br />
+                                                }
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-right button_Div">
+                            <input name="submit" type="submit" id="saveceiling" value=' @Localizer["Submit"] ' class="comm-button" />
+                            <input name="submit" formnovalidate="formnovalidate" type="submit" id="btnIncomplete" value='Save Incomplete' class="@((Model.CeilingPermitId > 0 && Model.Status > -1 && ViewBag.ShowIncomplete == 0)? "comm-bluebutton hide" : "comm-bluebutton")" />
+                            @*@Html.ActionLink("Cancel ", "Index", "Permit", new { @class = "comm-button" })*@
+                            @Html.ActionLink("Cancel", "Index", new { controller = "Permit" }, new { @class = "comm-Cancelbutton" })
+                        </div>
+                    </div>
+                    <input type="hidden" id="IsRequestEdited" name="IsRequestEdited" value="@ViewBag.IsRequestEdited" />
+                    <input type="hidden" id="NotSendMail" name="NotSendMail" value="0" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+<input type="hidden" id="RejectMessage" name="RejectMessage" value="0" />
+
+<input id="hdnIsVendor" type="hidden" value="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? 0 : 1)" />
+<input type="hidden" id="hdnCurrentSignSequence" value="@CurrentSignSequence" />
+<input type="hidden" id="hdnMaxSequence" value="@MaxSequence" />
+<input type="hidden" id="hdnMinSequence" value="@MinSequence" />
+<input type="hidden" id="hdnCurrentUserId" value="@HCF.Web.Base.UserSession.CurrentUser.UserId" />
+
+<input type="hidden" id="hdnIsVendorUser" value="@(HCF.Web.Base.UserSession.CurrentUser.IsVendorUser?"True":"False")" />
+<input type="hidden" id="hdnIsPowerUser" value="@(HCF.Web.Base.UserSession.IsPowerUser()?"True":"False")" />
+<input type="hidden" id="hdnFormId" value="@Model.CeilingPermitId" />
+<input type="hidden" id="hdnStatus" value="@Model.Status" />
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Permit/PermitWorkFlow.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<script>
+
+    $(".timepicker").each(function () {
+        var clockpicker = $(this);
+        $(this).clockpicker({
+            autoclose: false,
+            twelvehour: true,
+            donetext: "Done",
+            afterDone: function () {
+                // clockpicker.val(clockpicker.val().slice(0, -2) + ' ' + clockpicker.val().slice(-2));
+            }
+        });
+    });
+
+    var startdate;
+    function CheckDate() {
+       // debugger;
+        var _date = startdate;
+        var endate = $('#CompletionDate').val()
+        var newStartdate = $('#StartDate').val();
+        if (endate.length > 0 && _date != "") {
+            if (newStartdate == "") {
+                $('#StartDate').val(_date);
+            } else {
+                $('#StartDate').val(newStartdate);
+            }
+        }
+    }
+
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+
+    var additionalddl = $("#AdditionalItems");
+    var penetrationStructureddl = $("#IsPenetrationStructure");
+    var penetrationsVerifiedddl = $("#IsPenetrationsVerified");
+    var statusddl = $("#Status");
+
+    $(document).ready(function () {
+       // debugger
+        var _date = '@Model.StartDate';
+        if (_date != '') {
+            startdate = $('#StartDate').val();
+        }
+         var projectid = parseInt('@Model.ProjectId');
+
+            if (projectid != "" && projectid != undefined && projectid > 0) {
+                $('.chkSigleSelect input[type="checkbox"][value="' + projectid + '"]').prop('checked', true)
+                    .trigger('change');
+            }
+
+        var additionalItems = parseInt('@Model.AdditionalItems');
+        var ispenetrationstructure = parseInt('@Model.IsPenetrationStructure');
+        var ispenetrationsverified = parseInt('@Model.IsPenetrationsVerified');
+        var status = parseInt('@Model.Status');
+        if (additionalItems > 0) {
+            additionalddl.val(additionalItems);
+        }
+        if (ispenetrationstructure > 0) {
+            penetrationStructureddl.val(ispenetrationstructure);
+        }
+        if (ispenetrationsverified > 0) {
+            penetrationsVerifiedddl.val(ispenetrationsverified);
+        }
+        if ('@Model.CeilingPermitId' > 0) {
+            statusddl.val(status);
+        }
+        checkAppprovalStatus();
+         //it code to not allow vendor user to sign other user signature so diabled the dropdown
+        if ('@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+            $("#Requestedby").addClass("disable");
+        }
+        //check any changes done on page
+
+        if ('@Model.Status' == '1' && '@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+           // debugger;
+            $("#ceilingform").find("input,textarea,select").addClass("disabled");
+            $("input:submit").addClass("disable");
+            $("select").addClass("disable");
+            $(".allowclick").not(".modal-link").addClass("disable");
+            $("#btnattachingdrawings").addClass("disable");
+            $("#btnuploadfile").addClass("disable");
+            $("input:hidden").removeClass("disabled");
+            $('#ceilingProjectN').addClass("disabled");
+            $('#ceilingBuildings').addClass("disabled");
+        }
+        if ('@Model.Status' == '1'  && ('@HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")' == 'True') && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+           // debugger;
+            $("#ceilingform").find("input,textarea,select").addClass("disabled");
+            $(".selectList").addClass("disable");
+            $("select").addClass("disabled");
+            //$("#Status").removeClass("disabled");
+            //$("#Status").attr("disabled", false);
+            $(".allowclick").not(".modal-link").addClass("disable");
+            $("input:submit").removeClass("disabled");
+            $("#btnattachingdrawings").addClass("disable");
+            $("#btnuploadfile").addClass("disable");
+            $("input:hidden").removeClass("disabled");
+        }
+        var isincomplete = -1;
+        $("#Status>option[value=4]").hide();
+        $("#Status>option[value=5]").hide();
+        $("#Status>option[value=6]").hide();
+        if ('@Model.CeilingPermitId' != 0 && isincomplete!='@Model.Status') {
+            $("#Status>option[value=-1]").hide();
+        }
+
+        bindBuildingdll();
+        //bindFloordll();
+
+        //Save on any menu click for not loosing data
+
+        $("#ceilingform :input").change(function () {
+            $("#ceilingform").data("changed", true);
+            $('#btnbackpageUrl').addClass("stopunload");
+        });
+
+        $("a").not("#ceilingform .allowclick").each(function () {
+            $(this).addClass("stopunload");
+            var url = this.href;
+            //if link has url or click events will create duplicate
+            if (url != '' || url == '#') {
+                $(this).attr("linkurl", url);
+                $(this).removeAttr("href");
+            }
+            else {
+                $(this).clone().insertAfter(this);
+                $(this).addClass("originallink");
+                $(this).hide();
+            }
+        });
+
+
+        $("a").not(".originallink").not("#ceilingform allowclick").removeAttr("onclick");
+       // $('a:not([href*=javascript]):not([href^=#])')
+        $(".stopunload").not(".dropdown-toggle").click(function (e) {
+            e.preventDefault();
+           // e.stopPropagation();
+           // e.preventDefault();
+                if ($("#ceilingform").data("changed") || typeof $("#ceilingform").data("changed") !== 'undefined') {
+                    Restrictpageload(this);
+                }
+                else {
+                    Resetlinkclick(this);
+                }
+
+
+            e.preventDefault();
+        });
+
+        $('#btnbackpageUrl').removeClass("stopunload");
+
+
+         setWorkFlowControl(1);
+            if ('@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+                SetUpVendorSignatureControl();
+            }
+    });
+    function Resetlinkclick(thisobj) {
+        if (thisobj.id == "btnbackpageUrl") {
+            var screenName = '@string.Format("{0}_{1}", ViewContext.RouteData.Values["Controller"].ToString().ToLower(), ViewContext.RouteData.Values["Action"].ToString().ToLower())';
+            window.location.href = ('@Url.Action("RedirectTobackpage", "Common")' + "?pageUrl=" + window.location.href + "&screenName=" + screenName).replace('#', '');
+        } else {
+            var url = $(thisobj).attr("linkurl");
+            if (typeof url !== 'undefined')
+                window.location = url;
+            else {
+                var clickev = $(thisobj).prev(".originallink").attr("onclick");
+                if (typeof clickev !== 'undefined') {
+                    $(thisobj).hide();
+                    var prevlink = $(thisobj).prev(".originallink");
+                    $(thisobj).prev(".originallink").show();
+                    $(prevlink).click();
+                    $(thisobj).prev(".originallink").hide();
+                    $(thisobj).show();
+                }
+            }
+        }
+    }
+
+    function Restrictpageload(thisobj) {
+        swal({
+            title: "Changes you made may not saved",
+            text: "Do you want to save your data before leaving this page?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes',
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: true
+        },
+            function (isConfirm) {
+                swal.close();
+                if (isConfirm) {
+
+                    setTimeout(function () {
+                        if ($("#btnIncomplete").is(":visible")) {
+                            $('#btnbackpageUrl').removeClass("stopunload");
+                            $("#btnIncomplete").click();
+                        }
+                        else {
+                            $('#btnbackpageUrl').removeClass("stopunload");
+                            $("#saveceiling").click();
+                        }
+                    }, 1000)
+                }
+                else {
+                //swal.close();
+                    setTimeout(function () {
+                        $('#btnbackpageUrl').removeClass("stopunload");
+                        Resetlinkclick(thisobj);
+                    }, 1000)
+                }
+            });
+    }
+
+
+
+    function checkAppprovalStatus() {
+
+        var StatusId = $("#Status").val();
+        if (StatusId == 0 || StatusId == 3) {
+            var lbltext = StatusId == 0 ? "Reason(s) for Rejection:" : "Reason(s) for Hold/Pending:";
+            lbltext += '<em class="required-field approverby">*</em>';
+            $("#lbltext").html(lbltext);
+            $(".showonreject").show();
+            $(".showonapproved").hide();
+            $(".approverby").show();
+            $("#ApprovedDate").prop('required', false);
+            $("#ApprovedDate").prev("label").find("em").hide();
+            $("#FinalInspectionBy").prop('required', true);
+            $("#FinalInspectionBy").prev("label").find("em").show();
+            $("#Reason").prop('required', true);
+            $("#hdn_DSContractorSignature").prop('required', true);
+            $("#hdn_DSApproverSign").prop('required', false);
+
+        } else if (StatusId == 1) {
+            $(".showonreject").hide();
+            $(".showonapproved").show();
+            $(".approverby").show();
+            $("#ApprovedDate").prop('required', true);
+            $("#ApprovedDate").prev("label").find("em").show();
+            $("#FinalInspectionBy").prop('required', true);
+            $("#FinalInspectionBy").prev("label").find("em").show();
+            $("#Reason").prop('required', false);
+            $("#hdn_DSContractorSignature").prop('required', true);
+            $("#hdn_DSApproverSign").prop('required', true);
+        } else {
+            $(".showonreject").hide();
+            $(".showonapproved").hide();
+            $(".approverby").hide();
+            $("#ApprovedDate").prop('required', false);
+            $("#ApprovedDate").prev("label").find("em").hide();
+            $("#FinalInspectionBy").prop('required', false);
+            $("#FinalInspectionBy").prev("label").find("em").hide();
+            $("#Reason").prop('required', false);
+            $("#hdn_DSContractorSignature").prop('required', true);
+            $("#hdn_DSApproverSign").prop('required', false);
+
+        }
+    }
+    $(".readonly").on('keydown paste', function (e) {
+        e.preventDefault();
+    });
+
+    $("#btnIncomplete").click(function () {
+        debugger;
+        var IsValid = true;
+        if ($("#ProjectId").val() == "") {
+            swalalert("Please select Project");
+            return false;
+        }
+        else if ($("#WorkArea").val() == "") {
+            swalalert("Please enter work area");
+            IsValid = false;
+            return false;
+        }
+        else if ($("#Scope").val() == "") {
+            swalalert("Please enter scope");
+            IsValid = false;
+            return false;
+        }
+        if ($("#PhoneNo").val() != "") {
+            var phone = $("#PhoneNo").val().replace(/[^0-9]/g, '');
+            if (phone.length != 10) {
+                swalalert("Please Enter Valid Phone #");
+                IsValid = false;
+                return false;
+            }
+
+        }
+
+        if (IsValid) {
+            if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                IsValid = false;
+
+                swal({
+                    html: true,
+                    title: "Message",
+                    text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, reject permit",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        console.log("rejected is zer123o");
+                        $("#RejectMessage").val("1");
+                        $(".loadingModal").show();
+                        $("#btnIncomplete").click();
+                    }
+
+                });
+                if ($("#RejectMessage").val() == "0") {
+                    console.log("rejected is zero");
+                    $(".loadingModal").hide();
+                    return false;
+                }
+            }
+            else {
+                $(".loadingModal").show();
+                $("#ceilingform").submit();
+                return false;
+            }
+        }
+        else {
+            $(".loadingModal").hide();
+        }
+    });
+
+
+    // delete upload documents from permits updated by avinash on 27-04-2020
+    var TFileIds = $("#TFileIds");
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TFileIds.val() != undefined && TFileIds.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TFileIds.val(), TFileId, ",");
+                    TFileIds.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Permit_DeleteCeilingPermitFiles + "?CeilingPermitId=" + '@Model.CeilingPermitId' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidv_" + TFileId).remove();
+                            deleteattachfile(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    debugger;
+                    deleteattachfile(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                    //console.log(ret);
+                }
+            });
+    });
+
+
+    $(document).off("click", "#saveceiling").on("click", "#saveceiling", function () {
+  // $("#saveceiling").click(function () {
+        var IsValid = true;
+        if ($('#ceilingform')[0].checkValidity()) {
+
+            if ($("#PhoneNo").val() != "") {
+                var phone = $("#PhoneNo").val().replace(/[^0-9]/g, '');
+                if (phone.length != 10) {
+                    swalalert("Please Enter Valid Phone #");
+                    IsValid = false;
+                    return false;
+                }
+
+            }
+
+        }
+        else {
+            IsValid = false;
+            //return false;
+        }
+        if (IsValid) {
+            if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                IsValid = false;
+
+                swal({
+                    html: true,
+                    title: "Message",
+                    text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, reject permit",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        console.log("rejected is zer123o");
+                        $("#RejectMessage").val("1");
+                        $(".loadingModal").show();
+                        $("#saveceiling").click();
+                    }
+
+                });
+                if ($("#RejectMessage").val() == "0") {
+                    console.log("rejected is zero");
+                    $(".loadingModal").hide();
+                    return false;
+                }
+            }
+            else {
+                $(".loadingModal").show();
+                var iscompletedworkflow = setapprovalrequiredfield();
+                if (iscompletedworkflow) {
+                    $("#ceilingform").submit();
+                    return false;
+                }
+                else {
+                    $(".loadingModal").hide();
+                    return false;
+                }
+            }
+        }
+        else {
+            $(".loadingModal").hide();
+        }
+    });
+    $(".selectrequestor").change(function () {
+        let selectedUserId = $(this).val();
+        $("#Requestedby").val(selectedUserId);
+        debugger;
+        if (selectedUserId == "") {
+            selectedUserId = 0;
+        }
+        selectedUserId = selectedUserId != null ? parseInt(selectedUserId) : 0;
+        let url = CRxUrls.HotWorkPermit_GetUserInfo;
+        if (selectedUserId != 0) {
+            $.get(url + "?UserId=" + selectedUserId, function (data) {
+                if (data != null) {
+                    //console.log(data);
+                    $("#EmailAddress").val(data.Result.Email);
+
+                    debugger;
+                }
+
+
+            });
+        }
+        else {
+            $("#EmailAddress").val("");
+        }
+    });
+
+
+  var buildingddl = $("#Buildingddl");
+    buildingddl.change(function () {
+
+        mopBuildingDetails();
+    });
+
+    function mopBuildingDetails() {
+        var tfsbpbuildetails = [];
+        var buildingIds = getCheckedValue('chkBuildMultiSelect');
+        debugger;
+        $(".chkFloorMultiSelect").hide();
+        if ($("#UncheckBuilding").val() != "") {
+            $(`input[type="checkbox"][data-buildingid="${$("#UncheckBuilding").val()}"]`).prop('checked', false);
+        }
+        for (var i = 0; i < buildingIds.length; i++) {
+            var tfsbpbuildetail = { BuildingName: buildingIds[i].BuildingName, BuildingId: buildingIds[i].BuildingId, SiteBuildingName: buildingIds[i].SiteBuildingName };
+            tfsbpbuildetails.push(tfsbpbuildetail);
+
+            $(`input[type="checkbox"][data-buildingid="${buildingIds[i].BuildingId}"]`).parent("li").show();
+
+        }
+        debugger;
+        $("#lstBuildingDetails").val(JSON.stringify(tfsbpbuildetails));
+        debugger;
+        if ($('#lstBuildingDetails').val() != "[]")
+            $("#txtbuilding").val($('#lstBuildingDetails').val());
+        else
+            $("#txtbuilding").val("");
+
+       // mopFloorDetails();
+
+    }
+
+    var bindBuildingdll = () => {
+        debugger;
+        var chkedBuildingId = '@Model.BuildingId';
+        debugger;
+        var buildingIds = chkedBuildingId.split(',');
+        $('.chkBuildMultiSelect input[type="checkbox"]').prop('checked', false)
+
+        for (var i = 0; i < buildingIds.length; i++) {
+            $(`.chkBuildMultiSelect input[type="checkbox"][value="${buildingIds[i]}"]`).prop('checked', true)
+            $('.chkBuildMultiSelect').parent().parent().children('label').text(selectLabel($('.chkBuildMultiSelect')))
+        }
+        mopBuildingDetails();
+    }
+
+    var Floorddl = $("#Floorddl");
+    Floorddl.change(function () {
+        mopFloorDetails();
+    });
+
+    function mopFloorDetails() {
+        var tFloordetails = [];
+        var floorIds = getCheckedFloorValue('chkFloorMultiSelect');
+        debugger;
+        if (floorIds.length > 0) {
+            for (var i = 0; i < floorIds.length; i++) {
+                var tFloordetail = { FloorName: floorIds[i].FloorName, FloorId: floorIds[i].FloorId };
+                $('.chkFloorMultiSelect').parent().parent().children('label').text(selectLabelFloor($('.chkFloorMultiSelect')))
+                tFloordetails.push(tFloordetail);
+            }
+            debugger;
+            $("#lstFloorDetails").val(JSON.stringify(tFloordetails));
+
+
+        }
+        else {
+            $("#lstFloorDetails").val(JSON.stringify(tFloordetails));
+            $('.chkFloorMultiSelect input[type="checkbox"]').prop('checked', false);
+            $('.chkFloorMultiSelect').parent().parent().children('label').text("--Select Floor--");
+        }
+        debugger;
+        if ($('#lstFloorDetails').val() != "[]")
+            $("#txtFloor").val($('#lstFloorDetails').val());
+        else
+            $("#txtFloor").val("");
+
+    }
+
+    var bindFloordll = () => {
+        debugger;
+        var chkedFloorId = '@Model.FloorId';
+         var chkedBuildingId = '@Model.BuildingId';
+        debugger;
+        var floorIds = chkedFloorId.split(',');
+        var buildingIds = chkedBuildingId.split(',');
+        $('.chkFloorMultiSelect input[type="checkbox"]').prop('checked', false)
+        for (var i = 0; i < floorIds.length; i++) {
+            $(`.chkFloorMultiSelect input[type="checkbox"][value="${floorIds[i]}"]`).prop('checked', true)
+            $('.chkFloorMultiSelect').parent().parent().children('label').text(selectLabelFloor($('.chkFloorMultiSelect')))
+        }
+
+        mopFloorDetails();
+    }
+
+    function OnSuccess(data) {
+        debugger;
+        // $(".loadingModal").show();
+        if (data.Result) {
+            // debugger;
+            if (data.ApprovalStatus != null) {
+                $("#Status").val(data.ApprovalStatus)
+            }
+            if (data.PermitId != null) {
+                $("#CeilingPermitId").val(data.PermitId);
+            }
+            $(".loadingModal").hide();
+            if (data.IsShowPopUp > 0) {
+
+                ShowIlsmFireWatchPopUp(data.IsShowPopUp, data.TCeilingPermitDetail);
+            } else {
+                $(".loadingModal").show();
+                var urlAction = CRxUrls.Permit_Index;
+                window.location.href = urlAction;
+                return false;
+            }
+        }
+
+    }
+
+       //Interim Life Safety Measure Incident, Fire Watch
+        function ShowIlsmFireWatchPopUp(IsShowPopUp, ILSMRequiredChecklist) {
+            //0- Means no popup ; 1 -- Means Show for All and 2-- Means for a particular;
+            //debugger;
+            var htmltitle = 'Do you want to create ';
+            var htmltext = "";
+            var str = '<p class="comman_checkbox1 firecheckBox">';
+            var strtitle = "";
+            var _text = "";
+            var id = "0";
+            if (IsShowPopUp == 1) {
+                debugger;
+                str = '<p class="comman_checkbox1 firecheckBox hide">';
+                for (i = 0; i < ILSMRequiredChecklist.length; i++) {
+                    if ('@commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))' == 'True') {
+                        if (ILSMRequiredChecklist[i].RespondStatus == true) {
+                            htmltitle = htmltitle + ILSMRequiredChecklist[i].TPermitLinkForms.Description;
+                            _text = _text +
+                                '<input type=\"checkbox\" checked=\"true\" id=\"' +
+                                ILSMRequiredChecklist[i].TPermitLinkForms.Description +
+                                '\" name=\"ilsmfirewatch\" class=\"chckbox chBox\" style="width: 30px; height: 14px; "><span></span>' +
+                                ILSMRequiredChecklist[i].TPermitLinkForms.Name +
+                                '</br></br>';
+                            htmltext = str + _text + '</p>';
+                            id = ILSMRequiredChecklist[i].CeilingPermitId;
+                        }
+                    }
+                    else {
+                        if (ILSMRequiredChecklist[i].RespondStatus == true) {
+                            htmltitle = htmltitle + "CRA";
+
+                            htmltext = str + '</p>';
+                            id = ILSMRequiredChecklist[i].CeilingPermitId;
+                        }
+                    }
+                }
+            }
+            swal({
+                    html: true,
+                    title: htmltitle + "?",
+                    text: htmltext,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        debugger;
+                        var numberOfChecked = $('.chckbox:checked').length;
+                        var totalCheckboxes = $('.chckbox').length;
+                        var Isilsm = $("#ILSM").prop('checked');
+                        var urlAction = CRxUrls.ICRA_AddInspectionIcra;
+                        if ('@commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))'== 'True') {
+                            window.location.href = urlAction + "?ceilingPermitId=" + id + "&linkicra=1&iseditable=true";
+                        }
+                        else {
+                            urlAction = CRxUrls.PCRA_AddCRA;
+                            window.location.href = urlAction + "?ceilingPermitId=" + id + "&linkicra=1&mode=edit";
+                        }
+
+                         } else {
+                        $(".loadingModal").show();
+                        $(".icralink").prop("checked", false);
+                        $(".icralink").next("input:hidden").val("false");
+                        $("#NotSendMail").val("1");
+                        $("#btnIncomplete").click();
+                             //var urlAction = CRxUrls.Permit_Index;
+                             //window.location.href = urlAction;
+                         }
+                });
+    }
+
+     $(document).on('click', '#btnattachingdrawings', function () {
+        LoadDrawingPathway();
+        $('#modal-container1').modal('show');
+    });
+    var TDrawingFields = $("#attachdrawingFiles");
+    $(document).on('click', 'a.deletedrawing', function (e) {
+       // TDrawingFields = $("#attachdrawingFiles");
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TDrawingFields.val() != undefined && TDrawingFields.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TDrawingFields.val(), TFileId.toLowerCase(), ",");
+
+                    TDrawingFields.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Permit_DeleteCeilingDrawings + "?CeilingPermitId=" + '@Model.CeilingPermitId' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidrawingdv_" + TFileId).remove();
+                            deletedrawings(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    deletedrawings(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                }
+            });
+    });
+
+    $("#Status").change(function () {
+        checkAppprovalStatus();
+    });
+</script>
+<style>
+    .selectList {
+        width: 100%;
+    }
+
+    .ddlproject {
+        position: absolute;
+        right: 19px;
+        bottom: 5px;
+    }
+
+
+    .disable.crxSignBox, .disable.div-forworkflow {
+        opacity: 1 !important;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+        .disable.div-forworkflow input, .disable.div-forworkflow select, .disable.div-forworkflow .datepicker, .disable a[class*="DSPermitSignature"] .showSignPopUp {
+            opacity: .4 !important;
+            cursor: default !important;
+            pointer-events: none;
+        }
+</style>
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Permit/PermitSignature.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>

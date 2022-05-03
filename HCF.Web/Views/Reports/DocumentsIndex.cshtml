@@ -1,0 +1,259 @@
+﻿@model IEnumerable<HCF.BDO.InspectionEPDocs>
+
+@{
+    /**/
+
+    ViewBag.Title = "DocumentsIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";    
+}
+
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        Document Report
+    </h1>
+</section>
+    }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-lg-12">
+                        <div class="btn-group btn-group-vertical" data-toggle="buttons" style="display: block;">
+                            <div class="document-fillterBox" style="display:none">
+                                <div class="rep-multiBtn">
+                                    <input type="submit" name="button" class="button1 btn_pastdue" id="btn_pastdue" value="Past Due" rel="status_not_started" />
+                                    <div class="dropup" style="display: inline-block;">
+                                        <input type="submit" name="button" class="button1 dropdown-toggle due_with_day" id="btn_dueWithin"
+                                               value="Due within Days" data-toggle="dropdown" />
+                                        <ul class="dropdown-menu assets-dropdown">
+                                            <li><a href="#" class="filter_due_within">1 days</a></li>
+                                            <li><a href="#" class="filter_due_within">5 days</a></li>
+                                            <li><a href="#" class="filter_due_within">10 days</a></li>
+                                            <li><a href="#" class="filter_due_within">15 days</a></li>
+                                            <li><a href="#" class="filter_due_within">20 days</a></li>
+                                            <li><a href="#" class="filter_due_within">25 days</a></li>
+                                            <li><a href="#" class="filter_due_within">30 days</a></li>
+                                            <li><a href="#" class="filter_due_within">60 days</a></li>
+                                            <li><a href="#" class="filter_due_within">90 days</a></li>
+                                        </ul>
+                                    </div>
+                                    <input type="submit" name="button" class="button1 upcoming btn_upcoming" id="btn_upcoming" value="Upcoming" rel="status_pass" />
+                                    <input type="submit" name="button" class="button1 alleps" id="btn_all" value="All" />
+                                </div>
+                                <div class="btn-group btn-group-vertical right_setting btneoc" data-toggle="buttons">
+                                    <label class="btn">
+                                        @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn">
+                                        @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+                                    <label class="btn active">
+                                        @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                    </label>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-xs-6 form-group">
+                        <label>From</label>
+                        <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-lg-3 col-xs-6 form-group">
+                        <label>To</label>
+                        <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-lg-3 col-xs-6 form-group">
+                        <label>Document type</label>
+                        <select id="drpDocumenttype" name="drpDocumenttype" class="form-control">
+                            <option value="0" selected>All</option>
+                            <option value="107">Reports</option>
+                            <option value="106">Policies</option>
+                            <option value="108">Misc.Docs</option>
+                            @*<option value="4">Asset Report</option>*@
+                        </select>
+
+                    </div>
+                    <div class="col-lg-3 col-xs-6 form-group">
+                        <div>&nbsp;</div>
+                        <button class="comm-button" id="btnrunreport">Run Report</button>
+                        <button class="comm-button" id="btnrefresh">Refresh</button>
+                    </div>
+                </div>      
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="report_document" id="documentReport">
+                                @*@await Html.PartialAsync("~/Views/Reports/_documentsIndex.cshtml", Model)*@
+                            </div>
+                        </div>
+                    </div>
+                   
+                
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {     
+        var from = localStorage.getItem("from");
+        var todate = localStorage.getItem("todate");
+        var documentType = localStorage.getItem("drpDocumenttype");
+        var data = localStorage.getItem("documentData");
+
+        if (from != "" && todate != null) {
+            $("#from").val(from);
+            $("#todate").val(todate);
+            $("#drpDocumenttype").val(documentType);
+            if (data != null) {
+                $('#documentReport').html(data);
+                $('#documentReport').fadeIn('fast');
+            }
+            //loadData();
+        } else {
+            SetDefaultDate();
+        }
+
+    });
+
+
+    $("#btnrunreport").click(function () {
+        loadData();
+    });
+
+    $("#btnrefresh").click(function () {
+        localStorage.clear();
+        ClearAllFields();
+    });
+    
+    function loadData() {
+        var from = $("#from").val();
+        var todate = $("#todate").val();
+        var documenttype = $("#drpDocumenttype").val();  
+        localStorage.setItem("from", from);
+        localStorage.setItem("todate", todate);
+        localStorage.setItem("drpDocumenttype", documenttype);
+        var url = '@Url.Action("DocumentsReport", "Reports")';
+        $.get(url + "?fromdate=" + from + "&todate=" + todate + "&documenttype=" + documenttype, function (data) {
+            if (data != null) {
+                localStorage.setItem("documentData", data);
+                $('#documentReport').html(data);
+                $('#documentReport').fadeIn('fast');
+            }
+        });
+    }
+
+    function ClearAllFields() {
+        $("#drpDocumenttype").val(0);
+        $('#documentReport').empty();
+        SetDefaultDate();
+        //LoadData();
+    }
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        debugger;
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+</script>
+<style>
+    #DownloadDocumentReport {
+        background: url(/dist/Images/Icons/pdf-attach.png) 0 0 no-repeat !important;
+        background-size: 24px !important;
+        background-repeat: no-repeat !important;
+        width: 23px;
+        height: 26px;
+    }
+    .col-sm-6 .dataTables_paginate.paging_simple_numbers {
+        position: absolute;
+        right: 220px;
+        top: 4px;
+    }
+
+    .right_setting {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .dropdown-menu {
+        top: 100% !important;
+    }
+
+    .searchItem2 .comm-button {
+        margin-top: 20px;
+    }
+
+    .fillter-drop {
+        min-width: 130px !important;
+        margin: 13px 0px 15px 20px !important;
+        height: 150px !important;
+        overflow: auto;
+        left: -18px;
+    }
+
+    .due_with_day,
+    .btn_pastdue,
+    .upcoming,
+    .alleps {
+        padding: 8px 10px 8px 26px;
+        background-size: 16px;
+    }
+    .report_document {
+        clear: both;
+        position: relative;
+    }
+        .report_document form {
+            display: inline-block;
+            position: absolute;
+            top: 12px;
+            left: 26px;
+            z-index: 99;
+        }
+    div#c_myTable_filter {
+    text-align:right;
+
+    }
+</style>
+
+

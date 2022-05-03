@@ -1,0 +1,194 @@
+﻿@model List<HCF.BDO.RoundCategory>
+@{
+    ViewBag.Title = "RoundCategories";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Round Categories
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href="@Url.Action("AddRoundCommonCategory", "Round", new { roundCatId = 0 })"
+                               class="pull-right modal-link">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Round Category" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="roundCmnCategoriesTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th style="width:20px;">Active</th>
+                                        <th style="width:20px;">Edit</th>
+                                        <th style="width:50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderBy(x => x.CategoryName))
+                                    {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CategoryName)
+                                        </td>
+                                        <td class="comman_checkbox1 text-center">
+                                            @Html.DisplayFor(modelItem => item.IsActive, new { @class = "chkCat", @rel = item.RoundCatId })<span></span>
+                                        </td>
+                                        <td class="build-editicon">
+                                            <a href="@Url.Action("AddRoundCommonCategory", "Round",new { roundCatId = item.RoundCatId})" class="pull-right modal-link">
+                                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Round Category" alt="3d_add_button" />
+                                            </a>
+                                        </td>
+                                        <td class="build-editicon">
+                                            <img onclick="location.href ='@Url.Action("RoundCommonQuestionnaire", "Round", new { roundCatId = item.RoundCatId })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.View)" title="View Round Questionnaire" alt="" />
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+
+    var dtable =  $('#roundCmnCategoriesTable').dataTable({
+            "searching": true,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#roundCmnCategoriesTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            columnDefs: [
+                {
+                    targets: []
+                }
+            ],
+            dom: "Blfrtip",
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Round Categories Report',
+                    exportOptions: {
+                        columns: [0]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Round Categories Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Round Categories Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+
+        HideTableSorting();
+        $('#roundCmnCategoriesTable thead').click(function () {
+            HideTableSorting();
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+        function HideTableSorting() {
+            //debugger;
+            $('#roundCmnCategoriesTable th[aria-label*="Status').removeClass('sorting');
+            $('#roundCmnCategoriesTable th[aria-label*="Action"]').removeClass('sorting');
+            const el = $('#roundCmnCategoriesTable th[aria-label]')[3];
+            $(el).removeClass("sorting");
+        }
+
+
+        $('.chkCat').on('change', function () {
+        //debugger;
+        var id = $(this).attr("rel")
+        var val = $(this).prop('checked');
+            $.get("@Url.Action("RoundCategoriesActiveStatus", "Round")" + "?CatId=" + id + "&status=" + val, function () { });
+        });
+    });
+</script>

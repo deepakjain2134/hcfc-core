@@ -1,0 +1,158 @@
+﻿@model List<HCF.BDO.EPGroups>
+<div>
+    <input type="hidden" name="standepsids" id="
+           " />
+    <table class="table table-hover table-expandable table-striped" id="epgroups_viewTable">
+        <thead style="display:none;">
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(x => x.IsActive == true).OrderBy(x => x.EPGroupName))
+            {
+                if (item.StandardEps.Count > 0)
+                {
+                    <tr id='@($"tr_{item.EPGroupId}")'>
+                        <td width="40px;" class="details-control" rel='@item.EPGroupId'></td>
+                        <td>@item.EPGroupName</td>
+                        <td>@($"({item.StandardEps.Count})")</td>
+                        <td class="text-right"><a class="button1 btnAddDoc" epgroupid='@($"{item.EPGroupId}")' standepsids="@string.Join(",", item.StandardEps.Select(x => x.EPDetailId))"
+                               >Add Document</a>
+                        </td>
+
+                        @*@if (item.StandardEps.Count > 0)
+                        {
+                            <td class="align-center epfile-droppable"
+                                standepsids="@string.Join(",", item.StandardEps.Select(x => x.EPDetailId))"
+                                ondragover="dragOver(event);" ondrop="filedrop(event);" ondragleave="dragleave(event);"
+                                doctypeid="@item.EPGroupId">
+                                Drag and drop document here
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }*@
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="showepgroupdetail" role="dialog">
+    <div id="loadpartial-epgroups-epdetail" class="epagroupeps">
+
+    </div>
+</div>
+
+
+<script>
+
+    var checkpoints = $("#dvepdocs");
+    var part1 = $("#part1");
+    var epDocSteps = $("#epDocSteps");
+    var policyObject = { docTypeId: 0, epDetailId: [], fileName: "", reviewDate: "", backpage:"vendorreport" };
+    var fileObject = { fileId: 0, filePath: "", fileType: 0, filename: "", documentId: 0, doctypeId:0 };
+
+    var vendorId = $("#VendorId");
+    var assettable = $('#epgroups_viewTable').DataTable({
+        "searching": false,
+        "lengthChange": false,
+        "pageLength": 5,
+        "bPaginate": $('#epgroups_viewTable tbody tr').length > 5,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+    });
+
+
+    $('#epgroups_viewTable tbody').on('click', 'td.details-control , td.asset_title', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var epgroupId = $(this).attr("rel");
+                var Url = CRxUrls.EPGroups_GetEPGroups; //'@Url.Action("EPGroups", "EPGroups")';
+                $.get(Url + "?epgroupId=" + epgroupId, function (data) {
+                    row.child(data, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+
+
+    $(".back").click(function () {
+        checkpoints.hide();
+        epDocSteps.empty();
+        part1.show();
+
+    });
+
+    var selectedEpIds = "";
+    var epgroupId = 0;
+    $(document).on('click', '.btnAddDoc', function () {
+        epgroupId = $(this).attr("epgroupid");
+        selectedEpIds = $(this).attr("standepsids");
+        LoadRecentFiles();
+    });
+    var selectedtFiles = "";
+
+    function fileUploadSuccess(tFiles,selectedFiles) {
+     //    console.log(selectedFiles);
+        if (selectedFiles != undefined && selectedFiles.length > 0) {
+            if (selectedFiles.length > 1) {
+                swalalert("Select only one file to attach.");
+                return false;
+            }
+            //console.log(selectedEpIds);
+            selectedtFiles = selectedFiles;
+            //var epsid = selectedEpIds.split(",");
+
+            fileObject.fileId = selectedFiles[0].TFileId;
+            fileObject.filePath = selectedFiles[0].FilePath;
+            fileObject.fileType = 0;
+            fileObject.filename = selectedFiles[0].FullName;
+            fileObject.documentId = selectedFiles[0].TFileId;
+            fileObject.doctypeId = 0;
+
+          
+
+            var Url = CRxUrls.EPGroups_GetEPGroups;
+                        $.get(Url + "?epgroupId=" + epgroupId + "&mode=1", function (data) {
+                            $('#loadpartial-epgroups-epdetail').html(data);
+                            $('#loadpartial-epgroups-epdetail').fadeIn('fast');
+                            $('#showepgroupdetail').modal('show');
+                            $(".modal-backdrop").removeClass();
+                        });
+           
+        }
+    }
+
+  
+
+    var viewAfterFileUpload = function (fileObject) {
+       // var eDocInspePage = CRxUrls.Goal_EPDocs;
+        localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedtFiles));
+        localStorage.setItem('epDocEpsLists', JSON.stringify(policyObject));
+        window.location.href = CRxUrls.Goal_EPDocs +"?epId="+policyObject.epDetailId[0];
+            //$("#fileId").val(fileObject.fileId);
+           // setFile(fileObject.filename, fileObject.filePath);
+           // loadDocSteps(policyObject.epDetailId[0]);
+    };
+
+  
+
+
+</script>

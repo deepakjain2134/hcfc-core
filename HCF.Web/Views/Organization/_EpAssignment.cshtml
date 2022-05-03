@@ -1,0 +1,273 @@
+﻿@model HCF.Web.ViewModels.Organization.EpAssignmentsViewModel
+@{
+    var epDetails = Model.EpDetails.Where(x => x.IsActive && x.IsApplicable && x.IsExpired == false && x.IsUpComingEp == false);
+    int totalEPs = epDetails.Count();
+    int totalEcEPs = epDetails.Count(x => x.Standard.CategoryId.Value == 1);
+    int totalLsEPs = epDetails.Count(x => x.Standard.CategoryId.Value == 2);
+    int totalEmEPs = epDetails.Count(x => x.Standard.CategoryId.Value == 3);
+    int unAssignedEps = epDetails.Where(x => x.EPUsers.Count == 0).Count();
+}
+<div class="row tablelist-topform">
+    <div class="col-md-12">
+        <p class="note">*Select users here. When you check-mark EPs in the list below, the user is assigned to those EPs.</p>
+    </div>
+
+    <div class="col-md-6">
+        <div id="epUserDdl2" class="epassign-search">
+            <div class="form-group" id="epUserDdl">
+                <select name="ddlMultiUser" id="ddlMultiUser" class="ddlboxLive ddlMultiUser selectpicker" data-live-search="true">
+                    <option value="0" data-domain="" data-content="Nothing Selected">Nothing Selected</option>
+                    @foreach (var item in Model.UserList)
+                    {
+                        var text = item.FullName + " (" + ((item.IsPowerUser) ? " PU " + item.EpsCount : item.EpsCount.ToString()) + " )";
+                        text = text + " <br/>" + item.Email;
+                        <option value="@item.UserId" data-domain="@item.Email" data-content="@text">@text</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group assign-epmargin">
+                <input name="chk_assign_responsibility" id="chk_assign_responsibility" type="checkbox" /><span></span>
+                Assign another user’s EPs to the selected user
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-left">
+                    <a class="btn button1 comm-button"
+                       id="btnepAssignment">Assign EPs by Standard</a>
+
+                    @*<a class="btn button1 comm-button"
+                        id="btnUploadeps">Upload EP Assignment Sheet</a>*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="assignEpTo" class="col-md-6 epassign-search">
+        <span class="eparrow">&#8594;</span>
+        <select name="ddlAssignToMultiUser" id="ddlAssignToMultiUser" multiple="multiple" class="ddlboxLive ddlMultiUser">
+            @foreach (var item in Model.UserList)
+            {
+                var text = item.FullName + " (" + ((item.IsPowerUser) ? " PU " + item.EpsCount : item.EpsCount.ToString()) + " )";
+                text = text + " <br/>" + item.Email;
+                <option value="@item.UserId" data-domain="@item.Email" data-content="@text">@text</option>
+            }
+        </select>
+        <button class="comm-button" id="btnAssignResponsibility">Assign</button>
+    </div>
+
+</div>
+<span id="trcount" style="display:none;"></span>
+<div id="trselectedCount" class="col-lg-12 col-md-12 col-sm-12">
+    <span id="selectedCount">0</span> of <span id="toalEPs">
+    </span> EP Selected
+</div>
+
+<div class="epassign-fixed">
+    <div class="dashboard_filter allEPassign">
+        @*<input name="ep_chk_all" value="0" id="assign-select-all" type="checkbox" ><span></span>Select All EPs
+            <button class="comm-button btnAssignEps" id="btnAssignEps">Assign EP</button>&nbsp;&nbsp;*@
+        <input type="checkbox" id="filterUnAssignedEp" value="" /><span></span>Show Unassigned EPs (@unAssignedEps)
+    </div>
+    <div id="catfilter" class="dashboard_filter text-right">
+        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+            <label class="btn active">
+                @Html.RadioButton("EPCat", 1)<label for="EC">EC <span class="countec" id="txtEpEcCount">(@totalEcEPs)</span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 2)<label for="LS">LS <span class="countec" id="txtEpLsCount">(@totalLsEPs)</span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 3)<label for="EM">EM <span class="countec" id="txtEpEmCount">(@totalEmEPs)</span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 0, true)<label for="ALL">All <span class="countec" id="txtEpAllCount">(@totalEPs)</span></label><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+        </div>
+    </div>
+</div>
+<div class="" id="partialView">
+    <table id="ep_myTable" class="table table-bordered table-striped asset_list_view">
+        <thead>
+            <tr>
+                <th style="display:none;">
+                    CategoryName
+                </th>
+                <th style="display:none;">
+                    CategoryID
+                </th>
+                <th style="display:none">
+                    <input name="select_all" value="1" id="example-select-all" type="checkbox" class="hide" />
+                </th>
+                <th id="StandardEp" style="display:none">
+                    EPDetailId
+                </th>
+                <th id="StandardEp" class="sorting1">
+                    StandardEP
+                </th>
+                <th>
+                    Description
+                </th>
+                <th id="Assets" class="sorting1" style="width:70px;">
+                    Assets
+                </th>
+                <th title="Doc Required" id="DOC">
+                    <img alt="Doc Required" src="/dist/Images/Icons/dashboard_doc_icon.png" title="Doc Required">
+                </th>
+                <th>
+                    Users
+                </th>
+                <th style="display:none;">
+
+                </th>
+                <th style="display:none;">
+
+                </th>
+                <th style="display:none;">
+                    Full Name of responsible user(s)
+                </th>
+                <th style="display:none;">
+                    Email(s)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in epDetails)
+            {
+                if (item != null)
+                {
+                    <tr class="trmain" data-usercount="@item.EPUsers.Count()">
+                        <td style="display:none">
+                            <input type="hidden" id="AssignmentType" value="@ViewBag.Type" />
+                            @item.StandardEp.Split('.')[0]
+                        </td>
+                        <td style="display:none">
+                            @item.Standard.CategoryId
+                        </td>
+                        <td style="display:none">
+                            @item.EPDetailId
+                        </td>
+                        <td style="display:none">
+                            @item.EPDetailId
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.StandardEp)
+                        </td>
+                        <td class="align-left">
+                            @*@await Html.PartialAsync("_EpDescription", item.Description,
+                                 new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                 {{ "standardEp", @item.StandardEp }}
+                                )*@
+                            @await Component.InvokeAsync("EpDescription", new { epDetailId = item.EPDetailId, maxLength = 0, epdetails = item })
+                        </td>
+                        <td>
+                            @if (item.IsAssetsRequired)
+                            {
+                                <img width="25" src="@Url.Content("~/dist/Images/Icons/default.png")" alt="" />
+                            }
+                        </td>
+                        <td>
+                            @if (item.DocumentType != null && item.DocumentType.Count > 0)
+                            {
+                                <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="@item.DocumentType[0].Name" alt="" />
+
+                            }
+                        </td>
+                        <td>
+                            <div id="loadepuser_@item.EPDetailId">
+                                <input type="hidden" name="epuserIds" />
+                                @await Html.PartialAsync("_epuser_assignment", item)
+                            </div>
+                        </td>
+                        <td style="display:none">
+                            @item.EPSearchText
+                        </td>
+                        <td style="display:none">
+                            @{
+                                <text>  @string.Join(", ", item.EPUsers.Select(x => x.UserId))</text>
+
+                            }
+                        </td>
+                        <td style="display:none">
+                            @{
+                                <text>  @string.Join(", ", item.EPUsers.Select(x => x.Name))</text>
+
+                            }
+                        </td>
+                        <td style="display:none">
+                            @{
+                                <text>  @string.Join(", ", item.EPUsers.Select(x => x.Email))</text>
+
+                            }
+                        </td>
+
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <div id="loadicon"></div>
+</div>
+<script src='@Url.Content($"~/dist/js/Setup_EpAssignment.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.html5.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("body").removeClass("loading");
+    });
+
+    var btnEpAssignementPopUp = $("#btnepAssignment");
+    var popupUrl = '@Url.Action("EpFrequencyScheduleDatePopUp", "Organization")';
+    btnEpAssignementPopUp.click(function () {
+        var selectedUser = $('#ddlMultiUser').val();
+        debugger;
+        if (selectedUser != null && selectedUser != '' && selectedUser != "0") {
+            $("#modal-container .close").click();
+            $(".modal-backdrop.in").hide();
+            var modelContainer = $("#modal-container1");
+            modelContainer.empty();
+            $.get(popupUrl + "?userIds=" + selectedUser, function (data) {
+                modelContainer.html('');
+                modelContainer.html(data);
+                modelContainer.fadeIn('fast');
+                modelContainer.modal('show');
+            });
+        } else {
+            AlertWarningMsg('Select one user');
+        }
+    });
+
+    btnUploadeps = $("#btnUploadeps");
+    var uploadEPUrl = '@Url.Action("EPUploadPopUp", "EPAssignee")';
+    btnUploadeps.click(function () {
+        //alert("called");
+        $("#modal-container .close").click();
+        $(".modal-backdrop.in").hide();
+        var modelContainer = $("#modal-container1");
+        modelContainer.empty();
+        $.get(uploadEPUrl, function (data) {
+            modelContainer.html('');
+            modelContainer.html(data);
+            modelContainer.fadeIn('fast');
+            modelContainer.modal('show');
+        });
+    });
+
+
+</script>
+<style>
+    #ep_myTable_filter {
+        margin-bottom: 3px;
+        display: inline-block;
+        margin-left: 4px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        float: right;
+    }
+
+    .dt-buttons {
+        display: inline-block;
+    }
+</style>

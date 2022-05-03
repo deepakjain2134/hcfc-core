@@ -1,0 +1,155 @@
+﻿@model HCF.BDO.EPDetails
+<div class="slider">
+    @if (Model.TInspectionActivity.Count > 0)
+    {
+        if (Model.TInspectionActivity.Any(x => x.ActivityType == 2))
+        {
+            <table style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Asset
+                        </th>
+                        <th>
+                            Location
+                        </th>
+                        <th>
+                            @Localizer["NearBy"]
+                           
+                        </th>
+                        <th>
+                            @Localizer["AssetNo"]
+                           
+                        </th>
+                        <th>
+                            Comment
+                        </th>
+                        <th>
+                            @Localizer["InspectionDateTime"]
+
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>
+                            Inspector Name
+                        </th>
+                        <th>
+                            History
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mdl in Model.TInspectionActivity.Where(x => x.ActivityType == 2).OrderByDescending(x => x.ActivityInspectionDate))
+                    {
+                        if (mdl.TFloorAssets != null)
+                        {
+                            <tr>
+                                <td>
+                                    @mdl.TFloorAssets.Name
+                                </td>
+                                <td>
+                                    @if (mdl.TFloorAssets.FloorId != null)
+                                    {
+                                        <span>@($"{mdl.TFloorAssets.Floor.Building.BuildingName},{mdl.TFloorAssets.Floor.FloorName}")</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span>NA</span>
+                                    }
+                                </td>
+                                <td>
+                                    @mdl.TFloorAssets.NearBy
+                                </td>
+                                <td>
+                                    @mdl.TFloorAssets.AssetNo
+                                </td>
+                                <td>
+                                    @mdl.Comment
+                                </td>
+                                <td>
+                                    @mdl.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                                </td>
+                                <td>
+                                    @if (mdl.Status == 2)
+                                    {
+                                        <span>In-progress</span>
+                                    }
+                                    else if (mdl.Status == 1)
+                                    {
+                                <span>
+                                    @Localizer["CompliantText"]
+                                   
+                                </span>
+                                    }
+                                    else if (mdl.Status == 0)
+                                    {
+                                        <span>@Localizer["NonCompliantText"]</span>}
+                                </td>
+                                <td>
+                                    @mdl.UserProfile.FullName
+                                </td>
+                                <td>
+                                    @if (mdl.Status != 2)
+                                    {
+                                        <img onclick="location.href = '@Url.Action("ActivityHistory", "Assets", new {activityId = mdl.ActivityId})'"
+                                             src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+        @*else if (Model.Inspection.TInspectionActivity.Where(x => x.ActivityType == 3).Count() > 0)
+        {
+            <table style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Document Name
+                        </th>
+                        <th>
+                            Comment
+                        </th>
+                        <th>
+                            Inspection Date
+                        </th>
+                        <th>
+                            History
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mdl in Model.Inspection.TInspectionActivity.Where(x => x.ActivityType == 3))
+                    {
+                        if (Model.Inspection.InspectionDocs != null)
+                        {
+                            foreach (var docs in Model.Inspection.InspectionDocs)
+                            {
+                                <tr>
+                                    <td>
+                                        @docs.DocumentName
+                                    </td>
+                                    <td>
+                                        @mdl.Comment
+                                    </td>
+                                    <td>
+                                        @HCF.Utility.Conversion.ConvertToDateTime(mdl.CreatedDateTimeSpan).ToFormatDate()
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        }*@
+    }
+    else
+    {
+        <p>No data found</p>
+    }
+</div>

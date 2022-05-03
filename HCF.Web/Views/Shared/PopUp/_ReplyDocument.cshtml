@@ -1,0 +1,152 @@
+﻿@model HCF.BDO.Documents
+
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                Send Email
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+        </div>
+        <div class="modal-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(true)
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <input type="hidden" name="EPdetailId" id="EPdetailId" value="@TempData["epDetailId"]" />
+                            @Html.HiddenFor(model => model.DocumentRepoId)
+                            @Html.LabelFor(model => model.To, new { @class = "" })
+                            @Html.TextBoxFor(model => model.Sender, new { @readonly = "readonly", @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Sender)
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Subject, new { @class = "" })
+                            @Html.TextBoxFor(model => model.Subject, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Subject)
+                        </div>
+                        <div class="form-group" id="htmlEditorDiv">
+                            <label>Description</label>
+                            @Html.TextAreaFor(model => model.Details, new { @class = "form-control", name = "Details", placeholder = "Enter description for Details", required = "required" })
+                        </div>
+                        <div class="form-group maildoc-inline">
+                            <label>Doc Attached: </label>
+                            <ul class="doc_listing">
+                                @foreach (var attachment in Model.Attachments)
+                                {
+                                    <li class="sendmailattached-doc" id="@attachment.Id">
+                                        <a href="@commonModelFactory.FilePath(attachment.FilePath)" target="_blank">
+                                            <img src="../dist/Images/Icons/document_blue-icon.png" alt="" id='@attachment.Id'> <br />
+                                        </a>
+                                        <a class="deletefile allowclick">
+                                            <img id="deleteimg" alt="Delete" rel="@attachment.Id" title="Delete file" src="/dist/Images/Icons/red_cross.png">
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right button_Div">
+                    <input type="button" name="submitButton" value="SEND" class="comm-button" id="sendButton" />
+                    <input type="submit" name="submitButton" value="CANCEL" data-dismiss="modal" class="comm-Cancelbutton" />
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+<input type="hidden" name="RemovedAttach" id="RemovedAttach" />
+
+<script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+<script>
+
+    $(document).ready(function () {
+        debugger
+        CKEDITOR.replace('Details');
+    });
+
+    var valueArray = [];
+    $('#sendButton').click(function () {
+        debugger
+        $("#RemovedAttach").val(valueArray);
+        var documentObject = {
+            EPdetailId: parseInt($('#EPdetailId').val()),
+            DocumentRepoId: parseInt($('#DocumentRepoId').val()),
+            Sender: $('#Sender').val(),
+            Subject: $('#Subject').val(),
+            Details: $("#htmlEditorDiv iframe").contents().find('body').html(),    //$('#Details').val(),
+            RemovedAttach: $("#RemovedAttach").val()
+        }
+
+        debugger;
+
+        $.ajax({
+            url: CRxUrls.Common_ReplyDocument,
+            method: "POST",
+            data: documentObject,
+            /* contentType: "application/json; charset=utf-8",*/
+            success: function () {
+                $("#common-modal .close").click();
+                successAlert($.Constants.Email_Sent_Successfully, "Message");
+                $("#modal-container").modal('hide');
+            }
+        });
+    });
+
+    $(document).on('click', 'a.deletefile', function (e) {
+        debugger;
+        e.preventDefault();
+        var TFileId = $('#deleteimg').attr("rel");
+        //var i = $(this).val();
+        swal({
+            title: "Are you sure want to remove this file?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, remove it!",
+            closeOnConfirm: true
+        },
+            function () {
+                // debugger;
+                if (TFileId != "") {
+                    valueArray.push(TFileId);
+                    $('#' + TFileId).remove();
+                    swal("Removed!", "Your file has been removed.", "success");
+                    debugger;
+                }
+                else {
+                    // debugger;
+                    swal("Please select the file!");
+                }
+            });
+    });
+
+
+
+
+</script>
+
+
+<style>
+    .maildoc-inline .doc_listing li {
+        display: inline-block;
+        margin-bottom: 6px;
+        width: 38px;
+        border: 1px solid #ccc;
+        padding: 6px;
+        float: left;
+        margin-right: 12px;
+        position:relative;
+    }
+    .deletefile.allowclick, .deletedrawing.allowclick {
+        position: absolute;
+        right: -9px;
+        top: -28%;
+        background-color: #fff;
+    }
+</style>

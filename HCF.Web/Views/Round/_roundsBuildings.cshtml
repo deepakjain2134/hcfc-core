@@ -1,0 +1,69 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var allBuildings = Model.buildings;
+    var roundUserGroup = Model.Roundgrouplist;
+    Layout = null;
+}
+
+<div class="addfloor-content">
+    <h4>Buildings</h4>
+    @foreach (var buildingGroupBy in allBuildings.Where(x => x.SiteActive).GroupBy(x => x.SiteCode).OrderBy(x => x.FirstOrDefault().SiteName))
+    {
+        <div class="round-groupname">
+            <p class="buildingGroupBy">@buildingGroupBy.FirstOrDefault().SiteName</p>
+
+            @if (allBuildings.Where(x => x.IsActive && x.SiteCode == buildingGroupBy.FirstOrDefault().SiteCode && x.Floor.Count(f => f.IsActive) > 0).OrderBy(x => x.BuildingName).ToList().Count != 0)
+            {
+                <div id="roundbuildings" class="round-groupdetails">
+                    @foreach (var building in allBuildings.Where(x => x.IsActive && x.SiteCode == buildingGroupBy.FirstOrDefault().SiteCode && x.Floor.Count(f => f.IsActive) > 0).OrderBy(x => x.BuildingName))
+                    {
+                        <div class="addfloorBox1">
+                            <p>@building.BuildingName</p>
+                            <ul class="roundfloor_list">
+                                @foreach (var item in building.Floor.Where(x => x.IsActive).OrderBy(x => x.Sequence))
+                                {
+                                    <li class="roundfloor" floorid="@item.FloorId" buildingId="@item.BuildingId">
+                                        @item.Alias.ToUpper().Substring(0, Math.Min(item.Alias.Length, 3))
+                                    </li>
+                                }
+                            </ul>
+
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div id="roundbuildings" class="round-groupdetails">
+                    <div class="addfloorBox1">
+                        <p>No Record Found</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+<script>
+    $(document).ready(function () {
+        @foreach (var item in roundUserGroup.Where(x => x.RoundGroupLocations != null).ToList())
+        {
+            foreach (var locations in item.RoundGroupLocations.Where(x => x.IsActive == true))
+            {
+             @:$(".roundfloor[floorid='" + @locations.FloorId + "']").addClass("gray");
+           }
+        }        
+    });
+
+</script>
+
+<style>
+   
+
+    .yellow {
+        background-color: yellow !important;
+    }
+
+    .gray {
+        background-color: #cdcdcd;
+    }
+</style>

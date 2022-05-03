@@ -1,0 +1,24 @@
+﻿@model HCF.BDO.EPDetails
+
+
+@if (Model.EPUsers.Count > 1)
+{
+    <div data-toggle="modal" data-target="#addEpAssigneeModel"
+         class="addEpAssignee" title="Assign User"
+         id="EPDetailId_@Model.EPDetailId"
+         data-userlist="@string.Join(",", Model.EPUsers.Where(x=>x.IsCRxUser ==false  && x.IsActive).Select(x => x.UserId))">
+        <a href="javascript:void(0);">@string.Format("{0}{1}{2}{3}", Model.EPUsers.Where(x => x.IsCRxUser == false && x.IsActive).ToList()[0].FullName, " + ", Model.EPUsers.ToList().Count - 1, " More")</a>
+    </div>
+}
+else if (Model.EPUsers.Count > 0)
+{
+    <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="@string.Join(",", Model.EPUsers.Select(x => x.UserId))">
+        <a href="javascript:void(0);">@Model.EPUsers[0].FullName</a>
+    </div>
+}
+else
+{
+    <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="">
+        <a href="javascript:void(0);">Assign User</a>
+    </div>
+}

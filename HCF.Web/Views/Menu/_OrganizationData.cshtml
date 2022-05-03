@@ -1,0 +1,41 @@
+﻿@model List<HCF.BDO.OrgServices>
+@{
+    List<HCF.BDO.OrgServices> menuOrg = ViewBag.MenuList;
+}
+<h4>Assign Module</h4>
+<div class="organization_view" style="width:100% !important;">
+    <ul class="uname-listitem">
+        @foreach (var item in Model.Where(x => x.Type == 0))
+        {
+            <li>
+                <input type="checkbox" value='@item.ClientNo' name="menu"
+                       @((item.Status) ? "checked='checked'" : "") /> <span></span>
+                @item.Name
+            </li>
+        }
+    </ul>
+    <h4>
+        Default Enabled
+    </h4>
+    <ul class="uname-listitem">
+        @foreach (var item in Model.Where(x => x.Type == 1).OrderBy(x => x.ClientNo))
+        {
+            <li>
+                <input type="checkbox" value='@item.ClientNo' name="disabledMenu" class="disabled"
+                       checked="checked" /> <span></span>
+                @item.Name
+            </li>
+        }
+    </ul>
+</div>
+<script>
+    $("input[name='menu']").on('change', function () {
+        var IsActive = $(this).is(':checked');
+        var organizationId = $("#drpOrganization").val();
+        var serviceMode = 1;
+        var menuId = $(this).val();
+        var url = '@Url.Action("UpdateMenuOrganization", "Menu")';
+            $.get(url + '?organizationId=' + organizationId + '&menuId=' + menuId + '&IsActive=' + IsActive + '&serviceMode=' + serviceMode, function (data) {
+        });
+    });
+</script>

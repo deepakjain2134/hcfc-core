@@ -1,0 +1,100 @@
+﻿@model HCF.BDO.StopMaster
+@using HCF.Web.Helpers
+@{
+    ViewBag.Title = "Manage Stops";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Manage Stops
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="settingnewBox">
+                    @await Html.PartialAsync("_MoreConfig")
+                    <div class="rightcol-setting">
+                        <div class="box box-primary">
+                            @using (Html.BeginForm("MngLocation", "Location", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                           
+                            <div class="row">
+                                <div class="col-lg-6 form-group">
+
+                                    @Html.HiddenFor(x => x.StopId)
+                                    <label for="BuildingID">Buildings</label> <em class="required-field"> *</em>
+                                    @*@Html.BuildingDropDownList("BuildingID", 0, "Select Building",
+                                       new { @class = "form-control", required = "required" })*@
+
+                                    <buildingdropdownList name="BuildingID" selectedvalue="@Model.BuildingId" firsttext="Select Building" class="form-control" required="required"></buildingdropdownList>
+
+                                </div>
+                                <div class="col-lg-6 form-group">
+                                    @Html.LabelFor(model => model.StopName)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(m => Model.StopName, new { @class = "form-control", required = "required", @maxlength = "100" })
+                                    @Html.ValidationMessageFor(model => Model.StopName)
+                                </div>
+                                <div class="col-lg-6 form-group">
+                                    <label for="FloorId">Floors</label> <em class="required-field"> *</em>
+                                    <select id="floors" name="FloorId" class="form-control required" required="required"></select>
+                                </div>
+                                <div class="col-lg-6 form-group">
+                                    @Html.LabelFor(model => model.StopCode)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(model => model.StopCode, new { @class = "form-control", maxlength = 50, required = "required" })
+                                    @Html.ValidationMessageFor(model => model.StopCode)
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                    @Html.ValidationMessageFor(m => m.IsActive)
+                                    <label>Active</label>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-right button_Div">
+                                     <input type="submit"id="btnSubmit" value='Save' class="comm-button" />
+                                    @*@Html.ActionLink("Cancel ", "Locations", "Location", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "Locations", new { controller = "Location" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+
+<script>
+    var buildingdddlCtr = $("#BuildingID");
+    var floorsddlCtr = $("#floors");
+
+
+    $('input:checkbox[id^="IsActive"]').change(function () {
+        debugger;
+        var $this = $(this);
+        if ($this.is(":checked")) {
+            $('#IsActive').val(true);
+        } else {
+            $('#IsActive').val(false);
+        }
+
+    });
+
+    $(document).ready(function () {
+        $("#BuildingID").attr("required", true)
+        var selectedFloorID = parseInt('@Model.FloorId');
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, selectedFloorID);
+    });
+
+    buildingdddlCtr.change(function () {
+        bindFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+    });
+
+   
+</script>

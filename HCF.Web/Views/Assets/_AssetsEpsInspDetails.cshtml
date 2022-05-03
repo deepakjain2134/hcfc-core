@@ -1,0 +1,130 @@
+﻿@model HCF.BDO.TFloorAssets
+@{
+    var firstDiv = true;
+}
+
+@foreach (var item in Model.EPDetails.Where(x => x.EPFrequency != null && x.EPFrequency.Count > 0).OrderBy(x => x.StandardEp))
+{
+    int inspectionStatus = (item.Inspection != null) ? item.Inspection.Status.Value : 2;
+    <div class="slide tab-pane @(firstDiv ? "active" : string.Empty)" id="@($"{item.EPDetailId}a")">
+        
+        <div id="tbl_@item.EPDetailId" class="tble_shadow table">
+           
+            <div>
+                
+                @*@item.Description*@
+                @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "standardEp", @item.StandardEp } })*@
+
+                @*@await Html.PartialAsync("_EpDescription", item.Description,
+         new ViewDataDictionary(
+         new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+         new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+         {{ "standardEp", @item.StandardEp }}
+        )*@
+                @await Component.InvokeAsync("EpDescription", new { epDetailId = item.EPDetailId, maxLength = 0, epdetails = item })
+
+            </div>
+           
+        </div>
+        
+        <table class="table"  id="tbl_@item.EPDetailId">
+            <tbody>
+                <tr>
+                    <td style="display: none;"><strong>Frequency</strong></td>
+                    <td><strong> @Localizer["InspectionDateTime"] </strong></td>
+                    <td><strong>Due Date</strong></td>
+                    <td><strong>Status</strong></td>
+                    @*<td style="width:1px;"><strong>Location</strong></td>*@
+                    <td><strong>Inspector</strong></td>
+                    <td><strong>Comment</strong></td>
+                    <td><strong>Detail</strong></td>
+                </tr>
+                @foreach (var epfreq in item.EPFrequency)
+                {
+                    if (item.TInspectionActivity.Any(x => x.FloorAssetId == Model.FloorAssetsId && x.IsCurrent == true && x.FrequencyId == epfreq.FrequencyId))
+                    {
+                        foreach (var activity in item.TInspectionActivity.Where(x => x.FloorAssetId == Model.FloorAssetsId && x.IsCurrent == true && x.FrequencyId == epfreq.FrequencyId))
+                        {
+                            <tr>
+                                <td style="display: none;">@epfreq.Frequency.DisplayName</td>
+                                <td>@activity.ActivityInspectionDate.Value.ToClientTime().ToFormatDate()</td>
+                                <td>
+                                    @((activity.Status == 1 && activity.DueDate.HasValue) ? activity.DueDate.CastDate() : "Immediate")
+                                </td>
+                                <td>
+                                    @commonModelFactory.GetAssetStatus(activity)
+                                </td>
+                                <td>@((activity.UserProfile == null) ? "" : activity.UserProfile.FullName) </td>
+                                <td>
+                                    @activity.Comment
+                                </td>
+                                <td>
+                                    @if (activity.Status == 2)
+                                    {
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" alt="" />
+                                    }
+                                    else
+                                    {
+                                        <img class="details @(activity.Status != 2 ? "" : "disabled")" onclick="location.href = '@Url.Action("ActivityHistory", "Assets", new {activityId = activity.ActivityId})'" src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" alt="" />
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+     <br />
+        <div class="text-right button_Div">
+            <input type="submit" name="button" class="comm-bluebutton" value="View History" onclick="location.href = '@Url.Action("history", "Assets", new {floorassetId = Model.FloorAssetsId, epId = item.EPDetailId})'" />
+            @if (item.EPFrequency.Count > 0)
+            {
+                foreach (var epfreq in item.EPFrequency)
+                {
+                    var inspectionActivity = item.TInspectionActivity.Where(x => x.FrequencyId == epfreq.FrequencyId).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                    if (inspectionActivity != null)
+                    {
+                        <div id='@($"inspection_{epfreq.FrequencyId}")' style="display: none">
+                            <input type="hidden" value="@inspectionActivity.UserProfile.FullName" class="userName" />
+                            @{
+                                var dueDate = "";
+                                if (inspectionActivity.DueDate != null)
+                                {
+                                    dueDate = $"{inspectionActivity.DueDate.Value.ToClientTime():MMM dd, yyyy}";
+                                }
+                            }
+                            <input type="hidden" value="@dueDate" class="dueDate" />
+                            <input type="hidden" value="@($"{inspectionActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime():MMM dd, yyyy}")" class="inspectiondate" />
+                            <input type="hidden" value="@inspectionActivity.Status" class="activitystatus" />
+                        </div>
+                    }
+                    <input type="button"
+                           name="button"
+                           class="comm-bluebutton"
+                           value="Work Orders"
+                           onclick="gotoAssetWorkOrder(@Model.FloorAssetsId,@item.EPDetailId)" />
+
+                    <input type="button"
+                           name="button"
+                           class="comm-button"
+                           value="@($"{(item.EPFrequency.Count() > 1 ? epfreq.Frequency.DisplayName : "")} {"Inspect"}")"
+                           onclick="CheckInspection(@inspectionStatus,@Model.FloorAssetsId, @item.EPDetailId, '@Model.AssetNo',
+                           '@item.TInspectionActivity.Where(x => x.FrequencyId == epfreq.FrequencyId).Count()','@epfreq.FrequencyId')" />
+                }
+            }
+        </div>
+    </div>
+    firstDiv = false;
+}
+
+@if (Model != null && Model.EPDetails.Count == 0)
+{
+    <span style="margin: 0px auto;text-align: center;display: block;padding: 15px;">No EP Link with @Model.Assets.Name</span>
+}
+
+    <script>
+        $(function () {
+            $("[rel=popover]").popover({ placement: 'bottom' });
+        });
+    </script>

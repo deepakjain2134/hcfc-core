@@ -1,0 +1,87 @@
+﻿@model HCF.BDO.EPSteps
+@{
+    ViewBag.Title = "Document Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Document Inspection
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box-primary part1">
+                </div>
+                <div class="box box-primary part2">
+                    <div class="row tablelist-topform part2">
+                        <div class="col-md-12">
+                            <div class="back">
+                                <div class="pull-right">
+                                    <a href="#"><i class="fa fa-backward" aria-hidden="true"></i> Back</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                            @*@using (Ajax.BeginForm("EPDocs", "Goal", new AjaxOptions { HttpMethod = "POST", OnSuccess = "epDocsOnSuccess" }))
+        {*@
+                <div class="row">
+                    <form id="form0" asp-controller="Goal" asp-action="EPDocs"
+                          data-ajax-success="epDocsOnSuccess"
+                          data-ajax="true" data-ajax-method="POST" method="post">
+                        <div class="col-md-4">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="fileId" id="fileId" />
+                            <input type="hidden" name="FileContent" id="FileContent" />
+                            <input type="hidden" name="SubmitButton" id="SubmitButton" value="Yes" />
+                            <input type="hidden" name="epId" id="epId" value="@Model.EPDetailId" />
+                            <input type="hidden" name="inspectionid" id="inspectionid" value="@Model.InspectionId" />
+                            <input type="hidden" name="epIds" id="epIds" value="@TempData["epIds"]" />
+                            <input type="hidden" name="frequencyId" id="frequencyId" value="0" />
+                            <input type="hidden" name="fileName" id="fileName" />
+                            <input type="hidden" name="fileext" id="fileext" />
+                            <input type="hidden" name="filePaths" id="filePaths" />
+                            @*<input type="hidden" name="uploaddocTypeId" id="uploaddocTypeId" />*@
+                            <div id="epDocSteps">
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-8" id="epDocFilePreview">
+                            @await Html.PartialAsync("_epDocFileUploadPreview", new List<HCF.BDO.TFiles>())
+                        </div>
+                    </form>
+                </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts
+{
+    <script src='@Url.Content($"~/dist/Scripts/page_scripts/Goal/epdocs.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+    <script>
+        const canInspectEp = '@Model.EPDetails.CanInspect()';
+        @*var dueDate = '@((Model.Inspection != null && Model.Inspection.DueDate.HasValue) ? Model.Inspection.DueDate.Value.ToClientTime().ToFormatDate() : "") ';*@
+          @*var dueDate = "@Model.EPDetails.Inspection.DueDate.Value.ToFormatDate()";*@
+        var epStatus = '@Model.EpTransStatus';
+
+        var InspectionID = getParameterByName('InspectionId');
+        if (InspectionID == 0 && InspectionID != undefined) {
+            var dueDate = "@((Model.EPDetails != null && Model.EPDetails.Inspection != null && Model.EPDetails.Inspection.DueDate.HasValue) ? Model.EPDetails.Inspection.DueDate.Value.ToFormatDate() : "")";
+
+        }
+        else {
+
+        }
+        
+
+        
+
+    </script>
+}

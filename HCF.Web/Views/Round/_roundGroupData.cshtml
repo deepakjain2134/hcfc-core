@@ -1,0 +1,29 @@
+﻿@model List<HCF.BDO.RoundGroup>
+
+<h4>Assign RoundGroups</h4>
+<div style="width:100% !important;">
+    <ul class="uname-listitem">
+        @foreach (var item in Model)
+        {
+            <li>
+                <input type="hidden" value="@item.RoundGroupId" id="useridid" />
+                <input type="checkbox" value='@item.RoundGroupId'
+                       @((item.IsActive==1) ? "checked='checked'" : "") /> <span></span>
+                @item.Name
+            </li>
+        }
+    </ul>
+</div>
+<script>
+
+    $("[type=checkbox]").on('change', function () {
+       // debugger;
+        var IsActive = $(this).is(':checked');
+        var groupid = $(this).val();
+        var userid = $("#drpUser").val();
+        var url = '@Url.Action("UpdateandSaveGroup", "Round")';
+        $.get(url + '?userid=' + userid + '&groupid=' + groupid + '&IsActive=' + IsActive, function (data) {
+            swalalert('Saved Successfully');
+        });
+    });
+</script>

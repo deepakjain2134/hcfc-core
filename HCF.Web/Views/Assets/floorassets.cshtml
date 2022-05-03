@@ -1,0 +1,282 @@
+﻿@{
+    ViewBag.Title = Localizer["FloorAssets"].Value;
+    var selectedValues = "0";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Assets
+        </h1>
+    </section>
+        }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="filter_floor_assets row tablelist-topform">
+
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="floorAssetId" id="floorAssetId" value="@ViewBag.floorAssetId" />
+                               
+                                <div class="col-lg-3 col-sm-3 asset_tab">
+                                    <label>Asset Type</label>
+                                    @*@Html.DropDownList("assetId", new SelectList(ViewBag.Assets, "AssetId", "Name"), "All", new { @class = "form-control ddlboxLive" })*@
+                                    @*<assetsdownlist name="assetId" selectedvalue="@selectedValues" firsttext="All" class="form-control ddlbox"></assetsdownlist>*@
+                                    <assetsdownlist name="assetId" selectedvalue="@selectedValues" firsttext="All" class="form-control ddlbox"></assetsdownlist>
+                                </div>
+                                    <div class="col-lg-3 col-sm-3 building_tab buildingSelectBox">
+                                        <label>Building</label>
+                                        <buildingdropdownList firsttext="All"
+                                                              class="form-control ddlboxLive"
+                                                              selectedvalue="0"
+                                                              name="drpBuildings">
+                                        </buildingdropdownList>
+                                        @*@Html.BuildingDropDownList("drpBuildings", 0, "All", new { @class = "form-control ddlboxLive" })*@
+                                    </div>
+                                    <div class="col-lg-3 col-sm-3 floor_tab">
+                                        <label>Floor</label>
+                                        <select id="floors" class="form-control ddlboxLive"></select>
+                                    </div>
+                                    <div class="col-lg-3 col-sm-3">
+                                        <label>Status</label>
+                                        <assetstatusdropDown firsttext="All"
+                                                             class="form-control ddlbox"
+                                                             selectedvalue=""
+                                                             name="drpStatus">
+                                        </assetstatusdropDown>
+                                        @*@Html.AssetStatusDropDown("drpStatus", "", "All", new { @class = "form-control ddlbox" })*@
+                                    </div>
+                              
+
+                                <input type="button" value="Search" id="btn_Search" class="button1" style="display:none;" />
+
+                            }
+
+                        </div>
+                        <div class="floorAssets-mainBox">
+                            @*<div class="add_button_comman">
+                                    <a href='@(Url.Action("CreateFloorassets","Assets"))' class="pull-right plus_bt">
+                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Assets" alt="3d_add_button" />
+                                    </a>
+                                </div>*@
+                            <div id="loadpartialfloorAssets"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var assetIdindex = 0;
+
+    $(document).on("change", "#assetId", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (assetIdindex == 0) {
+            var lastAllSelected = false;
+            assetIdindex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+
+    });
+
+
+    $(document).ready(function () {
+        debugger;
+        let logo = localStorage.getItem('logoimgbase64');
+        localStorage.clear();
+        localStorage.setItem('logoimgbase64', logo);
+        $("#floors").empty();
+        $("#floors").append(
+            $('<option></option>').val("").html("All"));
+        loadfloorAssets();
+       // getInspectiongroupdate();
+
+        $(document).on("click", '.ddlboxLive,.selectpicker', function () {
+            $(".ddlboxLive").selectpicker('refresh').attr('data-live-search', true).attr('data-size', 5).attr('data-width', 'auto');
+        });
+
+        $("#drpBuildings").trigger('change');
+       // loadfloorAssets();
+
+    });
+
+    $("#btn_Search").click(function () {
+        loadfloorAssets();
+    });
+
+    $("#inspectionschedule").click(function () {
+        debugger;
+        var Id = $('#InsGroups').val();
+        var redireturl = '@Url.Action("editGroup", "Inspection")';
+        window.location.href = redireturl + '?gid=' + Id;
+    });
+
+    var floorddl = $("#floors");
+    $("#drpBuildings").change(function () {
+        debugger
+        if ($("#drpBuildings").val() != "") {
+            localStorage.setItem("fliterbuildingId", $("#drpBuildings").val());
+            bindBuildingsFloorddl($("#drpBuildings").val(), floorddl);
+        }
+        else {
+            $("#floors").empty();
+            $("#floors").append(
+              $('<option></option>').val("").html("All"));
+        }
+        loadfloorAssets();
+        $(".ddlboxLive").selectpicker('refresh').attr('data-live-search', true).attr('data-size', 5).attr('data-width', 'auto');
+    });
+
+
+    var bindBuildingsFloorddl = function (buildingddl, floorddl, selectedfloorId, firstvalue, firsttext) {
+        debugger;
+        floorddl.html("<option> loading ... </option>");
+        if (firstvalue == undefined) {
+            firstvalue = "";
+        }
+        if (firsttext == undefined) {
+            firsttext = $.Constants.Floor_ddl_text_Select_Floor;
+        }
+        var ishaveselectedfloor = false;
+        floorddl.html("");
+
+        var buildingID = buildingddl;
+
+        floorddl.empty();
+        floorddl.append(
+            $('<option></option>').val(firstvalue).html(firsttext));
+        floorddl.selectpicker('refresh');
+
+        if (buildingID) {
+            $.ajax({
+                url: CRxUrls.Organization_FillBuildingFloors,
+                global: false,
+                type: "GET",
+                dataType: "JSON",
+                data: { buildingIds: buildingID },
+                success: function (buildings) {
+                    console.log(buildings);
+
+                    $.each(buildings, function (index) {
+                        var optgroup = $('<optgroup>');
+                        optgroup.attr('label', buildings[index].BuildingName);
+
+                        $.each(buildings[index].Floor, function (i) {
+                            var option = $("<option></option>");
+                            option.val(buildings[index].Floor[i].FloorId);
+                            option.text(buildings[index].Floor[i].FloorName);
+
+                            optgroup.append(option);
+                        });
+                        floorddl.append(optgroup);
+                    });
+
+                    floorddl.selectpicker('refresh');
+                }
+            });
+        }
+    };
+
+    $("#InsGroups").change(function () {
+        getInspectiongroupdate();
+    });
+
+    function getInspectiongroupdate() {
+        debugger;
+        var Id = $('#InsGroups').val();
+        if (Id > 0) {
+            var url = '@Url.Action("getGroups", "Inspection")';
+            $.get(url + '?inspectionGroupId=' + Id, function (data) {
+                if (data.Result) {
+                    $("#lblInspectionGroupdate").html(data.InspectionDate);
+                    $("#lblschedule").show();
+                }
+            });
+        } else {
+            $("#lblInspectionGroupdate").html('');
+            $("#lblschedule").hide();
+        }
+    }
+
+    $("#assetId").change(function () {
+        debugger;
+        localStorage.setItem("fliterassetId", $("#assetId").val());
+        $("#floorAssetId").val(0);
+        loadfloorAssets();
+    });
+
+    $("#floors").change(function () {
+        localStorage.setItem("fliterfloorsId", $("#floors").val());
+        $("#floorAssetId").val(0);
+        loadfloorAssets();
+    });
+
+    $("#filterInsGroups").change(function () {
+        $("#floorAssetId").val(0);
+        loadfloorAssets();
+    })
+
+    function loadfloorAssets() {
+        debugger;
+        var buildingId = "";
+        var _floorAssetId = $("#floorAssetId").val();
+        if ($("#drpBuildings").val() != "") {
+            buildingId = $("#drpBuildings").val();
+        }
+        var floorId = "";
+        floorId = localStorage.getItem("fliterfloorsId");//$("#floors").val();
+        var assetId = "";
+        assetId = localStorage.getItem("fliterassetId");//$("#assetId").val();
+        var groupId = "";
+
+       // if (assetId > 0) {
+            var url = '@Url.Action("FilterTFloorAssets", "Assets")';
+            $.get(url + '?floorAssetId=' + _floorAssetId + '&buildingId=' + buildingId + '&floorId=' + floorId + '&assetId=' + assetId + '&groupId=' + groupId, function (data) {
+                $('#loadpartialfloorAssets').html(data);
+                $('#loadpartialfloorAssets').fadeIn('fast');
+                $("#checkAll").prop("checked", false);
+            });
+      //  }
+
+    }
+
+   
+</script>

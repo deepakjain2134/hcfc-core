@@ -1,0 +1,150 @@
+﻿@model List<HCF.BDO.RoundGroup>
+
+<div class="trackingAssets-lenged float-right text-right">
+    <ul class="legand">
+        <li class="roundTypeFilter" type="grey"><span class="processType-Sprite notdone-btn"></span>Not Done</li>
+        <li class="roundTypeFilter" type="status_fail"><span class="processType-Sprite deficiency-btn"></span>Deficiency</li>
+        <li class="roundTypeFilter" type="status_grace_in_days_sysadmin"><span class="processType-Sprite due-btn"></span>Due</li>
+        <li class="roundTypeFilter" type="status_inprogress"><span class="processType-Sprite inProgress-btn"></span>@Localizer["InProgress"] </li>
+        <li class="roundTypeFilter" type="status_pass"><span class="processType-Sprite completed-btn"></span> Completed</li>
+    </ul>
+</div>
+
+<div class="locationlist-scroll">
+    <table class="table table-bordered table-striped" id="userroundDatesTable">
+        <thead>
+            <tr class="red" status="">
+                <th style="display:none"></th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Location Group
+                </th>
+                <th>
+                    Round Type
+                </th>
+                <th>
+                    Volunteer
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderBy(x => x.Name))
+            {
+                foreach (var roundSchedules in item.RoundSchedules)
+                {
+                    foreach (var roundDate in roundSchedules.RoundScheduleDates)
+                    {
+                        var Userid = string.Join(",", item.GroupUsers.Select(x => x.UserId));
+                        <tr status="@roundDate.RoundStatus">
+                            <td style="display:none">
+                                @roundDate.RoundStatus
+                            </td>
+                            <td>
+                                <label class="processType-Sprite @roundDate.RoundStatus"></label>
+                            </td>
+                            <td>
+                                @item.Name
+                            </td>
+                            <td>
+                                <div class="roundtypeicon">
+                                    <img src="@((item.RoundType == 1)?"/dist/Images/Icons/IndividualRounds.png":"/dist/Images/Icons/Grouprounds.png")" />
+                                    <span>@roundSchedules.RoundsCategorieList</span>
+                                </div>
+
+                            </td>
+                            <td>
+                                <ul>
+                                    @foreach (var user in roundSchedules.RoundGroupNames)
+                                    {
+                                        <li>
+                                            @user
+                                        </li>
+                                    }
+                                </ul>
+                            </td>
+                            <td>
+                                @if (roundSchedules.RoundGroupUsers.Any(x => x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId))
+                                {
+                                    if (roundDate.TRoundId.HasValue && roundDate.Tround != null)
+                                    {
+                                        var text = roundDate.Tround.Status == 2 ? "Resume" : "View";
+                                        <a href="@Url.RouteUrl("roundinsp", new {  rid = roundDate.TRoundId})">
+                                            @text
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        if (roundDate.RoundDate <= DateTime.Today.Date)
+                                        {
+                                            <a href="@Url.Action("NewRoundInsp", "Round", new
+                                            {
+                                            roundGroupId = item.RoundGroupId,
+                                            rgid = roundSchedules.TRoundGroupId,
+                                            roundType= item.RoundType,
+                                            rscheduleDateId = roundDate.Id,
+                                            roundInspDate = roundDate.RoundDate,
+                                            })">
+                                                Start
+                                            </a>
+                                        }
+                                    }
+
+                                    if (!roundDate.TRoundId.HasValue && item.RoundType == 2)
+                                    {
+                                        <a href="@Url.Action("UserGroup", "Round", new { RoundType = 2 , ispopup = 1,grproundid=item.RoundGroupId})" class="modal-link allowclick">
+                                            Reassign
+                                        </a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<style>
+    .roundtypeicon {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+        .roundtypeicon img {
+            width: 28px;
+            margin-right: 10px;
+        }
+
+    .active {
+        background-color: #ccc;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+                $(".roundTypeFilter").on("click", function() {
+                     var value = $(this).attr("type").toLowerCase();
+                    if($(this).hasClass('active'))
+                    {
+                       value="";
+                       $(this).removeClass("active");
+
+                    }else
+                    {
+                    $(this).addClass("active");
+                        $('.roundTypeFilter').not(this).removeClass('active');
+                    }
+
+                    $("#userroundDatesTable tbody tr").filter(function() {
+                        $(this).toggle($(this).attr("status")
+                        .toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+</script>

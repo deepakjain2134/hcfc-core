@@ -1,0 +1,224 @@
+﻿@model HCF.Web.ViewModels.DrawingFloorViewModel
+
+@{
+    ViewBag.Title = "Floor Plans";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var floorTypes = Model.FloorTypes;
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Floor Plan History
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+
+        @if (Model != null)
+        {
+            <div class="row">
+                <div class="col-xs-3 col-left asset_list_view">
+                    <div class="box box-primary finalizeleft_view">
+                        <input type="hidden" value="@ViewBag.FloorTypeId" id="floorTypeId" />
+                        <ul class="list drawings-list" id="floorTypeUl">
+                            @foreach (var item in floorTypes.OrderBy(x => x.FloorType))
+                            {
+                                <li id="@item.FloorTypeId" class="floorTypeli active">
+                                    <a>
+                                        <label>
+                                            <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" alt="" />&nbsp;&nbsp;
+                                            <span for="@($"cb1{item.FloorType}")" id="lbl">
+                                                @item.FloorType
+                                            </span>
+                                        </label>
+                                    </a>
+                                    <span class="drawings-checkicon">
+                                        <img src="/dist/img/Artboard 2.png">
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="box box-primary">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-4 form-group">
+                                <label>Building Name:</label> 
+                                @($"{Model.Floor.Building.BuildingName} ({Model.Floor.Building.BuildingCode})")
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Floor Name:</label> 
+                                @Model.Floor.FloorName
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Floor Code:</label> 
+                                @Model.Floor.FloorCode
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="floorPlanHistoryTbl" class="table table-bordered table-striped no-footer">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <th>Floor Plan</th>
+                                            <th>
+                                                Plan Type
+                                            </th>
+                                            <th>Status</th>
+                                            <th>Date added </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.FloorPlans.OrderByDescending(x => x.CreatedDate))
+                                        {
+                                            <tr>
+                                                <td style="display:none">
+                                                    @item.FloorPlanTypeId
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(item.ImagePath) && commonModelFactory.GetExtension(item.ImagePath) == ".pdf")
+                                                    {
+                                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = Model.Floor.FloorName + " , " + Model.Floor.Building.BuildingName })"
+                                                           class="modal-link">
+                                                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.PDFIcon)" height="25" width="25" alt="" class="floorthumb" />
+                                                        </a>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(item.ImagePath))
+                                                    {
+                                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = Model.Floor.FloorName + " , " + Model.Floor.Building.BuildingName })"
+                                                           class="modal-link" rel="popover" data-img="@commonModelFactory.FilePath(item.ImagePath)">
+                                                            @*@Html.Image(item.ImagePath, item.FloorName, "floorthumb")*@
+                                                            <image src="@item.ImagePath" title="@item.FloorName" class="floorthumb"></image>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <img alt="@item.FloorName" src="@Url.Content("~/dist/Images/Icons/no_image.jpg")" style="width:30px;" title="@Model.Floor.FloorName" />
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @item.DrawingType.FloorType
+                                                </td>
+                                                <td>
+                                                    @if (item.IsCurrent)
+                                                    {
+                                                        <img alt="Status" src="@Url.Content("~/dist/Images/Icons/checked_box.png")" syle="width:30px;" title="Active" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <img onclick="makeActive('@item.FloorPlanId','@item.FloorId')" alt="Status" src="@Url.Content("~/dist/Images/Icons/red_cross.png")" title="In-Active" />
+                                                    }
+
+                                                </td>
+
+                                                <td data-sort="@item.CreatedDate.Ticks">
+                                                    @item.CreatedDate.ToFormatDate()
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+
+<script>
+    function makeActive(floorPlanId, floorId) {
+        //console.log(floorPlanId, floorId);
+        swal({
+            title: "Are you sure?",
+            text: "Make this Floor plan Active.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No, cancel!",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    UpdateFloorPlan(floorPlanId, floorId);
+                }
+            });
+    }
+
+    function UpdateFloorPlan(floorPlanId, floorId) {
+        $.ajax({
+            url: '@Url.Action("UpdateFloorPlan", "Drawing")',
+            type: "POST",
+            data: { floorPlanId: floorPlanId, floorId: floorId, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+            dataType: 'json',
+            success: function (result) {
+                location.reload();
+               // console.log(result);
+            }
+        });
+
+    }
+
+    $(document).ready(function () {
+        $(".floorTypeli").click(function () {
+            $(this).toggleClass("active");
+            getActiveTypes();
+        });
+
+        var floorDataTable = $('#floorPlanHistoryTbl').DataTable({
+            searching: true,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#floorPlanHistoryTbl tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_",
+                searchPlaceholder: "Search..."
+            },
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ]
+        });
+
+        var getActiveTypes = function () {
+            var activeTypes = [];
+            $(".floorTypeli.active").each(function () {
+                activeTypes.push($(this).attr("id"));
+            });
+            console.log(activeTypes.join("|"));
+            if (activeTypes.length > 0) {
+                floorDataTable.column(0).search("^" + activeTypes.join("|") + "$", true, false).draw();
+            }
+            else {
+                floorDataTable.columns(0).search("-1").draw();
+            }
+        }
+    });
+
+
+
+
+    // Add custom JS here
+    $('a[rel=popover]').popover({
+        html: true,
+        animated: 'fade',
+        trigger: 'hover',
+        placement: 'right',
+        content: function () { return '<img height="250" width="250" src="' + $(this).data('img') + '" />'; }
+    });
+</script>

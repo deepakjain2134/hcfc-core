@@ -1,0 +1,75 @@
+﻿@model HCF.BDO.RoundGroup
+<div style="background-color:lightgray; padding:10px; margin:10px 0px;">
+    <div class="assignedto">
+        <span><b>Assigned to:</b></span>
+        @if (Model.RoundCategory.Count > 0)
+        {
+            foreach (var category in Model.RoundCategory)
+            {
+                <div> @category.CategoryName rounds with the @Model.Name .</div>
+            }
+        }
+        else
+        {
+            <div> No categories assigned .</div>
+        }
+
+    </div>
+    <div>
+        <span><b>Replaced in:</b></span>
+        @if (Model.roundVolunteersAssigned.Count > 0)
+        {
+            foreach (var assignedTo in Model.roundVolunteersAssigned)
+            {
+                foreach (var item in assignedTo.roundCategory)
+                {
+                    if (assignedTo.ReplacementType == 1)
+                    {
+                        <div> @item.CategoryName with the @assignedTo.roundGroups.FirstOrDefault().Name by  @assignedTo.FullName (Next Round Only -@assignedTo.StartDate.ToFormatDate())  </div>
+                    }
+                    if (assignedTo.ReplacementType == 2)
+                    {
+                        <div> @item.CategoryName with the @assignedTo.roundGroups.FirstOrDefault().Name by  @assignedTo.FullName (@assignedTo.StartDate.ToFormatDate() -@assignedTo.EndDate.ToFormatDate())  </div>
+                    }
+
+                }
+            }
+
+        }
+        else
+        {
+            <div> This volunteer is not replaced in any group. </div>
+        }
+    </div>
+    <div>
+        <span><b>Replacing:</b></span>
+        @if (Model.roundVolunteers.Count > 0)
+        {
+
+            foreach (var volunteer in Model.roundVolunteers)
+            {
+                foreach (var item in volunteer.roundCategory)
+                {
+
+                    if (volunteer.ReplacementType == 1)
+                    {
+                        <div> @volunteer.FullName in @item.CategoryName with the @Model.Name (Next Round Only -@volunteer.StartDate.ToFormatDate()).</div>
+
+                    }
+                    if (volunteer.ReplacementType == 2)
+                    {
+                        <div> @volunteer.FullName in @item.CategoryName with the @Model.Name  (@volunteer.StartDate.ToFormatDate() -@volunteer.EndDate.ToFormatDate())  .</div>
+
+                    }
+
+                }
+
+            }
+        }
+        else
+        {
+            <div> No volunteer is replaced in this group. </div>
+        }
+
+    </div>
+</div>

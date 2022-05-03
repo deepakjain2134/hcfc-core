@@ -1,0 +1,129 @@
+﻿@model HCF.BDO.Assets
+@{
+
+    var tFloorAssets = Model.TFloorAssets.FirstOrDefault();
+    var guid = Guid.Empty;
+}
+
+@if (tFloorAssets != null)
+{
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <b>@($"Asset #: {tFloorAssets.AssetNo}")</b>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+
+        </div>
+        <div class="modal-body">
+            @if (Model.EPdetails !=null &&  Model.EPdetails.Count > 1)
+            {
+                <p>There are multiple EP assigned to this asset please select one EP to inspect or view history.</p>
+            }
+            <div class="assets-popupScroll">
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th style="padding: 6px;">
+                            Standard,EP
+                        </th>
+                        <th style="padding: 6px;">
+                            Description
+                        </th>
+                        <th style="min-width: 112px; padding: 6px;">
+                            Last Inspection
+                        </th>
+                        <th style="min-width: 92px; padding: 6px;">
+                            Due Date
+                        </th>
+                        <th style="min-width: 70px; padding: 6px;">
+
+                        </th>
+                    </tr>
+
+                    @if (Model.EPdetails != null)
+                    {
+                        foreach (var standardEp in Model.EPdetails)
+                        {
+                            var tinsActivity = tFloorAssets.TInspectionActivity.Where(x => x.EPDetailId == standardEp.EPDetailId).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+
+                            <tr>
+                                <td>
+                                    @($"{standardEp.StandardEp}")<br/>
+                                    <span>@standardEp.GetFrequencyName()</span>
+                                </td>
+                                <td class="">
+                                    @await Html.PartialAsync("_EpDescription", standardEp.Description,
+                                new ViewDataDictionary(
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                {{ "minLength", "0" }, { "standardEp", standardEp.StandardEp }}
+                               )
+                                    @*@await Html.PartialAsync("_EpDescription", standardEp.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", standardEp.StandardEp } })*@
+                                </td>
+                                <td>
+
+                                    @if (tinsActivity != null)
+                                    {
+                                        <span class="details @(tinsActivity.Status == 0 ? "fail" : tinsActivity.Status == 2 ? "inporgress" : "")">
+                                            @tinsActivity.ActivityInspectionDate.ToFormatDate()
+                                        </span>
+
+                                        guid = tinsActivity.ActivityId;
+                                    }
+
+                                </td>
+                                <td>
+
+                                    @if (tinsActivity != null && tinsActivity.DueDate.HasValue && tinsActivity.Status == 1)
+                                    {
+                                        var className = "none";
+                                        if (tinsActivity.DueDate >= DateTime.Now.Date && tinsActivity.GraceDate <= DateTime.Now)
+                                        {
+                                            className = "grace";
+                                        }
+                                        else
+                                        {
+                                            if (tinsActivity.GraceDate < DateTime.Now.Date)
+                                            {
+                                                className = "fail";
+                                            }
+                                        }
+                                        <span class="@className">
+                                            @tinsActivity.DueDate.ToFormatDate()
+                                        </span>
+                                    }
+
+                                </td>
+                                <td>
+                                    <a href='@Url.Action("AssetEps", "Assets", new {epId = standardEp.EPDetailId, floorassetId = tFloorAssets.FloorAssetsId})'>
+                                        <img style="cursor: pointer" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")" title="Inspection" alt=""/>
+                                    </a>
+                                    <a class="@(@tinsActivity == null || tinsActivity.Status == 2 ? "disable" : "")" onclick="location.href = '@Url.Action("ActivityHistory", "Assets", new {activityId = guid})'">
+                                        <img style="cursor: pointer" src="@Url.Content("~/dist/Images/Icons/history_icon.png")" title="Detail" alt=""/>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(".comment").shorten({
+        "showChars": 150,
+        "seeMore": false,
+        "moreText": "See More"
+    });
+    var popOverSettings = {
+        placement: 'bottom',
+        container: 'body',
+        html: true,
+        selector: '[rel="popover"]',
+        trigger: 'auto'
+
+    }
+    $('body').popover(popOverSettings);
+</script>

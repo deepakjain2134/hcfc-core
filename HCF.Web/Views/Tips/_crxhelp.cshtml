@@ -1,0 +1,29 @@
+﻿@model List<HCF.BDO.Tips>
+@if (Model.Count != 0)
+{
+    <div class="accodian-helpBox" id="content">
+
+        @foreach (var data in Model.Where(x => x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1).OrderBy(y => y.RouteName))
+        {
+            <div class="help-panellist" data-menuId="@data.Services.Id" id="index_@data.TipId" rel="@data.TipId">
+                <div class="help-panelHeading">
+                    <img class="howto-plus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png" />
+                    <img class="howto-minus" src="https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png" />
+                    <h3>@data.RouteName</h3>
+                </div>
+                <div class="help-panelDescption">
+                    @Html.Raw(data.Description)
+                </div>
+            </div>
+        }
+
+    </div>
+}
+<script>
+    $(document).ready(() => {       
+        var list = $(".help-panellist").map(function () { return $(this).attr("rel"); }).get();
+        var id = list[0];
+        $('#index_' + id).addClass('panel-active');
+    });
+</script>
+

@@ -1,0 +1,117 @@
+﻿@model HCF.Web.Models.RecentLoginModel
+
+@{
+    ViewBag.Title = "ManagePin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<
+    <section class="content-header">
+        <h1>
+            Generate Pin
+        </h1>
+    </section>
+    <div class="container-fluid">
+
+     
+            
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="box box-primary">
+                            
+                                Login Using Pin  <input type="checkbox" id="chkloginUsingPin" name="chkloginUsingPin" checked="@Model.IsPassCodeLogin" /><span></span>
+
+                                <div class="generateBox comman_checkbox ">
+                                    <div class="change_password pin-login">
+                                        <h4>
+                                            Generate PIN
+                                        </h4>
+                                        <span>New Pin</span>
+                                        <div class="pinbox" id="registerpin"></div>
+                                        <span>Confirm New Pin</span>
+                                        <div class="pinbox" id="registerpinretype"></div>
+                                    </div>
+                                </div>
+                            
+                        </div>
+                    </div>
+                </div>
+        
+        
+
+    </div>
+
+
+
+@section Scripts{
+    <script>
+        var registerpin = $('#registerpin').pinlogin({
+            placeholder: '*',
+            reset: false,
+            autofocus: false,
+            complete: function(pin) {
+                pincode = pin;
+                registerpinretype.focus(0);
+                registerpin.disable();
+            }
+        });
+
+        var registerpinretype = $('#registerpinretype').pinlogin({
+            placeholder: '*',
+            reset: false,
+            autofocus: false,
+            complete: function(pin) {
+                if (pincode != pin) {
+                    pincode = '';
+                    registerpin.reset();
+                    registerpinretype.reset();
+
+                    // disable repeat instance
+                    registerpinretype.disable();
+
+                    // set focus to first instance again
+                    registerpin.focus(0);
+
+                    swalalert('Pincodes do not match, please try again');
+                } else {
+
+                    savePassCode(pin);
+                    ///swalalert('Awesome! You entered: ' + pin);
+
+                    // reset both instances
+                    registerpin.reset();
+                    registerpinretype.reset();
+                }
+            }
+        });
+
+        $('#chkloginUsingPin').change(function() {
+            $.ajax({
+                url: '@Url.Action("LoginUsingPassCode", "Account")' + "?status=" + this.checked,
+                method: "POST",
+                success: function(data) {
+                   swalalert('updated Successfully');
+                }
+            });
+        });
+
+        var savePassCode = function (pin) {
+            var ischecked = $("#chkloginUsingPin").prop("checked");
+            debugger;
+            $.ajax({
+                url: '@Url.Action("SavePassCode", "Account")' + "?pin=" + pin + "&status=" + ischecked,
+                method: "POST",
+                success: function(data) {
+                    swalalert($.Constants.Pin_Generated_Successfully);
+                    window.location.href = '@Url.RouteUrl("dashboard")';
+                }
+            });
+        }
+
+        $(function() {
+            PasswordValidator.setup('NewPassword', 'ConfirmPassword');
+        });
+
+    </script>
+}
+

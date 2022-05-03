@@ -1,0 +1,68 @@
+﻿@model List<HCF.BDO.ICRAMatixPrecautions>
+@{
+
+    var consTypes = (List<HCF.BDO.ConstructionType>)ViewBag.Constructiontype;
+    var riskTypes = (List<HCF.BDO.ConstructionRisk>)ViewBag.ConstructionRisk;
+
+}
+<h4 class="align-center">Construction Project Type</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Patient Risk Group</th>
+            @foreach (var consType in consTypes.ToList())
+            {
+                <th class="constructiontypeMatrix" rel="@consType.ConstructionTypeId">
+                    @($"{consType.TypeName}")
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var riskType in riskTypes.ToList())
+        {
+            <tr>
+                <td class="constrisk" value="@riskType.ConstructionRiskId">@riskType.RiskName</td>
+                @foreach (var consType in consTypes.ToList())
+                {
+                    var str = string.Empty;
+                    var className = string.Empty;
+                    var data = Model.Where(x => x.ConstructionRiskId == riskType.ConstructionRiskId && x.ConstructionTypeId == consType.ConstructionTypeId).ToList();
+                    if (data.Count > 0)
+                    {
+                        str = string.Join(",", data.Select(x => x.ConstructionClass.ClassName));
+                        className = data.FirstOrDefault().ConstructionClass.ClassName.Replace(" ", "").ToLower();
+                    }
+                    <td matrixId="@($"id{consType.ConstructionTypeId}_{riskType.ConstructionRiskId}")" align="center" data-toggle="modal" data-target="#myModal" class="open-AddMatrix @className" riskid="@riskType.ConstructionRiskId"
+                        typeid="@consType.ConstructionTypeId">
+                        <a>@str</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@*<input type="hidden" id="icramatrix" value="@Newtonsoft.Json.JsonConvert.SerializeObject(new {data = Model})" />*@
+<input type="hidden" id="icramatrix" value="@System.Text.Json.JsonSerializer.Serialize(new { data = Model })" />
+<style>
+    .open-AddMatrix a {
+        color: black;
+    }
+
+    .classi {
+        color: black;
+    }
+
+    .classii {
+        color: black;
+    }
+
+    .classiii {
+        color: black;
+    }
+
+    .classiv {
+        color: black;
+    }
+</style>

@@ -1,0 +1,127 @@
+﻿@model IEnumerable<HCF.BDO.WorkOrder>
+@{
+    ViewBag.Title = "Work Order";
+    Layout = null;
+}
+
+@if (Model.Any(m => m.WorkOrderId > 0 || m.WorkOrderId == -2))
+{
+    foreach (var item in Model.Where(m => m.WorkOrderId > 0 || m.WorkOrderId == -2).Take(5))
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.WorkOrderNumber)
+            </td>
+            <td>
+                @if (item.DateCreated.HasValue)
+                {
+                    <p>
+                        @item.DateCreated.Value.ToFormatDate()
+                    </p>
+                }
+            </td>
+
+            <td style="text-align:left;">
+                @if (item.Description.Length > 90)
+                {
+                    @item.Description.Substring(0, Math.Min(item.Description.Length, 50))
+                    <a href="javascript:void(0);"
+                       tabindex="0"
+                       data-trigger="focus"
+                       class="descriptions"
+                       rel="popover"
+                       data-placement='right'
+                       data-original-title='@item.WorkOrderNumber'
+                       data-content='@item.Description'>
+                        @("...See More")
+                    </a>
+                }
+                else
+                {
+                    @item.Description
+                }
+            </td>
+            <td>
+                @if (item.FloorAssets.Count > 1)
+                {
+                    <p data-toggle="modal" data-target="#showAssetInfo" class="show_asset_info" title="See Asset Info" id="@item.IssueId" data-floorassets="@string.Join(",", item.FloorAssets.Select(x => x.FloorAssetsId))"><a href="javascript:void(0);">@($"{item.FloorAssets[0].AssetNo}{" + "}{item.FloorAssets.Count - 1}{" More"}")</a></p>
+                }
+                else if (item.FloorAssets.Count > 0)
+                {
+                    <p data-toggle="modal" data-target="#showAssetInfo" class="show_asset_info" title="See Asset Info" id="@item.IssueId" data-floorassets="@string.Join(",", item.FloorAssets.Select(x => x.FloorAssetsId))"><a href="javascript:void(0);">@item.FloorAssets[0].AssetNo</a></p>
+                }
+                else
+                {
+                    <p>N/A</p>
+                }
+            </td>
+            <td>
+                @if (item.FloorAssets.Count > 1)
+                {
+                    <p data-toggle="modal"
+                       data-target="#showAssetInfo"
+                       class="show_asset_info"
+                       title="See Asset Info"
+                       id="@item.IssueId"
+                       data-floorassets="@string.Join(",", item.FloorAssets.Select(x => x.FloorAssetsId))">
+                        <a href="javascript:void(0);">@string.Format("{0}{1}{2}", $"{commonModelFactory.GetFloorAssetLocation(item.FloorAssets.FirstOrDefault())}", " + ", item.FloorAssets.Count - 1, " More")</a>
+                    </p>
+                }
+                else if (item.FloorAssets.Count > 0)
+                {
+                    <p data-toggle="modal"
+                       data-target="#showAssetInfo"
+                       class="show_asset_info"
+                       title="See Asset Info"
+                       id="@item.IssueId"
+                       data-floorassets="@string.Join(",", item.FloorAssets.Select(x => x.FloorAssetsId))">
+                        <a href="javascript:void(0);">@($"{commonModelFactory.GetFloorAssetLocation(item.FloorAssets.FirstOrDefault())}")</a>
+                    </p>
+                }
+                else
+                {
+                    <p>N/A</p>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RequesterName)
+            </td>
+            @*<td>
+                    @Html.DisplayFor(modelItem => item.TypeCode)
+                </td>*@
+            <td>
+                @if (item.IssueId > 0)
+                {
+                    <input type="submit" name="button" class="btnwoStatus @(item.StatusCode == "CMPLT" || item.StatusCode == "Closed" ? "button_green" : "btn btn-primary" )"
+                           value="@item.StatusCode"
+                           onclick="location.href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })'" />
+                }
+                else
+                {
+                    <input type="submit" name="button" class="btnwoStatus @(item.StatusCode == "CMPLT" || item.StatusCode == "Closed" ? "button_green" : "btn btn-primary" ) disable"
+                           value="@item.StatusCode"
+                           onclick="location.href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })'" />
+                }
+            </td>
+            <td>
+                <input type="button" name="button" class="addwoToILSM btn btn-primary @((item.TilsmId.HasValue && item.TilsmId.Value > 0 ) ? "disabled":"btn btn-primary" )" woissueId="@item.IssueId" wonumber="@item.WorkOrderNumber"
+                       value="Add To ILSM" />
+                @*<input type="button" name="button" class="addwoToILSM btn btn-primary @(item.StatusCode == "CMPLT" || item.StatusCode == "CLOSE" || item.StatusCode == "CANCL" || (item.TilsmId.HasValue && item.TilsmId.Value > 0 ) ? "disabled":"btn btn-primary" )" woissueId="@item.IssueId"
+                    value="Add To ILSM" />*@
+            </td>
+        </tr>
+    }
+}
+else
+{
+    if (Convert.ToInt32(TempData.Get<string>("PageIndex")) == 1)
+    {
+        <tr>
+            <td colspan="8" class="align-center"> no record found</td>
+        </tr>
+    }
+}
+<script>
+    var WoResultList = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+    var clientname = '@HCF.Web.Base.UserSession.CurrentOrg.DbName'.toLowerCase();
+</script>

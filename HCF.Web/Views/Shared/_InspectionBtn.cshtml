@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+    string title = "";
+    string btnClass = "ins_check3_Ins_btn";
+    var disable = false;
+    string status = this.ViewData.ContainsKey("status") ? this.ViewData["status"].ToString() : string.Empty;
+    string subStatus = this.ViewData.ContainsKey("subStatus") ? this.ViewData["subStatus"].ToString() : string.Empty;
+    string floorAssetsId = this.ViewData.ContainsKey("floorAssetsId") ? this.ViewData["floorAssetsId"].ToString() : string.Empty;
+    string ePDetailId = this.ViewData.ContainsKey("ePDetailId") ? this.ViewData["ePDetailId"].ToString() : string.Empty;
+    string frequencyid = this.ViewData.ContainsKey("frequencyid") ? this.ViewData["frequencyid"].ToString() : string.Empty;
+
+    int openIlsmsCount = this.ViewData.ContainsKey("OpenIlsmsCount") ? Convert.ToInt32(this.ViewData["OpenIlsmsCount"].ToString()) : 0;
+    int openWorkOrdersCount = this.ViewData.ContainsKey("OpenWorkOrdersCount") ? Convert.ToInt32(this.ViewData["OpenWorkOrdersCount"].ToString()) : 0;
+    int IsworOrder = this.ViewData.ContainsKey("IsworOrder") ? Convert.ToInt32(this.ViewData["IsworOrder"].ToString()) : -3;
+
+}
+
+
+@if (openIlsmsCount > 0)
+{
+    title = "First close open ILSM";
+    disable = true;
+    btnClass = btnClass + " disabled";
+}
+else if (openWorkOrdersCount > 0)
+{
+    title = "First close open WorkOrders";
+    disable = true; btnClass = btnClass + " disabled";
+}
+@if (status == "1")
+{
+    btnClass = btnClass + " compliant";
+}
+
+@if (subStatus != "NA" && subStatus != "IN" && IsworOrder!=1)
+{
+    btnClass = btnClass + " disabled";
+}
+
+
+
+<input id="chkbtn" wo-count="@openWorkOrdersCount" ilsm-count="@openIlsmsCount" data-status="@btnClass"
+       class='@btnClass'
+       type="button"
+       value="@status"
+       onclick="inspectionStatus(this,1)"
+       data-orgvalue="@status"
+       data-floorassetid='@floorAssetsId' 
+       data-epid='@ePDetailId'
+       tempname='@ePDetailId'
+        data-frequencyid='@frequencyid'
+       title='@((disable) ? title : "")'
+       data-inspectiongroupid="1",
+       data-IsworkOrder="@IsworOrder"/>

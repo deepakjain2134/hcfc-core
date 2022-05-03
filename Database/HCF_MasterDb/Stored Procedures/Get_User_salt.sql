@@ -1,0 +1,17 @@
+﻿-- 
+-- remove this proc 
+--
+--CREATE PROCEDURE [dbo].[Get_User_salt]   
+-- @token nvarchar(max) = null  
+--AS  
+--BEGIN  
+--Declare  @Username nvarchar(50);
+--SELECT TOP 1 @Username= emailaddress FROM [dbo].PasswordResetRequests 
+--WHERE RecoveryMethod='E' AND 
+--RecoveryToken=@token 
+----AND Status='Y' and RequestedOn < DATEADD(HOUR,24,RequestedOn);
+--if exists(select  1 from Userprofile where username=@Username)
+--   BEGIN 
+--   select  salt from Userprofile where username=@Username
+--   END 
+--END 

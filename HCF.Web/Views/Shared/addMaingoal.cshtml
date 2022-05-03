@@ -1,0 +1,113 @@
+﻿@model List<HCF.BDO.MainGoal>
+@{    
+    var activityType = commonModelFactory.GetActivityType(); //GoalMaster.GetActivityType();
+}
+
+<div>
+    <!-- Modal content-->
+    <div class="modal-content" style="width: 1200px; margin: 0px 0px 0px -300px;">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Goal & Steps </h4>
+            <div>
+                <input class="addNewCheckList button3 pull-right" value="Add New MainGoal" id="addgoal" type="button" />
+            </div>
+        </div>
+        <div class="modal-body">
+            <div id="CheckListAddEdit">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div id="addNewChecks" hidden>
+                        Goal Type<em class="required-field"> *</em>:
+                        <select class="ddlAsset form-control" id="ddlActivityType" required>
+                            <option value="">Select Type</option>
+                            @foreach (var activty in activityType)
+                            {
+                                <option value="@activty.ActivityTypeId">@activty.Name</option>
+                            }
+                        </select>
+                        <br />
+                        
+                        <br />
+                        
+
+                        <input type="hidden" id="EpdetailId" value="@ViewBag.EpdetailId" />
+                        Main Goal<em class="required-field"> *</em>: <input class="form-control" id="CheckListName" required />
+                        <br />
+                        <input class="addNewCheckList button3" value="Save" id="addMaingoal" type="submit" />
+                    </div>
+                }
+                <div id="checksListTable">
+                    @await Html.PartialAsync("_CheckLists")
+                </div>
+                <div id="checksPointTable" hidden>
+                    <br />
+                    <input id="checkListID" value="" hidden />
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    $("#addgoal").click(function () {
+        $("#addNewChecks").show();
+    });
+
+    $(".ddlAssetAdd").hide();
+    $(".dllDocumenttype").hide();
+
+
+    $("#ddlActivityType").change(function () {
+        //$("#ddlAssetAdd").hide();
+        //$("#dllDocumenttype").hide();
+        $(".ddlAssetAdd").hide();
+        $(".dllDocumenttype").hide();
+        var activityType = $("#ddlActivityType").val();
+        if (activityType == 2) {
+            $(".ddlAssetAdd").show();
+            $("#ddlAssetAdd").attr("required", "true");
+        } else if (activityType == 3) {
+            $(".dllDocumenttype").show();
+            $("#dllDocumenttype").attr("required", "true");
+        } else {
+            //$(".ddlAssetAdd").hide();
+            //$(".dllDocumenttype").hide();
+            //$("#ddlAssetAdd").attr("required", "false");
+            //$("#dllDocumenttype").attr("required", "false");
+        }
+    });
+
+
+    $("#addMaingoal").click(function () {
+        //alert("Call");
+        var EPDetailId = $("#EpdetailId").val();//322;
+        var checkList = $('#CheckListName').val();
+        var AssetId = $('#ddlAssetAdd').val();
+        var DocumentType = $('#dllDocumenttype').val();
+        var ddlActivityType = $("#ddlActivityType").val();
+        var saveUrl = CRxUrls.goal_createMaingoal;
+        if (ddlActivityType > 0) {
+            var data = { EPDetailId: EPDetailId, Goal: checkList, AssetId: AssetId, DoctypeId: DocumentType, ActivityType: ddlActivityType };
+            $.ajax({
+                url: saveUrl,
+                method: "POST",
+                data: data,
+                success: function (d) {
+                    $("#ddlActivityType").val('');
+                    $('#CheckListName').val('');
+                    $('#ddlAssetAdd').val('');
+                    $('#dllDocumenttype').val('');
+                    $('#checksListTable').html(d);
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,47 @@
+﻿@model HCF.BDO.TRounds
+@{
+    var isnpStatus = Model.Inspections != null && Model.Inspections.Any(x => x.IsOpen) && Model.Status != 1 ? "2" : "1";
+    var isOpen = Model.IsFloorRoundOpenForUser(HCF.Web.Base.UserSession.CurrentUser.UserId, Model.Inspections.FirstOrDefault().FloorId);
+}
+
+@foreach (var inspection in Model.Inspections)
+{
+    <div>
+        <div class="add-commanBtn" style="padding: 0px 7px 7px 0px;">
+            <strong>@inspection.GetCategoryName()</strong>
+           @* @if (isOpen)
+            {
+                <a class="pull-right quest-addbtn"
+               floorId="@inspection.FloorId" catId="@inspection.RoundCatId" troundId="@Model.TRoundId">
+                <img src="/dist/Images/Icons/3d_add_button.png" title="Add Round Questionnaire" alt="3d_add_button">
+              </a>
+            }*@
+        </div>
+    </div>
+
+    <table id="@string.Format("round_cat_{0}",inspection.RoundCatId)" roundCatId="@inspection.RoundCatId" inspid="@Model.Inspections.FirstOrDefault().RoundInspId"
+       class="@(isOpen == true ? "table floorRoundtbl" : "table floorRoundtbl disabled")">
+        @for (int j = 0; j < inspection.Questionnaires.Count(); j++)
+        {
+            var model = inspection.Questionnaires[j];
+            model.TRoundId = Model.TRoundId;
+
+            @await Html.PartialAsync("_RoundCategoryStepInspection",model,new ViewDataDictionary(
+    new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+    new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+    { { "troundId", Model.TRoundId },
+    { "inspStatus", isOpen }
+    })
+
+        }
+        @if (inspection.Questionnaires.Any())
+        {
+            <tr>
+                <td><label>Comment:</label></td>
+                <td colspan="2">
+                    @Html.TextAreaFor(x => inspection.Comment, new { @class = (isOpen)? "form-control comment":"form-control comment disabled", @troundid = Model.TRoundId, roundCatId=@inspection.RoundCatId })
+                </td>
+            </tr>
+        }
+    </table>
+}

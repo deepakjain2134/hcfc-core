@@ -1,0 +1,411 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@{
+    ViewBag.Title = ViewBag.PageTitle;
+    HCF.BDO.Floor floor = (HCF.BDO.Floor)ViewBag.Floors;
+}
+
+    @section pageHeader {
+        <section class="content-header">
+            <h1>
+                @ViewBag.PageTitle
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                        <div class="row tablelist-topform">
+                            <div class="col-lg-6 col-md-3 col-sm-3 col-xs-4">
+                                <div id="catfilter" class="align-left">
+                                    @if (floor != null)
+                                    {
+                                        <span>@($"{floor.Building.BuildingName} - {floor.FloorName}")</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-5 align-right">
+                                <input type="submit" name="button" class="button1" id="btn_showCircle" btntype="0" value="Hide Assets" />
+                                <input type="submit" name="button" class="button1 showfailed" id="btn_showfailed" btntype="0" value="Show Failed" />
+                                <input type="submit" name="button" class="button1 show_due" id="btn_ShowDue" btntype="1" value="Show Due" />
+                                <input type="submit" name="button" class="button1 show_all activeFilter" btntype="-1" id="btn_showall" value="Show All " />
+                                <a href="@Url.Action("InventoryAssetsReport", "Reports" , new {assetIds = ViewBag.AssetsId,buildingId = floor.BuildingId ,floorId = floor.FloorId })">
+                                    <input type="button" value="Inventory" class="button1" />
+                                </a>
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 col-sm-3 col-xs-3" id="dvsearch">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="inputSuccess2" placeholder="Enter Assets #" />
+                                    <i class="closesearch" id="closesearch">x</i>
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search" id="btntxtsearch"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    
+                        <div class="row">
+
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                                <input type="hidden" id="floorId" value="@floor.FloorId" />
+
+                              
+                                    <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                                        <div id="imgdiv" style="text-align: center">
+
+                                            @*@await Component.InvokeAsync("CadViewer", new
+                        {
+                            sourceFilePath = commonModelFactory.FilePath(floor.ImagePath).Replace("https://", "https://s3.amazonaws.com/"),
+                            mode = "2",
+                            floorPlanId = floor.FloorPlanId,
+                            permitId = "0"
+                        })*@
+
+                                            @if (!string.IsNullOrEmpty(floor.ImagePath))
+                                            {
+                                                <img id="image" src="@commonModelFactory.FilePath(floor.ImagePath)"
+                                                     style="border:5px solid #ccc; padding:5px;" width="100%" />
+                                            }
+                                            else
+                                            {
+                                                <img id="dummyimage" style="border:2px solid #ccc; padding:5px;" width="100%" height="400px" />
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 ">
+                                        <label>Assets on Floor Plan</label>
+                                        <table id="example1" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none">FloorId</th>
+                                                    <th width="15%"></th>
+                                                    <th width="38%">
+                                                        @Localizer["AssetNo"]
+                                                    </th>
+                                                    <th width="47%">
+                                                        @Html.DisplayNameFor(model => model.Assets.Name)
+                                                    </th>
+                                                    <th>Inspect</th>
+                                                    <th style="display:none">ShowFailed</th>
+                                                    <th style="display:none">Pastdue</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in Model.OrderBy(x => x.Assets.Name))
+                                                {
+                                                    <tr>
+                                                        <td style="display:none">@item.FloorId</td>
+                                                        <td width="15%">
+                                                            <img src="@commonModelFactory.CommonFilePath(item.Assets.IconPath)"
+                                                                 alt="@item.Assets.Name"
+                                                                 height="24px"
+                                                                 width="24px" />
+
+                                                        </td>
+                                                        <td width="35%">
+                                                            <div assetId="@string.Format("{0}",item.FloorAssetsId)" id="@string.Format("assetid_{0}",item.FloorAssetsId)" class="point">
+                                                                @Html.DisplayFor(modelItem => item.AssetNo)
+                                                            </div>
+                                                        </td>
+
+                                                        <td width="50%">
+                                                            @Html.DisplayFor(modelItem => item.Assets.Name)
+                                                        </td>
+                                                        <td>
+                                                            <img class="@($"{(item.EPCount == 0 ? "hide" : "")}")"
+                                                                 style="cursor:pointer" src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)" title="Inspection"
+                                                                 onclick="location.href = '@Url.Action("AssetEps", "Assets", new { epId = ViewBag.epdetailid==null?0:ViewBag.epdetailid , floorassetId = item.FloorAssetsId })'" />
+
+                                                        </td>
+                                                        <td style="display:none">@commonModelFactory.GetAssetStatus(item)</td>
+                                                        <td style="display:none">@commonModelFactory.GetAssetDue(item)</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                        <input type="hidden" value="@floor.BuildingId" id="buildingId" />
+                                        <div id="assets_WithoutFloor" style="height: 200px;">
+
+                                        </div>
+                                    </div>
+                                
+                            }
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<div class="modal fade" id="EditAssetsPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial" class="1">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="SearchAssetsPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="searchloadpartial">
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/dist/Scripts/FloorPlans/jquery.mousewheel.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/dist/Scripts/FloorPlans/imgViewer.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/dist/Scripts/FloorPlans/imgNotes.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    var floorPlanimage = $("#image");
+
+    var floorPlanPage = {
+        floorId: $("#floorId").val(),
+        pageMode: '@ViewBag.PageTitle'
+    };
+
+
+    var fdatatable;
+    var pageMode = '@ViewBag.PageTitle';
+    $(document).ready(function () {
+
+        localStorage.setItem("btntype", -1);
+        $("#floorFilter").show();
+       
+
+        fdatatable = $('#example1').DataTable({
+            "lengthChange": false,
+            "pageLength": 5,
+            "bPaginate": $('#example1 tbody tr').length > 5,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            "aoColumnDefs": [{ "bVisible": false, "aTargets": [0, 5, 6] }]
+        });
+
+        loadAssets();
+       
+    });
+
+
+    var loadAssets = function () {
+            //var loadngCtr = $('#assets_WithoutFloor');
+            //loadngCtr.addClass("loadingbox");
+            var urlAction = CRxUrls.assets_floorassetswithoutfloor;
+            $.ajax({
+                url: urlAction + "?floorId=" + floorPlanPage.floorId + "&isShow=" + true,
+                type: "GET",
+                global: false,
+                success: function (data) {
+                    //alert("Call");
+                    //loadngCtr.removeClass("loadingbox");
+                    $('#assets_WithoutFloor').empty();
+                    $('#assets_WithoutFloor').html(data);
+                }
+            });
+        };
+
+    $(".button1").click(function () {
+        $(".button1").removeClass("activeFilter");
+        $(this).addClass("activeFilter");
+        var type = $(this).attr("btntype");
+        localStorage.setItem("btntype", type);
+        $(".assets").find("img").addClass("hide");
+        if (type == "-1") //show all
+        {
+            $(".assets").find("img").removeClass("hide");
+            fdatatable.draw();
+        } else if (type == "0") {
+            $(".assets").each(function (index) {
+                var status = $(this).attr("status");
+                if (status == "DE" || status == "RA") {
+                    $(this).find("img").removeClass("hide");
+                }
+            });
+            fdatatable.draw();
+        } else if (type == "1") {
+            $(".assets").each(function (index) {
+                var dueDate = $(this).attr("dueDate");
+                if (dueDate < 90) {
+                    $(this).find("img").removeClass("hide");
+                }
+            });
+            fdatatable.draw();
+        }
+    });
+
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+            if (settings.nTable.id == 'example1') {
+                var type = parseInt(localStorage.getItem("btntype"));
+                var status = data[5];
+                var duedays = parseFloat(data[6]) || 0;
+                if (type == "1") {
+                    if (duedays <= 90) {
+                        return true;
+                    }
+                } else if (type == "0") {
+                    if (status == 'DE' || status == 'RA')
+                        return true;
+                } else { return true; }
+                return false;
+            }
+            return true;
+        }
+    );
+
+   
+
+    $("#btn_showCircle").click(function () {
+        $(this).toggleClass("activeFilter");
+        if ($(this).hasClass("activeFilter")) {
+            $(".marker").find("img").attr("src", "/dist/Images/Circle.png");
+            this.value = 'Show Assets';
+        } else {
+            this.value = 'Hide Assets';
+            $(".marker").each(function () {
+                var src = $(this).find("img").attr("imagepath")
+                $(this).find("img").attr("src", src);
+            });
+        }
+    });
+
+    $("#btntxtsearch").click(function () {
+        var barcode = $("#inputSuccess2").val();
+        $(".assets").removeClass("blink");
+        var div = $(".assets[title=" + barcode + "]");
+        if (div.length > 0) {
+            div.addClass("blink");
+        } else {
+            getSearchAssets(barcode);
+        }
+    });
+
+    $("#closesearch").click(function () {
+        $(".assets").removeClass("blink");
+        $("#inputSuccess2").val('');
+    })
+
+    function getSearchAssets(barcode) {
+        var url = CRxUrls.Assets_GetFloorAssetsbyBarcode;
+        $.get(url + '?deviceno=' + barcode, function (data) {
+            $('#searchloadpartial').html(data);
+            $('#searchloadpartial').fadeIn('fast');
+            $('#SearchAssetsPopup').modal('show');
+        });
+    }
+
+    $(".point").click(function () {
+        var assetId = $(this).attr("assetId");
+        var div1 = $('#' + assetId);
+        blink(div1);
+    });
+
+    function blink(selector) {
+        setInterval(function () {
+            $(selector).fadeIn('slow', function () {
+                $(this).fadeOut('slow', function () {
+                    blink(this);
+                });
+            });
+        }, 200);
+    }
+
+  
+
+        (function ($) {
+            debugger;
+             if (floorPlanimage != undefined) {
+                 var $img = floorPlanimage.imgNotes();
+                 $('.drag').draggable({
+                     helper: 'clone'
+
+                 });
+             }
+
+             $(document).ready(function () {
+
+                 var assetArray = [];
+            @foreach (var item in Model)
+            {
+                @:var asset = { x: '@item.Xcoordinate', y: '@item.Ycoordinate', note: '@item.DeviceNo', id: '@item.FloorAssetsId', type: '@item.AssetId', icon: '@commonModelFactory.CommonFilePath(item.Assets.IconPath)', status: '@commonModelFactory.GetAssetStatus(item)', duedate: '@commonModelFactory.GetAssetDue(item)' }; assetArray.push(asset);
+
+            }
+                 if (floorPlanimage != undefined) {
+            @if (ViewBag.PageTitle == "Inspection" || (string.IsNullOrEmpty(floor.ImagePath)))
+            {
+                    @:$img.imgNotes("option", "canDrop", false); $img.imgNotes("option", "canEdit", false);
+
+            }
+            else
+            {
+                @:$img.imgNotes("option", "canDrop", true); $img.imgNotes("option", "canEdit", true);
+            }
+
+                     $img.imgNotes("option", "canDrop", true); $img.imgNotes("option", "canEdit", true);
+                     $img.imgNotes("import", assetArray);
+
+                 }
+             });
+    })(jQuery);
+
+        var openShowPopUp = function (elem) {
+            var floorAssetId = elem.data("id");
+            var url = CRxUrls.Assets_tfloorAssetEdit;
+            $.get(url + '?mode=' + pageMode + '&tfloorAssetId=' + floorAssetId, function (data) {
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+                $('#EditAssetsPopup').modal('show');
+            });
+        }
+
+        var editAssetPopUp = function (elem) {
+            openShowPopUp(elem);
+        }
+
+        var addAssetsToPlan = function (elem) {
+            console.log(elem.data("icon"));
+            var floorAssetId = elem.data("id");
+            $.ajax({
+                url: CRxUrls.Assets_MoveFloorassets,
+                type: "POST",
+                contentType: 'application/x-www-form-urlencoded',
+                dataType: "JSON",
+                data: {
+                    __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                    Xcoordinate: elem.data("relx"),
+                    Ycoordinate: elem.data("rely"),
+                    FloorAssetsId: floorAssetId,
+                    FloorId: floorPlanPage.floorId
+                },
+                success: function (data) {
+                    var table = $('#myTable3').DataTable();
+                    var data = table.row('#' + floorAssetId).data();
+                    var floorId = data[0];
+                    // var buildingId = data[1];
+                    var assetNo = data[3];
+                    var assetCat = data[4];
+                    table.row('#' + floorAssetId).remove().draw();
+                    var fdatatable = $('#example1').DataTable();
+                    fdatatable.row.add([floorId, data[2], assetNo, assetCat, '', 0, 0]).draw();
+                }
+            });
+        }
+    </script>
+
+}
+
+@*<style>
+    .dataTables_wrapper .dataTables_paginate,
+    div#myTable3_filter,
+    div#example1_filter {
+        float: right;
+    }
+</style>*@

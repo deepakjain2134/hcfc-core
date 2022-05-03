@@ -1,0 +1,105 @@
+﻿@{
+    ViewBag.Title = "Vendor Configuratons";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Vendor Configuration
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary" id="Setting_Content">
+                    <div>
+                        <div class="assets_view" id="assets">
+                            @Html.DropDownList("drpAssets", (SelectList)ViewBag.AssetsSelectList, "--Select--", new { @class = "form-control" })
+                        </div>
+
+                        <div class="vendor_view" id="vendor">
+                            @Html.DropDownList("drpVendrs", (SelectList)ViewBag.VendorsSelectList, "--Select--", new { @class = "form-control" })
+                        </div>
+
+                        <div class="select_view">
+                            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                <label class="btn active">
+                                    @Html.RadioButton("rbVendorAssets", "assets", true)@Html.Label("Assets")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                </label>
+                                <label class="btn">
+                                    @Html.RadioButton("rbVendorAssets", "vendor")@Html.Label("Vendor")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="vendor_view" id="vendor_view">
+                        </div>
+                        <div class="assets_view" id="assets_view">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(".vendor_view").hide();
+    $("[name=rbVendorAssets]").on('change', function () {
+       
+        var view = $(this).val();
+        $("#vendor").hide();
+        $("#assets").hide();
+        $("#" + view).show();
+        if (view == "assets") {
+            $("#vendor_view").show();
+            $("#assets_view").hide();
+        } else {
+            $("#vendor_view").hide();
+            $("#assets_view").show();
+        }
+    });
+
+    $("[type=checkbox]").on('change', function () {      
+        if ($(this).attr("name") == "assets") {
+            //
+        } else {
+
+        }
+        var mode = $("[name=rbVendorAssets]").val();
+    });
+
+    $('#drpAssets').change(function () {
+       
+        var selectedID = $(this).val();
+        var url = '@Url.Action("GetData", "Organization")';
+        $('#assets_view').hide(); $('#vendor_view').show();
+        if (selectedID != "") {
+            $.get(url + '?mode=Assets&id=' + selectedID, function (data) {
+                $('#vendor_view').html(data);
+                $('#vendor_view').fadeIn('fast');
+            });
+        } else {
+            $('#vendor_view').html("");
+        }
+    });
+
+    $('#drpVendrs').change(function () {
+        
+        var selectedID = $(this).val();
+        var url = '@Url.Action("GetData", "Organization")';
+        $('#vendor_view').hide(); $('#assets_view').show();
+        if (selectedID != "") {
+            $.get(url + '?mode=Vendor&id=' + selectedID, function (data) {
+                //$('#vendor_view').hide();
+                $('#assets_view').html(data);
+                $('#assets_view').fadeIn('fast');
+            });
+        } else {
+            $('#assets_view').html("");
+        }
+    });
+
+</script>

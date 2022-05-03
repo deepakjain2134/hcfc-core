@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Deficiencies Binder";
+    Layout = null;
+}
+
+
+
+<h3 class="roundDefiHeading">Deficiencies Binder <span>(Observation Deficiencies)</span></h3>
+<div class="foldercrumbs">
+    <a class="binderMenu" url="@Url.RouteUrl("deficienciesBinder")">
+        <span class="folder-crumb">Deficiencies Binder</span>
+    </a>
+    <span class="folder-crumb-separator"></span>
+    <span class="folder-crumb">Observation Deficiencies</span>
+</div>
+<br />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="form-group col-md-3 col-left">
+                <label>Campus</label>
+                <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+            </div>
+            <div class="form-group col-md-3 col-left deficienciesProjects">
+                <label>Project Name</label>
+                <input type="hidden" name="ProjectId" id="ProjectId" />
+                @await Component.InvokeAsync("CommonProjectCustomDDL", new { type = "SINGLE", ProjectId = "0" })
+            </div>
+            <div class="form-group col-md-4 col-left">
+                <div class="row">
+                    <div class="col-md-6 col-xs-6 form-group">
+                        <label>From</label>
+                        <input type="text" id="from" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                    <div class="col-md-6 col-xs-6 form-group">
+                        <label>To</label>
+                        <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-2">
+                <br />
+                <button class="comm-button" id="btnSearch">Search</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="partialContents"></div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        SetDefaultDate();
+        getObservationReportBinder();
+    });
+
+    $("#btnSearch").click(function () {
+        getObservationReportBinder();
+    });
+
+    function getObservationReportBinder() {
+        debugger;
+        var projectid = $("#ProjectId").val();
+        $.get(CRxUrls.ICRA_PartialObservationReportBinder + "?ProjectId=" + projectid, function (data) {
+            $('#partialContents').empty();
+            $('#partialContents').append(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+    function SetDefaultDate() {
+        var currentTime = new Date();
+        //var startDate = new Date(currentTime.getFullYear() - 1, 0, 1);
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3);
+        var dateFormat = $.CRx_DateFormat,
+            from = $("#from")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    beforeShow: changeYearButtons,
+                    onChangeMonthYear: changeYearButtons,
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    dateFormat: dateFormat,
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                buttonImage: ImgUrls.datepicker_calendar,
+                dateFormat: dateFormat,
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+            return date;
+        }
+    }
+
+</script>
+@*<style>
+    .deficienciesProjects .ddlprojects label {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+</style>*@

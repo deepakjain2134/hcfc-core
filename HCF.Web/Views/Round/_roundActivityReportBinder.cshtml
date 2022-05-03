@@ -1,0 +1,236 @@
+﻿@model List<HCF.BDO.RoundGroup>
+@{
+    string statusKey = string.Empty;
+    string pageMode = ViewBag.pageMode;
+}
+
+
+<table id="roundTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <td style="display:none">@Localizer["Status"]</td>
+            <td>@Localizer["Status"]</td>
+            <td>@Localizer["Round Type"]</td>
+            <td>@Localizer["Round Name"]</td>
+            <td>
+                Round start date
+            </td>
+            <td>@Localizer["Round By"] </td>
+            <td>@Localizer["Building"] </td>
+            <td>Details</td>
+            <td style="display:none"></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reports in Model.OrderBy(x => "-1,2,-2,0,1".IndexOf(x.RoundStatusID.ToString())))
+        {
+            foreach (var roundSchedule in reports.RoundSchedules)
+            {
+
+                foreach (var roundScheduleDate in roundSchedule.RoundScheduleDates)
+                {
+                    <tr>
+                        <td style="display:none">
+                            @roundScheduleDate.RoundStatus
+
+                        </td>
+                        <td>
+                            <label class="processType-Sprite @roundScheduleDate.RoundStatus"></label>
+                        </td>
+                        <td>
+                            <div class="roundtypeicon">
+                                <img src="@((reports.RoundType == 1)?"/dist/Images/Icons/IndividualRounds.png":"/dist/Images/Icons/Grouprounds.png")" />
+                                <ul>
+                                    @foreach (var cat in roundSchedule.RoundCategories)
+                                    {
+                                        <li>@cat.CategoryName</li>
+                                    }
+                                </ul>
+                            </div>
+                        </td>
+                        <td>
+                            @reports.Name
+                        </td>
+                        <td>
+                            @roundScheduleDate.RoundDate.ToFormatDate()
+
+                        </td>
+                        <td>
+                            <ul>
+                                @foreach (var user in roundSchedule.RoundGroupNames)
+                                {
+                                    <li>
+                                        @user
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                @foreach (var locations in roundScheduleDate.Locations.GroupBy(x => x.BuildingId).Select(x => x.FirstOrDefault()))
+                                {
+                                    <li>
+                                        @string.Format("{0},{1}",locations.floors.FloorName ,locations.floors.Building.BuildingName)
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                        <td>
+                            @if (roundScheduleDate.TRoundId.HasValue && roundScheduleDate.TRoundId.Value > 0)
+                            {
+                                <a href="@Url.Action("RoundInspectionPdf", "PDF", new { floorid = 0, roundid = roundScheduleDate.TRoundId, groupround = 0})" title="Download PDF">
+                                    <img src="~/dist/Images/Icons/pdf_icon.png" class="" />
+                                </a>
+                            }
+                        </td>
+                        
+                            @if (roundScheduleDate.TRoundId.HasValue && roundScheduleDate.TRoundId.Value > 0)
+                            {
+                            <td style="display:none">@roundScheduleDate.Tround.IsClosed </td>
+                        }else
+                        {
+                            <td style="display:none"></td>
+                        }
+
+
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        var pageMode='@ViewBag.pageMode';
+
+        var dataTables = $('#roundTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [[2, 'desc']],
+            "pageLength": 20,
+            "bPaginate": $('#roundTable tbody tr').length > 20,
+            //"bPaginate":false,
+            "bInfo": false,
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            },
+            dom: "<'row'<'col-sm-2'B><'col-sm-10 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+            buttons: [
+                {
+        extend: 'pdfHtml5',
+        orientation: 'portrait',
+        //pageSize:'LEGAL',
+        title: 'Round Activity Report',
+        exportOptions: {
+        columns: [0,2, 3, 4,5,6]
+        },
+        messageBottom: function () {
+        return $("#dvgeneratedby").text();
+        },
+        customize: function (doc) {
+        doc.content.splice(0, 1);
+        var now = new Date();
+        var jsDate = setDateFormat(now);
+        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+        doc.pageMargins = [20, 60, 20, 30];
+        doc.defaultStyle.fontSize = 8;
+        doc.styles.tableHeader.fontSize = 7;
+        doc['header'] = (function () {
+        return {
+        columns: [
+        { image: logo, width: 40 },
+        {
+        alignment: 'left',
+        italics: true,
+        text: '',
+        fontSize: 14,
+        margin: [0, 6, 0, 0],
+        width: 200,
+        },
+        {
+        alignment: 'middle',
+        fontSize: 14,
+        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n Round Report',
+        margin: [0, 6, 0, 0],
+        width: 600,
+        }
+        ],
+        margin: 20
+        }
+        });
+        doc['footer'] = (function (page, pages) {
+        return {
+        columns: [
+        {
+        alignment: 'left',
+        text: ['Created on: ', { text: jsDate.toString() }]
+        },
+        {
+        alignment: 'right',
+        text: ['Generated from: ', { text: '@HCF.Web.Base.UserSession.CurrentOrg.Name' }]
+        },
+        {
+        alignment: 'right',
+        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+        },
+        {
+        alignment: 'right',
+        text: [{ text: page.toString() }, ' of ', { text: pages.toString() }],
+        }
+        ],
+        margin: [20]
+        }
+        });
+        var objLayout = {};
+        objLayout['hLineWidth'] = function (i) { return .5; };
+        objLayout['vLineWidth'] = function (i) { return .5; };
+        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+        objLayout['paddingLeft'] = function (i) { return 4; };
+        objLayout['paddingRight'] = function (i) { return 4; };
+        doc.content[0].layout = objLayout;
+        }
+        },
+        {
+        extend: 'excel',
+        text: 'Round Activity Report',
+        filename: 'Round Activity Report',
+        title: 'Round Activity Report',
+        customize: function (xlsx) {
+        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+        var col = $('col', sheet);
+        $(col[3]).attr('width', 50);
+        $('row c[r^="B"]', sheet).each(function () {
+        $(this).attr('s', '55');
+         })
+        },
+        exportOptions: {
+        modifer: {
+         page: 'all',
+         search: 'none'
+         },
+         columns: [0, 2, 3, 4, 5,6]
+         }
+        }
+         ],
+         drawCallback: function () {
+         var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+         $('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+         }
+        });
+
+        var table = $('#roundTable').DataTable();
+        table.column(0).visible(false);
+
+        if(pageMode=="binder")
+        {
+            table.column(-1).search("TRUE").draw();
+        }
+    });
+</script>

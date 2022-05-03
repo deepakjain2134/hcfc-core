@@ -1,0 +1,169 @@
+﻿@model HCF.Web.Models.ImageDetail
+@inject HCF.Utility.AppConfig.IAppSetting appSettings
+<input type="hidden" value="@(ViewBag.ErrorMessage != null?"1":"0")" id="hdnIsRedirect" />
+
+
+@if (Model == null)
+{
+    <div id="error">Access Denied:Please login into <a href="@appSettings.WebUrlPath">@appSettings.WebUrlPath</a> to view this file</div>
+}
+else
+{
+    <div class="download-button" id="downloadsvg" title="Download as file." style="display:none;">
+        <div class="zoomBtn">
+            <a id="linkclick" style="font-size: 24px;color: #000;">
+                <i class="fa fa-download" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+    <div class="zoomRow">
+        @if (commonModelFactory.GetExtension(Model.Imgsrc).ToLower() == ".jpeg"
+       || commonModelFactory.GetExtension(Model.Imgsrc).ToLower() == ".png" || commonModelFactory.GetExtension(Model.Imgsrc).ToLower() == ".jpg")
+        {
+            <div class="zoomin" style="height:100%;">
+                <img id="img" src="@commonModelFactory.FilePreviewPath(Model.Imgsrc)" class="imagepreview" style="width:100%; height:100%;">
+                <canvas id="c" style="display:none;"></canvas>
+            </div>
+
+        }
+        else
+        {
+            <div class="iframe-preview" style="height:100%;">
+                <iframe name="document" id="idocsframe" style="width: 100%; height:100%; border: #ccc solid 1px;"></iframe>
+            </div>
+        }
+    </div>
+}
+
+<script src="~/dist/Scripts/jquery-3.1.1.js"></script>
+<script src="~/dist/Scripts/html2canvas.js"></script>
+<link href="~/dist/css/font-awesome.min.css" rel="stylesheet" />
+
+<script>
+
+        var src = '@commonModelFactory.FilePreviewPath(Model.Imgsrc)';
+        var filename = src.replace(/^.*[\\\/]/, '');
+        var filepath=  '@Model.Imgsrc';
+        var dataURL = "";
+        function svgfile() {//stop the browser from following
+
+            var svg = document.getElementById("idocsframe");
+
+            //get svg source.
+            var serializer = new XMLSerializer();
+            var source = serializer.serializeToString(svg);
+
+            //add name spaces.
+            if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+                source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+            }
+
+            //add xml declaration
+            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+            //convert svg source to URI data scheme.
+            var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            dataURL = url;
+    //you can download svg file by right click menu.
+
+        }
+
+
+
+        $(document).ready(function () {
+            if ($("#hdnIsRedirect").val() == "1") {
+                window.location.href = "/login?returnUrl=/Common/FilePreview?imgSrc=" + filepath;
+                return;
+            }
+            if (document.getElementById("idocsframe") != undefined) {
+            document.getElementById("idocsframe").setAttribute("src", getfileUrl(src));
+            }
+
+            debugger;
+            filename = src.replace(/^.*[\\\/]/, '');
+            const extension = filename.substr((filename.lastIndexOf('.') + 1));
+            if (extension === 'png' || extension === 'jpeg' || extension === 'jpg' || extension === 'svg') {
+                $("#downloadsvg").show();
+
+            }
+            if (extension === 'png' || extension === 'jpeg' || extension === 'jpg') {
+                var canvas = document.getElementById('c');
+                var ctx = canvas.getContext('2d');
+
+                canvas.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                });
+
+                // Create an image element
+                var img = document.createElement('IMG');
+                img.setAttribute('crossorigin', 'anonymous');
+
+                // Specify the src to load the image
+                img.src = src.replace("https://", "https://s3.amazonaws.com/");
+                // When the image is loaded, draw it
+                img.onload = function () {
+
+                    var originalWidth = img.width;
+                    ctx.canvas.height = img.height;
+                    ctx.canvas.width = img.width;
+
+                    //img.width = Math.round((50 * document.body.clientWidth) / 100);
+                    //img.height = Math.round((img.width * img.height) / originalWidth);
+
+                    var logo = {
+                        imgval: img,
+                        x: (canvas.width / 2) - (img.width / 2),
+                        y: (canvas.height / 2) - (img.height / 2)
+                    }
+                    ctx.drawImage(logo.imgval, logo.x, logo.y);
+                   /* ctx.drawImage(logo.imgval, logo.x, logo.y, logo.imgval.width, logo.imgval.height);*/
+                    //$(ctx).css("width", img.width);
+                    //$(ctx).css("height", img.height);
+                   // ctx.drawImage(img, 0, 0);
+                }
+
+
+                var link = document.getElementById('linkclick');
+                link.setAttribute("download", filename);
+
+                link.addEventListener('click', function (ev) {
+                    link.href = canvas.toDataURL();
+                    link.download = filename;
+                }, false);
+               // document.body.appendChild(link);
+            }
+           else if (extension === 'svg') {
+
+                var link = document.getElementById('linkclick');
+                svgfile();
+                link.setAttribute("download", filename);
+
+                link.addEventListener('click', function (ev) {
+                    link.href = dataURL;
+                    link.download = filename;
+                }, false);
+            }
+
+        });
+        function getfileUrl(src) {
+            const filename = src.replace(/^.*[\\\/]/, '');
+            const extension = filename.substr((filename.lastIndexOf('.') + 1));
+            if (extension === 'pdf') {
+                return src + "#toolbar=1&view=Fit";
+            } else if (extension === 'doc' || extension === 'docx' || extension === 'xlsx' || extension === 'xls') {
+                src = "https://view.officeapps.live.com/op/view.aspx?src=" + src + "&embedded=true";
+            }
+            else if (extension === 'png' || extension === 'jpeg' || extension === 'jpg') {
+                $("#downloadsvg").show();
+                src = src;
+            }
+            else if (extension === 'svg') {
+                src = src;
+                $("#downloadsvg").show();
+            }
+            return src;
+        }
+</script>

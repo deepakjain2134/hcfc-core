@@ -1,0 +1,185 @@
+﻿@model List<HCF.BDO.TFiles>
+
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">
+                <b>Attachments </b>
+            </h4>
+        </div>
+        <div class="modal-body">
+            <div class="list-files">
+                @{
+
+                    if (Model.Count == 0)
+                    {
+                        Model.Add(new HCF.BDO.TFiles());
+                    }
+                    int j = 0;
+
+                    foreach (var item in Model)
+                    {
+                        <div class="tfilesdiv" id="@j">
+
+                            <input type="hidden" name="Attachments[@j].Name" value="@item.Name" />
+                            <input type="hidden" name="Attachments[@j].FileName" value="@item.FileName" id="hdnfilename_@j" />
+                            <input type="hidden" name="Attachments[@j].FileContent" />
+                            <input type="hidden" name="Attachments[@j].FilePath" value="@item.FilePath" />
+                            <input type="hidden" name="Attachments[@j].AttachmentId" value="@item.AttachmentId" />
+                            <input type="hidden" name="Attachments[@j].TFileId" value="@item.TFileId" />
+                            <input type="hidden" name="Attachments[@j].IsDeleted" value="@item.IsDeleted" id="hdndelete_@j" />
+                            <div class="adduserform attachment-pop">
+                                <input type="hidden" class="uploadedby" name="Attachments[@j].UploadedBy" value="4">
+                                <div class="col-lg-5 col-sm-5">
+                                    <div class="form-group">
+                                        <label>File Name</label>
+                                        <input class="form-control fileName" id="Attachments[@j].Name" maxlength="50" name="Attachments[@j].Name" type="text" value="">
+                                        <div class="upload_file">
+                                            <input type="file"
+                                                   name="Attachments[@j].FileUpoladCtr"
+                                                   tempName="Attachments[@j].Name"
+                                                   tempfileName="Attachments[@j].FileName"
+                                                   tempfilecontent="Attachments[@j].FileContent" class="fileUpload certificate"
+                                                   onchange="Uploadfile(this ,'certificate')" id="file" />
+                                        </div>
+                                        <label id="TICRAFiles_@j" class="file_msg"></label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5 col-sm-5">
+                                    <div class="form-group">
+                                        <label>Comment</label>
+                                        <input class="form-control" value="@(String.IsNullOrEmpty(item.Comment) ? "" : item.Comment)" maxlength="150" name="Attachments[@j].Comment" />
+                                        @*<textarea class="form-control comment" cols="20" value="@(String.IsNullOrEmpty(item.Comment) ? "" : item.Comment)" id="Attachments[@j].Comment" maxlength="150" name="Attachments[@j].Comment" rows="2"></textarea>*@
+                                    </div>
+                                </div>
+                                <div class="col-lg-2">
+                                    <label style="display:block;">&nbsp;</label><br />
+                                    <input type="button" class="remove-button" name="remove" value="remove" btnid="@j" />
+                                    <input type="button" class="add-button" name="add" value="Add" />
+                                </div>
+                            </div>
+                        </div>
+                        j++;
+                    }
+                }
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="uploadButton" data-dismiss="modal" class="comm-button" name="uploadButton">Upload</button>
+            <button type="button" class="comm-Cancelbutton" data-dismiss="modal" onclick="handlerCloseModel()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '.add-button', function () {
+        debugger;
+        count = parseInt($('.tfilesdiv:last').attr('id'));
+        var newID = count + 1;
+        var template = $(this).parent("div").parent("div").parent("div").clone().attr("id", newID);
+        template.find('input[type=text]').val("");
+        template.find('label').html('');
+        template.find('textarea').val("");
+
+        template.find('input[type=file]').val("");
+
+
+        $.each(template.find('input'), function () {
+            $(this).val('');
+            var str = $(this).attr("name");
+            if (str != undefined && str.length > 0) {
+                if ($(this).hasClass("fileUpload")) {
+                    tempName = "Attachments[" + newID + "].Name";
+                    tempfileName = "Attachments[" + newID + "].FileName";
+                    tempfilecontent = "Attachments[" + newID + "].FileContent";
+                    ctrName = "Attachments[" + newID + "].FileUpoladCtr";
+
+                    $(this).attr('tempName', tempName);
+                    $(this).attr('name', ctrName);
+                    $(this).attr('tempfileName', tempfileName);
+                    $(this).attr('tempfilecontent', tempfilecontent);
+                    $(this).attr('onchange', 'Uploadfile(this,"certificate")');
+
+                } else {
+                    var newCtrId = str.replace(/\[\d+\]/g, '[' + newID + ']');
+                    if (newCtrId.indexOf("].FileName") != -1) {
+                        $(this).attr('id', "hdnfilename_" + newID);
+                        $(this).attr('name', newCtrId);
+                    }
+                    else if (newCtrId.indexOf("].IsDeleted") != -1) {
+                        $(this).attr('id', "hdndelete_" + newID);
+                        $(this).attr('name', newCtrId);
+                    }
+                    else if (newCtrId.indexOf("remove") != -1) {
+                        $(this).attr('btnid', newID);
+
+                    }
+                    else {
+                        $(this).attr('id', newCtrId);
+                        $(this).attr('name', newCtrId);
+                    }
+
+                }
+                $("#hdndelete_" + $(this).attr("btnid")).val(false);
+            }
+        });
+        $('.list-files').append(template);
+        count++;
+    });
+
+    $(document).on('click', '.remove-button', function () {
+        debugger;
+        var item = $(this).attr("btnid");
+        var count = $('.tfilesdiv:visible').length;
+        if (count == 1) {
+            return false;
+        }
+        $(this).closest("tfilesdiv").find("input[name='Attachments[" + item+"].FileContent']").val("");
+        $(this).parent("div").parent("div").parent("div").hide();
+       
+        item++;
+        $("#file-lists").find("#" + item).hide();
+        $("#hdndelete_" + $(this).attr("btnid")).val(true);
+
+    });
+
+    function handlerCloseModel() {
+        //$('.fileUpload').val('')
+        //$('.fileName').val('');
+       // $('.tfilesdiv').not("#0").remove();
+       /// $(".uploadFiles").remove();
+    }
+
+    $("#uploadButton").click(function () {
+        debugger;
+        bindThumbImage();
+    });
+
+    function bindThumbImage() {
+        debugger;
+        var filesList = [];
+        $(".uploadFiles").remove();
+        $(".tfilesdiv").each(function () {
+            var fileName = $(this).find(".fileName").val();
+            filesList.push(fileName);
+        });
+        var lstcount = $(".tfilesdiv:visible").length;
+        var count = 1;
+        $.each(filesList, function (i, v) {
+            if ($(".list-files").find("#" + i).is(':visible')) {
+                $("#hdndelete_" + i).val(false);
+
+                @*$("<li class='uploadFiles'  id=" + count + " > <img alt='" + v + "' src='@Url.Content("~/dist/Images/Icons/document_blue_icon.png")' /></li > ").appendTo("#file-lists");*@
+                $("<li class='uploadFiles'  id=" + count + " ><span>" + $("#hdnfilename_" + i).val()+"</span></li > ").appendTo("#file-lists");
+            }
+            else {
+                $("#hdndelete_" + i).val(true);
+               // $("<li class='uploadFiles' style='display:none;'  id=" + count + " > <img alt='" + v + "' src='@Url.Content("~/dist/Images/Icons/document_blue_icon.png")' /></li > ").appendTo("#file-lists");
+                $("<li class='uploadFiles' style='display:none;'  id=" + count + " ><span>" + $("#hdnfilename_" + i).val() + "</span></li > ").appendTo("#file-lists");
+            }
+
+            count++;
+        });
+    }
+</script>

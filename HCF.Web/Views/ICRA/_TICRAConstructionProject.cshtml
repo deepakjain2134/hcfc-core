@@ -1,0 +1,36 @@
+﻿@model List<HCF.BDO.ConstructionType>
+
+@*<span class="stepNo">
+    Step 1:
+</span><br />*@
+
+<label>Using the following table, <i>identify</i> <span style="color:blue;">the Type of Construction Project Activity (Type A-D)</span></label>
+
+<div class="addcra-identify">
+    @foreach (var item in Model.Where(x => x.IsActive))
+    {
+        <div class="ctype">
+            <div class="col-md-3" valign="middle">
+                <input type="checkbox" 
+                       value="@item.ConstructionTypeId"
+                       rel="@item.ConstructionTypeId" 
+                       class="constructiontype" 
+                       typeName="@item.TypeName"
+                       classname="@item.TypeName" /><span></span>
+                @item.TypeName
+            </div>
+            <div class="col-md-9 identify-col9">
+                <h4>@item.Description</h4>
+                <p><label>Includes, but is not limited to:</label></p>
+                <div class="identifySublist">
+                    <ul class="single">
+                        @foreach (var activity in item.ConstructionActivity.Where(x => x.IsActive))
+                        {
+                            <li>@activity.Activity</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>

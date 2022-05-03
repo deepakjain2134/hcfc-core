@@ -1,0 +1,61 @@
+﻿@model List<HCF.BDO.Organization>
+@{
+    ViewBag.Title = "UserHospitals";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                User Hospital Configuration
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary" id="Setting_Content">
+                    <div>
+                        <userdropdownlist name="drpUsers" selectedvalue="0" firsttext="--Select--" class="form-control ddlboxLive">
+
+                        </userdropdownlist>
+                                          @*@Html.UserDropDownList("drpUsers", 0, "--Select--" , new { @class="form-control ddlboxLive" , @data_live_search="true" })*@
+                    </div>
+                    <div>
+                        <br />
+                        <h4>Select Hospitals</h4>
+                        <div class="hospital_view" id="hospital_view">
+                            @await Html.PartialAsync("_userHospitals", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    var drpUsers = $("#drpUsers");
+    var hospital_view = $("#hospital_view");
+
+    drpUsers.change(function () {
+        if ($(this).val() > 0) {
+            loadView($(this).val());
+        } else {
+            
+        }
+    });
+    var loadView = function (userId) {
+        $.ajax({
+            url: '@Url.Action("UserHospitalView", "User")',
+            global: false,
+            type: "GET",
+            dataType: "HTML",
+            data: { userId: userId },
+            success: function (data) {
+                hospital_view.empty().html(data);
+            }
+        });
+    }
+
+</script>

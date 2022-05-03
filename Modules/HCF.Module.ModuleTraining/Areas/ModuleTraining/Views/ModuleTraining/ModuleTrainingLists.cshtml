@@ -1,0 +1,80 @@
+﻿@model IEnumerable<HCF.BDO.ModuleTraining.TrainingSessionMaster>
+@using HCF.Utility;
+@{
+    ViewBag.Title = "Implementation Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Implementation Status
+        </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="implementationRow">
+                            @foreach (var item in Model)
+                            {
+                                <div class="implementation-col">
+                                    <h4>@item.Name</h4>
+                                    <p>@item.ShortDescription</p>
+                                    @{
+                                        var test = item.GetOrgTrainingStatus();
+
+                                        <a id="@string.Format(" btn_status_{0}",item.ModuleSessionId)" href="@Url.Action("UpdateTrainingStatus", "ModuleTraining" ,new { modeuleSessionId=item.ModuleSessionId })" title=""
+                                           data-toggle="modal" data-target="#modal-container"
+                                           class="@string.Format(" btn {0}",test.ToString())">
+                                            @test.GetDescription()
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+
+    <script src="@Url.Content("~/dist/js/jQuery.tagify.min.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/dist/css/tagify.css")" rel="stylesheet">
+    <style>
+        .btn.Completed {
+            background-color: green;
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+
+        .btn.NotStarted {
+            background-color: blue;
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+
+        .btn.CustomerDeferred {
+            background-color: gray;
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+
+        .btn.Notcompleted {
+            background-color: red;
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 15px;
+        }
+    </style>
+}

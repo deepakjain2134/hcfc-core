@@ -1,0 +1,268 @@
+﻿@model HCF.BDO.TIlsm
+@{
+    ViewBag.Title = "AddILSMShow";
+    var IlsmEP = Model.AllTilsmEPs;
+    List<int> epDetails = Model.TIlsmEP.Where(x => x.IsActive).Select(x => x.EPDetailId).ToList();
+
+    string replaceText = "When the hospital identifies Life Safety Code deficiencies that cannot be immediately corrected or during periods of construction,";
+    string replace2 = "the hospital does the following: ";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            ILSM Incident #: @Model.IncidentId
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-5 form-group">
+                        <label>Name:</label>
+                        @Html.TextBoxFor(x => x.Name, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="col-md-5 form-group">
+                        <label>Reason for this ILSM Creation:</label>
+                        @Html.TextAreaFor(x => x.Notes, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="col-md-2">
+                        <div>&nbsp;</div>
+                        <input type="submit" value="Update Reason" class="comm-button" id="updateIlsm" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 form-horizontal-1">
+                        <h4>Based on issues, following ILSMs are recommended:</h4>
+                        <input type="hidden" value="@Model.TIlsmId" id="hnd_tilsmId" />
+                        <ul class="activity_history stylish" id="ilsmEps">
+                            @foreach (var ilsm in Model.TIlsmEP.Where(x => epDetails.Contains(x.EPDetailId)))
+                            {
+                                <li class="editor-field addcolms">
+                                    <div class="addilsmcol1">
+                                        @if (ilsm.IsAdditional)
+                                        {
+                                            <div class="ilsmcheckBox">
+                                                <input type="checkbox"
+                                                       id="@($"epDetailId{ilsm.EPDetailId}")"
+                                                       name="epDetailId_@ilsm.EPDetailId"
+                                                       class="@((int)Model.Status != 1 ? "checkBox epDetailId" : "checkBox epDetailId disable" )"
+                                                       checked="checked"
+                                                       value="@ilsm.EPDetailId" /><span></span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="ilsmcheckBox"></div>
+                                        }
+                                        <span>@ilsm.StandardEp.StandardEP</span>
+                                        @Html.HiddenFor(m => ilsm.EPDetailId)
+                                    </div>
+                                    <ul class="addilsmcol2">
+                                        <li style="border-bottom:0;">
+
+                                            @await Html.PartialAsync("_EpDescription", ilsm.StandardEp.Description.Replace(replaceText, "").Replace(replace2, ""),
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               { { "standardEp", @ilsm.StandardEp.StandardEP }}
+                              )
+                                            @*@await Html.PartialAsync("_EpDescription", ilsm.StandardEp.Description.Replace(replaceText, "").Replace(replace2, ""), new ViewDataDictionary { { "standardEp", @ilsm.StandardEp.StandardEP } })*@
+
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+
+                    </div>
+                    <div class="col-md-12 form-horizontal-2" id="view2">
+                        <div class="comman_checkbox1" style="overflow:initial !important;">
+                            <b class="iblmsg-heading" id="lblmsg"><strong>There are additional possible Interim Life Safety Measures. Check the ones you want to activate:</strong></b>
+                            <ul class="activity_history stylish" id="extra_eps">
+                                @foreach (var ilsm in IlsmEP.Where(x => !epDetails.Contains(x.EPDetailId)))
+                                {
+                                    <li class="editor-field addcolms">
+                                        <div class="addilsmcol1">
+                                            <input type="checkbox"
+                                                   id="@($"epDetailId{ilsm.EPDetailId}")"
+                                                   name="epDetailId_@ilsm.EPDetailId"
+                                                   class="@((int)Model.Status != 1 ? "checkBox epDetailId" : "checkBox epDetailId disable" )"
+                                                   value="@ilsm.EPDetailId" /><span></span>
+
+                                            <span>@ilsm.StandardEp</span>
+                                            @Html.HiddenFor(m => ilsm.EPDetailId)
+                                        </div>
+                                        <ul class="addilsmcol2">
+                                            <li style="border-bottom:0;">
+                                                @await Html.PartialAsync("_EpDescription", ilsm.Description,
+                                                   new ViewDataDictionary(
+                                                   new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                                   new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                                   { { "standardEp",  commonModelFactory.GetEpStandard(ilsm) }}
+                                                  )
+                                                @*@await Component.InvokeAsync("EpDescription", new { epDetailId = Model.EPDetails.EPDetailId, maxLength = 0, epdetails = Model.EPDetails })*@
+
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-12 text-right button_Div">
+                        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.TIlsmId })" class="comm-button">
+                            <span>Document this ILSM</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    $(document).ready(function () {
+        if ($("#extra_eps li").length == 0) {
+            $("#lblmsg").hide();
+            //$("#view2").empty();
+        } else { $("#lblmsg").show(); }
+    });
+
+
+    $(document).on('click', '.checkBox', function () {
+        debugger;
+        var epDetailId = $(this).val();
+        var tilsmId = $("#hnd_tilsmId").val();
+        var isActive = false;
+        if (epDetailId > 0 && tilsmId > 0) {
+            if ($(this).is(":checked")) {
+                isActive = true;
+                $("#ilsmEps").append("<li class='editor-field addcolms'>" + $(this).attr("checked", "checked").closest("li").html() + "</li>");
+                $(this).closest("li").remove();
+            } else {
+                isActive = false;
+                $("#extra_eps").append("<li class='editor-field addcolms'>" + $(this).removeAttr("checked").closest("li").html() + "</li>");
+                $(this).closest("li").remove();
+            }
+            if ($('#extra_eps li').length == 0) {
+                $("#lblmsg").hide();
+                //$("#view2").empty();
+            } else { $("#lblmsg").show(); }
+            var url = CRxUrls.ilsm_AddAdditionalTilsmEP;
+            $.ajax({
+                url: url + "?epDetailId=" + epDetailId + "&tilsmId=" + tilsmId + "&isActive=" + isActive,
+                method: "GET",
+                contentType: 'application/json',
+                success: function (data) {
+                    // Reinitialize pop over for showing pop-over on  dynamic adding row
+                    $(".descriptions").popover({ trigger: "manual", html: true, animation: false })
+                        .on("mouseenter", function () {
+                            var _this = this;
+                            $(this).popover("show");
+                            $(".popover").on("mouseleave", function () {
+                                $(_this).popover('hide');
+                            });
+                        }).on("mouseleave", function () {
+                            var _this = this;
+                            setTimeout(function () {
+                                if (!$(".popover:hover").length) {
+                                    $(_this).popover("hide");
+                                }
+                            }, 50);
+                        });
+                    // Reinitialize pop over for showing pop-over on  dynamic adding row
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    });
+
+    $("#updateIlsm").click(function () {
+        var reason = $('#Notes').val().trim();
+        var name = $('#Name').val().trim();
+        var tilsmId = $("#hnd_tilsmId").val();
+
+        if (name.length === 0) {
+            swalalert("please select name first");
+            return false;
+        } else if (reason.length === 0) {
+            swalalert("Please enter the reason");
+            return false;
+        }
+
+        if (reason != "") {
+            var tilsm = {
+                Notes: reason,
+                TIlsmId: tilsmId,
+                Name: name
+            };
+            var UrlAction ='@Url.Action("UpdateILSM", "ILSM")';
+            $.ajax({
+                contentType: 'application/x-www-form-urlencoded',
+                dataType: 'json',
+                type: 'POST',
+                url: UrlAction,
+                data: tilsm,//JSON.stringify(tilsm),
+                success: function (resultData) {
+                    swalalert("Reason Updated Successfully!");
+                }
+            });
+        }
+    });
+
+
+
+
+    $(document).ready(function () {
+        if ($('#extra_eps li').length == 0) {
+            $("#lblmsg").hide();
+            //$("#view2").empty();
+        } else { $("#lblmsg").show(); }
+
+
+
+
+    });
+
+
+
+
+
+
+</script>
+
+<script>
+    $(".ePDescriptions").shorten({
+        moreText: 'read more',
+        showChars: 320,
+        lessText: 'read less'
+    });
+</script>
+
+<style>
+    .ep_heading:first-child {
+        margin-bottom: 4px !important;
+    }
+
+    .addilsmcol2 li::first-letter {
+        text-transform: uppercase;
+    }
+
+    .popover-content.popover-scrollBar {
+        max-height: 120px;
+        overflow: auto;
+        margin-bottom: 10px;
+    }
+</style>

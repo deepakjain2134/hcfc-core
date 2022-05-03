@@ -1,0 +1,34 @@
+﻿@model List<HCF.BDO.AssetType>
+<h3>Asset Type</h3>
+<ul id="assetsList">
+    <li>
+        <input type="checkbox" id="checkAll" /><span></span> Select All
+        @foreach (var item in Model.Where(x => x.IsActive && x.IsInternal == false && 
+         x.Assets.Where(z => z.IsActive).Any()).OrderBy(x => x.Name))
+        {
+            <ul class="list">
+                <li>
+                    <input type="checkbox" id="cb2" class="parentCheck" assetid="@item.TypeId" /><span></span>
+                    <a>@item.Name</a>
+                    <ul class="sublist" id="@string.Format("ulassets_{0}", item.TypeId)">
+                        @foreach (var asset in item.Assets.Where(x => x.IsActive).OrderBy(x => x.Name))
+                        {
+                            <li draggable="true" ondragstart="dragStart(event);" id=@asset.AssetId>
+                                <input type="checkbox" id="@string.Format("cb2{0}",asset.AssetId)" class="ChildCheck" value=@asset.AssetId /><span></span>
+                                <img src="@commonModelFactory.CommonFilePath(asset.IconPath)"                                     
+                                     id="@asset.AssetId" height="25" width="25" />
+                                <label for="@string.Format("cb2{0}",asset.AssetId)">@asset.Name (@asset.Count)</label>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        }
+
+    </li>
+</ul>
+<style>
+    ul.list li ul {
+        display: none;
+    }
+</style>

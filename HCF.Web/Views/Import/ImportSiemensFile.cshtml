@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "ImportSiemensFile";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Import Siemens File From Its Url
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header"></div>
+                    @using (Html.BeginForm("ImportSiemensFile", "Import", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        
+                            <input type="submit" value="Import File" title="Import Siemens File From Its Url" />
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+</script>
+
+@*<style>
+    .row {
+        margin-top: 10px;
+    }
+</style>*@
+

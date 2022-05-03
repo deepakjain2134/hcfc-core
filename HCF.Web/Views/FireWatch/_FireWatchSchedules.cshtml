@@ -1,0 +1,376 @@
+﻿@model List<HCF.BDO.ScheduledLogs>
+
+<div class="row">
+    <div class="col-md-6">
+        <p><label># Active/Scheduled Fire round Incidents </label></p>
+    </div>
+    <div class="col-md-6">
+        @*<div class="add_button_comman">
+                <a href='@Url.Action("ManageFireWatchSchedules", "FireWatch")' class="pull-right">
+                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Schedules" alt="3d_add_button" />
+                </a>
+            </div>*@
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <label>Active: </label>
+    </div>
+    <div class="col-md-6">
+        <div class="add_button_comman">
+            <a href='@Url.Action("ManageFireWatchSchedules", "FireWatch")' class="pull-right">
+                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Schedules" alt="3d_add_button" />
+            </a>
+        </div>
+    </div>
+</div>
+
+<table class="table table-bordered table-striped" id="activeSchedules">
+    <thead>
+        <tr>
+            <th style="width:10%;">Effective</th>
+            <th style="width:10%;">Continue  Until</th>
+            <th style="width:20%;">Building</th>
+            <th style="width:10%;">Area</th>
+            <th style="width:30%;">Comments</th>
+            <th style="width:10%;">Initiated by</th>
+            <th style="width:5%;">Action</th>
+            <th style="width:5%;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (HCF.BDO.ScheduledLogs logs in Model.Where(x => x.ScheduledStatus == 2 && x.IsClosed == false).ToList())
+        {
+            <tr id="@($"tr{logs.Id}")">
+
+
+                <td data-sort="@logs.StartDate.DateSort()">
+                    @logs.StartDate.Value.ToClientTime().ToFormatDate()<br />
+                    @logs.StartDate.Value.ToClientTime().ToString("hh:mm tt")
+                </td>
+
+
+                <td data-sort="@logs.Enddate.DateSort()">
+                    @if (logs.Enddate.HasValue)
+                    {
+                        @logs.Enddate.Value.ToClientTime().ToFormatDate()<br />
+                        @logs.Enddate.Value.ToClientTime().ToString("hh:mm tt")
+                    }
+                </td>
+
+
+                <td>
+                    @logs.Buildings.BuildingName
+
+                </td>
+                <td>
+                    @logs.Area
+
+                </td>
+                <td>
+                    @logs.Comment
+
+                </td>
+                @if (logs.InitiatedBy != "")
+                {
+                    <td>
+                        <span>@logs.InitiatedBy</span>
+                    </td>
+                }
+                else
+                {
+                    <td width="15%">
+                        @if (logs.TIlsmId.HasValue)
+                        {
+                            <span>
+                                CRx
+                            </span>
+                        }
+                        else
+                        {
+                            <span>@logs.UserProfile.FullName</span>
+                        }
+                    </td>
+                }
+                <td>
+                    <a title="Edit" class="@(logs.IsClosed == true ? "disable" :"")">
+                        <span>
+                            <img onclick="location.href ='@Url.Action("ManageFireWatchSchedules", "FireWatch", new { Id = logs.Id })'"
+                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                        </span>
+                    </a>
+
+
+                    <a href="@Url.Action("PrintFireWatchPDF", "PDF",new {logId=logs.Id})">
+                        <span>
+                            <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                        </span>
+                    </a>
+                </td>
+                <td>
+                    @if (logs.IsClosed)
+                    {
+                        <input type="button" class="button2" name="button" value="Closed" title="Closed" />
+                    }
+                    else
+                    {
+                        <a href="" class="closed" data-id="@logs.Id">
+                            <input type="button" class="button1" name="button" value="Close" title="Close" />
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<div class="clearfix">
+    <b>Scheduled: </b>
+</div>
+
+<table id="schedules" class="table table-bordered table-striped">
+    <thead>
+        <tr style="visibility:collapse">
+            <th style="width:10%;">Effective</th>
+            <th style="width:10%;">Continue  Until</th>
+            <th style="width:20%;">Building</th>
+            <th style="width:10%;">Area</th>
+            <th style="width:30%;">Comments</th>
+            <th style="width:10%;">Initiated by</th>
+            <th style="width:5%;">Action</th>
+            <th style="width:5%;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (HCF.BDO.ScheduledLogs logs in Model.Where(x => x.ScheduledStatus == 0 && x.IsClosed == false).ToList())
+        {
+            <tr>
+
+
+                <td data-sort="@logs.StartDate.DateSort()">
+                    @logs.StartDate.Value.ToClientTime().ToFormatDate()<br />
+                    @logs.StartDate.Value.ToClientTime().ToString("hh:mm tt")
+                </td>
+                <td data-sort="@logs.Enddate.DateSort()">
+                    @if (logs.Enddate.HasValue)
+                    {
+                        @logs.Enddate.Value.ToClientTime().ToFormatDate()<br />
+                        @logs.Enddate.Value.ToClientTime().ToString("hh:mm tt")
+                    }
+                </td>
+                <td>
+                    @logs.Buildings.BuildingName
+
+                </td>
+                <td>
+                    @logs.Area
+
+                </td>
+                <td>
+                    @logs.Comment
+                </td>
+                @if (logs.InitiatedBy != "")
+                {
+                    <td>
+                        <span>@logs.InitiatedBy</span>
+                    </td>
+                }
+                else
+                {
+                    <td width="15%">
+                        @if (logs.TIlsmId.HasValue)
+                        {
+                            <span>
+                                CRx
+                            </span>
+                        }
+                        else
+                        {
+                            <span>@logs.UserProfile.FullName</span>
+                        }
+                    </td>
+                }
+
+                <td>
+                    <a title="Edit" class="@(logs.IsClosed == true ? "disable" :"")">
+                        <span>
+                            <img onclick="location.href ='@Url.Action("ManageFireWatchSchedules", "FireWatch", new { Id = logs.Id })'"
+                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                        </span>
+                    </a>
+
+
+                    <a href="@Url.Action("PrintFireWatchPDF", "PDF",new {logId=logs.Id})">
+                        <span>
+                            <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                        </span>
+                    </a>
+                </td>
+                <td>
+                    @if (logs.IsClosed)
+                    {
+                        <input type="button" class="button2" name="button" value="Closed" title="Closed" />
+                    }
+                    else
+                    {
+                        <a href="" class="closed" data-id="@logs.Id">
+                            <input type="button" class="button1" name="button" value="Close" title="Close" />
+                        </a>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="closedFireWatch" class="hide">
+    <div>
+        <b>Closed : </b>
+    </div>
+
+    <table id="closedSchedules" class="table table-bordered table-striped">
+        <thead>
+            <tr style="visibility:collapse">
+                <th style="width:10%;">Effective</th>
+                <th style="width:10%;">Continue  Until</th>
+                <th style="width:20%;">Building</th>
+                <th style="width:10%;">Area</th>
+                <th style="width:30%;">Comments</th>
+                <th style="width:10%;">Initiated by</th>
+                <th style="width:5%;">Action</th>
+                <th style="width:5%;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (HCF.BDO.ScheduledLogs logs in Model.Where(x => x.IsClosed).OrderByDescending(x => x.ClosedDate).ToList())
+            {
+                <tr>
+
+                    <td data-sort="@logs.StartDate.DateSort()">
+                        @logs.StartDate.Value.ToClientTime().ToFormatDate()<br />
+                        @logs.StartDate.Value.ToClientTime().ToString("hh:mm tt")
+                    </td>
+
+
+                    <td data-sort="@logs.Enddate.DateSort()">
+                        @if (logs.Enddate.HasValue)
+                        {
+                            @logs.Enddate.Value.ToClientTime().ToFormatDate()<br />
+                            @logs.Enddate.Value.ToClientTime().ToString("hh:mm tt")
+                        }
+                    </td>
+
+                    <td>
+                        @logs.Buildings.BuildingName
+
+                    </td>
+                    <td>
+                        @logs.Area
+
+                    </td>
+                    <td>
+                        @logs.Comment
+                    </td>
+                    <td>
+                        @logs.UserProfile.FullName
+                    </td>
+                    <td>
+                        <a title="Edit" class="@(logs.IsClosed == true ? "disable" :"")">
+                            <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="3d_add_button" /></span>
+                        </a>
+
+
+                        <a href="@Url.Action("PrintFireWatchPDF", "PDF",new {logId=logs.Id})">
+                            <span>
+                                <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                            </span>
+                        </a>
+
+                    </td>
+                    <td title="Close">
+                        @($"{"Closed on"} {logs.ClosedDate.Value.ToClientTime().ToFormatDate()} {logs.ClosedDate.Value.ToClientTime().ToString("hh:mm tt")} {"by"} {(logs.ClosedByUser != null ? logs.ClosedByUser.FullName : string.Empty)}")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+
+    $('input[type="checkbox"]').click(function () {
+        debugger;
+        if ($(this).is(":checked")) {
+            $("#closedFireWatch").removeClass("hide");
+        }
+        else {
+            $("#closedFireWatch").addClass("hide");
+        }
+    });
+
+
+    $(document).ready(function () {
+        $('#activeSchedules').DataTable({
+            "searching": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "bPaginate": $('#activeSchedules tbody tr').length > 10,
+            "bInfo": false,
+        });
+
+        $('#schedules').DataTable({
+            "searching": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "bPaginate": $('#schedules tbody tr').length > 10,
+            "bInfo": false,
+            "bSort": false,
+        });
+
+        $('#closedSchedules').DataTable({
+            "searching": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "bPaginate": $('#closedSchedules tbody tr').length > 10,
+            "bInfo": false,
+            "bSort": false,
+        });
+
+
+    });
+
+    $('body').on('click', 'a.closed', function (e) {
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You want to close this schedule!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, Close it!",
+            closeOnConfirm: false
+        },
+            function () {
+                var urlAction = '@Url.Action("CloseSchedulelog", "FireWatch")';
+                $.ajax({
+                    type: "GET",
+                    url: urlAction + "?Id=" + Id,
+                    success: function (data) {
+                        successAlert("Your Schedule log has been closed.", "Closed!");
+                        window.location.reload();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+</script>
+@*<style>
+    .dataTables_wrapper .dataTables_paginate {
+        float: right;
+        margin-bottom: 10px;
+    }
+</style>*@

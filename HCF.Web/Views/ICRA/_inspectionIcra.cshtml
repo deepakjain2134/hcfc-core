@@ -1,0 +1,400 @@
+﻿@model IEnumerable<HCF.BDO.TIcraLog>
+@{ int index = 0;}
+<table id="inspectionicraTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th style="display:none"></th>
+            <th>
+                Project #
+            </th>
+            <th>
+                Project Name
+            </th>
+            <th>
+                Permit #
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Scope)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CompletionDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsICRA)
+            </th>
+            <th>
+                @Localizer["Type"]
+            </th>
+            <th>
+                @Localizer["Risk"]
+            </th>
+            <th>
+                @Localizer["Class"]
+            </th>
+            <th>
+                @Localizer["Status"]
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comment)
+            </th>
+         
+            <th title="Attachments" width="3%">
+                <img src="@Url.Content("~/dist/Images/Icons/attachment_icon_new.png")" alt="Attachments" title="Attachments" />
+            </th>
+            <th>
+                @Localizer["Action"]
+            </th>
+            <th>
+                More
+            </th>
+            <th style="display:none"></th>
+            <th style="display:none"></th>
+            <th style="display:none"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Where(x => x.IsActive).OrderBy(x => x.StartDate))
+        {
+            <tr>
+                <td style="display:none">@item.PermitRequestBy</td>
+                <td style="display:none">@item.PermitAuthorizedBy</td>
+                <td>
+                    @item.Project.ProjectNumber
+                </td>
+                <td>
+                    @item.Project.ProjectName
+                </td>
+                <td>
+                    @item.PermitNo
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location)
+                </td>
+                <td style="text-align:left;">
+                    @item.Scope.Substring(0, Math.Min(item.Scope.Length, 100))
+                    @if (item.Scope.Length > 100)
+                    {
+                        <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover' data-placement='right' data-original-title='' data-content='@item.Scope'>@("...See More")</a>
+                    }
+                </td>
+                <td data-sort="@item.StartDate.DateSort()">
+                    @item.StartDate.CastLocaleDate()
+                </td>
+                <td data-sort="@item.CompletionDate.DateSort()">
+                    @item.CompletionDate.CastLocaleDate()
+                </td>
+                <td>
+                    @if (item.IsICRA)
+                    {<span>Y</span>}
+                    else
+                    {<span>N</span>}
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConstructionType.TypeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConstructionRisk.RiskName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ConstructionClass.ClassName)
+                </td>
+                <td>
+                    @*@($"{@Enum.GetName(typeof(HCF.Utility.Enums.ICRAStatus), item.Status)} {(item.ClosedDate.HasValue ? $"({item.ClosedDate.CastLocaleDate()})" : string.Empty)}")*@
+                    @{
+                        HCF.BDO.Enums.ApprovalStatus enums = (HCF.BDO.Enums.ApprovalStatus)item.Status;
+                    }
+                    <p>@enums.GetDescription()</p>
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Comment)
+                </td>
+                <td style="text-align:center;">
+                    @if (item.TICRAFiles.Any(x => !x.IsReport))
+                    {
+                        <img onclick="location.href ='@Url.Action("TicraFiles", "ICRA", new { icraId=item.TicraId})'"
+                             src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")"
+                             alt="Document" title="Document" />
+                    }
+                    <br />
+                </td>
+                <td>
+                    <div class="icra_action">
+                        <img onclick="location.href ='@Url.Action("AddInspectionIcra", "ICRA", new { icraId = item.TicraId , iseditable = true,version=item.Version })'" src="@Url.Content("~/dist/Images/Icons/edit_button2.png")" title="Edit" alt="Edit" />
+                        <img onclick="location.href ='@Url.Action("AddInspectionIcra", "ICRA", new { icraId = item.TicraId , iseditable= false ,version=item.Version})'" src="@Url.Content("~/dist/Images/Icons/view_icon.png")" title="View" alt="View" />
+                        <a data-id="@item.TicraId" class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "deletepermit" :"deletepermit hide")">
+                            <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete Permit" alt="3d_add_button" /></span>
+                        </a>
+                        <img onclick="location.href ='@Url.Action("TICRAProjectObservationReport", "ICRA", new {modulename="icra", projectId = item.ProjectId,icraid=item.TicraId,permitnumber=item.PermitNo  })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="Observation Report" alt="Observation Report" />
+                        <a href="@Url.Action("ICRASignedReport", "ICRA", new { ticraId = item.TicraId })" class="modal-link" title="Submit Signed ICRA">
+                            <img src="@Url.Content("~/dist/Images/Icons/icra_sign.png")" />
+                        </a>
+                    </div>
+
+                </td>
+                <td>
+                    <div class="dropdown icratable-drop">
+                        <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown">
+                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                        </button>
+                        @{ index = index + 1;}
+                        @await Html.PartialAsync("~/Views/Shared/_icramoreoption.cshtml", new ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                             new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { { "icraId", item.TicraId }, { "permitno", item.PermitNo }, { "index", index } })
+                        @*@Html.Partial("~/Views/Shared/_icramoreoption.cshtml", new ViewDataDictionary { { "icraId", item.TicraId }, { "permitno", item.PermitNo }, { "index", index } })*@
+                    </div>
+                </td>
+
+                <td style="display:none">@(item.PermitAuthorizedBySignId.HasValue && item.PermitAuthorizedBySignId.Value>0 ? '1' : '0')</td>
+                <td style="display:none">@item.ProjectId</td>
+                <td style="display:none">@item.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+
+    $(document).ready(function () {
+        $('.descriptions').popover({
+            trigger: 'focus'
+        });
+
+        $("#statusId>option[value=4]").hide();
+    });
+
+
+
+    var inspectiondataTables = $('#inspectionicraTable').DataTable({
+
+       "lengthChange": false,
+        "aaSorting": [],
+        "pageLength": 20,
+        "bPaginate": $('#inspectionicraTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [[7, 'desc']],
+        "oSearch": { "bSmart": false },
+        "language": {
+            "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+        },
+         initComplete: function () {
+             $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("addinspectionicra", "ICRA", new { version =ViewBag.version }))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add ICRA" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+        buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    //pageSize:'LEGAL',
+                
+                title: 'ICRA v' + @ViewBag.version + ' log sheet',
+                    exportOptions: {
+                        columns: [2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        //genereateRpeort(doc)
+                         //Remove the title created by datatTables
+                        doc.content.splice(0, 1);
+                        //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                        var now = new Date();
+                        var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                        // Logo converted to base64
+                        //var logo = $("#logoimgbase64").val();
+                        //debugger;
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: ('@HCF.Web.Base.UserSession.CurrentOrg' != null ? getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') : ""),
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'ICRA v' + @ViewBag.version+' log sheet',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Created on: ', { text: jsDate.toString() }]
+                                    }
+                                    //{
+                                    //    alignment: 'right',
+                                    //    text: [{ text: $.Constants.PDF_Footer_Msg_Fire_Watch_Portal_module }]
+                                    //}
+                                ],
+                                margin: 20
+                            }
+                        });
+
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'ICRA log sheet',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,13],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+    });
+
+    var selprojectId = $("#SelProjectId");
+    $(document).ready(function () {
+        debugger;
+        var projectId = parseInt(getParameterByName('ProjectId'));
+        if (statusdrp == "") {
+            var status = getParameterByName('Status');
+
+            if (status != undefined) {
+                $("statusId").val(status);
+                filterRecordsbyStatus(status);
+            }
+        }
+
+        if (projectId != undefined && projectId > 0) {
+            selprojectId.val(projectId);
+            filterRecords(projectId);
+        }
+
+        var ApprovalStatus = parseInt(getParameterByName('ApprovalStatus'));
+        if (ApprovalStatus != undefined && ApprovalStatus > 0) {
+            debugger;
+            $("#btn_reqauth").val(ApprovalStatus);
+            $("#btn_reqauth").change();
+            $("#btn_reqauth").next(".ddlbox").find("ul.dropdown-menu").find("li").removeClass("selected");
+            $("[rel=" + ApprovalStatus+"]").addClass("selected");
+            //filterdatatable(ApprovalStatus);
+        }
+    });
+    selprojectId.change(function () {
+        var projectId = selprojectId.val();
+        filterRecords(projectId);
+    })
+
+    function filterRecords(projectId) {
+        if (projectId > 0) {
+            //alert("Call " + projectId);
+            inspectiondataTables.column(-2).search("^" + projectId + "$", true, true, false).draw();
+        } else {
+            inspectiondataTables.columns(-1).search("").columns(-2).search("").draw();
+        }
+    }
+
+    function filterRecordsbyStatus(status) {
+
+        //if (status != undefined) {
+        //    inspectiondataTables.column(-2).search("^" + status + "$", true, true, false).draw();
+        //}
+        if (status != undefined) {
+            if (status != -2) {
+                //alert("Call " + projectId);
+                inspectiondataTables.column(-1).search("^" + status + "$", true, true, false).draw();
+            } else {
+                inspectiondataTables.columns(-1).search("").columns(-2).search("").draw();
+
+
+            }
+        }
+    }
+
+
+    function filterdatatable(value) {
+        debugger;
+        inspectiondataTables.columns(0).search("").columns(1).search("").draw();
+        var userId = @HCF.Web.Base.UserSession.CurrentUser.UserId;
+        if (value == 1) {
+            inspectiondataTables.columns(0).search("^" + userId + "$", true, false, true).draw();
+        } else if (value == 2) {
+            inspectiondataTables.columns(1).search("^" + userId + "$", true, false, true).draw();
+        } else if (value == 3) {
+            //inspectiondataTables.columns(0).search('^$', true, false).draw();
+            inspectiondataTables.columns(-1).search('-1', true, false).draw();
+        } else if (value == 4) {
+            //inspectiondataTables.columns(1).search('^$', true, false).draw();
+            inspectiondataTables.columns(-1).search("-1|2|3|4|5|6", true, false).draw();
+        }
+        else if (value == 5)
+        {
+           // var filter = "-1||0||2||3||4||5||6";
+            inspectiondataTables.columns(-1).search("-1|2|3|4|5|6", true, false).columns(1).search("^" + userId + "$", true, false, true).columns(-3).search("^0$", true, false, true).draw();
+            //inspectiondataTables.columns(-1).search("-1|2|3|4|5|6", true, false).columns(1).search(userId).draw();
+            //inspectiondataTables.columns(-1).search(filter).columns(1).search(userId).draw();
+        }
+        else {
+            inspectiondataTables.columns(-1).search("").columns(1).search("").columns(2).search("").columns(-3).search("").draw();
+        }
+    }
+
+    $(document).on('click', 'a.deletepermit', function (e) {
+        debugger;
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to delete this permit?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Permit_Delete + "?id=" + Id + "&permittype=11",
+                    success: function (data) {
+                        swal("Deleted!", "Your permit has been deleted.", "success");
+                        location.reload();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+</script>
+@*<style>
+    .dataTables_wrapper {
+        clear: initial !important;
+    }
+</style>*@

@@ -1,0 +1,102 @@
+﻿@model List<HCF.BDO.TIcraLog>
+@using HCF.BDO
+@{
+    TempData["curIlsmId"] = ViewBag.ILSMId;
+}
+<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Search @(commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)) ? "ICRA" : "CRA")</h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-group workinput">
+            <div class="popworkBox1">
+                <label class="control-label"><b>@(commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))?"ICRA":"CRA")</b>&nbsp;</label>
+                <input type="text" class="numeric" id="txtICRASearch" maxlength="15" />
+                <button type="submit" id="btnicraSearch" class="popsearch-btn disable">Search</button>
+            </div>
+            <input type="hidden" value='@ViewBag.ILSMId' id="tilsmId" />
+            <input type="hidden" id="hidCurpermitno" />
+        </div>
+
+        <div id="">
+            <table id="woTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Permit #</th>
+                        <th width="10%">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="partialContents">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer"></div>
+</div>
+
+<script>
+
+    var txtICRASearch = $("#txtICRASearch");
+    var btnicraSearch = $("#btnicraSearch");
+    var tILSMid = $("#tilsmId");
+
+    btnicraSearch.click(function () {
+        getICRAs(txtICRASearch.val());
+    });
+
+    function getICRAs(searchby) {
+
+        var tilsmId = tILSMid.val();
+        $.get(CRxUrls.ICRA_ICRAList + '?tilsmId=' + tilsmId+'&searchparam=' + searchby, function (data) {
+            $('#partialContents').empty();
+            $('#partialContents').append(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+    $(document).on("click", ".addICRAToILSM", function () {
+        var tilsmId = tILSMid.val();
+        var icraId = $(this).attr("icraId");
+        var permitNo = $(this).closest('tr').find('td.permitNo').text();
+        $('#hidCurpermitno').val(permitNo);
+        linkToICRA(tilsmId, icraId);
+    });
+
+    var linkToICRA = function (tilsmId, icraId) {
+        $.ajax({
+            url: CRxUrls.ILSM_ILSMlinkToICRA + "?tilsmId=" + tilsmId + "&icraId=" + icraId,
+            type: "POST",
+            dataType: "JSON",
+            success: function (resuslt) {
+                debugger;
+                var msg = "";
+                if ('@commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))'=='True') {
+                    msg= (resuslt) ? '@HCF.Utility.ConstMessage.LinkICRAToILSM_Success' : '@HCF.Utility.ConstMessage.LinkICRAToILSM_Fail';
+                }
+                else {
+                    msg= (resuslt) ? 'CRA link with ILSM Successfully ' : '@HCF.Utility.ConstMessage.LinkICRAToILSM_Fail';
+                }
+
+                swalalert(msg);
+                $('#partialContents').empty();
+                txtICRASearch.val('');
+                loadilsmdetailpartial();
+                $('#popUpModal').modal('hide');
+
+            }
+        });
+    }
+
+    txtICRASearch.on('keyup', function (e) {
+        var val = $(this).val().trim().length;
+        if (val > 0) $('#btnicraSearch').removeClass('disable');
+        else {
+            $('#btnicraSearch').addClass('disable');
+            $('#partialContents').empty();
+        }
+    });
+</script>

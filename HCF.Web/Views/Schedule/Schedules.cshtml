@@ -1,0 +1,213 @@
+﻿@model IEnumerable<HCF.BDO.Schedules>
+@{
+    ViewBag.Title = "Schedules";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Schedules
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="box-header" style="display: inline-block;float: right;">
+                            <a class="pull-right addnew">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Schedule" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <div id="">
+                                <table id="woTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Schedule #</th>
+                                            <th>Start Date</th>
+                                            <th>Frequency</th>
+                                            <th>Next Due</th>
+                                            <th>Inspecting</th>
+                                            <th>Description</th>
+                                            <th>Special consideration</th>
+                                            <th>Status</th>
+                                            <th>Assign</th>
+                                        </tr>
+                                    </thead>
+                                    @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                                    {
+                                        <tr>
+                                            <td>@item.ReferenceName</td>
+                                            <td>@item.StartDate.ToFormatDate()</td>
+                                            <td>
+                                                @foreach (var sfrequency in item.ScheduleFrequency)
+                                                {
+                                                    <span>
+                                                        @sfrequency.Frequency.DisplayName
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @foreach (var sfrequency in item.ScheduleFrequency)
+                                                {
+                                                    <span>
+                                                        @{ var NextDate = sfrequency.CurrentScheduleDate; }
+                                                        @NextDate.ToClientTime().ToFormatDate()<br />
+                                                        @sfrequency.NextScheduleDate.ToFormatDate()
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="#"
+                                                   class="modal-link">
+                                                    @if (item.StandardEP.Any())
+                                                    {
+                                                        if (item.StandardEP.Count() > 1)
+                                                        {
+                                                            <span>@($"{item.StandardEP.ToList()[0].StandardEP}{" + "}{item.StandardEP.Count() - 1}{" More"}")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                @item.StandardEP.FirstOrDefault().StandardEP
+                                                            </span>
+                                                        }
+                                                    }
+                                                </a><br />
+                                                <a href="#"
+                                                   class="modal-link">
+                                                    @if (item.Assets.Any())
+                                                    {
+                                                        if (item.Assets.Count() > 1)
+                                                        {
+                                                            <span>@($"{item.Assets.ToList()[0].Name}{" + "}{item.Assets.Count() - 1}{" More"}")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                @item.Assets.FirstOrDefault().Name
+                                                            </span>
+                                                        }
+                                                    }
+                                                </a>
+
+                                            </td>
+                                            <td>
+                                                @item.Description
+                                            </td>
+                                            <td>
+                                                @if (item.IsCustomDate)
+                                                {
+                                                    foreach (var sfrequency in item.ScheduleFrequency)
+                                                    {
+                                                        @*@HCF.Utility.ScheduleDateTime.Convertruletext(sfrequency.FrequencyId, item.StartDate, sfrequency.YearNo, sfrequency.MonthNo, sfrequency.WeekNo, sfrequency.WeekDays)*@
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" name="status" class="chkstatus" checked="@(item.IsActive?true:false)" rel="@item.ScheduleId" /><span></span>
+                                                @*<button type="button" id="assign"
+                                                            class="button1 addnew">
+                                                        Edit
+                                                    </button>*@
+                                            </td>
+                                            <td>
+                                                Assign
+                                                <button type="button" id="assign"
+                                                        class="button1"
+                                                        onclick="location.href ='@Url.Action("AssetsSchedule", "Schedule", new { scheduleId = item.ScheduleId })'">
+                                                    Assets
+                                                </button>&nbsp;&nbsp;
+                                                <button type="button" id="assign"
+                                                        class="button1"
+                                                        onclick="location.href ='@Url.Action("EPSchedule", "Schedule", new { scheduleId = item.ScheduleId })'">
+                                                    EPs
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade" id="addNewSchedule" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartialview">
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var chkstatus = $(".chkstatus");
+
+    $('body').on('click', '.addnew', function () {
+        openAddView(0);
+    });
+
+    var openAddView = function (scheduleId) {
+        var url = CRxUrls.Schedule_AddNewSchedule;
+        $.get(url + "?scheduleId=" + scheduleId, function (data) {
+            $('#addNewSchedule').modal('show');
+            $('#loadpartialview').html(data);
+            $('#loadpartialview').fadeIn('fast');
+        });
+    };
+
+
+    chkstatus.change(function (e) {
+        debugger;
+        var scheduleId = $(this).attr('rel');
+        var msg = "";
+        var isactive = false;
+        var cntrl = $(this);
+        if (cntrl.is(":checked")) {
+            msg = "Active.";
+            isactive = true;
+        } else { msg = "In-Active."; isactive = false; }
+        swal({
+            title: "Are you sure?",
+            text: "Make this Schedule " + msg,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No, cancel!",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    UpdateSchdule(scheduleId, isactive);
+                } else {
+                    cntrl.attr("checked", true);
+                }
+            });
+    });
+
+
+    function UpdateSchdule(scheduleId, isactive) {
+        $.ajax({
+            url: CRxUrls.Schedule_UpdateSchedule,
+            type: "POST",
+            data: { ScheduleId: scheduleId, IsActive: isactive },
+            dataType: 'json',
+            success: function (result) {
+                location.reload();
+                // console.log(result);
+            }
+        });
+    }
+
+</script>

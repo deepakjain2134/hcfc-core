@@ -1,0 +1,845 @@
+﻿@model HCF.BDO.EPSteps
+@{
+    ViewBag.Title = "Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Review
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-xs-3 col-left">
+            <div class="box box-primary assetsInspection" style="overflow:auto" id="goal_assetsInspection">
+                @*@AsyncLoader.Render("Goal", "AssetsInspection", "goal_assetsInspection", new
+                     {
+                    inspectionId = Model.InspectionId,
+                    epId = Model.EPDetailId,
+                    floorAssetId = Model.FloorAssetId
+                     })*@
+
+                @await Component.InvokeAsync("GoalAssetsInspection", new
+           {
+               inspectionId = Model.InspectionId,
+               epId = Model.EPDetailId,
+               floorAssetId = Model.FloorAssetId
+           })
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <div class="ep-mainContainer">
+
+                    <div class="row form-group" style="clear:both;">
+                        @if (Model.EPDetails != null)
+                        {
+                            <div class="col-md-6">
+
+                                @if (Model.CampusInspection.Count > 0 && Model.Campus.Count > 0 && Model.EPDetails.IsAssetsRequired == false && Model.EPDetails.IsDocRequired == false)
+                                {
+                                    var html = new System.Text.StringBuilder();
+
+                                    foreach (var i in Model.CampusInspection)
+                                    {
+                                        html.AppendLine($"<li><div class='ep-campusList'><span class='{commonModelFactory.GetInspectionStatus(i.SubStatus)}'></span><span>{i.Campus.FirstOrDefault(x => x.EPDetailId == i.EPDetailId && x.SiteId == i.SiteId).SiteName}</span></div></li>");
+
+                                    }
+
+                                    <a href="javascript:void(0);"
+                                       tabindex="0" data-trigger="focus"
+                                       class="@commonModelFactory.GetInspectionStatus(Model?.CampusStatus) descriptions" rel='popover'
+                                       data-placement='bottom'
+                                       data-html="true"
+                                       data-original-title='@Model.EPDetails.StandardEp'
+                                       data-content='@html.ToString()'></a>
+                                    <div class="epDetails">
+                                        <p>
+                                            @Model.EPDetails.StandardEp
+                                            <ep-risk-score risk-score="@Model.EPDetails.Scores.Name">
+                                            </ep-risk-score>
+                                        </p>
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    @*<span class="processType-Sprite @commonModelFactory.GetInspectionStatus(Model.EPDetails.Inspection?.SubStatus)"></span>*@
+                                    <div class="epDetails">
+                                        <span class="processType-Sprite @commonModelFactory.GetInspectionStatus(Model.EPDetails.Inspection?.SubStatus)"></span>
+                                        <sapn>@Model.EPDetails.StandardEp <span class="">@Model.EPDetails.Scores.Name</span></sapn>
+
+                                    </div>
+                                }
+
+                            </div>
+                            <div class="col-md-3">
+                                @if (Model.EPDetails != null && Model.EPDetails.IsAssetsRequired)
+                                {
+
+                                    <div class="input-group">
+                                        <a class="comm-bluebutton btnCompliancebylocation" id="btnCompliancebylocation" style="font-size: x-small;">Asset Compliance by Location</a>
+                                    </div>
+
+                                }
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" id="epSearchText" placeholder="Search.." name="search"
+                                           value="@Model.EPDetails.StandardEp">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" type="submit" id="epSearchbtn">
+                                            <i class="glyphicon glyphicon-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (Model.EPDetails != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-11">
+
+                                @await Component.InvokeAsync("EpDescription", new { epDetailId = Model.EPDetails.EPDetailId, maxLength = 0, epdetails = Model.EPDetails })
+
+                                @*@await Html.PartialAsync("_EpDescription", Model.EPDetails.Description, new ViewDataDictionary { { "minLength", "0" }, { "standardEp", @Model.EPDetails.StandardEp } })*@
+                            </div>
+                            @*<div class="ep-cols4 epDescription">
+                    @Model.EPDetails.Description
+
+                </div>*@
+
+                            <div class="col-md-1 text-right">
+                                <img src="@commonModelFactory.ReturnImagePath(Convert.ToInt32(Model.EPDetails.DocStatus), Model.EPDetails.IsDocRequired)"
+                                     title="@commonModelFactory.ReturnImageTooltip(Convert.ToInt32(Model.EPDetails.DocStatus), Model.EPDetails.IsDocRequired)"
+                                     alt="" />
+                            </div>
+                        </div>
+
+                    }
+
+                        <div class="crx-scrollBar" id="Divcampus">
+                            @*@await Html.PartialAsync("_InspectionCampus", Model)*@
+                            @await Component.InvokeAsync("GoalInspectionCampus", new HCF.Web.ViewModels.Goal.InspectionCampusViewModel()
+                             { Campus = Model.Campus, ShowAll = true })
+                        </div>
+                        <div class="" id="LastInspectionSummaryDiv">
+                            @await Component.InvokeAsync("ComplianceHistory", new
+                       {
+                           epdetailid = Model.EPDetailId,
+                           buildingid = 0,
+                           frequencyid = Model.EPDetails.EPFrequency.FirstOrDefault().FrequencyId,
+                           year = DateTime.Now.Year,
+                           month = DateTime.Now.Month
+                       })
+                        </div>
+
+                        @*@if (Model.LastInspectionSummary != null && Model.LastInspectionSummary.Count > 0)
+            {
+                <div class="" id="LastInspectionSummaryDiv">
+                    @await Html.PartialAsync("_LastInspectionSummary", Model.LastInspectionSummary)
+                </div>
+            }*@
+
+                        <input type="hidden" id="rbnUploadtype" name="rbnUploadtype" />
+
+                        <div class="row">
+                            <div class="col-md-12 epstatusCol-row">
+                                <div class="epstatusCol-4">
+                                    @if (Model.EPDetails.Inspection?.SubStatus == "PD" && Model.Status.HasValue)
+                                    {
+                                        if (Model.EPDetails.Inspection != null && Model.EPDetails.Inspection.DueDate.HasValue && Model.EPDetails.Inspection.DueDate != default(DateTime) && Model.EPDetails.InitialInspDate == null)
+                                        {
+                                            <p>
+                                                <label>Status:</label> Failed Needs Review  <br />(@Model.EPDetails.Inspection.DueDate.Value.ToFormatDate() Review Not Finished)
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            if (Model.EPDetails.IsInspectionDateFixed)
+                                            {
+
+                                                <p>
+                                                    <label>Status:</label> Failed Needs Review (@CommonUtility.GetScheduleFixedDate(Model.EPDetails.FrequencyId, Convert.ToDateTime(Model.EPDetails.InitialInspDate), 0).ToFormatDate() Review Not Finished)
+                                                </p>
+
+                                            }
+                                        }
+                                    }
+                                    else if (Model.EPDetails.Inspection?.SubStatus == "GP" && Model.Status.HasValue)
+                                    {
+                                        <p>
+                                            <label>Status:</label> Grace Period (@commonModelFactory.GetEpStatus(Model.Status.HasValue ? Model.Status.Value : -1))
+
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p>
+                                            <label>Status:</label> @commonModelFactory.GetEpStatus(Model.Status.HasValue ? Model.Status.Value : -1)
+
+                                        </p>
+
+                                    }
+
+
+
+                                </div>
+                                <div class="epstatusCol-4">
+                                    <p>
+                                        <label>EP Reviewed By:</label>
+                                        @if (Model.Inspection.Status == Convert.ToInt32(HCF.BDO.Enums.Status.In_Progress))
+                                        {
+                                            if (Model.LastInspection.TInspectionActivity != null && Model.LastInspection.TInspectionActivity.Count > 0 && Model.LastInspection.TInspectionActivity.FirstOrDefault().UserProfile != null)
+                                            {
+                                                if (Model.LastInspection.TInspectionActivity.FirstOrDefault().CreatedDate != null)
+                                                {
+                                                    <input type="text" hidden id="_inspectionDate" value="@(Model.LastInspection.TInspectionActivity.FirstOrDefault()?.CreatedDate.Value.ToClientTime().ToFormatDate())">
+                                                    <span>
+                                                        @($"{Model.LastInspection.TInspectionActivity.FirstOrDefault().UserProfile.FullName} {"on"} {Model.LastInspection.TInspectionActivity.FirstOrDefault()?.CreatedDate.Value.ToClientTime().ToFormatDate()}")
+                                                    </span>
+                                                    <a class="epview-btn" href="@Url.Action("EPActivityHistory", "Assets", new { InspectionId = Model.LastInspection.TInspectionActivity.FirstOrDefault().InspectionId, epId = Model.LastInspection.EPDetailId })">View Details</a>
+
+                                                }
+                                            }
+
+                                        }
+                                        else
+                                        {
+
+                                            if (Model.Inspection != null && Model.Inspection.UserProfile != null)
+                                            {
+                                                <input type="text" hidden id="_inspectionDate" value="@(Model.Inspection.LastUpdatedDate.ToClientTime().ToFormatDate())">
+                                                <span>
+                                                    @($"{Model.Inspection.UserProfile.FullName} {"on"} {Model.Inspection.LastUpdatedDate.ToClientTime().ToFormatDate()}")
+                                                </span>
+                                                <a class="epview-btn" href="@Url.Action("EPActivityHistory", "Assets", new { InspectionId = Model.Inspection.InspectionId, epId = Model.Inspection.EPDetailId })">View Details</a>
+
+
+                                            }
+                                            else
+                                            {
+                                                if (Model.TInspectionActivity != null && Model.TInspectionActivity.UserProfile != null)
+                                                {
+                                                    if (Model.TInspectionActivity.CreatedDate != null)
+                                                    {
+                                                        <input type="text" hidden id="_inspectionDate" value="@(Model.TInspectionActivity?.CreatedDate.Value.ToClientTime().ToFormatDate())">
+                                                        <span>
+                                                            @($"{Model.TInspectionActivity.UserProfile.FullName} {"on"} {Model.TInspectionActivity?.CreatedDate.Value.ToClientTime().ToFormatDate()}")
+                                                        </span>
+                                                        <a class="epview-btn" href="@Url.Action("EPActivityHistory", "Assets", new { InspectionId = Model.TInspectionActivity.InspectionId, epId = Model.Inspection.EPDetailId })">View Details</a>
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                    </p>
+                                </div>
+                                <div class="epstatusCol-4">
+                                    <p>
+                                        <label>Assigned To:</label>
+                                        <a href="@Url.Action("EpUserView", "Common", new { epDetailId = Model.EPDetailId, standardEP = Model.EPDetails.StandardEp })"
+                                           class="modal-link assign-ellip">
+                                            @{
+                                                var users = Model.EPDetails.EPUsers.Where(x => x.IsCRxUser == false).ToList();
+
+                                                var showCounts = 5;
+                                                var totalCount = users.Count;
+                                                var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+                                                if (totalCount > showCounts)
+                                                {
+                                                    <span>@($"{usersText} +  {totalCount - showCounts}")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>
+                                                        @usersText
+                                                    </span>
+                                                }
+                                            }
+                                        </a>
+
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>
+
+                                    <label>Next Review Due:</label>
+                                    @if (Model.EPDetails.Inspection != null && Model.EPDetails.Inspection.DueDate.HasValue && Model.EPDetails.Inspection.DueDate != default(DateTime) && Model.EPDetails.InitialInspDate == null)
+                                    {
+                                        <span>
+                                            @Model.EPDetails.Inspection.DueDate.Value.ToFormatDate()
+                                        </span>
+                                        if (Model.EPDetails.IsAssetsRequired == false && Model.EPDetails.IsDocRequired == false)
+                                        {
+                                            <span class="eprView epviewmain">(Based on EP Review Date)</span>
+
+                                            @*else
+                                {
+                                    <span class="eprView epviewmain" style="color:#b3b3b3;font-weight: 500;">(awaiting for completion of ep review)</span>
+                                }*@
+                                        }
+                                        if (Model.EPDetails.IsAssetsRequired && Model.EPDetails.IsDocRequired == false)
+                                        {
+                                            if (ViewBag.epType == 2)
+                                            {
+                                                <span class="eprView epviewmain">(Based on Asset Inspection Date)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="eprView epviewmain">(awaiting for Asset Inspection)</span>
+                                            }
+
+                                        }
+
+                                        if (Model.EPDetails.IsAssetsRequired && Model.EPDetails.IsDocRequired)
+                                        {
+                                            if (ViewBag.epType == 2)
+                                            {
+                                                <span class="eprView epviewmain">(Based on Asset Inspection Date)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="eprView epviewmain">(awaiting for Asset Inspection)</span>
+                                            }
+                                        }
+
+                                        if (Model.EPDetails.IsDocRequired && Model.EPDetails.IsAssetsRequired == false)
+                                        {
+
+                                            if (ViewBag.epType == 3)
+                                            {
+                                                <span class="eprView epviewmain">(Based on Doc Review Date)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="eprView epviewmain">(awaiting for doc upload)</span>
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        if (Model.EPDetails.IsInspectionDateFixed)
+                                        {
+                                            <span>
+                                                <i class="fa fa-lock"></i>
+                                                @CommonUtility.GetScheduleFixedDate(Model.EPDetails.EPFrequency.FirstOrDefault().FrequencyId, Convert.ToDateTime(Model.EPDetails.InitialInspDate), 0).ToFormatDate()
+                                            </span>
+                                            <span class="eprView epviewmain">(Based on Custom Scheduled Date)</span>
+                                        }
+                                    }
+                                </p>
+                            </div>
+                            <div class="col-md-12"><p><label>Review Comment:</label> @Model.InspectionComment</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                @await Html.PartialAsync("_InspectionDocs", Model.Inspection.InspectionDocs)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="button_DivEP">
+                                    <a class="comm-Backbutton" href="@Url.Action("ActivityDashboard", "Home", new { Isback = 1 })" style="float: right;">Back To Dashboard</a>
+                                    <a class="comm-bluebutton" href="@Url.Action("EpInspectionsHistory", "Goal", new { epId = Model.EPDetailId })" style="float: right;">History</a>
+
+                                    @if (Model.EPDetails.IsAssetsRequired)
+                                    {
+                                        <a class="comm-button"
+                                           href="@Url.Action("GenerateInspectionReport", "PDF", new {epdetailId = Model.EPDetailId,inspectionId=Model.Inspection.InspectionId})"
+                                           style="float: right;">Generate Report</a>
+                                    }
+                                    @if (Model.EPDetails.EpState == HCF.BDO.Enums.EpStateCode.ACTIV || Model.EPDetails.EpState == HCF.BDO.Enums.EpStateCode.TJCInActive)
+                                    {
+                                        if (Model.EPDetails.Inspection?.SubStatus == "IN")
+                                        {
+                                            <a class="comm-button" href="@Url.Action("EPstate", "Goal", new { epId = Model.EPDetailId })" style="float: right;">Resume</a>
+                                              @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                            {
+                                            <a class="comm-Cancelbutton undoReview" epId ="@Model.EPDetailId" inspectionId="@Model.Inspection.InspectionId"  activityId="@Model.TInspectionActivity.ActivityId"  style="float: right;">Undo Review</a>
+                                             }
+                                        }
+                                        else
+                                        {
+                                            <a class="comm-button" href="@Url.Action("EPstate", "Goal", new { epId = Model.EPDetailId })" style="float: right;">Review Now</a>
+
+                                        }
+
+                                        <a class="comm-button hide" id="btnAddDoc">Add Document</a>
+
+                                    }
+                                    else
+                                    {
+                                        <a class="comm-button disable" href="" style="float: right;">Review Now</a>
+                                        <a class="comm-button disable hide" id="btnAddDocdisable">Add Document</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="https://localhost:44325/dist/js/crx.js-window.async.js"></script>
+    <script>
+        var epcompliancetrigger =@ViewBag.triggerRequiredDoc;
+        var epId = '@Model.EPDetailId';
+        var InspectionId = '@Model.Inspection.InspectionId';
+        //var _epstatus = "ER";
+        $(document).ready(function () {
+
+
+           ;
+
+          // var urlAction = '@Url.Content("/GOal/AssetsInspection?epId="+Model?.EPDetailId+"&inspectionId="+ Model?.InspectionId + "&floorAssetId=" +Model?.FloorAssetId)';
+          //  console.log(urlAction);
+           // callGetAjax($('.assetsInspection'), urlAction);
+
+
+            showFrequencyUpdatePopUp();
+            showAssestsUpdatePopUp();
+
+            if (epcompliancetrigger== 1) {
+
+                $("#btnAddDoc").trigger('click');
+
+                    $(".radio1").addClass('disabled');
+
+
+
+                   // $(".confirm").trigger('click');
+
+
+
+            }
+            @*var _epstatus = "@Model.EPDetails.Inspection.SubStatus";
+            if (_epstatus == "NA" ||( _epstatus == "PD" && "@isAdditionalDocAllowed"=="true")) {
+                $("#btnAddDoc").removeClass("hide");
+            }*@
+        });
+
+
+        var showFrequencyUpdatePopUp = function() {
+            const canInspectEp = '@Model.EPDetails.CanInspect()';
+            //console.log(canInspectEp);
+            if (canInspectEp.toLowerCase() === "false") {
+                var pageName = getParameterByName('pagename');
+                var cancelRedirectUrl = (pageName == "cms") ? CRxUrls.CMSDashboard : CRxUrls.ActivityDashboard;//CRxUrls.ActivityDashboard;
+                //var confirmRedirectUrl = "";
+                var html = $.Constants.EP_Inspection_Ongoing_User;
+                showInforMsg("EP Review", html, "Back To dashboard", cancelRedirectUrl);
+            }
+
+
+    }
+        var showAssestsUpdatePopUp = function () {
+            const tsAssetEp = '@Convert.ToString(Model.IsAssetEP)';
+            const floorAssetsCount = '@Model.EPDetails.Assets.Count';
+            //console.log(tsAssetEp, floorAssetsCount);
+            
+            if (tsAssetEp.toLowerCase() === "true" && floorAssetsCount === "0") {
+                var pageName = getParameterByName('pagename');
+                var cancelRedirectUrl = (pageName == "cms") ? CRxUrls.CMSDashboard : CRxUrls.ActivityDashboard; //CRxUrls.ActivityDashboard;
+                var html = $.Constants.EP_Inspection_Attach_Assets;
+                showInforMsg("EP Review", html, "Back To dashboard", cancelRedirectUrl);
+            }
+        }
+
+
+        var btnAddDoc = $("#btnAddDoc");
+        var docUploadUrl = '@Url.Action("EPDocs", "Goal")?epId=' + epId + '&InspectionId=' + InspectionId
+
+        btnAddDoc.click(function() {
+            @if (Model.EPDetails.IsDocRequired)
+            {
+                @:confirmFilePopUp();
+            }
+            else
+            {
+                @:loadFilePopup();
+            }
+        });
+
+
+        $(".delete").click(function() {
+
+            var ctrName = $(this);
+            var activityId = ctrName.attr("activityId");
+
+            swal({
+                    html: true,
+                    title: "Delete Document",
+                    text: 'Are you sure to delete this file?',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function (isConfirm) {
+                    
+
+                    if (isConfirm) {
+                        $.ajax({
+                            url: '@Url.Action("RemoveEpDoc", "Goal")' ,
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { activityId: activityId,  __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+                            success: function(data) {
+                                ctrName.closest("tr").remove();
+                                $('li[activityid="' + activityId + '"]').remove();
+                                swalalert("File has been successfully deleted.");
+                                hideTable();
+                            }
+                        });
+                    }
+                });
+        });
+
+        var hideTable = function() {
+            if ($('#miscDocumentsTbl > tbody > tr').length === 0) {
+                $('#miscDocumentsTbl').hide();
+            }
+            if ($('#requiredDocTbl > tbody > tr').length === 0) {
+                $('#requiredDocTbl').hide();
+            }
+        }
+
+        var loadFilePopup = function (uploadDocType) {
+            if (uploadDocType === "2") {
+                LoadRecentEpFiles();
+            } else {
+                LoadRecentFiles();
+            }
+        };
+
+
+        function LoadRecentEpFiles() {
+            var modelContainer = $("#modal-container");
+            modelContainer.empty();
+            const recentFiles = CRxUrls.Goal_EpDocHistory + "?epId=" + epId;
+            $.get(recentFiles,
+                function(data) {
+                    modelContainer.html('');
+                    modelContainer.html(data);
+                    modelContainer.fadeIn('fast');
+                    modelContainer.modal('show');
+                });
+        }
+
+
+        var confirmFilePopUp = function() {
+            swal({
+                    html: true,
+                    title: "Add Document",
+                    text:
+                        '<div class="container1 epssweetpopup"> <div class="radio1">  <input class="radio" id="radio-1" name="doctyperadio" type="radio" checked value="1">' +
+                            '<label for="radio-1" class="radio-label">Required document <br />(@Model.DocName)</label>' +
+                            '</div> ' +
+                            '<div class= "radio1" > ' +
+                            '<input id="radio-3" class="radio" name="doctyperadio" type="radio" value="2"> ' +
+                            '<label for= "radio-3" class= "radio-label">Re-use previously reviewed document</label> ' +
+                            '</div>' +
+                            '<div class= "radio1" > ' +
+                            '<input id="radio-2" class="radio" name="doctyperadio" type="radio" value="0"> ' +
+                            '<label for= "radio-2" class= "radio-label"> Misc. Document</label> ' +
+                            '</div>' +
+
+                            ' </div>',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                function(isConfirm) {
+                    if (isConfirm) {
+                        
+                        const uploadDocType = $('input[name=doctyperadio]:checked').val();
+                        $("#rbnUploadtype").val(uploadDocType);
+                        @*if (uploadDocType != "0" && '@Model.EpTransStatus' == "C") {
+                            showFileUploadPopUp(uploadDocType);
+                        } else {*@
+                            swal.close();
+                            loadFilePopup(uploadDocType);
+                        //}
+                    }
+                });
+        }
+
+        var showFileUploadPopUp = function(uploadDocType) {
+            var dueDate =
+                '@((Model.Inspection != null && Model.Inspection.DueDate.HasValue) ? Model.Inspection.DueDate.Value.ToClientTime().ToFormatDate() : "") ';
+            if (dueDate) {
+                swal({
+                        html: true,
+                        title: "Upload Document",
+                        text: '<b>EP is in Compliant Status</b>.<br/> Next Review is due on ' +
+                            dueDate +
+                            '. <br/><br/> If you upload a Required Document, EP status will change to in progress and EP review will be required.',
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Continue",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            loadFilePopup(uploadDocType);
+                        }
+                    });
+            }
+        }
+
+        function fileUploadSuccess(tFiles, selectedFiles) {
+            console.log(tFiles, selectedFiles);
+            var uploadDocType = $("#rbnUploadtype").val();
+            if (uploadDocType === "1" || uploadDocType === "2") {
+                localStorage.setItem('epDocUploadFiles', JSON.stringify(selectedFiles));
+                window.location.href = docUploadUrl;
+            } else if (uploadDocType === "3") {
+                var IsPreviousCycle = $("#IsPreviousCycle").val();
+                var PreviousCycleInspectionId = $("#PreviousCycleInspectionId").val();
+                AddMiscEPDocsPreviousCycle(selectedFiles, '@Model.EPDetailId', '108', IsPreviousCycle, PreviousCycleInspectionId);
+            }
+            else {
+                 AddMiscEPDocs(selectedFiles, '@Model.EPDetailId', '108');
+            }
+        }
+
+
+
+
+
+        var AddMiscEPDocs = function (files, epId, docTypeId) {
+            
+            var fileswithcomma = files.join(",");
+            $.ajax({
+                url: '@Url.Action("AddMiscEPDocuments", "Goal")',
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    files: fileswithcomma, epId: epId, docTypeId: docTypeId},
+                success: function(data) {
+                    if (data.Result) {
+                        swalalert("File has been uploaded successfully.");
+                        location.reload(true);
+                    }
+                }
+            });
+        };
+
+        var AddMiscEPDocsPreviousCycle = function (files, epId, docTypeId,IsPreviousCycle,PreviousCycleInspectionId) {
+            
+            var fileswithcomma = files.join(",");
+            $.ajax({
+                url: '@Url.Action("AddMiscEPDocuments", "Goal")',
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    files: fileswithcomma, epId: epId, docTypeId: docTypeId, IsPreviousCycle: IsPreviousCycle, PreviousCycleInspectionId:PreviousCycleInspectionId},
+                success: function(data) {
+                    if (data.Result) {
+                        swalalert("File has been uploaded successfully.");
+                        location.reload(true);
+                    }
+                }
+            });
+        };
+
+        var popOverSettings = {
+            placement: 'bottom'
+
+        }
+        $('body').popover(popOverSettings);
+
+
+        @*var loadYearData = function (Year) {
+            
+          $.ajax({
+                url: '@Url.Action("LastInspectionSummary", "Goal")',
+               type: "GET",
+               // dataType: "JSON",F
+              contentType: "application/json; charset=utf-8",
+                data: {
+                    year: Year, userId: 0, epId: epId},
+              success: function (data)
+              {
+                  console.log(data);
+                    if (data) {
+
+                        $('#LastInspectionSummaryDiv').html(data);
+                        $('#LastInspectionSummaryDiv').fadeIn('fast');
+                        $("#Activeyear").val(Year);
+                        $("#spnactiveyear").text($("#Activeyear").val());
+                    }
+                }
+            });
+        };*@
+
+
+        var loadYearData = function (Year) {
+            
+            $.ajax({
+                url: '@Url.Action("LastInspectionSummary", "Goal")',
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    year: Year, frequencyid: '@Model.EPDetails.EPFrequency.FirstOrDefault().FrequencyId', epId: epId
+                },
+                success: function (data) {
+                    //console.log(data);
+                    if (data) {
+                        $('#LastInspectionSummaryDiv').html(data);
+                        $('#LastInspectionSummaryDiv').fadeIn('fast');
+                        $("#Activeyear").val(Year);
+                        $("#spnactiveyear").text($("#Activeyear").val());
+                    }
+                }
+            });
+        };
+
+        $("#epSearchText").keypress(function (e) {
+            if (e.which == 13) {
+                var epSearchText = $("#epSearchText").val();
+
+            $.ajax({
+                url: '@Url.Action("EpSearchbyEpNumber", "Goal")',
+                type: "GET",
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    epSearchText: epSearchText, userId: 0
+                },
+                success: function (data) {
+                    
+                    console.log(data);
+                    if (data["EPDetailId"] > 0) {
+                        var epid = data["EPDetailId"];
+                        window.location.href = "/Goal/EpInspections?epId=" + epid;
+                    }
+                    else {
+                        swalalert("Please Enter Complete  or Correct Ep Number ");
+                    }
+                }
+            });
+            }
+        });
+        $("#epSearchbtn").click(function () {
+
+            var epSearchText = $("#epSearchText").val();
+
+            $.ajax({
+                url: '@Url.Action("EpSearchbyEpNumber", "Goal")',
+                type: "GET",
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                data: {
+                    epSearchText: epSearchText, userId: 0
+                },
+                success: function (data) {
+                    
+                    console.log(data);
+                    if (data["EPDetailId"] > 0) {
+                        var epid = data["EPDetailId"];
+                        window.location.href = "/Goal/EpInspections?epId=" + epid;
+                    }
+                    else {
+                        swalalert("Please Enter Complete  or Correct Ep Number ");
+                    }
+                }
+            });
+
+        });
+
+
+        $(".btnCompliancebylocation").click(function () {
+            var assetId = $("#AssetId").val();
+            //alert(assetId);
+            window.location.href = CRxUrls.Reports_ComplianceAssetsTrackingReports + "?assetId=" + assetId;
+        });
+         $(".undoReview").click(function () {
+                var ctrName = $(this);
+                var epId = ctrName.attr('epId');
+                var inspectionId = ctrName.attr('inspectionId');
+                var activityId = ctrName.attr('activityId');
+                swal({
+                    html: true,
+                    title:"",
+                    text: 'Are you sure you want to cancel this EP review?',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Cancel Review",
+                    cancelButtonText: "Back",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                    function (isConfirm) {
+                        
+
+                        if (isConfirm) {
+                            $.ajax({
+                                url: '@Url.Action("UndoInspection", "Inspection")',
+                                type: "POST",
+                                dataType: "JSON",
+                                data: { epId: epId, inspectionId: inspectionId, activityId: activityId, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+                                success: function (data) {
+                               
+                                    swalalert(data.Message);
+                                    location.reload(true);
+
+                                }
+                            });
+                        }
+                    });
+            })
+
+
+
+
+    </script>
+    <script>
+        $(".ePDescriptions").shorten({
+            moreText: 'read more',
+            showChars: 277,
+            lessText: 'read less'
+        });
+        $(".descriptions").popover({ trigger: "manual", html: true, animation: false })
+            .on("mouseenter", function () {
+                var _this = this;
+                $(this).popover("show");
+                $(".popover").on("mouseleave", function () {
+                    $(_this).popover('hide');
+                });
+            }).on("mouseleave", function () {
+                var _this = this;
+                setTimeout(function () {
+                    if (!$(".popover:hover").length) {
+                        $(_this).popover("hide");
+                    }
+                }, 50);
+            });
+    </script>
+
+}

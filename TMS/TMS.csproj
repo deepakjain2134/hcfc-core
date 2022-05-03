@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Configurations>Debug;Release;Staging</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="HolyName\**" />
+    <Compile Remove="NBIH\New folder\**" />
+    <EmbeddedResource Remove="HolyName\**" />
+    <EmbeddedResource Remove="NBIH\New folder\**" />
+    <None Remove="HolyName\**" />
+    <None Remove="NBIH\New folder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HCF.BAL\HCF.BAL.csproj" />
+    <ProjectReference Include="..\HCF.BDO\HCF.BDO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceModel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+</Project>

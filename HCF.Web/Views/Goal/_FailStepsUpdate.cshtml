@@ -1,0 +1,404 @@
+﻿@{
+    Layout = "";
+}
+@model  List<HCF.BDO.EPSteps>
+
+<div class="row">
+    <div class="col-md-12">
+        <label>
+            Please review and mark Compliant If deficiencies are corrected at this time for this asset. Once all deficiencies are corrected and marked compliant on this
+            page for all assets involved, this ILSM incident will be marked complete.
+        </label>
+    </div>
+
+    <div class="col-md-12">
+        @using (Html.BeginForm("UpdateInspection", "Goal", FormMethod.Post, new { id = "epStepsform" }))
+        {
+            @Html.AntiForgeryToken()
+            @if(Model != null && Model.Count>0) { 
+           
+            int frequencyId = 0;//Convert.ToInt32(TempData["frequencyId"]);
+            <input type="hidden" value="@ViewBag.TilsmId" name="TilsmId" id="TilsmId" />
+            <input type="hidden" value="@Model.FirstOrDefault()?.ActivityId" id="ActivityId" name="ActivityId" />
+            <input type="hidden" value="@Model.FirstOrDefault()?.ActivityType" id="activityType" name="activityType" />
+            <input type="hidden" value="@frequencyId" id="frequencyId" name="frequencyId" />
+            <table border="0" cellspacing="0" cellpadding="0" class="table asset_table">
+                <tbody>
+                    <tr>
+                        @if (Model.FirstOrDefault().TFloorAssets != null)
+                        {
+                            if (Model.FirstOrDefault().FloorAssetId.HasValue)
+                            {
+                                <th align="left"><label>Asset : @Model.FirstOrDefault().TFloorAssets.Name </label></th>
+                                <th align="left">
+                                    <label> @Localizer["AssetNo"]: @Model.FirstOrDefault().TFloorAssets.AssetNo </label>
+                                </th>
+                                <th style="display:none">
+                                    <input type="hidden" value="@Model.FirstOrDefault().TFloorAssets.TmsReference" id="TmsReference" />
+                                </th>
+                            }
+                        }
+                        <th style="text-align:right;">
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+            <input type="hidden" value="@Model.FirstOrDefault().TInspectionActivity.OpenWOCount" id="woOrderCount" />
+            <input type="hidden" value="@Model.FirstOrDefault().TInspectionActivity.IsWorkOrder" id="IsWorkOrder" />
+
+            @Html.HiddenFor(m => m.FirstOrDefault().FloorAssetId)
+            @Html.HiddenFor(m => Model.FirstOrDefault().InspectionId)
+            @Html.HiddenFor(m => Model.FirstOrDefault().InspectionGroupId)
+            @Html.HiddenFor(m => Model.FirstOrDefault().EPDetailId)
+            @Html.HiddenFor(m => Model.FirstOrDefault().Status)
+            <input type="hidden" id="hdnsubmitButton" name="btnSubmit" />
+            <input type="hidden" name="PageName" id="hdnPageName" />
+
+            if (Model.SingleOrDefault().MainGoal.Count > 0)
+            {
+                if (Model.SingleOrDefault().IsInspReady == 1)
+                {
+                    if (Model.SingleOrDefault().MainGoal.Any(x => x.Steps.Any(y => y.StepType == 1)))
+                    {
+                        <input type="button" value="" class="allcompliantFailSteps" />
+                    }
+                }
+            }
+            for (int i = 0; i < Model.FirstOrDefault().MainGoal.Count; i++)
+            {
+                int? floorAssetId = null;
+                if (Model.FirstOrDefault().TFloorAssets != null)
+                {
+                    floorAssetId = Model.FirstOrDefault().TFloorAssets.FloorAssetsId;
+                }
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr class="editor-field">
+
+                        <td colspan="4">
+                            @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].MainGoalId)
+                            @Html.ValidationMessageFor(m => Model.FirstOrDefault().MainGoal[i].MainGoalId)
+                            <strong>@Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Goal)</strong>
+                        </td>
+
+                    </tr>
+                    @for (int j = 0; j < Model.FirstOrDefault().MainGoal[i].Steps.Count(); j++)
+                    {
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Status)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].IsRA)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].StepType)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].RAScore)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Comments)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FileContent)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FileName)
+                        @Html.HiddenFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].FilePath)
+                        <tr class="@(Model.SingleOrDefault().MainGoal[i].Steps[j].IsRA ? "editor-field rastep" : "editor-field ")">
+
+                            <td>
+                                @if (Model.SingleOrDefault().IsInspReady == 1)
+                                {
+                                    <input id="InsFailSteps"
+                                           class="ins_check3_btn"
+                                           type="button"
+                                           onclick="tristate1(this)"
+                                           value="@Model.FirstOrDefault().MainGoal[i].Steps[j].Status"
+                                           tempname='MainGoal[@i].Steps[@j].Status' />
+                                }
+                                else
+                                {
+                                    <input id="InsFailSteps"
+                                           class="ins_check3_btn"
+                                           type="button"
+                                           onclick="tristate1(this)"
+                                           value="@Model.FirstOrDefault().MainGoal[i].Steps[j].Status"
+                                           tempname='MainGoal[@i].Steps[@j].Status'
+                                           disabled />
+                                }
+                            </td>
+                            <td width="62%">
+                                @Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].Step)
+                            </td>
+                            <td width="12%">
+                                @if (Model.FirstOrDefault().MainGoal[i].Steps[j].IsRA)
+                                {
+                                    <div class="raScore">
+                                        Risk
+                                        @*RAScore: @Html.DisplayFor(m => Model.FirstOrDefault().MainGoal[i].Steps[j].RAScore)*@
+                                    </div>
+                                }
+                            </td>
+                            <td width="14%">
+                                @if (Model.SingleOrDefault().IsInspReady == 1)
+                                {
+                                    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" tempname='MainGoal[@i].Steps[@j].Comments' data-toggle="modal" data-target="#commentModal" class="@(string.IsNullOrEmpty(Model.SingleOrDefault().MainGoal[i].Steps[j].Comments) ? "commentIcon" : "commentIcon text ")" />
+                                    <div class="img_file_upload">
+                                        <input name="file_Uploader" type="file" 
+                                        onchange="InsUploadfile(this, @Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId,'C',@Model.FirstOrDefault().MainGoal[i].Steps[j].Status)" 
+                                        tempname='MainGoal[@i].Steps[@j].FileContent' 
+                                        filename="MainGoal[@i].Steps[@j].FileName" 
+                                        filepath="MainGoal[@i].Steps[@j].FilePath" />
+                                    </div>
+                                    <img class="@(Model.SingleOrDefault().MainGoal[i].Steps[j].FilePath != string.Empty ? "img_prev_upload" : "img_prev")"
+                                         id="imagePreview_@Model.FirstOrDefault().MainGoal[i].Steps[j].StepsId"
+                                         src="@commonModelFactory.FilePath(Model.FirstOrDefault().MainGoal[i].Steps[j].FilePath)">
+                                }
+                                else
+                                {
+                                    <img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />
+                                    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float: right; margin-right: 5px;" class="commentIcon disable" />
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+
+            <br>
+            <div class="text-right button_Div">
+                @if (Model.FirstOrDefault().ActivityStatus != 1)
+                {
+                    <input type="button" id="submitFailButton" name="btnSubmit" value="Save" class="btn comm-button" />
+                }
+            </div>
+                }
+            }
+   
+    </div>
+
+    <div class="modal fade" id="commentModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Comment</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" value="" id="setpId" />
+                    <textarea name="text" cols="40" rows="5" class="form-control" id="Commenttxt"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="comm-button" data-dismiss="modal" id="saveComment">Save</button>
+                    <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="dialog-confirm">
+        <label id="msg"></label>
+    </div>
+</div>
+<script>
+    $(".MarkDeficiency").hide();
+    $("#hdnPageName").val(window.location.href);
+
+    function tristate1(control) {
+        tristate(control, '-1', '1', '0');
+    }
+
+    function tristate(control, value1, value2, value3) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value3;
+                break;
+            case value3:
+                control.value = value1;
+                break;
+        }
+
+        var values = [];
+        $(".ins_check3_btn").each(function () {
+            values.push($(this).val());
+        });
+        var found_falis = $.grep(values, function (v) {
+            return v === "-1" || v === "0";
+        });
+        if (found_falis.length === 0)
+            $(".allcompliantFailSteps").addClass("disabled");
+        else
+            $(".allcompliantFailSteps").removeClass("disabled");
+
+
+        SetCheckValue(control);
+    }
+
+    function SetCheckValue(control) {
+        var controlId = $(control).attr("tempName");
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+        if ($(control).val() == 0) {
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").removeClass("hide");
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").addClass("show");
+        } else {
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").removeClass("show");
+            $("[tempname='" + controlId + "']").parent().parent().find("div.MarkDeficiency").addClass("hide");
+        }
+    }
+
+    function ShowDefecienciesAlertMsg() {
+        disablecontrol();
+        var confirmRedirectUrl = '@Url.RouteUrl("deficiencies")';
+        var tilsmId = $("#tilsmId").val();
+        var urlAction = '@Url.Action("GetIlsmInspection", "Goal")';
+        var cancelRedirectUrl = urlAction + "?tilsmId=" + tilsmId;
+        redirecttodefeciencies(confirmRedirectUrl, cancelRedirectUrl);
+    }
+
+    function ShowWorkOrderPopUp() {
+        disablecontrol();
+        var _floorAssetId = $("#FloorAssetId").val();
+        var _epDetailId = $("#EPDetailId").val();
+        var tilsmId = $("#tilsmId").val();
+
+        var urlAction = '@Url.Action("Index", "WorkOrder")';
+        var isConfirmUrl = urlAction + "?page=1&floorAssetId=" + _floorAssetId + "&EPdetailId=" + _epDetailId;
+
+        var cancelurl = '@Url.Action("GetIlsmInspection", "Goal")';
+        var cancelRedirectUrl = cancelurl + "?tilsmId=" + tilsmId;
+        redirecttoWOassets(isConfirmUrl, cancelRedirectUrl);
+    }
+
+
+    function disablecontrol() {
+        $(".ins_check3_btn").addClass("disable");
+        $("#submitFailButton").addClass("disable");
+    }
+
+    $(document).ready(function () {
+
+        var openWoCOunt = $("#woOrderCount").val();
+        var IsWorkOrder = $("#IsWorkOrder").val();
+        var tilsmId = $("#tilsmId").val();
+
+        if (IsWorkOrder == 0 || IsWorkOrder == 2) {
+            ShowDefecienciesAlertMsg();
+            return false;
+        }
+
+        if (openWoCOunt > 0) {
+            ShowWorkOrderPopUp();
+            return false;
+        }
+        $(document).on("click", ".commentIcon", function () {
+            var control = $(this).attr("tempName");
+            var commnet = $("input[name='" + control + "'][type=hidden]").val();
+            $("#Commenttxt").val(commnet);
+            $("#setpId").val(control);
+        });
+
+        $(document).on("click", "#saveComment", function () {
+            var control = $("#setpId").val();
+            var text = $("#Commenttxt").val();
+            // console.log(control);
+            $("input[name='" + control + "'][type=hidden]").val(text);
+            if (text.trim().length > 0) {
+                $("img[tempname='" + control + "']").addClass("text");
+            } else
+                $("img[tempname='" + control + "']").removeClass("text");
+        });
+
+
+        $('#submitFailButton').click(function () {
+
+            // redirect to deficiencies page if there is any deficiency
+            if (IsWorkOrder == 0 || IsWorkOrder == 2) {
+                ShowDefecienciesAlertMsg()
+                return false;
+            }
+
+            // redirect to wokrorder page
+            if (openWoCOunt > 0) {
+                ShowWorkOrderPopUp();
+                return false;
+            }
+
+            var ilsmStatus = $("#ilsmStatus").val();
+            //if (ilsmStatus == 0) {
+            //    swalalert("First complete ep level steps.");
+            //    return;
+            //}
+
+            var passLenth = $('input:button[id^="InsFailSteps"][value="1"]').length;
+            var totalCheckPoint = $('input:button[id^="InsFailSteps"]').length;
+            if (passLenth != totalCheckPoint) {
+                markallcompliantmsg();
+                return;
+            }
+            else {
+                UpdateFailSteps();
+            }
+        });
+
+        function UpdateFailSteps() {
+            var _floorAssetId = $("#FloorAssetId").val();
+            var _inspectionId = $("#InspectionId").val();
+            var _epDetailId = $("#EPDetailId").val();
+            $.ajax({
+                url: '@Url.Action("UpdateInspection", "Goal")',
+                type: "POST",
+                dataType: "JSON",
+                data: $("#epStepsform").serialize(),
+                success: function (data) {
+                    if (data.Result) {
+                        if (data.Messgae == "ILSM is now closed") {
+                            swalalert(data.Messgae);
+                            debugger;
+                            $.ajax({
+                                url: '@Url.Action("SaveTilsmReport", "Goal")',
+                                type: "POST",
+                                data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), tilsmId: $("#TilsmId").val() }, //data,
+                                dataType: 'json',
+                                success: function (data) {
+                                    //var urlAction = '@Url.Action("ilsmview", "Goal")';
+                                    window.location.href = CRxUrls.Goal_ilsmview;
+                                    return false;
+                                }
+                            });
+                        } else {
+                            var tilsmId = $("#tilsmId").val();
+                            var urlAction = '@Url.Action("GetIlsmInspection", "Goal")';
+                            window.location.href = urlAction + "?tilsmId=" + tilsmId + "&isNext=1";
+                            return false;
+                        }
+                    }
+                }
+            });
+        }
+
+        $(".allcompliantFailSteps").click(function () {
+            $(".allcompliantFailSteps").addClass("disabled");
+            $(".ins_check3_btn").each(function () {
+                var control = $(this);
+                $(this).val(1);
+                var controlId = $(this).attr("tempName");
+                $("input[name='" + controlId + "'][type=hidden]").val(1);
+
+            });
+            $(".MarkDeficiency").removeClass("hide").removeClass("show").addClass("hide");
+        });
+
+    });
+
+    
+
+    function GetSelectedItem(rdbtnctrl, stepsId) {
+        var Name = $(rdbtnctrl).attr("name");
+        var Val = $(rdbtnctrl).val();
+        if (Val == "False") {
+            $("#Drtxt_" + stepsId).show();
+            $("#Drtxt_" + stepsId).css("display", "inline-block");
+        } else {
+            $("#Drtxt_" + stepsId).hide();
+            $("#Drtxt_" + stepsId).removeClass("TimeToresolve");
+        }
+
+    }
+
+    $("#btnBack").addClass("btnback");
+    $("#btnNext").addClass("btnnext");
+
+
+</script>

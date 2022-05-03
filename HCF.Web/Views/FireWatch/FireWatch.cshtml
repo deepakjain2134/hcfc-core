@@ -1,0 +1,119 @@
+﻿@{
+    ViewBag.Title = "Fire Watch";
+}
+
+@section pageHeader{
+
+    <section class="content-header">
+        <h1>
+            Fire Watch Log
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+
+
+                <div class="row tablelist-topform">
+                    <div class="col-md-8 form-inline">
+                        <div class="form-group">
+                            <label>Date:</label>
+                            <input type="text" name="date" class="datepicker form-control" id="watcherdate" style="min-width: 240px;" readonly="readonly" />
+                            <input type="hidden" id="mode" value="@ViewBag.Mode" />
+                        </div>
+                        <div class="form-group">
+                            <label>Building Name:</label>
+                            @*@Html.BuildingDropDownList("BuildingId", 0, "Select Building", new { @class = "form-control", required = "required" })*@
+
+                            <buildingdropdownlist firsttext="All Building"
+                                                  required="required"
+                                                  class="form-control"
+                                                  selectedvalue="0"
+                                                  name="BuildingId">
+                            </buildingdropdownlist>
+                        </div>
+                    </div>
+                    <div class="col-md-4 form-group text-right">
+                        <strong>History: </strong> <img onclick="location.href ='@Url.Action("FireWatchHistory", "FireWatch")'"
+                                                        src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="History" />
+                    </div>
+                </div>
+
+
+
+                <div class="row" id="loadpartial">
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+
+    var minDate = -1;
+        var hasFirewatch = '@commonModelFactory.IsFireWatchSupervisorUser()';
+        //var hasFirewatch = userTypeIds.indexOf('7') != -1;
+        if (hasFirewatch.toLowerCase() == "true") {
+            minDate = -730;
+        }
+
+
+    $('.datepicker').datepicker({
+        showOn: "both",
+        buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+        buttonImageOnly: true,
+        minDate: minDate,
+        maxDate: new Date(),
+        beforeShow: changeYearButtons,
+        onChangeMonthYear: changeYearButtons,
+        dateFormat: $.CRx_DateFormat
+    }).datepicker('setDate', 'today');
+
+
+    $(document).ready(function () {
+        var mode = $('#mode').val();
+        debugger;
+        if (mode == "Edit") {
+            $('.alert').hide();
+            $('.alert-success').hide();
+        }
+        loaddata();
+    });
+
+        $('#watcherdate').change(function () {
+            loaddata();
+        });
+
+        $(document).on("change", "#BuildingId", function () {
+            loaddata();
+        });
+
+
+
+
+    function loaddata() {
+       //debugger
+        var date = $("#watcherdate").val();
+        var buildingID = $("#BuildingId").val();
+        var url = '@Url.Action("LogFireWatch", "FireWatch")'
+        $.ajax({
+            url: url + '?selecteddate=' + date + '&buildingID=' + buildingID,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+            }
+        });
+    }
+
+
+
+    </script>
+}

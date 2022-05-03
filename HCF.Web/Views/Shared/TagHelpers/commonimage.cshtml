@@ -1,0 +1,6 @@
+﻿@model ImageModelTagHelper
+
+@if (Model != null && Model.Url != null)
+{
+    <img src="@Model.Url.AbsoluteUri" alt="@Model.Title" title="@Model.Title" class="@Model.ClassName" />
+}

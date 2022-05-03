@@ -1,0 +1,78 @@
+﻿@model HCF.BDO.TRounds
+@{
+    Layout = null;
+}
+<div class="adduserlistBox">
+    <div class="roundpanel">
+        <h4 class="roundsHeading"> @Model.RoundName.CastToNA("NA")</h4>
+        <div class="roundtypeicon">
+            <img src="@((Model.RoundType == 1)?"/dist/Images/Icons/IndividualRounds.png":"/dist/Images/Icons/Grouprounds.png")" />
+        </div>
+        <h4 class="roundsHeading"> @Model.RoundDate.ToFormatDate()</h4>
+    </div>
+    @Html.HiddenFor(x => x.TRoundId)
+    <div id="insp_round_locations">
+        @await Html.PartialAsync("_RoundLocations", Model.Locations)
+    </div>
+    <div id="insp_round_users">
+        @await Html.PartialAsync("_RoundInspectors", Model.TRoundUsers)
+    </div>
+    @if (Model.RoundType == 2)
+    {
+        <div id="insp_Add_categories">
+          @*  @await Component.InvokeAsync("RoundCategoriesAddRemove",new { floorId=Model.DefaultFloorId, troundId=Model.TRoundId, id=Convert.ToString(Model.RoundGroup.RoundGroupId)})*@
+        </div>
+    }
+    <div id="insp_round_issues">
+        @await Html.PartialAsync("_RoundIssues", Model.RoundWorkOrders)
+    </div>
+    <div id="insp_round_issues">
+        @await Html.PartialAsync("_RoundILSM", Model.Ilsms)
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+    @foreach (var item in Model.Inspections.Where(x => x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId).ToList())
+    {
+        @:BindFloorStatus('@item.FloorId', '@item.Status');
+    }
+    });
+
+    function BindFloorStatus(floorId, status) {
+        console.log(floorId, status);
+        if (parseInt(status) === 1) {
+            $('li.floor[floorid=' + floorId + ']').find(".floor_status").html('Compliant').addClass('pass');
+        } else if (parseInt(status) === 0) {
+            $('li.floor[floorid=' + floorId + ']').find(".floor_status").html('Non Compliant').addClass('fail');
+        }else {
+            $('li.floor[floorid=' + floorId + ']').find(".floor_status").html('In Progress').addClass('inprogress');
+        }
+    }
+</script>
+<style>
+    .roundpanel {
+        position: relative;
+    }
+
+    .roundtypeicon {
+        display: inline-block;
+        position: absolute;
+        top: 6px;
+        right: 10px;
+    }
+
+        .roundtypeicon img {
+            max-width: 20px;
+        }
+
+.floor_status{
+    float: right;
+    width: 35%;
+    text-align: center;
+}
+
+/*.asset_list_view ul li ul li{
+        border: 1px solid gray;
+}*/
+
+</style>

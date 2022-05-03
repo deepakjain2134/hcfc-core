@@ -1,0 +1,221 @@
+﻿@model List<HCF.BDO.UserLogin>
+@{
+    ViewBag.Title = "Login History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Login Activity
+        </h1>
+    </section>
+}
+@*<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 col-xs-12">
+            <div class="box box-primary">
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <table id="myTablelogin" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Access Type
+                                    </th>
+                                    <th>
+                                        IP Address
+                                    </th>
+                                    <th>
+                                        Login Date/Time
+                                        (Displayed in your time zone)
+                                    </th>
+                                    <th>
+                                        Last Activity Date
+                                    </th>
+                                    <th>
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Where(x => !string.IsNullOrEmpty(x.ip) && x.LogOnDate > DateTime.Now.AddMonths(-2) && !string.IsNullOrEmpty(x.RefreshToken.ToString())))
+                                {
+                                    <tr class="@((HCF.Web.Base.UserSession.LogOnToken !=null && item.RefreshToken.Value == Guid.Parse(HCF.Web.Base.UserSession.LogOnToken)) ? "current" : "")">
+                                        <td>
+                                            @if (item.DeviceTypeId == 1)
+                                            {
+                                                <span> Authorized Application (Android)</span>
+                                            }
+                                            else if (item.DeviceTypeId == 2)
+                                            {
+                                                <span> Authorized Application (iOS)</span>
+                                            }
+                                            else if (item.DeviceTypeId == 3)
+                                            {
+                                                <p>@string.Format("{0} {1} {2}", item.OsName, item.DeviceType, item.BrowserName)</p>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.ip))
+                                            {
+                                                <span>@($"{item.city}{(!String.IsNullOrEmpty(item.country_name) ? " (" + item.country_name + ") " : "")} ({item.ip})")</span>
+                                            }
+                                        </td>
+                                        <td data-sort="@item.LogOnDate.Ticks">
+                                            @item.LogOnDate.ToClientTime().ToFormatDateTime()
+                                        </td>
+                                        <td data-sort="@item.LastActivityDateTime.Ticks">
+                                            @item.LastActivityDateTime.ToClientTime().ToFormatDateTime()
+                                        </td>
+                                        <td>
+                                            @if (item.RefreshToken.Value != Guid.Parse(HCF.Web.Base.UserSession.LogOnToken) && item.IsLogOn == true && item.UserId == UserSession.CurrentUser.UserId)
+                                            {
+                                                <input type="button" value="Log Out" class="btnlogOut button1" id="@item.RefreshToken" />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_profilemenu")
+        </div>
+
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <table id="myTablelogin" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                Access Type
+                            </th>
+                            <th>
+                                IP Address
+                            </th>
+                            <th>
+                                Login Date/Time
+                                (Displayed in your time zone)
+                            </th>
+                            <th>
+                                Last Activity Date
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Where(x => !string.IsNullOrEmpty(x.ip) && x.LogOnDate > DateTime.Now.AddMonths(-2) && !string.IsNullOrEmpty(x.RefreshToken.ToString())))
+                        {
+                            <tr class="@((HCF.Web.Base.UserSession.LogOnToken !=null && item.RefreshToken.Value == Guid.Parse(HCF.Web.Base.UserSession.LogOnToken)) ? "current" : "")">
+                                <td>
+                                    @if (item.DeviceTypeId == 1)
+                                    {
+                                        <span> Authorized Application (Android)</span>
+                                    }
+                                    else if (item.DeviceTypeId == 2)
+                                    {
+                                        <span> Authorized Application (iOS)</span>
+                                    }
+                                    else if (item.DeviceTypeId == 3)
+                                    {
+                                        <p>@string.Format("{0} {1} {2}", item.OsName, item.DeviceType, item.BrowserName)</p>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ip))
+                                    {
+                                        <span>@($"{item.city}{(!String.IsNullOrEmpty(item.country_name) ? " (" + item.country_name + ") " : "")} ({item.ip})")</span>
+                                    }
+                                </td>
+                                <td data-sort="@item.LogOnDate.Ticks">
+                                    @item.LogOnDate.ToClientTime().ToFormatDateTime()
+                                </td>
+                                <td data-sort="@item.LastActivityDateTime.Ticks">
+                                    @item.LastActivityDateTime.ToClientTime().ToFormatDateTime()
+                                </td>
+                                <td>
+                                    @if (item.RefreshToken.Value != Guid.Parse(HCF.Web.Base.UserSession.LogOnToken) && item.IsLogOn == true && item.UserId == UserSession.CurrentUser.UserId)
+                                    {
+                                        <input type="button" value="Log Out" class="btnlogOut button1" id="@item.RefreshToken" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+@section scripts{
+    <script>
+        var dtable = $('#myTablelogin').DataTable({
+            searching: false,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $("#myTablelogin tbody tr").length > 20,
+            bInfo: false,
+            stateSave: true,
+            aaSorting: [2, 'desc'],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7 text-right'p>>"
+        });
+
+
+        $(".btnlogOut").click(function () {
+            var control = $(this);
+            var loginTokenId = control.attr("id");
+            $.ajax({
+                url: '@Url.Action("UserLogOff", "Account")' + '?logOnToken=' + loginTokenId,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    if (data == 1) {
+                        control.remove();
+                        AlertSuccessMsg("User log out sucessfully.", "Message");
+                    }
+                }
+            });
+        });
+    </script>
+    <style>
+        .current {
+            background-color: #008000 !important;
+            color: #fff;
+        }
+
+        .dataTables_paginate.paging_simple_numbers {
+            float: right;
+        }
+    </style>
+}

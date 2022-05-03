@@ -1,0 +1,239 @@
+﻿@model HCF.BDO.EPDetails
+@{
+    ViewBag.Title = "EpDocs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@if (Model != null)
+{
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                EP Document History
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="tble_shadow">
+                            <div class="row tablelist-topform">
+
+                                <div class="col-md-2">
+                                    <span title=" @Localizer["StandardEP"] ">@Model.StandardEp</span><br />
+
+                                    <ep-risk-score risk-score="@Model.Scores.Name">
+                                    </ep-risk-score>
+                                    @*<label>@($"{Model.Scores.Name}")</label>*@
+                                </div>
+                                <div class="col-md-10">
+                                    @await Html.PartialAsync("_EpDescription", Model.Description,
+                      new ViewDataDictionary(
+                      new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                      new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                      {{ "standardEp", @Model.StandardEp }}
+                     )
+
+                                    @*@await Html.PartialAsync("_EpDescription", Model.Description, new ViewDataDictionary { { "standardEp", @Model.StandardEp } })*@
+                                </div>
+
+                            </div>
+                        </div>
+                        
+                        
+                        <table id="docsTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+
+                                    <th>Document Type</th>
+                                    <th>File Name</th>
+                                    @*<th>@Localizer["AssetNo"] </th>*@
+                                    <th>Review Date</th>
+                                    <th>Uploaded Date</th>
+                                    <th>Uploaded By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var activity in Model.EpDocs)
+                                {
+                                    <tr class="@((activity.IsDeleted) ? "deleted" : "")">
+                                        <td>
+                                            @activity.Name
+                                        </td>
+                                        <td>
+
+                                            @if (activity.IsDeleted)
+                                            {
+                                                <a class="disable">
+                                                    <img src="@commonModelFactory.UploadDocTypeImagePath(activity.UploadDocTypeId, activity.DocTypeId)" alt="">
+                                                    <span>@activity.FileName.CastToNA()</span>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@commonModelFactory.FilePath(activity.Path)" target="_blank">
+                                                    <img src="@commonModelFactory.UploadDocTypeImagePath(activity.UploadDocTypeId, activity.DocTypeId)" alt="">
+                                                    <span>@activity.FileName.CastToNA()</span>
+                                                </a>
+                                            }
+                                        </td>
+                                        @*<td>@activity.DeviceNo </td>*@
+                                        <td data-sort="@activity.DtEffectiveDate.DateSort()">
+                                            @if (activity.DtEffectiveDate.HasValue)
+                                            {
+                                                <span>@activity.DtEffectiveDate.CastLocaleDate()</span>
+                                            }
+                                        </td>
+                                        <td data-sort="@activity.CreatedDate.Ticks">@activity.CreatedDate.ToClientTime().ToFormatDateTime()</td>
+                                        <td>@activity.FullName</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script>
+    var docsTable = $('#docsTable').dataTable({
+        "searching": true,
+        "pageLength": 20,
+        "lengthChange": false,
+        "bPaginate": $('#docsTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        aoColumnDefs: [
+            {
+                orderSequence: ["desc", "asc"],
+                aTargets: ['_all']
+            }
+        ],
+
+        //dom: "<'row'<'col-sm-12'>>" +
+        //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+        //    "<'row'<'col-sm-5'i><'col-sm-7'p>>Blftip",
+
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                orientation: 'portrait',
+                title: 'EpDoc Report',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4]
+                },
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                customize: function (doc) {
+                    doc.content.splice(0, 1);
+                    var now = new Date();
+                    var jsDate = setDateFormat(now);
+                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                    doc.pageMargins = [20, 60, 20, 30];
+                    doc.defaultStyle.fontSize = 8;
+                    doc.styles.tableHeader.fontSize = 7;
+                    doc['header'] = (function () {
+                        return {
+                            columns: [
+                                { image: logo, width: 40 },
+                                {
+                                    alignment: 'left',
+                                    italics: true,
+                                    text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: 'EpDoc Report',
+                                    margin: [0, 6, 0, 0]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'center',
+                                    text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+            {
+                extend: 'excel',
+                title: 'EpDoc Report',
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4],
+                    orthogonal: 'export'
+                }
+            }
+        ],
+        drawCallback: function () {
+            var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+            $('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+            //$('.buttons-excel')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+            $('[rel="popover"]').popover({ trigger: "hover" });
+        }
+    });
+
+    $(document).ready(function () {
+        //DisableDefaultDTfp();
+        $("div.dataTables_info#docsTable_info").css("display", "none");
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+    });
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+</script>
+
+<style>
+    .col-sm-7 div#docsTable_paginate {
+        position: absolute;
+        right: 270px;
+        top: 3px;
+    }
+
+    .tble_shadow {
+        margin-bottom: 15px;
+    }
+</style>

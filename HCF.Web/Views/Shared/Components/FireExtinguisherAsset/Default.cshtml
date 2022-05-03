@@ -1,0 +1,76 @@
+﻿@model IEnumerable<HCF.BDO.AssetType>
+<h4>Assets</h4>
+<ul>
+    <li>
+        @foreach (var item in Model.OrderBy(x => x.Name).Where(x => x.IsInternal))
+        {
+            <ul class="list">
+                <li>
+                    <ul class="assetsList">
+                        @foreach (var asset in item.Assets.OrderBy(x => x.Name))
+                        {
+                            <li>
+                                <input type="checkbox"
+                                       id="@string.Format("cb2{0}",asset.AssetId)"
+                                       value=@asset.AssetId
+                                       name="AssetsId"
+                                       class="foo" /><span></span>
+                                <img src="@commonModelFactory.CommonFilePath(asset.IconPath)" height="25" width="25" alt="" />
+                                <a class="assetsListLi" style="cursor:pointer" title="@asset.Name">
+                                    <span for="@string.Format("cb2{0}",asset.AssetId)">@asset.Name (@asset.Count)</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        }
+    </li>
+</ul>
+
+
+<script>
+    var assetsid = getParameterByName('assetsid');
+    debugger;
+    var assetsLists = JSON.parse(localStorage.getItem('rbi_assts'));
+//console.log(JSON.parse(assetsLists));
+    if (assetsid != undefined && assetsid > 0) {
+        
+        $("input[type='checkbox'][value='" + assetsid + "']").prop('checked', true);
+    } else {
+        $("input[type='checkbox'][value='" + 123 + "']").prop('checked', true);
+    }
+
+    if (assetsLists != undefined && assetsLists.length > 0) {
+        for (let count in assetsLists) {
+            $("input[type='checkbox'][value='" + assetsLists[count] + "']").prop('checked', true);
+        }
+    }
+    $(".foo").change(function () {
+        //var checked = $(this).prop("checked");
+        //debugger;
+        //if (checked == true) {
+        //    $(".foo").not(this).attr("checked", false);
+        //} else {
+        //    $(this).prop('checked', true);
+        //}
+    });
+
+    $('.list > li a').click(function () {
+        $(this).parent().find('ul.assetsList').toggle();
+    });
+
+    $('.assetsListLi').click(function () {
+        $(this).parent().find('ul.assetsubCategoryList').toggle();
+    });
+
+</script>
+<style>
+    ul.assetsubCategoryList {
+        display: none;
+    }
+
+    .asset_list_view ul.list ul {
+        margin-left: 0;
+    }
+</style>

@@ -1,0 +1,211 @@
+﻿@model List<HCF.BDO.FireDrillCategory>
+@{
+    ViewBag.Title = "FireDrillCategories";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                FireDrill Categories 
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">                        
+                        @*<div class="add_button_comman">
+                            <a href="@Url.Action("AddFireDrilCategory", "Rounds")" class="pull-right modal-link">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add FireDrill Category" alt="3d_add_button" />
+                            </a>
+                        </div>*@
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="firedrillCategoriesTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th style="width:20px;">Active</th>
+                                            <th style="width:20px;">Edit</th>
+                                            <th>View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderBy(x => x.CategoryName))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.CategoryName)
+                                                </td>
+                                                @if (item.IsCommonCat)
+                                                {
+                                                    <td class="comman_checkbox1 text-center">
+                                                        @Html.CheckBoxFor(modelItem => item.IsActive, new { @class = "chkCat", @rel = item.FiredrillCatId })<span></span>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="comman_checkbox1 text-center">
+                                                        @Html.DisplayFor(modelItem => item.IsActive, new { @class = "chkCat" })<span></span>
+                                                    </td>
+                                                }
+
+                                                @if (item.IsCommonCat)
+                                                {
+                                                    <td></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>
+                                                        <a href="@Url.Action("AddFireDrilCategory", "Rounds",new { Id = item.FiredrillCatId})" class="pull-right modal-link">
+                                                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit fire drill category" alt="3d_add_button" />
+                                                        </a>
+                                                    </td>
+                                                }
+                                                @if (item.IsCommonCat)
+                                                {
+                                                    <td class="build-editicon">
+                                                        <img onclick="location.href ='@Url.Action("FireDrillQues", "Rounds", new { firedrillCatId = item.FiredrillCatId,isCommon = 1 })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.View)" title="View fire drill questionnaire" alt="" />
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="build-editicon">
+                                                        <img onclick="location.href ='@Url.Action("FireDrillQues", "Rounds", new { firedrillCatId = item.FiredrillCatId,isCommon = 0 })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.View)" title="View fire drill questionnaire" alt="" />
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function () {
+
+        var dtable = $('#firedrillCategoriesTable').dataTable({
+            "searching": true,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#firedrillCategoriesTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            columnDefs: [
+                {
+                    targets: []
+                }
+            ],
+             /*dom: "Blfrtip",*/
+            
+
+             initComplete: function () {
+                 $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("AddFireDrilCategory", "Rounds"))" class= "pull-right modal-link" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add FireDrill Category" alt="3d_add_button"></a></div >');
+        },
+            dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Firedrill Categories Report',
+                    exportOptions: {
+                        columns: [0]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Firedrill Categories Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Firedrill Categories Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+        $('.chkCat').on('change', function () {
+        var id = $(this).attr("rel")
+        var val = $(this).prop('checked');
+            $.get("@Url.Action("FireDrillCategoriesActiveStatus", "Rounds")" + "?CatId=" + id + "&status=" + val, function () { });
+        });
+
+
+    });
+    </script>

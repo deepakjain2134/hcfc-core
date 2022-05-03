@@ -1,0 +1,24 @@
+﻿@model HCF.Web.Models.MultiSelectPicker
+
+@if (Model.IsMultiple)
+{
+
+    <multiselectbuildingdropdownlist multiple="multiple" name="ddlSinglebuildings" selectedvalue="@Model.SelectedValue" firsttext="Select" class="ddlboxLive ddlMultiUser"></multiselectbuildingdropdownlist>
+    @*@Html.MultiSelectBuildingDropDownList("ddlSinglebuildings", Model.SelectedValue, "Select", new
+        {
+            @class = "ddlboxLive ddlMultiUser",
+            multiple = "multiple",
+            data_selected_text_format = "count > 1",
+            data_live_search = "true"
+        })*@
+}
+else
+{
+    <multiselectbuildingdropdownlist name="ddlSinglebuildings" selectedvalue="@Model.SelectedValue" firsttext="Select" class="ddlboxLive"></multiselectbuildingdropdownlist>
+    @*@Html.MultiSelectBuildingDropDownList("ddlSinglebuildings", Model.SelectedValue, "Select", new
+        {
+            @class = "ddlboxLive",
+            data_selected_text_format = "count > 1",
+            data_live_search = "true"
+        })*@
+}

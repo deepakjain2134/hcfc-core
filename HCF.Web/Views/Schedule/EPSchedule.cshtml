@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "EPs Schedule";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            EPs Schedule Inspection
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                    
+                        <div class="row">
+                            <div class="col-lg-3 col-xs-3">
+                                Schedule
+                                <scheduledropdownlist name="drpSchedule" selectedvalue="0" firsttext="Select" class="form-control"></scheduledropdownlist>
+                                @*@Html.ScheduleDropDownList("drpSchedule", 0, "Select", new { @class = "form-control" })*@
+                            </div>
+                            <div class="col-lg-9 col-xs-9">
+                                <div id="scheduleinfo" style='margin: 36px 0 0 0;'>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="eps_view">
+                            </div>
+                        </div>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var drpSchedule = $("#drpSchedule");
+    var eps_view = $("#eps_view")
+
+    $(document).ready(function (e) {
+        var scheduleId = getParameterByName('scheduleId');
+        if (scheduleId > 0 && scheduleId != undefined) {
+            drpSchedule.val(scheduleId);
+            drpSchedule.trigger("change");
+        }
+    });
+
+
+
+    drpSchedule.change(function () {
+        var scheduleId = $(this).val();
+        $.ajax({
+            url: CRxUrls.Schedule_GetSchedules,
+            type: "GET",
+            dataType: "JSON",
+            data: { scheduleId: scheduleId },
+            success: function (data) {
+                debugger;
+                var date = new Date(parseInt(data.result.StartDate.substr(6))).toLocaleDateString();
+                $("#scheduleinfo").empty();
+                var htmlstr = "<div><strong><label>Description: </label></strong><label>" + data.result.Description + "</label>&nbsp;&nbsp;";
+                $.each(data.result.ScheduleFrequency, function (i, schefreq) {
+                    htmlstr += "<strong><label>Frequency: </label></strong><label>" + schefreq.Frequency.DisplayName + "</label>";
+                });
+                htmlstr += "</div>";
+                $("#scheduleinfo").append(htmlstr);
+                console.log(data);
+            }
+        });
+        loadfloorAssets();
+    });
+
+
+    function loadfloorAssets() {
+        $.ajax({
+            url: CRxUrls.Schedule_EPsSchedulePartial,
+            type: "GET",
+            dataType: "HTML",
+            success: function (data) {
+                eps_view.empty().html(data);
+            }
+        });
+    }
+
+</script>

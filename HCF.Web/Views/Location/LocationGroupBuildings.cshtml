@@ -1,0 +1,30 @@
+﻿@model HCF.Web.ViewModels.Location.LocationGroupViewModel
+@{
+    ViewBag.Title = "Fire Drill Building Groups";
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Fire Drill Building Groups
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="" id="loadpartial">
+                        @await Html.PartialAsync("_locationGroupBuilding", Model,
+                        new ViewDataDictionary(
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

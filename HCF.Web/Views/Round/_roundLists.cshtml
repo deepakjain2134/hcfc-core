@@ -1,0 +1,163 @@
+﻿@model List<HCF.BDO.TRounds>
+@if (Model.Count > 0)
+{
+    <div class="roundsListBox">
+        <h5>Active Rounds</h5>
+        @if (Model.Count(x => x.Status == 2) > 0)
+        {
+            foreach (var item in Model.Where(x => x.Status == 2).OrderByDescending(x => x.RoundDate).ToList())
+            {
+                <div class="roundsheadBox">
+                    <div class="roundsList-contenthead">
+                        <div class="roundsLeftBox">
+                            <p><span>@($"{item.CategoryName} : {item.RoundName} on {item.RoundDate.ToFormatDate()}")</span></p>
+                        </div>
+                        <div class="roundsRightBox">
+                            <p>
+                                @if (item.CreatedBy != HCF.Web.Base.UserSession.CurrentUser.UserId)
+                                {
+                                    <a class="adduser" style="cursor:pointer;" troundId="@item.TRoundId">
+                                        @(item.TRoundUsers.Any(x => x.RoundUserId == HCF.Web.Base.UserSession.CurrentUser.UserId && x.IsActive) ? "Leave Round" : "Join Round")
+                                    </a>
+                                }
+                                @if (item.TRoundUsers.Any(x => x.RoundUserId == HCF.Web.Base.UserSession.CurrentUser.UserId && x.IsActive))
+                                {
+                                    <a class="adduser" href='@(Url.RouteUrl("addround", new { roundId = item.TRoundId }))' troundId="@item.TRoundId">Add User</a>
+                                    <a title="Edit" class="scheduleRound" href='@(Url.RouteUrl("addround", new { roundId = item.TRoundId }))'>
+                                        <img class="history-icon" src="@Url.Content("~/dist/Images/Icons/edit_button2.png")">
+                                    </a>
+                                    if (item.IsInpectionReady == true)
+                                    {
+                                        <a class="scheduleRound" href='@(Url.RouteUrl("roundinsp", new { rid = item.TRoundId }))'>
+                                            <img class="history-icon" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")" title="Inspection">
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a class="scheduleRound" onclick="locationPopup()">
+                                            <img class="history-icon" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")" title="Please Add Location First!">
+                                        </a>
+                                    }
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="roundsList-content">
+                        <div class="roundsLeftBox">
+                            <div class="buildingLocation">
+                                @foreach (var building in item.Locations)
+                                {
+                                    <p>@building.BuildingName</p>
+                                }
+                            </div>
+                            <div class="buildingFloor-rounds">
+                                @foreach (var building in item.Locations)
+                                {<ul>
+                                        @foreach (var floor in building.Floor)
+                                        {
+                                            <li>@floor.Alias.ToUpper().Substring(0, Math.Min(floor.Alias.Length, 2))</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        </div>
+                        <div class="roundsRightBox">
+                            <p title="Click to see inspector">
+                                <span class="creater-listitem"><span>Inspectors:</span>(@item.TRoundUsers.Count(x => x.IsActive))</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="roundsfooterBox">
+                        <ul class="ulSeeMore itemInspectors">
+                            @foreach (var rounduser in item.TRoundUsers.Where(x => x.IsActive))
+                            {
+                                <li title="@rounduser.User.Name">@rounduser.User.FullName</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="tble_shadow text-center">No data available</div>
+        }
+    </div>
+    <div class="roundsListBox">
+        <h5>Rounds Pending Deficiencies Resolution</h5>
+        @if (Model.Count(x => x.Status != 2) > 0)
+        {
+            foreach (var item in Model.Where(x => x.Status != 2).OrderByDescending(x => x.RoundDate).ToList())
+            {
+                <div class="roundsheadBox">
+                    <div class="roundsList-contenthead">
+                        <div class="roundsLeftBox">
+                            <p><span>@($"{item.CategoryName} : {item.RoundName} on {item.RoundDate.ToFormatDate()}")</span></p>
+                        </div>
+                        <div class="roundsRightBox">
+                            <p>
+                                <a class="scheduleRound @(item.IsInpectionReady ? "" : "disabled" )" href='@(Url.RouteUrl("roundinsp", new { rid = item.TRoundId }))'>
+                                    <img class="history-icon" src="@Url.Content("~/dist/Images/Icons/view_icon.png")" title="View Inspection">
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="roundsList-content">
+                        <div class="roundsLeftBox">
+                            <div class="buildingLocation">
+                                @foreach (var building in item.Locations)
+                                {
+                                    <p>@building.BuildingName</p>
+                                }
+                            </div>
+                            <div class="buildingFloor-rounds">
+                                @foreach (var building in item.Locations)
+                                {
+                                    <ul>
+                                        @foreach (var floor in building.Floor)
+                                        {
+                                            <li>@floor.Alias.ToUpper().Substring(0, Math.Min(floor.Alias.Length, 2))</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        </div>
+                        <div class="roundsRightBox">
+                            <p title="Click to see inspector">
+                                <span class="creater-listitem"><span>Inspectors:</span>(@item.TRoundUsers.Count(x => x.IsActive))</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="roundsfooterBox">
+                        <ul class="ulSeeMore itemInspectors">
+                            @foreach (var rounduser in item.TRoundUsers.Where(x => x.IsActive))
+                            {
+                                <li title="@rounduser.User.Name">@rounduser.User.FullName</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="tble_shadow text-center">No data available</div>
+        }
+    </div>
+}
+else
+{
+    <div class="tble_shadow text-center">No data available</div>
+}
+
+<script>
+    $(document).ready(function () {
+        $(".creater-listitem").click(function () {
+            $(this).closest(".roundsheadBox").find(".roundsfooterBox").slideToggle(400);
+        });
+    });
+
+    function locationPopup() {
+        swalalert('Please Add Location First!');
+    }
+</script>

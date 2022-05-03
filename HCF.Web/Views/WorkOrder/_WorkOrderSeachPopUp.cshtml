@@ -1,0 +1,185 @@
+﻿
+<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Search Work Order</h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="form-group workinput">
+            <div class="popworkBox1">
+            <label class="control-label"><b> @Localizer["WorkOrderNo"]</b>&nbsp;</label>
+            <input type="text" class="numeric" id="txtWoSearch" maxlength="15" />
+            <button type="submit" id="btnwoSearch" class="popsearch-btn disable">Search</button>
+            </div>
+            <input type="hidden" value='@ViewBag.FlootAssetId' id="floorAssetId" />
+            <input type="hidden" value='@ViewBag.EPdetailId' id="EPdetailId" />
+            @if (ViewBag.WOPopUpType == "ILSM")
+            {
+                <a href='@Url.Action("ILSMWorkOrder","WorkOrder", new { tilsmId =ViewBag.WOPopUpId })'
+                   class="comm-button float-right">Create work order</a>
+            }
+        </div>
+        <div id="">
+            <table id="woTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th onclick="SetSortingOrder('WorkOrderNumber')" class="sorting1" id="WorkOrderNumber" width="10%">
+                            @Localizer["WorkOrderNo"]
+                        </th>
+                        <th onclick="SetSortingOrder('DateCreated')" class="sorting1" id="DateCreated" width="10%">
+                            Created date
+                        </th>
+                        <th onclick="SetSortingOrder('Description')" class="sorting1" id="Description" width="20%">
+                            Description
+                        </th>
+                        <th onclick="SetSortingOrder('AssetNo')" class="sorting1" id="AssetNo">
+                            @Localizer["AssetNo"]
+                        </th>
+                        <th>
+                            Location
+                        </th>
+                        <th onclick="SetSortingOrder('RequesterName')" class="sorting1" id="RequesterName" width="12%">
+                            @Localizer["Requester"]
+                        </th>
+                        @*<th onclick="SetSortingOrder('TypeCode')" class="sorting1" id="TypeCode" width="8%">
+                                Type
+                            </th>*@
+                    <th onclick="SetSortingOrder('StatusCode')" class="sorting1" id="StatusCode" width="8%">
+                        @Localizer["Status"] 
+                    </th>
+                        <th width="10%">
+                            Add To ILSM
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="partialContents"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+      
+    </div>
+
+</div>
+
+<script>
+
+
+    $("#btnwoSearch").click(function () {
+        getWorkOrders(1);
+    });
+    function getWorkOrders(index) {
+       // debugger;
+        var sortOrder = 'WorkOrderNumber';
+        var orderbySort = 'ASC';
+        var isScroll = false;
+        var searchby = $("#txtWoSearch").val();
+        if (sortOrder == null) {
+            sortOrder = "";
+        } if (orderbySort == null) {
+            orderbySort = "";
+        }
+        var floorAssetId = 0;
+        var epdetailId = 0;
+        $.get(CRxUrls.WorkOrder_WorkOrders + '?page=' + 1 + "&floorAssetId=" + floorAssetId + "&EPdetailId=" + epdetailId + "&sortOrder=" + sortOrder + "&OrderbySort=" + orderbySort + "&searchparam=" + searchby + "&isScroll=" + isScroll + "&isPopUp=" + true, function (data) {
+            $('#partialContents').empty();            
+            $('#partialContents').append(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+    function getWorkOrdersJson(index) {
+        return new Promise((resolve, reject) => {
+            var sortOrder = 'WorkOrderNumber';
+            var orderbySort = 'ASC';
+            var isScroll = false;
+            var searchby = $("#txtWoSearch").val();
+            if (sortOrder == null) {
+                sortOrder = "";
+            } if (orderbySort == null) {
+                orderbySort = "";
+            }
+            var floorAssetId = 0;
+            var epdetailId = 0;
+            $.get(CRxUrls.WorkOrder_WorkOrders + '?page=' + 1 + "&floorAssetId=" + floorAssetId + "&EPdetailId=" + epdetailId + "&sortOrder=" + sortOrder + "&OrderbySort=" + orderbySort + "&searchparam=" + searchby + "&isScroll=" + isScroll + "&isPopUp=" + false + "&json=" + true, function (data) {
+                resolve(data)
+            });
+        })
+        
+    }
+
+
+    $(document).on("click", ".addwoToILSM", function () {
+        var tilsmId ='@ViewBag.WOPopUpId';
+        var issueId = $(this).attr("woissueId");
+        var wonumber = $(this).attr("wonumber");
+        if (clientname == "hcf_atlantic" && issueId==0) {
+            addSerchedWorkOrder($(this).attr("wonumber")).then((success) => {
+                getWorkOrdersJson(1).then((data) => {
+                    //debugger
+                    var wo = data.find(obj => {
+                        return obj.WorkOrderNumber === wonumber
+                    })
+                    //debugger
+                    issueId = wo.IssueId
+                    linkToILSM(tilsmId, issueId);
+
+
+
+                    $(this).siblings('td').find('.btnwoStatus').removeClass('disable')
+                    $(this).siblings('td').find('.btnwoStatus').attr('onclick', "location.href='/WorkOrder/UpdateWorkOrder?issueId=" + issueId + "'")
+
+                })
+            })
+        }
+        else {
+            linkToILSM(tilsmId, issueId);
+        }
+    });
+
+    var addSerchedWorkOrder = (wonumber) => {
+        return new Promise( (resolve, reject) => {
+            if (clientname == "hcf_atlantic") {
+                var wo = WoResultList.find(obj => {
+                    return obj.WorkOrderNumber === wonumber
+                })
+                var url = '@Url.Content("~/WorkOrder/Create?floorAssetId=0")'
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(wo),
+                    success: (d) => {
+                        //console.log(d)
+                        resolve('success')
+                    }
+                })
+            }
+            
+        })
+    }
+
+    var linkToILSM = function (tilsmId, woissueId) {
+        $.ajax({
+            url: CRxUrls.ILSM_ILSMlinkToWO + "?tilsmId=" + tilsmId + "&issueId=" + woissueId,
+            type: "POST",
+            dataType: "JSON",
+            success: function (resuslt) {
+                swalalert("Work order link with ILSM Successfully");
+                $('#partialContents').empty();
+                $('#txtWoSearch').val('');
+                loadilsmdetailpartial();
+            }
+        });
+    }
+
+    $('#txtWoSearch').on('input', function (e) {
+        //alert('Changed!')
+        var text = $('#txtWoSearch').val();
+        if (text != undefined && text.length > 0) {
+            $("#btnwoSearch").removeClass("disable")
+        } else { $("#btnwoSearch").addClass("disable") }
+    });
+</script>

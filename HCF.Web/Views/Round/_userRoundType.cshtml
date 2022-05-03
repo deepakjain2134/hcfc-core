@@ -1,0 +1,54 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var groups = Model.Roundgrouplist;
+}
+
+
+    <div class="row tablelist-topform">
+        <div class="col-md-12">
+            <p class="step6-details">
+                <label>Select a location group from the dropdown menu. Then, select the round type you wish to assign to each volunteer(s).</label>
+            </p>
+        </div>
+
+        <div class="col-md-12 confi-searchBox">
+            <div class="user_view ddluser form-inline" id="user">
+                <label for="user">Location Group:</label>
+                <select id="drpGroup" name="drpGroup" class="form-control ddlboxLive">
+                    <option value="">Select Location Group</option>
+                    @foreach (var item in groups.Where(x => x.IsActive == 1 && x.RoundType == ViewBag.RoundType).OrderBy(x => x.Name))
+                    {
+                        <option value="@item.RoundGroupId"> @item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" id="groupdata">
+        </div>
+    </div>
+
+
+<script>
+    $('#drpGroup').change(function () {
+    
+        var selectedID = $(this).val();
+        if (selectedID != "") {
+            $.get('@Url.Action("UserRoundType", "Round")' + '?id=' + selectedID, function (data) {
+                //debugger;
+                $('#groupdata').html(data);
+                $('#groupdata').fadeIn('fast');
+            });
+        } else {
+            $('#groupdata').html("");
+        }
+    });
+    $(document).ready(function () {
+        //debugger;
+        $('#drpGroup').val($("#hdn_locationgroupId").val());
+        if ($('#drpGroup').val() != null && $('#drpGroup').val() != '') {
+            $('#drpGroup').trigger('change');
+        }
+    });
+</script>

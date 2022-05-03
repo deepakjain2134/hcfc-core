@@ -1,0 +1,57 @@
+﻿@model List<HCF.BDO.ICRAMatixPrecautions>
+@{
+    var constructionClass = (List<HCF.BDO.ConstructionClass>)ViewBag.ConstructionClass;
+}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title"><span class="popupTitle">Assign Class</span></h4>
+        </div>
+        <div class="modal-body asset_list_view">
+            <ul class="ulriskarea">
+                @foreach (var item in constructionClass)
+                {
+                    <li>
+                        <input class="classname" type="checkbox" name="className" value='@item.ConstructionClassId' @*checked="@HCF.Web.Controllers.ICRAController.CheckisAssign(item.ConstructionClassId,Model)"*@ />
+                        <span></span> @item.ClassName
+                    </li>                    
+                }
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <input type="hidden" value="@ViewBag.ConstructionRiskId" id="hdnConstructionRiskId" />
+            <input type="hidden" value="@ViewBag.ConstructionTypeId" id="hdnConstructiontypeId" />
+            <input type="hidden" value="@ViewBag.Version" id="hdnVersion" />
+            <button type="button" class="comm-button" data-dismiss="modal" id="saveClass">Save</button>
+            <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on("click", "#saveClass", function () {
+
+        var constructionRiskId = $("#hdnConstructionRiskId").val();
+        var constructionTypeId = $("#hdnConstructiontypeId").val();
+        var version = $("#hdnVersion").val();
+        var classIds = "";
+        var count = 0;
+        // console.log(constructionRiskId);
+        $("input:checkbox.classname:checked").each(function () {
+            classIds = classIds + "," + $(this).val();
+            count++;
+        });
+        $.ajax({
+            url: '@Url.Action("AddICRAMatrixPrecaution", "ICRA")',
+            type: "POST",
+            data: { constructionRiskId: constructionRiskId, constructionTypeId: constructionTypeId, classIds: classIds, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), version: version },
+            dataType: 'json',
+            success: function (result) {
+                window.location.reload();
+            }
+        });
+    });    
+
+</script>
+

@@ -1,0 +1,363 @@
+﻿@model IEnumerable<HCF.BDO.TRounds>
+
+<div class="roundreportsRow">
+    <div class="col-md-12">
+            <div class="panel panel-reports">
+                <div class="trgtry AAAAA">
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Compliance by Category Report</p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+                                    <div class="col-md-6">
+                                        <table class="table table-bordered" id="Compliance">
+                                            <thead>
+                                                <tr>
+                                                    <th>Category</th>
+                                                    <th>Percentage</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                @foreach (var item in Model)
+                                                {
+
+                                                    if (@item.CategoryName != null && @item.CompliantCount != 0)
+                                                    {
+                                                        <tr>
+                                                            <td class="catname">@item.CategoryName</td>
+                                                            <td class="compcount">@item.CompliantCount<span>%</span></td>
+
+                                                        </tr>
+                                                    }
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <figure class="highcharts-figure">
+                                            <div id="ComplianceChart"></div>
+
+                                        </figure>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    
+                   
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Non Compliant Questions Occurrence Report</p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+                                    <table class="table table-bordered" id="NonCompliance">
+                                        <thead>
+                                            <tr>
+                                                <th>Question</th>
+                                                <th># Of Occurences</th>
+                                                <th>Category</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.Questions != null)
+                                                {
+                                                    <tr>
+                                                        <td class="ques">@item.Questions</td>
+                                                        <td class="occurance">@item.NumberOfOccurences</td>
+                                                        <td>@item.CategoryName</td>
+                                                    </tr>
+                                                }
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="MFDeficiency">
+
+                                </div>
+                            </div>
+                        </div>
+                    
+
+
+                   
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Round Related Work Orders Report</p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+                                    <table class="table table-bordered" id="WorkOrder" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>WorkOrder</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.WorkOrder > 0)
+                                                {
+                                                    <tr>
+                                                        <td class="workOrder">@item.WorkOrder</td>
+                                                        <td class="status">@item.Status</td>
+                                                    </tr>
+                                                }
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                    <figure class="highcharts-figure">
+                                        <div id="container"></div>
+
+                                    </figure>
+                                </div>
+                            </div>
+                        </div>
+                    
+
+
+                    <div class="round-groupname panel-active">
+                        <p class="buildingGroupBy">Compliance by Risk Report</p>
+                        <div id="roundbuildings" class="round-groupdetails">
+                            <div class="roundExpand-box">
+                               
+                                    <div class="col-md-6">
+                                        <table class="table table-bordered" id="RiskWeighted">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2" style="text-align: center;">Risk Weighted Scoring </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                @foreach (var item in Model)
+                                                {
+
+                                                    if (@item.Risk != null && @item.NumberOfOccurencesRisk != 0)
+                                                    {
+                                                        <tr>
+                                                            <td class="catname">@item.Risk</td>
+                                                            <td class="compcount">@item.NumberOfOccurencesRisk</td>
+
+                                                        </tr>
+                                                    }
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                
+                             
+                                    <div class="col-md-6">
+                                        <table class="table table-bordered" id="RoundsTbl" style="display:none">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>RoundStatus</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in Model)
+                                                {
+                                                    if (@item.RoundCount > 0)
+                                                    {
+                                                        <tr>
+                                                            <th class="RoundStatus">@item.RoundStatus</th>
+                                                            <td class="Roundount">@item.RoundCount</td>
+
+                                                        </tr>
+                                                    }
+                                                }
+
+
+
+                                            </tbody>
+                                        </table>
+
+                                        <figure class="highcharts-figure">
+                                            <div id="RoundChart"></div>
+
+                                        </figure>
+                                    </div>
+                                
+
+
+                              
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                  
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Rounds Compliance by Building</p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+
+
+
+                                    <div class="col-md-12">
+                                        <table class="table table-bordered" id="RoundsBuilding">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2" style="text-align: center;">Rounds Compliance by Building </th>
+                                                </tr>
+                                                <tr>
+                                                    <th>Building</th>
+                                                    <th>Compliance Percentage </th>
+                                                </tr>
+
+                                            </thead>
+                                            <tbody>
+                                                <tr style="display:none"></tr>
+
+                                                @foreach (var item in Model)
+                                                {
+
+                                                    if (@item.BuildingName != null && @item.CompliantCountBuilding != 0)
+                                                    {
+                                                        <tr>
+                                                            <td class="buildingName">@item.BuildingName</td>
+                                                            <td class="compcountBuilding">@item.CompliantCountBuilding<span>%</span></td>
+
+                                                        </tr>
+                                                    }
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    
+
+
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Round Inspection Point by Status </p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+                                    <table class="table table-bordered" id="RoundInsptbl" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>Occurance</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.Occurences > 0)
+                                                {
+                                                    <tr>
+                                                        <td class="occurance">@item.Occurences</td>
+                                                        <td class="status">@item.RoundInspStatus</td>
+                                                        <td class="percentage">@item.RoundPercentage</td>
+                                                    </tr>
+                                                }
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                    <div class="col-md-6" id="RoundInsp"></div>
+                                    <table class="table table-bordered" id="RoundInsptblPer" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>status</th>
+                                                <th>Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.RoundPercentage > 0)
+                                                {
+                                                    <tr>
+                                                        <td class="status">@item.RoundInspStatus</td>
+                                                        <td class="Occurences">@item.Occurences</td>
+                                                    </tr>
+                                                }
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                    <figure class="highcharts-figure"> <div class="col-md-6" id="RoundInspPer"></div></figure>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    
+
+
+                   
+                        <div class="round-groupname panel-active">
+                            <p class="buildingGroupBy">Deficiencies by Risk Score</p>
+                            <div id="roundbuildings" class="round-groupdetails">
+                                <div class="roundExpand-box">
+                                    <table class="table table-bordered" id="Risktbl" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>Question</th>
+                                                <th>count</th>
+                                                <th>Risk</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model)
+                                            {
+                                                if (@item.RiskCount > 0)
+                                                {
+                                                    <tr>
+                                                        <td class="Questions">@item.QuestionsRisk</td>
+                                                        <td class="RiskCount">@item.RiskCount</td>
+                                                        <td class="RiskType">@item.RiskType</td>
+                                                    </tr>
+                                                }
+                                            }
+
+
+
+                                        </tbody>
+                                    </table>
+                                    <div class="" id="RiskDeficiencyChart"></div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    
+
+
+
+
+
+
+                </div>
+
+     
+    </div>
+</div>
+    </div>
+<style>
+    .hide{
+        display:none
+    }
+    .round-groupname {
+        overflow: hidden;
+    }
+</style>

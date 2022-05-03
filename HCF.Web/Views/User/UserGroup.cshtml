@@ -1,0 +1,143 @@
+﻿@model IEnumerable<HCF.BDO.UserGroup>
+@{
+    ViewBag.Title = "User Group"; //Resources.Resource.UpdateAsset;
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1 style="margin-left:5px">
+                User Group
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="row">
+                            <div class="add_button_comman">
+                                <a href="@Url.Action("EditUserGroup", "User",new { id=""})" class="pull-right">
+                                    <img src="/dist/Images/Icons/3d_add_button.png" title="User Group" alt="">
+                                </a>
+                            </div>
+                            <table id="userGroupTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Name)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Description)
+                                        </th>
+                                        <th style="display:none">
+                                            @Html.DisplayNameFor(model => model.Description)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.IsActive)
+                                        </th>
+                                        <th>
+                                            @Localizer["Action"]
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(model => item.Name)</td>
+                                            <td>
+                                                @item.Description.Substring(0, Math.Min(item.Description.Count(), 100))
+                                                @if (item.Description.Count() > 100)
+                                                {
+                                                    <a href="javascript:void(0);"
+                                                       tabindex="0" data-trigger="focus"
+                                                       rel='popover'
+                                                       data-placement='right'
+                                                       data-content='@item.Description'>...See More</a>
+                                                }
+                                            </td>
+                                            <td style="display:none">
+                                                @Html.DisplayFor(model => item.Description)
+                                            </td>
+
+                                            <td>
+                                                <input type="checkbox" name="status" disabled="disabled" class="chkread" checked="@(item.IsActive?true:false)" rel="@item.IsActive" /><span></span>
+                                            </td>
+                                            <td class="@(item.IsActive ? "" : "disabled")">
+                                                <button type="button" id="btnedit" class="btn button1">
+                                                    @Html.ActionLink( "Edit" , "EditUserGroup", new { id = item.GroupId })
+                                                </button>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+@section scripts{
+    <script>
+
+        $('.chkread').change(function () {
+            debugger;
+            if ($(this).prop('checked')) {
+                $(this).closest("td").next('td').css('disabled', true);
+
+            } else {
+
+                if ($(this).closest("td").next('td').hasClass('disabled')) {
+                    $(this).closest("td").next('td').removeClass('disabled');
+                }
+
+            }
+
+        });
+        var dataTables = $('#userGroupTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [0, 'asc'],
+            "pageLength": 20,
+            "bPaginate": $('#userGroupTable tbody tr').length > 20,
+            "bInfo": false,
+            "searching": true,
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "Search",
+                "searchPlaceholder": "Filter User Group"
+            },
+            columnDefs: [
+                {
+                    targets: [3, 4],
+                    orderable: false
+                }
+            ],
+            dom: "Blfrtip"
+        });
+
+
+    </script>
+    <style>
+        div#userGroupTable_filter {
+            margin-right: 55px;
+        }
+
+        .add_button_comman {
+            position: absolute;
+            right: 6px;
+            top: 6px;
+        }
+
+        .button1 a {
+            color: #fff;
+        }
+    </style>
+}

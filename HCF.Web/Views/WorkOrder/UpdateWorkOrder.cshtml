@@ -1,0 +1,374 @@
+﻿@model HCF.BDO.WorkOrder
+@{
+    ViewBag.Title = "UpdateWorkOrder";
+    List<HCF.BDO.TFloorAssets> tfloorAssets = new List<HCF.BDO.TFloorAssets>();
+    HCF.BDO.EPDetails epdetails = new HCF.BDO.EPDetails();
+    if (TempData["TfloorAssets"] != null)
+    {
+        tfloorAssets = TempData.Get<List<HCF.BDO.TFloorAssets>>("TfloorAssets"); //(List<HCF.BDO.TFloorAssets>)TempData["TfloorAssets"];
+    }
+    if (TempData["epdetails"] != null)
+    {
+        epdetails = TempData.Get<HCF.BDO.EPDetails>("epdetails"); //(HCF.BDO.EPDetails)TempData["epdetails"];
+    }
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>Update work order</h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary ">
+                    <div class="row tablelist-topform">
+                        <div class="col-md-12">
+                            <label> @Localizer["WorkOrderNo"] : @Model.WorkOrderNumber</label>
+                        </div>
+                    </div>
+                   <div class="row">
+                       <div class="col-md-12">
+                           @if (epdetails.EPDetailId > 0)
+                           {
+                               <div class="tble_shadow">
+                                   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="asset_table">
+                                       <tr>
+                                           <th align="left" colspan="2"><strong>Standard EP :</strong> @epdetails.Standard.TJCStandard , @epdetails.EPNumber</th>
+                                       </tr>
+                                       @foreach (HCF.BDO.TFloorAssets tFloorAsset in tfloorAssets)
+                                       {
+                                           if (tFloorAsset != null)
+                                           {
+                                               <tr>
+                                                   <th align="left"><strong>Asset :</strong> @tFloorAsset.Assets.Name</th>
+                                                   <th align="left">
+                                                       <strong> @Localizer["AssetNo"] :</strong> @tFloorAsset.AssetNo
+                                                   </th>
+                                               </tr>
+                                           }
+                                       }
+                                   </table>
+                               </div>
+                           }
+                       </div>
+                   </div>
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                       
+                <div class="row" id="tbl">
+                    <div class="col-md-12 form-group">
+                        @Html.HiddenFor(m => Model.DeficiencyCode)
+                        @Html.HiddenFor(m => Model.IssueId)
+                        @Html.HiddenFor(m => Model.ActivityId)
+                        @Html.HiddenFor(m => Model.WorkOrderNumber)
+                        @Html.HiddenFor(m => Model.WorkOrderId)
+                        @Html.HiddenFor(m => Model.SourceWoId)
+
+                        @if (HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower() == "HCF_Atlantic".ToLower())
+                        {
+                            <input name="TemplateName" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.TemplateName" hidden />
+                            <input name="Mode" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.Mode" hidden />
+                            <input name="Group" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.Group" hidden />
+                            <input name="CategoryId" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.CategoryId" hidden />
+                            <input name="CategoryName" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.CategoryName" hidden />
+                        }
+
+                        <input id="SegmentID" name="SegmentID" type="hidden" value="@HCF.Web.Base.UserSession.CurrentOrg.SegmentId">
+                        @*<input id="floorAssetId" name="floorAssetId" type="hidden" value="@tfloorAssets.FloorAssetsId">*@
+                        @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                        @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required", maxlength = 500, @rows = "3", @cols = "10" })
+                        @Html.ValidationMessageFor(model => model.Description)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.PriorityCode)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.PriorityCode, (SelectList)ViewBag.Priority, "-- Select Priority --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.PriorityCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.StatusCode)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.StatusCode, (SelectList)ViewBag.Status, new { @class = "form-control", @onchange = "ChangeSubStatus()", required = "required" })
+                        @Html.ValidationMessageFor(model => model.StatusCode)
+                    </div>
+
+                    @if (ViewBag.IsWOSubStatusEnabled)
+                    {
+                        <div class="col-md-4 form-group">
+                            @*@Html.LabelFor(model => model.SubStatusCode)*@
+                            <label>Substatus Code <em class="required-field"> *</em></label>
+                            @Html.DropDownListFor(model => model.SubStatusCode, Enumerable.Empty<SelectListItem>(), new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.SubStatusCode)
+                        </div>
+                    }
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.SiteName)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.SiteCode, (SelectList)ViewBag.SiteViewBag, "-- Select --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.SiteCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.BuildingName)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.BuildingCode, (SelectList)ViewBag.Buildings, "-- Select --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.BuildingCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.TypeCode)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.TypeCode, (SelectList)ViewBag.Type, "-- Select --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.TypeCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.AccountCode)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.AccountCode, (SelectList)ViewBag.Account, "-- Select --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.AccountCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.SkillCode)<em class="required-field"> *</em>
+                        @Html.DropDownListFor(model => model.SkillCode, (SelectList)ViewBag.Skill, "-- Select --", new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.SkillCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.TargetDate)
+                        @Html.TextBoxFor(x => Model.TargetDate, $"{Model.TargetDate:MMM d, yyyy}", new { @class = "futuredatepicker form-control readonly", @autocomplete = "off" })
+                        @Html.ValidationMessageFor(model => model.TargetDate)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.ProblemCode)
+                        @Html.DropDownListFor(model => model.ProblemCode, (SelectList)ViewBag.Problem, "-- Select Problem --", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ProblemCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.ItemCode)
+                        @Html.DropDownListFor(model => model.ItemCode, (SelectList)ViewBag.Item, "-- Select Item --", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ItemCode)
+                    </div>
+                    <div class="col-md-4 form-group dtc">
+                        <label>Date Completed <em class="required-field"> *</em></label>
+                        @Html.TextBoxFor(m => Model.DateCompleted, $"{Model.DateCompleted:MMM d, yyyy}", new { @class = "datepicker form-control readonly", @autocomplete = "off", @readonly = "readonly", required = "required" })
+                        @Html.ValidationMessageFor(model => Model.DateCompleted)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.CauseCode)
+                        @Html.DropDownListFor(model => model.CauseCode, (SelectList)ViewBag.Cause, "-- Select Cause --", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.CauseCode)
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.ActionCode)
+                        @Html.DropDownListFor(model => model.ActionCode, (SelectList)ViewBag.Action, "-- Select Action --", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ActionCode)
+                    </div>
+
+                    <div class="col-md-4 form-group">
+                        <label>Assignment </label>
+                        <input type="hidden" id="Userddl" />
+                        <input type="hidden" name="lstResourcesDetails" id="lstResourcesDetails" />
+                        @*@Html.Action("userCustomddl", "Common", new { type = "MULTI" })*@
+                        @await Component.InvokeAsync("CommonuserCustomddl", new { type = "MULTI" })
+                        @*@Html.DropDownListFor(model => model.Resources[0].UserId, (SelectList)ViewBag.Resources, "-- Not Assigned --", new { @class = "form-control" })*@
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.RequesterPhone)<em class="required-field"> *</em>
+                        @Html.TextBoxFor(model => model.RequesterPhone, new { @class = "form-control phone", required = "required", @onkeypress = "ValidateNumber(event);" })
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.RequesterName)<em class="required-field"> *</em>
+                        @Html.TextBoxFor(model => model.RequesterName, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="col-md-4 form-group">
+                        @Html.LabelFor(model => model.RequesterEmail)<em class="required-field"> *</em>
+                        @Html.TextBoxFor(model => model.RequesterEmail, new { @class = "form-control", required = "required", @type = "email" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.CompletionComments)
+                        @Html.TextAreaFor(model => model.CompletionComments, new { @class = "form-control", @rows = "4", @cols = "10" })
+                        @Html.ValidationMessageFor(model => model.CompletionComments)
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.RequesterComments)
+                        @Html.TextAreaFor(model => model.RequesterComments, new { @class = "form-control", @rows = "4", @cols = "10" })
+                    </div>
+                </div>
+                            
+                <div class="row">
+                    <div class="col-md-12 text-right button_Div" id="btndv">
+                        <input type="submit" value='Update' class="comm-button" id="btnSubmit" />
+                        <a href='@HCF.Web.Base.UISession.GetBackPage("workorder_UpdateWorkOrder")' class="comm-Cancelbutton">Cancel</a>
+                    </div>
+                </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section scripts{
+    <script>
+
+        $(document).ready(function () {
+            debugger
+            var IsExistTagDeficiency = '@session.IsExistTagDeficiency';
+            var isGuestUser = '@session.IsGuestUser'
+            if (IsExistTagDeficiency == 'True' && isGuestUser == "True") {
+                $(".breadcrumb-arrow").remove($("<li>").hasClass('backbtn'))
+                $('.chkpassword').hide()
+                $('.liprofile').hide()
+            }
+            $(".dtc").hide();
+
+            var preDesc = "";
+            if ('@HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower()' == "HCF_Atlantic".toLowerCase()) {
+                if ('@Model.IsIlsm' == 'true') {
+                    preDesc = "ILSM: "
+                }
+                else {
+                    preDesc = "MAINT: "
+                }
+
+                if ($('#Description').val().includes('MAINT:') || $('#Description').val().includes('ILSM:')) {
+                    var desc = $('#Description').val();
+                    $('#Description').val(desc)
+                }
+                else {
+                    var desc = preDesc + $('#Description').val();
+                    $('#Description').val(desc)
+                }
+
+            }
+
+            if ('@Model.StatusCode' != 'ACTIV' && '@Model.StatusCode' != "PENDG" && '@Model.CRxCode' != "ACTIV" && '@Model.CRxCode' != "PENDG") {
+                $("#tbl").find("input,textarea,select").attr("disabled", "disabled");
+                //var msg = '@Model.StatusCode' == "CANCL" ? "canceled" : "completed";
+                var msg = '@Model.CRxCode' == "CANCL" ? "canceled" : '@Model.CRxCode' == "CLOSE" ? "closed" : "completed";
+                swal({
+                    html: true,
+                    title: "Message",
+                    text: "<label>Work order is " + msg + "</label>",
+                    type: "warning",
+                    cancelButtonText: "OK",
+                    closeOnCancel: true
+                });
+                $("#btndv").hide();
+                $(".dtc").show();
+                $('#DateCompleted').attr('readonly', true);
+                // $('#DateCompleted').datepicker('disabled', true);
+            }
+            else {
+                CheckDateCompleted();
+            }
+
+
+            @*@if (Model.Resources.Count > 0)
+            {
+                @: if ($('#Resources_0__UserId option[value=' + @Model.Resources.FirstOrDefault().UserId + ']').length > 0){$("#Resources_0__UserId").val(@Model.Resources.FirstOrDefault().UserId);}
+            }*@
+
+            var enableDate = new Date('@Model.DateCreated.Value.ToClientTime().ToFormatDate()');
+            //debugger;
+            $('.datepicker').datepicker("option", "minDate", enableDate);
+            ChangeSubStatus();
+            resourcedll();
+            //bindUserdll();
+
+            if ('@Model.SiteCode' == '') {
+                $("#SiteCode").val($("#SiteCode option:eq(1)").val());
+            } else {
+                $("#SiteCode").val('@Model.SiteCode');
+            }
+
+        });
+
+
+    //$('.datepicker').datepicker("option", "maxDate", new Date());
+
+    $('.ui-datepicker-trigger').on('dragstart', function (event) { event.preventDefault(); });
+
+        function ChangeSubStatus() {
+            debugger;
+        $("#SubStatusCode").empty();
+        $("#SubStatusCode").append(
+                        $('<option></option>').val("").html("Select Sub Type"));
+        var statusCode = $('#StatusCode').val();
+        //var completeDate = $('#DateCompleted');
+        CheckDateCompleted();
+        var urlAction = '@Url.Action("GetSubStatus", "WorkOrder")';
+        if (statusCode != "") {
+            $.ajax({
+                url: urlAction,
+                type: "GET",
+                dataType: "JSON",
+                global: false,
+                data: { statusCode: statusCode },
+                success: function (resuslt) {
+                    console.log(resuslt);
+                    $.each(resuslt, function (i, substatus) {
+                        $("#SubStatusCode").append(
+                            $('<option></option>').val(substatus.Code).html(substatus.Description));
+                    });
+                    $("#SubStatusCode").val('@Model.SubStatusCode');
+                }
+            });
+        }
+    }
+
+        function CheckDateCompleted() {
+            //debugger;
+            var statusCode = $('#StatusCode').val();
+            if (statusCode == "CMPLT" || statusCode == "CANCL") {
+                var completeDate = $('#DateCompleted').val($.datepicker.formatDate('M dd yy', new Date()));
+            } else {
+                var completeDate = $('#DateCompleted');
+            }
+        if (statusCode == "CMPLT" || '@Model.CRxCode' == 'CMPLT' || statusCode == "Resolved" || statusCode == "CANCL") {
+            debugger
+            $(".dtc").show();
+            completeDate.attr('required', "required");
+        } else {
+            completeDate.attr('required', "required");
+            $("#DateCompleted").val("");
+            $(".dtc").hide();
+        }
+    }
+
+        $("#btnSubmit").on('click', function () {
+            debugger
+            var requesterphonenum = $("#RequesterPhone").val();
+            if ($("#DateCompleted").val() == "" && $(".dtc").is(':visible')) {
+                swalalert("Please Select Date First!");
+                return false;
+            } else  if (requesterphonenum.length != 14) {
+                    swalalert("Please Enter 10 Digit Requester Phone!");
+                    return false;
+                }
+            else {
+                return true;
+            }
+        });
+
+     
+
+        function resourcedll() {
+            debugger;
+            var chkedUserId = '@string.Join(",", Model.Resources.Select(x=>x.UserId).Select(n => n.ToString()).ToArray())';
+            var usersIds = chkedUserId.split(',');
+            for (var i in usersIds) {
+                var optionVal = usersIds[i];
+                $("#ddlMultiUser").find("option[value=" + optionVal + "]").prop("selected", "selected");
+            }
+            $("#ddlMultiUser").selectpicker('refresh');
+        }
+
+
+    $('body').on('change', '#ddlMultiUser', function () {
+        var value = $(this).val();
+        var resourcesdetails = [];
+        for (var i = 0; i < value.length; i++) {
+            var resourcesdetail = { UserId: value[i] };
+            resourcesdetails.push(resourcesdetail);
+        }
+        //debugger;
+        $("#lstResourcesDetails").val(JSON.stringify(resourcesdetails));
+    });
+
+
+    </script>
+}

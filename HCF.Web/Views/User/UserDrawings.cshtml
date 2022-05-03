@@ -1,0 +1,231 @@
+﻿@model  HCF.Web.ViewModels.UserDrawingViewModel
+@{
+    var usersList = Model.Users;
+    var drawings = Model.Drawings;
+    //var siteMapping = Model.UserSites;
+    ViewBag.Title = "Drawing Assignment";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                User Drawing Assignment 
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+
+
+
+                    <div class="row tablelist-topform">
+                        <div class="col-md-12">
+                            @await Html.PartialAsync("_userViewSelect")
+                        </div>
+                        
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-9"></div>
+                        <div class="col-md-3 text-right">
+                            <div class="input-group" id="">
+                                <div class="input-sublist">
+                                    <input type="text" class="form-control" id="inputSuccess2" placeholder="Search">
+                                </div>
+                                <span class="input-group-addon">
+                                    <i class="fa fa-search" id="btntxtsearch"></i>
+                                </span>
+                            </div>
+                        </div>
+                       
+                        <div class="col-md-12">
+
+                            <div class="table-responsive usersite-table">
+                                <table id="userTable" class="display table table-bordered comman_checkbox1">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <button class="button1" id="filterUsers">Internal Users</button>
+                                            </th>
+                                            @foreach (var item in drawings)
+                                            {
+                                                <th>
+                                                    @item.FloorType
+                                                </th>
+
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in usersList.Where(x => x.IsActive))
+                                        {
+                                            <tr class="users" id="@string.Format("user_{0}",item.UserId)" vendorid="@item.IsVendorUser.ToString()">
+                                                <th>@item.FullName</th>
+                                                @foreach (var floorType in drawings)
+                                                {
+                                                    bool isCheckBoxVisible = true;
+                                                    int step = 0;
+                                                    if (item.DrawingIds != null)
+                                                    {
+                                                        var type = item.DrawingIds.Contains(floorType.FloorTypeId);
+                                                        if (type)
+                                                        {
+                                                            step = 1;
+                                                        }
+                                                    }
+                                                    if (item.VendorId.HasValue && item.VendorId.Value > 0)
+                                                    {
+                                                        var vendorDrawings = Model.Vendors.FirstOrDefault(x => x.VendorId == item.VendorId.Value && x.IsActive)?.DrpDrawingsIds;
+                                                        if (vendorDrawings != null)
+                                                        {
+                                                            var type = vendorDrawings.Contains(floorType.FloorTypeId);
+                                                            if (type == false)
+                                                            {
+                                                                isCheckBoxVisible = false;
+                                                            }
+                                                        }
+                                                    }
+
+                                            <th class="text-center">
+                                                @if (isCheckBoxVisible)
+                                                {
+                                                    <span userid="@item.UserId" class="@string.Format("checkbox step{0}", step)" drawingid="@floorType.FloorTypeId" assignedtype="@step">
+                                                    </span>
+                                                    <span class="label"></span>
+                                                }
+                                                else
+                                                {
+                                                    <span userid="@item.UserId" class="@string.Format("checkbox step{0}", step)" drawingid="@floorType.FloorTypeId" assignedtype="@step">
+                                                    </span>
+                                                    <span class="label"></span>
+                                                }
+                                            </th>
+                                                }
+                                            </tr>
+
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+
+
+@section   scripts{
+
+    <link href="~/dist/css/userStyle.css" rel="stylesheet" />
+
+
+    <script>
+
+        $("#filterUsers").click(function () {
+            debugger;
+            $(this).text($(this).text() == 'Internal Users' ? 'Vendor Users' : 'Internal Users');
+            $("tr.users").hide();
+            if ($(this).text() == 'Internal Users') {
+                $("tr[vendorid='False']").show();
+            } else {
+                $("tr[vendorid='True']").show();
+            }
+
+        });
+
+
+        $(document).ready(function () {
+            debugger;
+            $("tr[vendorid='True']").hide();
+        });
+
+
+        var lists = [];
+
+        $('.checkbox').click(function () {
+            var ctr = $(this);
+            loadData(ctr);
+
+        });
+
+        $(document).ready(function () {
+    
+        });
+
+        function loadData(ctr) {
+            debugger;
+            var userid = ctr.attr("userid");
+            var accessType = 0;
+           
+
+            if (ctr.hasClass('step1')) {
+                ctr.removeClass('step1');
+                ctr.addClass('step0');
+                  accessType = 0;           
+            } else {
+                ctr.addClass('step1');
+                  accessType = 1;
+            }
+
+
+           
+            ctr.attr("assignedtype", accessType);
+            SaveRecords(userid);
+        }
+
+        function SaveRecords(userid) {
+            debugger;
+            var lists = [];
+            var trCtr = $("#user_" + userid);
+            trCtr.find(".checkbox").each(function (index) {
+
+                var siteId = $(this).attr("drawingid");
+                var assignedtype = $(this).attr("assignedtype");
+                //var userid = $(this).attr("userid");
+                //let list = {
+                //    SiteId: siteId,
+                //    AssignedType: assignedtype,
+                //    UserId: userid
+                //};
+                if (assignedtype === "1")
+                    lists.push(siteId);
+            });
+            $.ajax({
+                url: '@Url.Action("SaveUserDrawings", "User")' + "?userId=" + userid,
+                type: "POST",
+                //global: false,
+                data: { drawingIds: lists },//JSON.stringify({ drawingIds: lists }),
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (result) {
+
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            debugger;
+            $("#inputSuccess2").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#userTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+
+
+    </script>
+
+   
+}
+

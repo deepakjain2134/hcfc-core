@@ -1,0 +1,299 @@
+﻿@model HCF.BDO.RoundVolunteer
+@{
+    var ReplacingUserName = Model.ReplacingUserName;
+    var userList = Model.userList;
+}
+
+<div class="modal-content">
+    @*@using (Ajax.BeginForm("ReplaceVolunteer", "Round", new { id = "volunteerReplace" }, new { OnSuccess = "OnVolunteerSuccess" }))
+        {*@
+    <form asp-controller="Round" asp-action="ReplaceVolunteer"
+          id="volunteerReplace"
+          data-ajax-success="OnVolunteerSuccess"
+          data-ajax="true" data-ajax-method="POST">
+
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span class="modelTitle">VOLUNTEER REPLACEMENT</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+        </div>
+        @if (Model.roundGroups.Count > 0)
+        {
+            <div class="modal-body">
+                <div class="form-group">
+                    @Html.HiddenFor(m => m.Userid)
+                    @Html.HiddenFor(m => m.RoundGroupId)
+                    @Html.HiddenFor(m => m.SelectedChecks)
+                    <h4 style="font-size:16px;"> @ReplacingUserName is currently assigned to the following rounds. Please select the rounds for which you would like @ViewBag.ReplacingUser replaced. </h4>
+
+                    <div class="form-group ReplacingUserList">
+                        <ul>
+                            @foreach (var rgroup in Model.roundGroups)
+                            {
+                                foreach (var cate in rgroup.RoundCategory)
+                                {
+                                    if (cate != null)
+                                    {
+                                        var isExists = rgroup.RoundSchedules.Any(x => x.RoundGroupId == rgroup.RoundGroupId && x.RoundCatId == cate.RoundCatId);
+                                        if (isExists)
+                                        {
+                                            <li>
+                                                <input type="checkbox" id="UsergroupAndCatReplace" catid="@cate.RoundCatId" groupid="@rgroup.RoundGroupId "
+                                                       class="checkBox" value="@cate.CategoryName rounds with the @rgroup.Name group." />
+                                                <span></span> <label> @cate.CategoryName rounds with the @rgroup.Name group.</label>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <input type="checkbox" id="UsergroupAndCatReplace" catid="@cate.RoundCatId" groupid="@rgroup.RoundGroupId"
+                                                       class="checkBox" value="@cate.CategoryName rounds with the @rgroup.Name group." disabled />
+                                                <span></span> <label class="disable"> @cate.CategoryName rounds with the @rgroup.Name group ( There are no rounds assigned in step 4 ). </label>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><strong>Please select replacement volunteer</strong></label>
+                    <div class="form-group">
+                        <select class="form-control" id="RoundVolunteerID" name="RoundVolunteerID">
+                            <option value="">Select Volunteer</option>
+                            @foreach (var item in Model.userList.OrderBy(x => x.Name))
+                            {
+                                if (Model.roundGroups.FirstOrDefault().roundVolunteers.Any(x => x.Userid == item.UserId))
+                                {
+                                    <option value="@item.UserId" username="@item.FullName" disabled="disabled">@item.FullName (This user already Replaced to @ViewBag.ReplacingUser )</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.UserId" username="@item.FullName">@item.FullName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><strong>When do you want this replacement occur?</strong></label>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="btn-group volunteer-vertical" data-toggle="buttons" id="btnroundDuration">
+                            <label class="btn active">
+                                @Html.RadioButton("ReplacementType", "1", new { @selradio = "1" }) <i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>  @Html.Label("Replace for next round only")
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("ReplacementType", "2", new { @selradio = "2" }) <i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i> @Html.Label("Replace for customized period of time")
+                                <span class="volunteer2date">
+                                    <input class="datepicker Startdate form-control" placeholder="Start Date" type="text" id="Startdate" name="Startdate" readonly="readonly" required="required" value="" />
+                                    <input class="datepicker EndDate form-control" placeholder="End Date" type="text" id="Enddate" name="Enddate" readonly="readonly" required="required" value="" />
+                                </span>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("ReplacementType", "3", new { @selradio = "3" }) <i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i> @Html.Label("Replace permanently")
+                                <span class="volunteer2date">
+                                    <input class="datepicker Startdate form-control" placeholder="Effective Date" type="text" id="EffectiveDate" name="EffectiveDate" style="min-width: 240px;" readonly="readonly" value="" />
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="modal-body">
+
+                <span> There are no round schedules for @ReplacingUserName  </span>
+            </div>
+        }
+
+        <div class="modal-footer">
+            <button type="button" class="comm-Cancelbutton" id="btn_close" data-dismiss="modal">Cancel</button>
+            @if (Model.roundGroups.Count > 0)
+            {
+                <input name="btnSubmit" type="button" id="Replace" value="Replace" class="comm-button" />
+            }
+        </div>
+    </form>
+</div>
+
+
+<script>
+    //const { e } = require("../../dist/Scripts/quagga");
+
+    $(document).ready(function () {
+        $('input.EndDate').datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: $.CRx_DateFormat,
+            beforeShow: changeYearButtons,
+            minDate: 0,
+            onChangeMonthYear: changeYearButtons
+        });
+
+
+        $("input.Startdate").datepicker({
+            minDate: 0,
+            dateFormat: $.CRx_DateFormat
+        });
+
+
+
+
+    })
+    Array.prototype.Remove = function () {
+        var what, a = arguments, L = a.length, ax;
+        while (L && this.length) {
+            what = a[--L];
+            while ((ax = this.indexOf(what)) !== -1) {
+                this.splice(ax, 1);
+            }
+        }
+        return this;
+    };
+
+    var arr = []
+    var text_array = []
+    $('input:checkbox[id^="UsergroupAndCatReplace"]').on('change', function () {
+       // debugger
+        var catid = $(this).attr("catid");
+        var gId = $(this).attr("groupid");
+        var txt = $(this).val();
+        var values = catid + '_' + gId;
+        if (jQuery.inArray(values, arr) === -1) {
+            arr.push(values);
+        } else { arr.Remove(values);}
+        if (jQuery.inArray(txt, text_array) === -1) {
+            text_array.push(txt);
+        } else { text_array.Remove(txt);}
+    });
+    var val = null;
+    $("[name=ReplacementType]").on('change', function () {
+       // debugger
+        val = $(this).val();
+        var volunteer = $('#RoundVolunteerID').val();
+        if (val != "" && arr.length == 0 && volunteer == "") {
+            swalalert("First select currently assigned Rounds and volunteer which you want to replace!");
+            return false
+        }
+        if (val != "" && arr.length == 0) {
+            swalalert(" First select atleast one or more  currently assigned Rounds ");
+            return false
+        }
+
+        if (val != "" && volunteer == "") {
+            swalalert("Please select volunteer which you want to replace!");
+            return false
+        }
+    });
+
+    var replacingvolunteerName = '';
+    $('#RoundVolunteerID').on('change', function () {
+       // debugger
+        var value = $(this).val();
+        var username = $('option:selected', this).attr('username');
+        replacingvolunteerName = username;
+    });
+
+
+        function OnVolunteerSuccess(data) {
+           // debugger;
+            if (data == "NoSchedules") {
+                swalalert("There are no round schedules!")
+                $('#OpenReplaceUsersPopup').modal('hide');
+            }
+            if (data == true) {
+                swalalert("Replace Successfully!")
+                $('#OpenReplaceUsersPopup').modal('hide');
+            }
+            getGroupUsers();
+        }
+
+    $('#Replace').on('click', function () {
+        //debugger
+        var text = 'You have selected ' + replacingvolunteerName + ' to replace ' + '@ViewBag.ReplacingUser' + ' for:' + '\r\n';
+        if (text_array.length != 0) {
+            for (var i = 0; i < text_array.length; i++) {
+                text += parseInt([i]) + 1 + '. ' + text_array[i] + '\r\n';
+            }
+        }
+
+        if (arr.length != 0) {
+            $('#SelectedChecks').val(arr);
+        } else {
+            swalalert(" First select atleast one or more  currently assigned Rounds ");
+            return false
+        }
+        //debugger;
+        var volunteer = $('#RoundVolunteerID').val();
+        if (volunteer == "") {
+            swalalert("Please select volunteer which you want to replace!")
+            return false
+        }
+        if (val == null) {
+            swalalert("Please select replacement date!")
+            return false
+        }
+
+        if (val == "2") {
+            var startdate = $('#Startdate').val();
+            var enddate = $('#Enddate').val();
+            if (startdate == "") {
+                swalalert("Please enter start date")
+                return false
+            }
+            if (enddate == "") {
+                swalalert("Please enter end date")
+                return false
+            }
+
+        }
+        if (val == "3") {
+            var effectivedate = $('#EffectiveDate').val();
+            if (effectivedate == "") {
+                swalalert("Please enter effective date")
+                return false
+            }
+        }
+
+        swal({
+            html: true,
+            title: "Message",
+            text: text,
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+        }, function (isConfirm) {
+                if (isConfirm) {
+                    //debugger;
+                    ReplacedSubmit();
+                } else {
+                    //debugger;
+                }
+        });
+    });
+
+
+        function ReplacedSubmit() {
+            //debugger
+            $('#volunteerReplace').submit();
+        }
+
+</script>
+<style>
+    div[data-toggle="buttons"] label {
+        float: initial;
+    }
+</style>

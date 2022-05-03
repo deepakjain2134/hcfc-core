@@ -1,0 +1,88 @@
+﻿@model HCF.BDO.EPDetails
+
+@{
+    Layout = null;
+    //var StartDate = Model.Inspection.StartDate;
+    //var EndDate = Model.Inspection.EndDate;
+}
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Select a date</h4>
+</div>
+
+@*<div class="modal-header">
+        <h4 class="modal-title">Select a date</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>*@
+<div class="modal-body">
+    <div>
+        @Html.HiddenFor(x => x.EPDetailId)
+        <label>Please select any date to inspect the previous inspection.</label>
+        <div id="datepicker"></div>
+        <p><label>Select a date to continue</label></p>
+    </div>
+    @*<div id="divreinspect">
+        <div>Would you like to Re-Inspect Or View History ?</div>
+        <a class="comm-button" style="margin-right:5px" href="@Url.Action("EPstate", "Goal", new {epId = Model.EPDetailId })">Re-Inspect</a>
+        <a class="comm-bluebutton" style="margin-right:5px" href="@Url.Action("EpInspectionsHistory", "Goal" , new {epId = Model.EPDetailId })">History</a>
+        <a class="comm-button" style="margin-right:5px" href="">Attach Addtional Doc</a>
+    </div>*@
+
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn comm-button disabled" id="btn_continue">Continue</button>
+    <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal" id="cancelBtn">Close</button>
+</div>
+
+<script>
+    var epId = '@Model.EPDetailId';
+   
+    $('#datepicker').datepicker({
+        minDate: new Date('@Model.Inspection.StartDate'),
+        maxDate: new Date('@Model.Inspection.EndDate'),
+        dateFormat: 'mm-dd-yy',
+        //changeMonth: true,
+        //changeYear: true,
+        //yearRange: "-90:+00",
+
+        onSelect: function (dateText, inst) {
+            $("#btn_continue").removeClass("disabled");
+         
+        }
+    });
+
+    $("#btn_continue").click(function () {
+
+        var date = $("#datepicker").datepicker("option", "dateFormat", "mm-dd-yy").val();
+
+        console.log(date, epId);
+        //return false;
+                 $.ajax({
+                            url: '@Url.Action("AddPreviousInspection", "Inspection")' ,
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { epId: epId, datetime: date,  __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+                     success: function (data) {
+                         console.log(data);
+                         if (data.InspectionId > 0 && data.EPDetailId >0) {
+                             $("#cancelBtn").click();
+                             //$(".modal-backdrop.in").hide();
+                             localStorage.setItem('IsPreviousCycle', 1);
+                             localStorage.setItem('InspDate', date);
+                             window.location.href = '@Url.Action("EPstate", "Goal")' + "?epId=" + data.EPDetailId + "&inspectionId=" + data.InspectionId;
+                         }
+                            }
+                        });
+    });
+</script>
+<style>
+    .modal-dialog {
+        max-width: 60%;
+    }
+
+    .hasDatepicker {
+        background-image: none;
+    }
+</style>

@@ -1,0 +1,104 @@
+﻿@model HCF.BDO.RoundCategory
+@{
+    ViewBag.Title = "RoundQuestionnaries";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Round Questionnaire
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href="@Url.Action("AddRoundsQuestonaries", "Round", new { roundId = Model.RoundCatId, floorId = 0 })"
+                               class="pull-right modal-link">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Rounds Questionnaire" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="f_myTable" class="table table-bordered table-striped comman_checkbox1">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Questionnaire
+                                        </th>
+                                        <th></th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.RoundItems.OrderBy(x => x.RoundStep))
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.RoundStep)
+                                            </td>
+                                            <td></td>
+                                            <td class="comman_checkbox1">
+                                                @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                            </td>
+                                            <td title="Edit">
+
+                                                <a href="@Url.Action("AddRoundsQuestonaries", "Rounds", new { roundId = Model.RoundCatId, roundQuestionId = item.RouQuesId })"
+                                                   class="pull-right modal-link">
+                                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="3d_add_button" />
+                                                </a>
+
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var dtable = $('#f_myTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [1, 'asc'],
+            "bPaginate": $('#f_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            columnDefs: [{
+                targets: 0,
+                data: 2,
+                'checkboxes': {
+                    'selectRow': true
+                }
+            },
+                {
+                    "visible": false, "targets": 1
+                }],
+            select: {
+                style: 'multi'
+            },
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        });
+
+
+
+    });
+</script>

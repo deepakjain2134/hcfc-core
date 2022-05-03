@@ -1,0 +1,73 @@
+﻿@model List<HCF.BDO.TRoundWorkOrders>
+<div class="woListpanel">
+    <h4 class="roundsHeading" id="woListpanel">
+        <i class="fa fa-chevron-down"></i> Work Orders (@Model.Distinct().Where(x=>x.WorkOrder.WorkOrderNumber!="0").ToList().Count)
+        <span class="plusicon1" onclick="GotoIssues()" id="addwo">
+            <span title="Add Work Order"><i class="fa fa-plus" aria-hidden="true"></i></span>
+        </span>
+    </h4>
+    <ul class="wohideshow">
+        @foreach (var item in Model.Distinct().Where(x => x.WorkOrder.WorkOrderNumber != "0").ToList())
+        {
+            @if (item.WorkOrder.WorkOrderNumber != "0")
+            {
+                <li id="@item.IssueId" class="roundIssue">
+                     @("WO#: "+ item.WorkOrder.WorkOrderNumber)
+
+                    @if (item.WorkOrder.StatusCode == "ACTIV")
+                    {
+                        <span style="float:right">
+                            ACTIVE
+                        </span>
+                    }
+                    else if (item.WorkOrder.StatusCode == "CANCL")
+                    {
+                        <span style="float:right">
+                            CANCELED
+                        </span>
+                    }
+                    else if (item.WorkOrder.StatusCode == "CMPLT")
+                    {
+                        <span style="float:right">
+                            COMPLETED
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="float:right">
+                            PENDING
+                        </span>
+                    }
+
+                </li>
+            }
+
+        }
+    </ul>
+</div>
+<script>
+    var roundId = $("#TRoundId").val();
+    $("#woListpanel").click(function () {
+        $(".wohideshow").slideToggle('linear');
+        $("#woListpanel").find(".fa-chevron-down").toggleClass("rightarrow");
+    });
+
+    $(".roundIssue").click(function () {
+        var Id = $(this).attr("id");
+        var urlAction = CRxUrls.WorkOrder_UpdateWorkOrder;
+        window.location.href = urlAction + "?issueId=" + Id;
+    });
+
+    function GotoIssues() {
+        var troundId=$("#hdnRoundId").val();
+        var url = '@Url.Action("RoundIssues", "Round")';
+        if (troundId != null && troundId != "" && troundId != undefined) {
+            url = '@Url.Action("GroupRoundIssues", "Round")';
+            window.location.href = url + "?rId=" + troundId + "&groupid=" + $('#hdnGroupRoundId').val() + "&userids=" + $('#hdnusers').val() + "&rounddate=" + $("#hdndate").val()
+        }
+        else {
+            window.location.href = url + "?rId=" + troundId;
+        }
+    }
+
+</script>

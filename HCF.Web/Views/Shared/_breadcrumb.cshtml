@@ -1,0 +1,44 @@
+﻿@{
+    var list = HCF.Web.Base.UISession.GetAll();
+    var breadCum = HCF.Web.Base.UISession.GetBreadCrumbs();
+    var ScreenName = string.Format("{0}_{1}", ViewContext.RouteData.Values["Controller"].ToString().ToLower(), ViewContext.RouteData.Values["Action"].ToString().ToLower());
+}
+<ul class="leftpadding"></ul>
+
+<div class="crxbraecrum-row">
+    <ol class="breadcrumb breadcrumb-arrow">
+        @if (list.Count > 0)
+        {
+            <li class="backbtn">
+                <a href="#" id="btnbackpageUrl"><i class="fa fa-backward" aria-hidden="true"></i> Back</a>
+            </li>
+        }
+        @if (breadCum.Any())
+        {
+            <li class="home_brud">
+                <a href="/dashboard">Home</a>
+            </li>
+        }
+        @foreach (var item in breadCum)
+        {
+            <li>
+                <a href="@Url.Action("RedirectToPage", "Common", new { pageIndex = item.PageIndex, screenName = item.Screen })">@item.DisplayName</a>
+            </li>
+        }
+    </ol>
+    @if (HCF.Web.Base.UISession.IskeyExist("assets_GetTfloorAssets"))
+    {
+        <a class="floorplan_redirect" href="@Url.Action("GetBackPageInspection", "Common", new { 
+                                           screenName = "assets_GetTfloorAssets" })">GO TO FloorPlan</a>
+    }
+    &nbsp;&nbsp;
+    @await Html.PartialAsync("_PrintPage")   
+</div>
+<script type="text/javascript">
+    $("#btnbackpageUrl").click(function (e) {
+        
+        if (document.referrer) {
+            window.location.href = document.referrer;
+        }
+    });
+</script>

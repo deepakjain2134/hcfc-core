@@ -1,0 +1,46 @@
+﻿@model HCF.BDO.ConstructionClassActivity
+@{
+    var constructionclass = (HCF.BDO.ConstructionClass)ViewBag.ConstructionClass;
+}
+@using (Html.BeginForm())
+{
+    <div class="modal-header">
+
+        <h4 class="modal-title">
+            <span class="modelTitle">@constructionclass.ClassName</span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.ConstClassId)
+            <div class="col-md-12 form-group">
+                @Html.LabelFor(model => model.ConstClassCatId)<em class="required-field"> *</em>
+                @Html.DropDownListFor(m => m.ConstClassCatId, new SelectList(ViewBag.ConstClassCategory, "ConstClassCatId", "Categrory"),
+                   "Select Category",
+                 new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.ConstClassCatId)
+            </div>
+            <div class="col-md-12 form-group">
+                @Html.LabelFor(model => model.Activity)<em class="required-field"> *</em>
+                @Html.TextAreaFor(model => model.Activity, new { @class = "form-control", required = "required", maxlength = 500 })
+                @Html.ValidationMessageFor(model => model.Activity)
+            </div>
+            <div class="col-md-12 form-group comman_checkbox">
+
+                @*@Html.LabelFor(model => model.IsActive)*@
+                @Html.EditorFor(model => model.IsActive)<span></span>
+                @Html.ValidationMessageFor(model => model.IsActive)
+                <label>Active</label>
+            </div>
+
+            <div class="col-md-12 text-right modal-footer">
+                <input type="submit" value="Save" class="btn comm-button" />
+                <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+}

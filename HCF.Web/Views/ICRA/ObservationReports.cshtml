@@ -1,0 +1,111 @@
+﻿@model HCF.BDO.TIcraLog
+@{
+   // ViewBag.Title = "ObservationReports";
+    if (ViewBag.PermitType != null && ViewBag.PermitType == 1)
+    {
+        ViewBag.Title = "CRA Observation Reports";
+    }
+    else
+    {
+        ViewBag.Title = "ICRA Observation Reports";
+    }
+
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+
+            @(ViewBag.PermitType != null && ViewBag.PermitType == 1 ? "CRA Observation Reports (Read only)" : "ICRA Observation Reports (Read only)")
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary">
+                    <ul class="ul_list">
+                        @foreach (var item in Model.ObservtionReports.ToList().OrderByDescending(x => x.ReportDate))
+                        {
+                            <li>
+                                <label class="@commonModelFactory.GetTranStatus(item.ReportStatus)" style="margin-top:-5px;"></label>
+                                <a href="#" onclick="openview(@item.TICRAReportId,'@item.ReportDate.ToFormatDate()',this);" id="@item.TICRAReportId" date="@item.ReportDate.ToFormatDate()">
+                                    @item.ReportName
+                                    <span>
+                                        @item.ReportDate.ToFormatDate()
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-9 col-xs-9">
+                <div class="box box-primary col-lg-12">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>Project Name: @Model.ProjectName</td>
+                            @*<td>Project No: @Model.ProjectNo</td>*@
+                            @if (@Model.ObservtionReports.Count > 0)
+                            {
+                                <td>
+                                    Report Date:
+                                    <label id="reportdate">
+                                        @Model.ObservtionReports.ToList().OrderByDescending(x => x.ReportDate).FirstOrDefault().ReportDate.ToFormatDate()
+                                    </label>
+                                </td>
+                            }
+
+                        </tr>
+                    </table>
+                    <div id="icraReportDiv">
+                        @if (Model.ObservtionReports.ToList().FirstOrDefault() != null)
+                        {
+                            @await Html.PartialAsync("_TICRAObservationReport", Model.ObservtionReports.ToList().OrderByDescending(x => x.ReportDate).FirstOrDefault())
+                        }
+                        else
+                        {
+                            <div class="tble_shadow text-center">No observation reports </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        $('.ul_list li:first').addClass('active');       
+        $(':input').addClass("disable");
+        $(".ui-datepicker-trigger").hide();
+        $("#tblreportinfo").hide();
+    });
+
+
+  
+    var openview = function (reportId, reportdate, control) {
+        $('#icraReportDiv').empty();
+        
+        $("li").removeClass("active");
+        $("#" + control.id).parent("li").addClass("active");
+        $("#reportdate").html(reportdate);
+        $.ajax({
+            url: CRxUrls.icra_ObservationReport + "?icraId=" +@Model.TicraId + "&reportId=" + reportId ,
+            type: "GET",
+            dataType: "HTML",
+            success: function (data) {
+                if (data) {
+                    $('#icraReportDiv').empty();
+                    $('#icraReportDiv').html(data).fadeIn('fast');
+                    $(':input').addClass("disable");
+                    $(".ui-datepicker-trigger").hide();
+                    $("#tblreportinfo").hide();
+                }
+            }
+        });
+    }   
+
+</script>
+

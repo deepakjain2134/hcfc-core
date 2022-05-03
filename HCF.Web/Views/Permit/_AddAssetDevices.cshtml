@@ -1,0 +1,77 @@
+﻿@model HCF.BDO.AssetDevices
+@using (Html.BeginForm())
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle">Manage Asset Device</span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <div class="">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.AssetFormId)
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.Description)
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Path)<em class="required-field"> *</em>
+                <select id="Path" name="Path" class="form-control" required>
+                    <option value="">Select</option>
+                    <option value="A">Path A (Non Fire Alarm Device)</option>
+                    <option value="B">Path B (Fire Alarm NonAddressable Device)</option>
+                    <option value="C">
+                        Path C (Fire Alarm Addressable Device)
+                    </option>
+                </select>
+                @Html.ValidationMessageFor(model => model.Path)
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.DeviceType)<em class="required-field"> *</em>
+                <select id="DeviceType" name="DeviceType" class="form-control" required>
+                    <option value="0">Other Device</option>
+                    <option value="1">Life Safety Device</option>
+                    <option value="2">Facility Device</option>
+
+                </select>
+                @Html.ValidationMessageFor(model => model.Path)
+            </div>
+            <div class="form-group comman_checkbox">
+
+                @*@Html.LabelFor(model => model.IsActive)*@
+                @Html.EditorFor(model => model.IsActive)<span></span>
+                @Html.ValidationMessageFor(model => model.IsActive)
+                <label>Active</label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="comm-button" />
+        <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+    </div>
+}
+<script>
+    var Path = $("#Path");
+    var DeviceType = $("#DeviceType");
+
+    $(document).ready(function () {
+        debugger;
+        var Pathval = '@Model.Path';
+        var DeviceTypeval = parseInt('@Model.DeviceType');
+        if (Pathval != null && Pathval!='') {
+            Path.val(Pathval);
+        }
+      
+        if (DeviceTypeval > 0) {
+            DeviceType.val(DeviceTypeval);
+        }
+    } );
+</script>>

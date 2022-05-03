@@ -1,0 +1,331 @@
+﻿@model HCF.BDO.Schedules
+@using HCF.Web.Helpers
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">
+            When Inspection in this schedules are done
+        </h4>
+    </div>
+
+    @*@using (Ajax.BeginForm("SaveSchedule", "Schedule", new AjaxOptions { OnSuccess = "onSuccess" }))
+        {*@
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(modelItem => modelItem.ScheduleId)
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-6">
+                    Name this schedule
+                </div>
+                <div class="col-lg-6">
+                    Start Date
+                </div>
+                <div class="col-lg-6">
+                    @Html.TextBoxFor(modelItem => Model.ReferenceName, new { required = "required", @class = "form-control", @placeholder = "This must be unique" })
+                </div>
+                <div class="col-lg-6">
+                    @Html.TextBoxFor(modelItem => Model.StartDate, $"{Model.StartDate:MM/dd/yyyy}", new { required = "required", @class = "form-control startDate readonly", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">
+                    Frequency
+                </div>
+                <div class="col-lg-10">
+                    <div class="col-lg-12">
+                        @for (int i = 0; i < Model.ScheduleFrequency.Count(); i++)
+                        {
+                            <div class="col-lg-4">
+                                @Html.HiddenFor(modelItem => Model.ScheduleFrequency[i].ScheduleFreqId)
+                                @Html.HiddenFor(modelItem => Model.ScheduleFrequency[i].FrequencyId)
+                                @Html.CheckBoxFor(modelItem => Model.ScheduleFrequency[i].IsActive, new { @class = "frequencyChk", @value = Model.ScheduleFrequency[i].FrequencyId }) <span></span>@Model.ScheduleFrequency[i].Frequency.DisplayName
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">
+                    Description
+                </div>
+                <div class="col-lg-10">
+                    @Html.TextAreaFor(modelItem => Model.Description, new { @class = "form-control" , id="scheduleDesc" , @readonly="" })
+                </div>
+            </div>
+
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-4">
+                    Special consideration / Rule
+                </div>
+                <div class="col-lg-1">
+                    @Html.CheckBoxFor(modelItem => Model.IsCustomDate)<span></span>
+                </div>
+                <div class="col-lg-7" id="scheduleRule">
+                    @await Html.PartialAsync("_scheduleRule")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" id="submitButton" class="btn btn-default" name="submitButton">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    </div>
+    @*}*@
+
+</div>
+
+<script>
+
+    var IsCustomDate = $("#IsCustomDate");
+    var frequencyChk = $(".frequencyChk");
+    function onSuccess(data) {
+
+        $('#addNewSchedule').modal('hide');
+        infoAlert("schedule created successfully.");
+        location.reload(true);
+    }
+
+    $(document).ready(function () {
+        $(".schedulerule").hide();
+        $('.startDate').datepicker().datepicker("setDate", new Date());
+        $('input:checkbox.frequencyChk').click(function () {
+            $('input:checkbox.frequencyChk').not(this).prop('checked', false);
+        });
+    });
+
+
+    $("#submitButton").click(function () {
+        getRuleData();
+       // return false;
+
+    });
+
+    function getRuleData() {
+        debugger;
+        var Schedules = {};
+        var chkFrequencyId = $('input:checkbox.frequencyChk:checked').val();
+        Schedules.ReferenceName = $("#ReferenceName").val();
+        if (Schedules.ReferenceName.length == 0) {
+            swal("Please enter Schedule Name!");
+            return false;
+        } else if (chkFrequencyId == undefined) {
+            swal("Please select at least one frequency!");
+            return false;
+        }
+        Schedules.Description = $("#scheduleDesc").val();
+        Schedules.StartDate = $("#StartDate").val();
+        Schedules.IsCustomDate = $("#IsCustomDate").prop('checked');//$("IsCustomDate").is(':checked');
+        var scheduleFrequencies = [];
+        if (Schedules.IsCustomDate == true) {
+            $(".schedule-rule li.active").each(function () {
+                var frequencyId = $(this).attr("id").split('_')[1];
+                var YearNo = 0;
+                var MonthNo = 0;
+                var WeekNo = 0;
+                var weekDay = 0;
+                $(this).find(":input").each(function () {
+                    if ($(this).hasClass("dayNo")) {
+                        weekDay = $(this).val();
+                    } else if ($(this).hasClass("weekNo")) {
+                        WeekNo = $(this).val();
+                    } else if ($(this).hasClass("monthNo")) {
+                        MonthNo = $(this).val();
+                    }
+                });
+                var scheduleFrequency = {
+                    FrequencyId: parseInt(frequencyId),
+                    YearNo: parseInt(YearNo),
+                    MonthNo: parseInt(MonthNo),
+                    WeekNo: parseInt(WeekNo),
+                    WeekDays: parseInt(weekDay),
+                    IsActive: true,
+                    IsCustomDate: Schedules.IsCustomDate
+                };
+                scheduleFrequencies.push(scheduleFrequency);
+            });
+        }
+        if (scheduleFrequencies.length == 0) {
+            var scheduleFrequency = {
+                FrequencyId: parseInt(chkFrequencyId),
+                YearNo: 0,
+                MonthNo: 0,
+                WeekNo: 0,
+                WeekDays: 0,
+                IsActive: true,
+                IsCustomDate: Schedules.IsCustomDate
+            };
+            scheduleFrequencies.push(scheduleFrequency);
+        }
+        
+        Schedules.ScheduleFrequency = scheduleFrequencies;
+        var UrlAction ='@Url.Action("SaveSchedule", "Schedule")';
+        $.ajax({
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'POST',
+            url: UrlAction,
+            data: JSON.stringify(Schedules),
+            success: function (resultData) {
+                $('#addNewSchedule').modal('hide');
+                infoAlert("schedule created successfully.");
+                location.reload(true);
+
+                //console.log(resultData);
+            }
+        });
+    }
+
+    frequencyChk.change(function () {
+        frequencyId = $(this).val();
+        $('.schedulerule').removeClass("active")
+        $("#frequencyId_" + frequencyId).addClass("active");
+        IsCustomDate.attr("checked", false);
+        IsCustomDate.trigger("change");
+    });
+
+    IsCustomDate.change(function () {
+        if ($(this).is(":checked")) {
+            //alert("Checkbox is checked.");
+            $('input.frequencyChk[type=checkbox]:checked').each(function () {
+                var frequencyId = $(this).val();
+                $("#frequencyId_" + frequencyId).show();
+            });
+        } else {
+            $(".schedulerule").hide();
+        }
+    });
+
+    var Description = ""
+    var frequecyText = {
+        'Daily': 'day',
+        '3 Days': '3 days',
+        'Weekly': 'week',
+        'Monthly': 'month',
+        '2 Months': '2 months',
+        'Quarterly': 'Quarter',
+        'Semi-annually': 'semi annual',
+        'Annually': 'annual',
+        '3 years': '3 years',
+        '5 years': '5 years',
+        '6 years': '6 years',
+    }
+    var frequecyWithNoCustomCondition = [2, 28];
+    var ShortMonth = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC"];
+    var ShortDay = ["SUN", "MON", "TUE", "WED", "THR", "FRI", "SAT"];
+
+    var ScheduleDescFixed = "Every {frequency}";
+    var ScheduleDescCustom = 'Schedule frequecy is {frequency} with custom rule Every{WeekNumber}{WeekDay}of{Month}month';
+
+    //$('#ReferenceName').keyup(function () {
+    //    if ($(this).val().trim() != '') {
+    //        desc1 = 'ScheduleID: ' + $(this).val()
+    //    } else {
+    //        desc1 = ''
+    //    }
+    //    $('#scheduleDesc').trigger('change')
+    //    $('#StartDate').trigger('change')
+    //})
+
+    //$('#StartDate').change(function () {
+    //    if ($(this).val().trim() != '') {
+    //        desc2 = 'Start Date: ' + $(this).val()
+    //    } else {
+    //        desc2 = ''
+    //    }
+    //    $('#scheduleDesc').trigger('change')
+    //})
+
+    $('.frequencyChk').click(function () {
+        //console.log(frequecyWithNoCustomCondition.includes(parseInt($(this).val())))
+        if (frequecyWithNoCustomCondition.includes(parseInt($(this).val()))) {
+            $('#IsCustomDate').attr("disabled", true)
+        }
+        else {
+            $('#IsCustomDate').removeAttr("disabled")
+        }
+        
+        $('#IsCustomDate').trigger('change')
+    })
+    $('.ddl-schedule').change(function () {
+        $('#IsCustomDate').trigger('change')
+    })
+
+    $('#IsCustomDate').change(function () {
+        var description = "";
+        if ($(this).is(':checked')) {
+            description = ScheduleDescCustom.replace("{frequency}", $('.frequencyChk:checked').parent().text().trim())
+            if ($('li.schedulerule.active>#drpweekNo').val() != undefined) {
+                description = description.replace("{WeekNumber}", " "+$('li.schedulerule.active>#drpweekNo').val() + getSuffixOfNumbers($('li.schedulerule.active>#drpweekNo').val())+" ");
+            }
+            else {
+                description = description.replace("{WeekNumber}", "");
+            }
+            if ($('li.schedulerule.active>#monthdays').val() != undefined) {
+                description = description.replace("{WeekDay}", " " + ShortDay[parseInt($('li.schedulerule.active>#monthdays').val() - 1)] + " ");
+            }
+            else {
+                description = description.replace("{WeekDay}", "");
+            }
+            if ($('li.schedulerule.active>.monthNo').val() != undefined) {
+                if (findMaxValueDDL($('li.schedulerule.active>.monthNo')) < 12) {
+                    description = description.replace("of{Month}month", " of " + $('li.schedulerule.active>.monthNo').val() + getSuffixOfNumbers($('li.schedulerule.active>.monthNo').val()) + " month");
+                }
+                else {
+                    description = description.replace("of{Month}month", " of " + ShortMonth[$('li.schedulerule.active>.monthNo').val() - 1] + "");
+                }
+            }
+            else {
+                description = description.replace("of{Month}month", " ");
+            }
+        } else {
+            description = ScheduleDescFixed.replace("{frequency}", frequecyText[$('.frequencyChk:checked').parent().text().trim()] != undefined ? frequecyText[$('.frequencyChk:checked').parent().text().trim()] : $('.frequencyChk:checked').parent().text().trim())
+        }
+        $('#scheduleDesc').val(description);
+    })
+    
+
+    function findMaxValueDDL(element) {
+        var maxValue = undefined;
+        $('option', element).each(function () {
+            var val = $(this).attr('value');
+            val = parseInt(val, 10);
+            if (maxValue === undefined || maxValue < val) {
+                maxValue = val;
+            }
+        });
+        return maxValue;
+    }
+
+    function getSuffixOfNumbers(num) {
+        var num = parseInt(num)
+        var prefix = "";
+        switch (num) {
+            case 1:
+            case 21:
+            case 31:
+                prefix = "st";
+                break;
+            case 2:
+            case 22:
+                prefix = "nd";
+                break;
+            case 3:
+            case 23:
+                prefix = "rd";
+                break;
+            default:
+                prefix = "th";
+                break;
+
+        }
+        return prefix;
+    }
+
+
+
+</script>

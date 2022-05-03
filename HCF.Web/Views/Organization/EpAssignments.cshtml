@@ -1,0 +1,99 @@
+﻿@model HCF.Web.ViewModels.Organization.EpAssignmentsViewModel
+
+@{
+    ViewBag.Title = "EpAssignments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Assignment
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="partialView">
+                        <div class="row">
+                            <div class="col-md-12">
+                                @await Html.PartialAsync("_EpAssignment", Model)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        $('#ddlMultiUser').selectpicker({ liveSearch: true, showTick: true });
+
+    var partialviewdata = "";
+    var pastindex = 0;
+    var strtext = "";
+    var rows_selected = [];
+
+    var urlAction_GetUsersEPs = '@Url.Action("GetUsersEPs", "Organization", new { area = "" })';
+    var organization_EpAssignmentUserDDL = '@Url.Action("EpAssignmentUserDDL", "Organization", new { area = "" })';
+    var loadViewUrl = CRxUrls.Organization_EpAssignmentList;   //'@Url.Action("EpAssignmentList", "Organization", new { area = "" })';
+    var assignRepoUrl = '@Url.Content("~/assign_ep_resposibility")';
+
+    </script>
+
+    <style>
+        #epUserDdl #bs-select-1,
+        #assignEpTo .dropdown-menu {
+            max-height: 250px !important;
+        }
+
+        #assignEpTo .inner {
+            max-height: 190px !important;
+        }
+
+
+
+
+        .asset_list_popup ul li {
+            width: 25%;
+            float: left;
+        }
+
+
+
+        .ddlUser {
+            width: 220px;
+            height: 38px;
+            background: #e2e2e2;
+            border-radius: 4px;
+        }
+
+
+
+        #trselectedCount {
+            text-align: center;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            background: #f5f5f5;
+            padding: 8px;
+        }
+
+        .note {
+            font-size: 12px;
+            color: red;
+        }
+
+
+
+        .selectpicker li.disabled {
+            display: none !important;
+        }
+    </style>
+}

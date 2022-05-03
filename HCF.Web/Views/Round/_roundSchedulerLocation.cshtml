@@ -1,0 +1,128 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var allBuildings = Model.buildings;
+    Layout = null;
+}
+
+    <div id="locationgroup">
+        <div class="row tablelist-topform">
+            <div class="col-lg-12">
+                <p class="roundBlue">                    
+                    Add a building or individual floors to the location group by selecting them under the Buildings section on the left. Remove floors by clicking them under the selected location group on the right.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6" id="step2_part1">
+                <div class="roundsListBox roundlocations">
+                    <div class="roundsheadBox" id="roundsheadBox">
+                        @await Html.PartialAsync("_roundsBuildings", Model)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 roundpart2" id="step2_part2">
+                <div class="roundsListBox">
+                    <a href="#" id="lbllocationgrp">
+                        <h4>
+                            Location Group
+                        </h4>
+                    </a>
+                    @*@await Html.PartialAsync("_locationGroup", Model, new ViewDataDictionary { { "type", ViewBag.Roundtype } })*@
+
+                    @await Html.PartialAsync("_locationGroup", Model,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "type", ViewBag.Roundtype }}
+                              )
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="locationgrouplst" style="display:none">
+        @await Html.PartialAsync("_locationGrouplist", Model)
+    </div>  
+
+<script>
+
+
+    $(document).ready(function () {
+        //debugger;
+        var roundGroupId = $("#hdn_locationgroupId").val();
+        if (roundGroupId > 0) {
+            $('#ddlroundgroup').val(roundGroupId).trigger('change');
+        }
+    });
+
+    $(document).off('click', '.roundfloor').on('click', '.roundfloor', function () {
+       // debugger;
+   // $(".roundfloor").click(function () {
+        var roundGroupId = $("#ddlroundgroup option:selected").val();
+        if (roundGroupId > 0) {
+          /*  if (!$(this).hasClass("gray")) {*/
+                var buildingId = $(this).attr('buildingId');
+                var floorId = $(this).attr('floorid');
+                var isActive = true;
+                AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive);
+            //} else {
+            //    AlertWarningMsg(" you can not select already assigned floor.");
+            //}
+        } else {
+            AlertWarningMsg(" Select a location group prior to selecting a floor or building. ");
+        }
+    });
+
+    $('body').on('click', '.selectedroundfloor', function () {
+        var roundGroupId = $("#ddlroundgroup option:selected").val();
+        var buildingId = $(this).attr('buildingId');
+        var floorId = $(this).attr('floorid');
+        var isActive = false;
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to remove this Floor from round?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive);
+            });
+    });
+
+
+    function AddOrRemoveLocations(roundGroupId, buildingId, floorId, isActive) {
+       // debugger;
+        var url = '@Url.Action("SaveRoundGroupLocations", "Round")';
+        $.get(url + '?roundGroupId=' + roundGroupId + '&buildingId=' + buildingId + '&floorId=' + floorId + '&IsActive=' + isActive, function (data) {
+            //debugger;
+            if (isActive) {
+                successAlert("Saved Successfully");
+            } else {
+                successAlert("Removed Successfully");
+            }           
+            getGroupLocation();
+        });
+    }
+    
+    $("#lbllocationgrp").click(function () {
+        $("#locationgroup").hide();
+        $("#locationgrouplst").show();
+    });
+
+</script>
+
+<style>
+    .round-groupname .buildingGroupBy {
+        background-color: #f5f5f5;
+    }
+
+    .round-groupname {
+        border: none;
+    }
+
+        .round-groupname:last-child {
+            border-bottom: none;
+        }
+</style>

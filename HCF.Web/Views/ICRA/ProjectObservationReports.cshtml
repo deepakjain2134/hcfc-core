@@ -1,0 +1,198 @@
+﻿@model HCF.BDO.TICRAReports
+
+@{
+    /**/
+
+    ViewBag.Title = "ProjectObservationReports";
+}
+@if (Model.TICRAReportId > 0)
+{
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                ICRA Observation Reports @*(Read only)*@
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary" style="padding:0px;">
+                    <ul class="ul_list observationLeft-panel">
+                        @foreach (var item in Model.RelatedReports.ToList().OrderByDescending(x => x.ReportDate))
+                        {
+                            <li>
+                                <label class="@commonModelFactory.GetTranStatus(item.ReportStatus)"></label>
+                                <a href="#" onclick="openview(@item.TICRAReportId,'@item.ReportDate.ToFormatDate()',this);" id="@item.TICRAReportId" date="@item.ReportDate.ToFormatDate()">
+                                    @item.ReportName
+                                    <span>
+                                        @item.ReportDate.ToFormatDate()
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("TICRAProjectObservationReport", "ICRA", FormMethod.Post, new { id = "ICRAform" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="reports_short">
+                                    <label>Project Name:</label>
+                                    @Model.ProjectNames
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="reports_short">
+                                    <label>Project No:</label>@Model.ProjectNos
+                                </div>
+                                @*<div class="row">
+                                        @if (@Model.RelatedReports.Count > 0)
+                                        {
+                                            <div class="col-md-6">
+                                                <div class="reports_short">
+                                                    <label>Report Date:</label>
+                                                    <span id="reportdate">
+                                                        @Model.RelatedReports.ToList().OrderByDescending(x => x.ReportDate).FirstOrDefault().ReportDate.ToFormatDate()
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>*@
+                            </div>
+                        </div>
+
+                        <div id="icraReportDiv">
+                            @if (Model.RelatedReports.ToList().FirstOrDefault() != null)
+                            {
+                                @await Html.PartialAsync("_TICRAProjectObservationReport", Model.RelatedReports.ToList().OrderByDescending(x => x.ReportDate).FirstOrDefault())
+                            }
+                            else
+                            {
+                                <div class="tble_shadow text-center">No observation reports </div>
+                            }
+                        </div>
+
+                    }
+                    <div class="row">
+                        <div class="col-md-12">
+                            @using (Html.BeginForm("ICRAProjectObserverReport", "Pdf"))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="text-right button_viewdiv" style="display:none">
+                                    <input type="hidden" name="projectIds" id="projectIds" value="" class="showinviewmode" />
+                                    <input type="hidden" name="reportId" id="reportId" value="" class="showinviewmode" />
+                                    <input type="submit" value='@Localizer["Print Report"]' class="comm-button showinviewmode" id="btnPrint" />
+                                    <input type="button" value="Email Report" class="comm-button showinviewmode" id="btnEmailReport" />
+                                    @*@Html.ActionLink("Cancel ", "IcraProjectPermit", "ICRA", new { @class = "comm-button" })*@
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+else
+{
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                ICRA Observation Reports (Read only)
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-xs-3">
+                <div class="box box-primary col-lg-12">
+                    <ul class="ul_list"></ul>
+                </div>
+            </div>
+            <div class="col-lg-9 col-xs-9">
+                <div class="box box-primary col-lg-12">
+                    <table class="table">
+                        <tr></tr>
+                    </table>
+                    <div id="icraReportDiv">
+                        <div class="tble_shadow text-center">No observation reports </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script>
+    $(document).ready(function () {
+        $('.ul_list li:first').addClass('active');
+        $(':input').addClass("disable");
+        $(".ui-datepicker-trigger").hide();
+        $("#tblreportinfo").hide();
+        $("#dveditobservationReport").show();
+        $(".button_viewdiv").show();
+        $(".showinviewmode").removeClass("disable");
+        $(".crxSignBox").addClass("disable");
+    });
+
+    $("#ticraobsReports").hide()
+
+    var openview = function (reportId, reportdate, control) {
+        $('#icraReportDiv').empty();
+        //console.log(control.id);
+        //console.log(reportId);
+        $("li").removeClass("active");
+        $("#" + control.id).parent("li").addClass("active");
+        $("#reportdate").html(reportdate);
+        $.ajax({
+            url: '@Url.Content("~/ICRA/ProjectObservationReport")' + "?ProjectIds=" +'@Model.ProjectIds' + "&reportId=" + reportId ,
+            type: "GET",
+            dataType: "HTML",
+            success: function (data) {
+                if (data) {
+                    $('#icraReportDiv').empty();
+                    $('#icraReportDiv').html(data).fadeIn('fast');
+                    $(':input').addClass("disable");
+                    $(".ui-datepicker-trigger").hide();
+                    $("#tblreportinfo").hide();
+                    $("#dveditobservationReport").show();
+                    $(".button_viewdiv").show();
+                    $(".showinviewmode").removeClass("disable");
+                    $(".crxSignBox").addClass("disable");
+                    //$("#reportId").val(reportId);
+                }
+            }
+        });
+    }
+
+    $("#btnEmailReport").click(function () {
+        var d = new Date();
+        var strDate = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+        var _reportId = $("#reportId").val();
+        var _projectIds = $("#projectIds").val();
+        var url = '@Url.Action("EmailICRAReport", "ICRA")';
+        $.get(url + '?projectIds=' + _projectIds + '&reportId=' + _reportId, function (data) {
+            if (data.Result) {
+                var reportpath = data.ReportPath;
+                var emailText = 'Hi'
+                    + '\r\n' + '\r\n' + 'Please follow the link below to download the observation report' + '\r\n' + '\r\n' +
+                    reportpath + '\r\n' + '\r\n'
+                emailText = encodeURIComponent(emailText);
+                var subject = "Observation Report " + strDate;
+                window.location = 'mailto:' + "" + '?cc=' + "" + '&subject=' + subject + '&body=' + emailText;
+            }
+        });
+    });
+
+
+</script>

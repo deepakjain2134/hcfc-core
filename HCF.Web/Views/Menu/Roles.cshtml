@@ -1,0 +1,155 @@
+﻿@model IEnumerable<HCF.BDO.UserRoles>
+@{
+    ViewBag.Title = "Roles";
+    var data = ViewBag.RoleMaster;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Roles
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+
+                       
+
+                            @*@helper ShowTree(IEnumerable<TreeItem<HCF.BDO.UserRoles>> roles)
+                                    {
+                                <ul class="rolesList-box">
+                                    @foreach (var foo in data)
+                                    {
+                                        <li>
+                                            <span class="red">
+                                                @foo.Item.DisplayText
+
+                                                <a class="float-right" href='@(Url.RouteUrl("AddorEditRoles",new { parentRoleId=foo.Item.RoleId}))'>
+                                                    <img id="addNewBtn" src="/dist/Images/Icons/3d_add_button.png" title="Add Roles" />
+                                                </a>
+
+                                            </span>
+                                            @if (foo.Children.Any())
+                                                {
+                                                    @ShowTree(foo.Children)
+                                                }
+                                        </li>
+                                    }
+                                </ul>
+                                }*@
+
+                            @*@ShowTree(data)*@
+
+                            <table id="rolesTable" class="table table-bordered table-striped" hidden>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.RoleName)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Sequence)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.DisplayText)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.ParentName)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.IsChild)
+                                        </th>
+                                        <th class="hide">
+                                            @Html.DisplayNameFor(model => model.IsChild)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.IsUserRole)
+                                        </th>
+                                        <th class="hide">
+                                            @Html.DisplayNameFor(model => model.IsUserRole)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.IsActive)
+                                        </th>
+                                        <th class="hide">
+                                            @Html.DisplayNameFor(model => model.IsActive)
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        @Html.HiddenFor(modelItem => item.RoleId)
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.RoleName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Sequence)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.DisplayText)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ParentName)
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(modelItem => item.IsChild, new { @class = "disabled" })<span></span>
+                                            </td>
+                                            <td class="hide">
+                                                @(item.IsChild ? "Yes" : "No")
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(modelItem => item.IsUserRole, new { @class = "disabled" })<span></span>
+                                            </td>
+                                            <td class="hide">
+                                                @(item.IsUserRole ? "Yes" : "No")
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(modelItem => item.IsActive, new { @class = "disabled" })<span></span>
+                                            </td>
+                                            <td class="hide">
+                                                @(item.IsActive ? "Yes" : "No")
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Edit", "AddorEditRoles", new { roleId = item.RoleId }, new { @class = "edit" })
+                                                @*@Html.ActionLink("Delete", "DeleteUserRole", new { roleId = item.RoleId }, new { @class = "delete" })*@
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<style>
+    .hide {
+        display: none;
+    }
+
+    .add_button_comman {
+        position: absolute;
+        right: 11px;
+        top: 18px;
+    }
+
+    #rolesTable_filter {
+        margin-right: 55px;
+    }
+</style>
+

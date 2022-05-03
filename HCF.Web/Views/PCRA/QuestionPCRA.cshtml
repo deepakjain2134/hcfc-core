@@ -1,0 +1,273 @@
+﻿@model IEnumerable<HCF.BDO.QuestionPCRA>
+@{
+    ViewBag.Title = "Question PCRA";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Localizer["TitleQuestionPCRA"]
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <span id="message">@ViewBag.Message</span>
+                        </div>
+                    </div>
+                    @*<div class="add_button_comman">
+                        <a href='@(Url.RouteUrl("addquestionPCRA"))' class="pull-right">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Question PCRA" alt="3d_add_button" />
+                        </a>
+                    </div>*@
+                   
+                        <table id="questtbl" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>@Html.DisplayNameFor(model => model.Questions)</th>
+                                    <th>@Html.DisplayNameFor(model => model.IsOption)</th>
+                                    <th>@Html.DisplayNameFor(model => model.CanComment)</th>
+                                    <th>
+                                        @*@Html.DisplayNameFor(model => model.IsActive)*@
+                                        Active
+                                    </th>
+                                    <th>Edit</th>
+                                    <th style="width: 75px;">Add Option</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="details-control" rel='@item.QuesPCRAId' style="width:25px"></td>
+                                        <td>@item.Questions</td>
+                                        <td class="comman_checkbox1 text-center">
+                                            @Html.DisplayFor(modelItem => item.IsOption)<span></span>
+                                        </td>
+                                        <td class="comman_checkbox1 text-center">
+                                            @Html.DisplayFor(modelItem => item.CanComment)<span></span>
+                                        </td>
+                                        <td class="comman_checkbox1 text-center">
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+                                        <td class="build-editicon">
+                                            <a href="@Url.Action("AddQuestionPCRA", "PCRA", new { QuesPCRAId = item.QuesPCRAId })" class="pull-right">
+                                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Question Option PCRA" alt="3d_add_button" />
+                                            </a>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:void(0)" data-toggle="modal" onclick="AddQuestionOptionPCRA('@item.QuesPCRAId')">
+                                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Questions Option PCRA" alt="3d_add_button" />
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade" id="questionOptionPCRAModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-md-10">
+                        <h4>Add/Edit Question Option PCRA</h4>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="loadpartial">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<style>
+    input[type='checkbox'] {
+        opacity: 1 !important;
+    }
+</style>
+<script>
+    (function () {
+        debugger;
+        const success = '@ViewBag.AddSuccess';
+        if (success.toLowerCase() == "AddSuccess".toLowerCase()) {
+            swalalert('Options added successfully');
+        }
+    })();
+
+    $(document).ready(function () {
+        $("#message").fadeOut(5000);
+    });
+
+    var table = $('#questtbl').DataTable({
+        "searching": true,
+        "pageLength": 15,
+        "lengthChange": false,
+        "bPaginate": $('#questtbl tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        aoColumnDefs: [
+            {
+                orderSequence: ["desc", "asc"],
+                aTargets: ['_all'],
+               "orderable": false, "targets": [0,2,3,4,5,6]
+            }
+        ],
+
+
+        /*dom: "Blftip",*/
+        
+       initComplete: function () {
+           $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("addquestionPCRA"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Question PCRA" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+      buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'QuesPCRA Report',
+                    exportOptions: {
+                        columns: [1]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        //doc.content.splice(0);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'RiskArea Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                     {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: ' QuesPCRA Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+    });
+    HideTableSorting();
+    $('#questtbl thead').click(function () {
+        HideTableSorting();
+    });
+    function HideTableSorting() {
+        const el = $('#questtbl th[aria-label]')[1];
+        $(el).removeClass("sorting");
+    }
+
+
+
+
+
+    function AddQuestionOptionPCRA(quesPCRAId) {
+        debugger;
+        $('#questionOptionPCRAModal').modal("show");
+        var url = CRxUrls.PCRA_GetQuestionOptionPCRA;
+        $.get(url + "?quesPCRAId=" + quesPCRAId , function (data) {
+            debugger;
+            $("#loadpartial").html('');
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+    }
+
+    $('#questtbl tbody').on('click', 'td.details-control', function () {
+        debugger;
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+        if (row.child.isShown()) {
+            $(row.child()).toggle("");
+            tr.toggleClass('shown');
+        }
+        else {
+            var quesPCRAId = $(this).attr("rel");
+            var url = CRxUrls.PCRA_GetQuestionOptionPCRAs;
+            $.get(url + "?quesPCRAId=" + quesPCRAId, function (users) {
+                row.child(users, 'no-padding').show();
+                tr.toggleClass('shown');
+            });
+            $('div.slider', row.child()).toggle("");
+        }
+    });
+</script>

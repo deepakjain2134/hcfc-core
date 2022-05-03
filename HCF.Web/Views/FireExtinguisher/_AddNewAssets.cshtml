@@ -1,0 +1,403 @@
+﻿@model HCF.BDO.TFloorAssets
+@using HCF.Web.Helpers
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">
+            <b>@((Model.FloorAssetsId > 0) ? "Edit Asset" : "Add Asset")</b>
+        </h4>
+    </div>
+
+    @*@using (Ajax.BeginForm("SaveAssets", "FireExtinguisher", new AjaxOptions { OnSuccess = "OnSuccess" }))
+        {*@
+
+    <form asp-controller="FireExtinguisher" asp-action="SaveAssets"
+          data-ajax-success="OnSuccess"
+          data-ajax="true" data-ajax-method="POST">
+        <div class="modal-body">
+            @Html.AntiForgeryToken()
+           
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(modelItem => modelItem.FloorAssetsId)
+                <input type="hidden" value="@ViewBag.CurrentStop.StopId" class="currentstop" name="StopId" />
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        @Html.Hidden("Xcoordinate", 0)
+                        @Html.Hidden("Ycoordinate", 0)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        @if (ViewBag.CurrentStop.StopId > 0)
+                        {
+                           
+                        <div class="form-group">
+                           
+                                <label>Stop:</label>
+                                <span>
+                                    @string.Format("{0}({1})", ViewBag.CurrentStop.StopName, ViewBag.CurrentStop.StopCode)
+                                </span>
+                            
+                        </div>
+                        }
+                    </div>
+                </div>
+                    
+            
+            <div class="row">
+                   
+                       
+                        <div class="col-lg-4 form-group" style="display:none">
+                                <label>Asset Types<em class="required-field"> *</em></label>
+                                @Html.DropDownList("assetsTypes", (SelectList)ViewBag.AssetsTypes, new { @class = "form-control", @required = "required" })
+                        </div>
+                        <div class="col-lg-4 form-group ">
+                           
+                                <label>Asset <em class="required-field"> *</em></label>
+                            
+                                <select id="AssetId" class="form-control" required="required" name="AssetId"></select>
+                            
+                        </div>
+                        <div class="col-lg-4 form-group  non-visible">
+                            
+                                <label>Type</label>
+                           
+                                <select id="AscId" class="form-control" name="AscId"></select>
+                           
+                        </div>
+                        <div class="col-lg-4 form-group  non-visible">
+                           
+                                <label>Size </label>
+                           
+                                <select id="FETypeId" class="form-control" name="FETypeId"></select>
+                            
+                        </div>
+                        <div class="col-lg-4 form-group ">
+                            
+                                @Html.LabelFor(modelItem => Model.TagNo)<em class="required-field"> *</em>
+                            
+                                @Html.TextBoxFor(modelItem => Model.SerialNo, new { required = "required", @class = "form-control", @placeholder = "This must be unique" })
+                            
+                        </div>
+
+                        <div class="col-lg-4 form-group  non-visible">
+                            
+                                @Html.LabelFor(modelItem => Model.Model)
+                            
+                                @Html.TextBoxFor(modelItem => Model.Model, new { @class = "form-control" })
+                            
+                        </div>
+                        <div class="col-lg-4 form-group ">
+                           
+                                <label>Status<em class="required-field"> *</em></label>
+                           
+                                <select id="StatusCode" name="StatusCode" class="form-control floor_tab" required="required">
+                                    <option value="">Select Status</option>
+                                    <option selected="selected" value="ACTIV">ACTIV-In Use</option>
+                                    <option value="INACT">INACT-In Inventory</option>
+                                    <option value="RETIR">RETIR-Not Usable</option>
+                                </select>
+                          
+                        </div>
+                    
+                        <div class="col-lg-4 form-group  non-visible">
+                           
+                                @Html.LabelFor(modelItem => Model.Make)
+                            
+                                @Html.DropDownListFor(modelItem => Model.ManufactureId, new SelectList(ViewBag.Manufactures, "ManufactureId", "ManufactureName"),
+                                    "Select", new { @class = "form-control" })
+                            
+                        </div>
+                   
+                       
+                        <div class="col-lg-4 form-group  location">
+                            
+                                <label> @Localizer["Building"] <em class="required -field"> *</em></label>
+                           
+                                @*@Html.BuildingDropDownList("addAssetsdrpBuildings", 0, "Select Building",
+                                    new { @class = "form-control", required = "required" })*@
+                                <buildingdropdownList name="addAssetsdrpBuildings" selectedvalue="0" firsttext="Select Building" class="form-control" required="required"></buildingdropdownList>
+                           
+                        </div>
+                        <div class="col-lg-4 form-group  location">
+                           
+                                <label> @Localizer["Floor"] <em class="required-field"> *</em></label>
+                           
+                                <select id="FloorId" name="FloorId" class="form-control" required="required"></select>
+                           
+                        </div>
+                        <div class="col-lg-4 form-group  location">
+                           
+                                <label>Stop<em class="required-field"> *</em></label>
+                            
+                                <select id="StopId" name="StopId" class="form-control" required="required">
+                                    <option value="">Select</option>
+                                </select>
+                                <p>If no stops are displayed in the drop down, go to setup to create a stop.</p>
+                                @*@Html.TextBoxFor(modelItem => Model.Stop.StopName, new { required = "required", @class = "form-control", @placeholder = "Actual location" })*@
+                            
+                        </div>
+
+                    
+                </div>
+            
+
+
+
+        </div>
+        <div class="modal-footer">
+            <button type="submit" id="submitButton" class="btn comm-button" name="submitButton">Save</button>
+            <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+    @*}*@
+
+</div>
+<script type="text/javascript">
+
+    var buildingCtr = $('#addAssetsdrpBuildings');
+    var stopsddlCtr = $("#StopId");
+    var floorsddlCtr = $("#FloorId");
+
+    $(document).ready(function () {
+
+        var sbuildingId = $("#sbuildingId").val();
+
+        $("#FloorId").empty();
+        $("#FloorId").append(
+            $('<option></option>').val("").html("Select"));
+
+        $("#AssetId").empty();
+        $("#AssetId").append(
+            $('<option></option>').val("").html("Select"));
+        $("#AscId").empty();
+        $("#AscId").append(
+            $('<option></option>').val("").html("Select"));
+        $("#FETypeId").empty();
+        $("#FETypeId").append(
+            $('<option></option>').val("").html("Select"));
+        getAssetsbyType();
+        if (sbuildingId > 0) {
+            $("#addAssetsdrpBuildings").val(sbuildingId);
+        } else {
+            $("#addAssetsdrpBuildings").val("");
+        }
+        getFloorsByBuildingId();
+
+    });
+
+    $("#addAssetsdrpBuildings").change(function () {
+        stopsddlCtr.empty();
+        stopsddlCtr.append($('<option></option>').val("").html("Select"));
+        getFloorsByBuildingId();
+    });
+
+    function getFloorsByBuildingId()
+    {
+          if ($("#addAssetsdrpBuildings").val() != "") {
+              $("#FloorId").empty();
+            $("#FloorId").append(
+               $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization")';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = { buildingId: $("#addAssetsdrpBuildings").val() };
+            floorOptions.datatype = "json";
+            /*floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (floorList) {
+                console.log(floorList);
+                for (var i = 0; i < floorList.length; i++) {
+                    $("#FloorId").append(
+                    $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                }
+                if ($('#FloorId option[value=' + $("#sfloorId").val() + ']').length > 0) {
+                    $("#FloorId").val($("#sfloorId").val());
+                    bindStopsddl(floorsddlCtr);
+                } else {
+                    $("#FloorId").val("");
+                }
+                //getLocationsbyfloorId();
+                $("#FloorId").prop("disabled", false);
+            };
+              floorOptions.error = function () { AlertWarningMsg("Error in Getting Floors!!",""); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#FloorId").empty();
+            $("#FloorId").append(
+              $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    floorsddlCtr.change(function () {
+        bindStopsddl(floorsddlCtr);
+    });
+
+    function bindStopsddl(floorsddlCtr) {
+        if (floorsddlCtr.val() != "") {
+            stopsddlCtr.empty();
+            stopsddlCtr.append($('<option></option>').val("").html("Select"));
+            var stopOptions = {};
+            stopOptions.url = '@Url.Action("FillStops", "Location")';
+            stopOptions.type = "POST";
+            stopOptions.data = { floorId: floorsddlCtr.val() };
+            stopOptions.datatype = "json";
+            /*stopOptions.contentType = "application/json";*/
+            stopOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    stopsddlCtr.append(
+                        $('<option></option>').val(lists[i].StopId).html(lists[i].StopName + "( " + lists[i].StopCode +  " )"));
+                }
+            };
+            stopOptions.error = function () { AlertWarningMsg("Error in Getting data!!",""); };
+            $.ajax(stopOptions);
+        }
+        else {
+            stopsddlCtr.empty();
+            stopsddlCtr.append($('<option></option>').val("").html("Select"));
+        }
+    }
+
+
+
+    $("#assetsTypes").change(function () {
+        getAssetsbyType();
+    });
+
+    function getAssetsbyType()
+    {
+        if ($("#assetsTypes").val() != "") {
+            $("#AssetId").empty();
+            $("#AssetId").append(
+                $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssets", "Assets")';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = { assetTypeId: $("#assetsTypes").val() };
+            floorOptions.datatype = "json";
+            /*floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    if (lists[i].AssetId == parseInt('@ViewBag.AssetId'))
+                    {
+                        $("#AssetId").append(
+                            $('<option selected="selected"></option>').val(lists[i].AssetId).html(lists[i].Name));
+                        $('#AssetId').trigger('change');
+                    }
+                    else {
+                        $("#AssetId").append(
+                            $('<option></option>').val(lists[i].AssetId).html(lists[i].Name));
+                    }
+                }
+                $("#AssetId").prop("disabled", false);
+                ShowHidecntrl();
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting States!!",""); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#AssetId").empty();
+            $("#AssetId").append(
+                $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    $("#AssetId").change(function () {
+        ResetAssetDropdown(buildingCtr, floorsddlCtr, stopsddlCtr);
+        debugger;
+        if ($("#AssetId").val() != "") {
+            ShowHidecntrl();
+            $("#AscId").empty();
+            $("#AscId").append($('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssetSubCategory", "Assets")';
+            floorOptions.type = "POST";
+            floorOptions.data = { assetId: $("#AssetId").val() };
+            floorOptions.datatype = "json";
+           /* floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                debugger;
+                for (var i = 0; i < lists.length; i++) {
+                    $("#AscId").append(
+                        $('<option></option>').val(lists[i].AscId).html(lists[i].AscName));
+                }
+                $("#AscId").prop("disabled", false);
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting data!!", ""); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#AscId").empty();
+            $("#AscId").append(
+                $('<option></option>').val("").html("Select"));
+        }
+    });
+
+    function OnSuccess(data) {
+        debugger;
+        console.log(data);
+        if (JSON.parse(data.Result).Success) {
+            loadData(2);
+            infoAlert(JSON.parse(data.Result).Message);
+            $("#viewRefresh").val("1");
+            $('#addNewAssets').modal('hide');           
+        } else {
+            infoAlert(JSON.parse(data.Result).Message);
+        }
+    }
+
+
+    $("#AscId").change(function () {
+        if ($("#AscId").val() != "") {
+            $("#FETypeId").empty();
+            $("#FETypeId").append(
+               $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssetSubCategorySize", "Assets")';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = { ascId: $("#AscId").val() };
+            floorOptions.datatype = "json";
+            /*floorOptions.contentType = "application/json";*/
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    $("#FETypeId").append(
+                        $('<option></option>').val(lists[i].FETypeId).html(lists[i].FeType));
+                }
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting data!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#FETypeId").empty();
+            $("#FETypeId").append(
+              $('<option></option>').val("").html("Select"));
+        }
+    });
+
+
+    function ShowHidecntrl() {
+        var _assetId = $("#AssetId").val();
+        if (_assetId != 123) {
+            $(".non-visible").hide();
+            $(".non-visible").removeAttr('required');
+        } else { $(".non-visible").show(); $(".non-visible").prop('required', true);}
+    }
+
+
+
+</script>
+
+<script>
+    $(document).ready(function () {
+        if ('@ViewBag.CurrentStop.StopId' > 0) {
+            $(".location").remove();
+            ShowHidecntrl();
+        }
+        else {
+            $(".currentstop").remove();
+            ShowHidecntrl();
+        }
+    });
+
+</script>
+

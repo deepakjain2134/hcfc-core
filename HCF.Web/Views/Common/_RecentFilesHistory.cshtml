@@ -1,0 +1,391 @@
+﻿@model List<HCF.BDO.TFiles>
+@{
+    var files = new List<HCF.BDO.TFiles>();
+    var file = new HCF.BDO.TFiles();
+    files.Add(file);
+}
+<!-- Modal -->
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Document</h4>
+        </div>
+        <div class="modal-body custom-dropzone">
+            <div class="fileupload-mainBox inner-mainBox">
+                <div id="dropZoneBoxDiv">
+                    <form asp-controller="Common" asp-action="SaveUploadedFile" name="myDropzone" id="myDropzone"
+                          data-ajax-success="fileSuccess" enctype="multipart/form-data"
+                          data-ajax="true" data-ajax-method="POST">
+                        <input type="hidden" id="filesData" name="filesData" />
+                        <div class="mainBoxfile2">
+                            <div class="uploadSteps fileactive" id="">
+                                <div class="fileupload-optionBox">
+                                    <div class="fileupload-option dropupload" id="dropfileshere">
+                                        <div class="dropzone">
+                                            <div id="previews" class="dz-default dz-message box__input dropzone">
+                                                <div class="filedropBox">
+                                                    <p><img src="/dist/Images/drop-icon.png"></p>
+                                                    <p>Drop files here</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="fileupload-or">
+                                        <span>OR</span>
+                                    </div>
+                                    <div class="fileupload-option browefiles" id="browsefileupload">
+                                        <div class="dropzone">
+                                            <div id="previews" class="dz-default dz-message box__input dropzone">
+                                                <div class="filedropBox">
+                                                    <p><img src="/dist/Images/filetoupload.png"></p>
+                                                    <p>Browse File to Upload</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="fileupload-or">
+                                        <span>OR</span>
+                                    </div>
+                                    <div class="fileupload-option" id="recentlyuploadfile">
+                                        <a href="#">
+                                            <p><img src="/dist/Images/recent-upload.png" /></p>
+                                            <p>Use Recently Uploaded Files</p>
+                                        </a>
+                                    </div>
+                                    <div class="fileupload-or">
+                                        <span>OR</span>
+                                    </div>
+                                    <div class="fileupload-option crxinboxdrop" id="crxinboxfile">
+                                        <a href="#">
+                                            <p><img src="/dist/Images/drop-mail.png" /></p>
+                                            <p>Use CRx Inbox</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uploadSteps" id="dropfilesdetails">
+                                <div class="fileupload-optionBox">
+                                    <div class="fileupload-option dropupload inner-options">
+                                        <a href="#">
+                                            <img src="/dist/Images/filetoupload.png" />
+                                            <p>File to Upload</p>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="table-Box uploadpostion">
+                                    <div class="heading-backbtn">
+                                        <h4><img src="/dist/Images/filetoupload.png" /> File to Upload</h4>
+                                        <a href="#" class="btn comm-button btnBack">Back</a>
+                                    </div>
+                                    <div class="filesuploadbox">
+                                        <div id="previewFiles"></div>
+                                        <div id="template-preview" style="display:none">
+                                            <div class="dz-preview dz-file-preview well" id="dz-preview-template">
+                                                <div class="dz-image"><img class="dz-image" data-dz-thumbnail /></div>
+                                                <div class="dz-details">
+                                                    <div class="dz-filename">
+                                                        <input type="text" placeholder="Required" data-file-input value="" required="required" class="form-control fileName" />
+                                                        <span data-dz-name class="hide"></span>
+                                                    </div>
+                                                    <div class="dz-size" data-dz-size></div>
+                                                </div>
+                                                <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+                                                <div class="dz-success-mark"><span></span></div>
+                                                <div class="dz-error-mark"><span></span></div>
+                                                <div class="dz-error-message"><span data-dz-errormessage></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="button_Div">
+                                        <input type="button" id="Submit" name="Submit" class="btn btn-success m-t-5 comm-button" value="Upload" />
+                                        <button name="cancel" type="button" class="comm-Cancelbutton cancel-btn" id="btnuploadCancel2" value="Cancel">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="fileupload-mainBox inner-mainBox">
+                <div class="uploadSteps" id="recentlydetails">
+                    <div class="fileupload-optionBox">
+                        <div class="fileupload-option inner-options">
+                            <a href="#">
+                                <img src="/dist/Images/recent-upload.png" />
+                                <p>Use Recently Uploaded Files</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="table-Box">
+                        <div class="heading-backbtn">
+                            <h4><img src="/dist/Images/recent-upload.png" /> Recently Uploaded Files</h4>
+                            <a href="#" class="btn comm-Cancelbutton btnBack">Back</a>
+                        </div>
+                        <div class="table-responsive crx-scrollBar fileupload-scroll">
+                            <table class="table table-bordered" id="filesTable">
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>File Name</th>
+                                        <th>File Size</th>
+                                        <th>Uploaded Date</th>
+                                        <th>Uploaded By</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderByDescending(x => x.UploadedDate).Where(x => x.UploadedBy == HCF.Web.Base.UserSession.CurrentUser.UserId).Take(15).ToList())
+                                    {
+                                        <tr>
+                                            <td>
+                                                <img src="@commonModelFactory.ReturnDocImageIcon(commonModelFactory.GetExtension(item.FileName))" alt="" />
+                                            </td>
+                                            <td>
+                                                <a class="filePath" href="@commonModelFactory.FilePath(item.FilePath)" target="_blank">
+                                                    <span class="fileName"> @commonModelFactory.GetFileNameWithoutExtension(item.FileName)</span>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                @commonModelFactory.SizeSuffix(item.FileSize)
+                                            </td>
+                                            <td>
+                                                @item.UploadedDate.ToFormatDate()
+                                            </td>
+                                            <td>
+                                                @((item.UploadedByUser != null) ? item.UploadedByUser.FullName : "")
+                                            </td>
+                                            <td>
+                                                <a href="#">
+                                                    <img src="/dist/Images/Icons/addplus-btn.png"
+                                                         class="btnSelect" tblName="@((item.TblName != null) ? item.TblName : "TFiles")"
+                                                         fileid="@item.TFileId" alt="" filesize="@item.FileSize" />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-right button_Div">
+                            <input type="button" class="comm-button btnAttachFiles" value="Attach Files" />
+                            <button name="submit" type="button" class="comm-Cancelbutton cancel-btn" id="btnAttachfilesCancel" value="Cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fileupload-mainBox inner-mainBox">
+                <div class="uploadSteps" id="crxinbox">
+                    <div class="fileupload-optionBox" ondragover="dragOver(event);" ondrop="dropInboxRecent(event);" ondragleave="dragleave(event);">
+                        <div class="fileupload-option inner-options crxDrops crxinboxdrop">
+                            <a href="#">
+                                <img src="/dist/Images/drop-mail.png" />
+                                <p>Drop document here</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="table-Box">
+                        <div class="heading-backbtn">
+                            <h4>CRx Inbox Files</h4>
+                            <a href="#" class="btn comm-Cancelbutton btnBack resetback">Back</a>
+                        </div>
+                        <div class="table-responsive crx-scrollBar fileupload-scroll">
+                            @await Component.InvokeAsync("CommonGetDocuments")
+                        </div>
+                        <div class="text-right button_Div">
+                            <button name="submit" type="button" class="comm-Cancelbutton cancel-btn" id="btnAttachfilesCancel2" value="Cancel">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fileupload-mainBox inner-mainBox">
+                <div id="duplicatesFiles" class="uploadSteps">
+                    <div class="fileupload-optionBox">
+                        <div class="fileupload-option inner-options">
+                            <a href="#">
+                                <img src="/dist/Images/recent-upload.png" />
+                                <p>Find Duplicate Files</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="table-Box">
+                        <div class="heading-backbtn">
+                            <h4><img src="/dist/Images/recent-upload.png" />Find Duplicate Files</h4>
+                            <a href="#" class="btn comm-Cancelbutton btnBack">Back</a>
+                        </div>
+                        <div class="table-responsive crx-scrollBar fileupload-scroll">
+                            We found some of duplicate files. Please select files to upload
+
+                            <table class="table table-bordered" id="duplicateFiles">
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>File Name</th>                                       
+                                        <th>Uploaded Date</th>
+                                        <th>Uploaded By</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="text-right button_Div">
+                            <input type="button" class="comm-button btnDuplicateAttachFiles" value="Attach Files" id="btnDuplicateAttachFiles" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>
+<script>
+
+
+    //var fileSuccess = function (data) {
+    //    debugger;
+    //};
+
+    $(function () {
+
+        $("#vendorReport").hide();
+
+        $('#recentlyuploadfile').add('.dvfilecount').click(function () {
+           Showrecentfiles();
+        });
+
+        $('#crxinboxfile').click(function () {
+            $('.uploadSteps').removeClass('fileactive');
+            $('#recentlydetails').removeClass('fileactive');
+            $("#crxinbox").addClass('fileactive');
+        });
+
+
+    });
+
+    function Showrecentfiles() {
+        $('.uploadSteps').removeClass('fileactive');
+        $("#crxinbox").removeClass('fileactive');
+        $('#recentlydetails').addClass('fileactive');
+
+    }
+
+    var bindNewFiles = function (data, Isshowpopup) {
+
+
+        $.each(data, function (i, val) {
+            debugger;
+            var fileNameWithOutExt = val.FileName.replace(/(.*)\.(.*?)$/, "$1");
+            row = $("<tr></tr>");
+            col1 = $('<td><img  src="@Url.Content("~/dist/Images/Icons/pdf_icon.png")" height="25px" /></td>');
+            col2 = $('<td><a class="filePath" href="' + val.FilePath+'" target="_blank">'
+                + ' <img src="@Url.Content("~/dist/Images/Icons/document_blue_icon.png")" height="25px" /><span class="fileName"> ' + fileNameWithOutExt
+                + '</span> </a></td>');
+            col3 = $("<td>@DateTime.UtcNow.ToClientTime().ToFormatDate()</td>");
+            col4 = $("<td>@HCF.Web.Base.UserSession.CurrentUser.FullName</td>");
+            col5 = $('<td><a href="#"><img src="@Url.Content("~/dist/Images/Icons/remove-btn.png")" class="btnSelect active" tblName="TFiles" fileid="' + val.TFileId + '"  filesize="' + val.FileSize +'" /></a></td>');
+            //col4 = $('<td><button type="button" class="button1 btnSelect" tblName="TFiles" fileid="' + val.TFileId+'">Add</button></td>');
+            row.append(col1, col2, col3, col4, col5).prependTo("#filesTable tbody");
+            if (Isshowpopup == 1) {
+                AlertSuccessMsg('File(s) uploaded successfully.');
+            }
+            $(".list-files").find("input").val("");
+        });
+        getSelectedFile();
+    }
+
+
+    var showDuplicateFIleBox = function (uploadedFiles, duplicateFiles,selectedFiles) {
+        console.log(uploadedFiles, duplicateFiles, selectedFiles);
+        $('#duplicateFiles tbody').empty();
+        localStorage.setItem("tempFileUpload", JSON.stringify(uploadedFiles));
+        $('.uploadSteps').removeClass('fileactive');
+        $("dropZoneBoxDiv").removeClass('fileactive');
+        $(".dz-preview").hide();
+        $("#duplicatesFiles").addClass('fileactive');
+        $.each(uploadedFiles, function (i, val) {
+            var matchFound = (val.ReleatedFiles.length > 0) ? "(match found(s))" : "";
+            row = $("<tr></tr>");
+                col = $('<td colspan="4"><a>'
+                    + ' <img src="@Url.Content("~/dist/Images/Icons/document_blue_icon.png")" height="25px" /><span class="fileName"> ' + val.FileName
+                    + '</span> ' + matchFound+' </a></td>');
+            col2 = $('<td><a href="#"><img src="@Url.Content("~/dist/Images/Icons/remove-btn.png")" class="btnSelect active" tblName="TFiles" fileid="' + val.TFileId + '"  filesize="' + val.FileSize + '" /></a></td>');
+
+                row.append(col, col2).appendTo("#duplicateFiles tbody");
+            if (val.ReleatedFiles.length > 0) {
+                $.each(val.ReleatedFiles, function (i, relatedFiles) {
+                    createFileRow(relatedFiles, val.MD5Digest);
+                });
+            }
+        });
+    }
+
+
+    function createFileRow(val, key) {
+        var fileNameWithOutExt = val.FileName.replace(/(.*)\.(.*?)$/, "$1");
+        var isSameFile = ((val.MD5Digest != '' || val.MD5Digest != null) && (val.MD5Digest == key));
+
+        var baseFilePath = '@commonModelFactory.FilePath("")';
+        var suggestionText = (isSameFile) ? "same" : "name matches";
+        console.log(isSameFile,val.MD5Digest, key);
+                row = $("<tr></tr>");
+                col1 = $('<td><img  src="@Url.Content("~/dist/Images/Icons/pdf_icon.png")" height="25px" /></td>');
+        col2 = $('<td><a class="filePath" href="' + baseFilePath.concat(val.FilePath.replace("~/", ""))  + '" target="_blank">'
+            + ' <img src="@Url.Content("~/dist/Images/Icons/document_blue_icon.png")" height="25px" /><span class="fileName"> ' + fileNameWithOutExt
+            /*+ '</span> <span style="color: green;"> (' +suggestionText+')</span> </a></td>');*/
+            + '</span> <span style="color: green;"></span> </a></td>');
+                col3 = $("<td>@DateTime.UtcNow.ToClientTime().ToFormatDate()</td>");
+                col4 = $("<td>@HCF.Web.Base.UserSession.CurrentUser.FullName</td>");
+        col5 = $('<td><a href="#"><img src="@Url.Content("~/dist/Images/Icons/addplus-btn.png")" class="btnSelect" tblName="TFiles" fileid="' + val.TFileId + '"  filesize="' + val.FileSize + '" /></a></td>');
+        row.append(col1, col2, col3, col4, col5).appendTo("#duplicateFiles tbody");
+
+    }
+
+    function dragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        //alert("Call drag over");
+    }
+
+    function dragleave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        //debugger;
+        //alert("Call drag leave");
+    }
+
+    function dropInboxRecent(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        var sourceData = JSON.parse(e.dataTransfer.getData("text"));
+        console.log(sourceData);
+        var fileId = sourceData.fileId;
+        var TFiles = [];
+        var Tfile = {
+            AttachmentId: fileId,
+            FileType: sourceData.doctypeId,
+        };
+        TFiles.push(Tfile);
+        $.ajax({
+            url: CRxUrls.Common_UploadFiles,
+            type: "POST",
+            dataType: "JSON",
+            data: { files: TFiles },
+            success: function (data) {
+                if (data.status == true) {
+                    bindNewFiles(data.Result, 0);
+                } else {
+                    swalalert('please try again later.');
+                }
+            }
+        });
+    }
+
+</script>
+
+@*<style>
+    .errorFileName {
+        border: 1px solid red !important;
+    }
+</style>*@

@@ -1,0 +1,1137 @@
+﻿@model HCF.BDO.TLifeSafetyDevicesForms
+@{
+    ViewBag.Title = "Add Life Safety Devices Forms Permit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+  
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Life Safety Devices Forms @((Model.FormType == 1) ? " - Addition Form" : " – Removal Form")
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("AddLifeSafetyDevicesFormsPermit", "Permit", FormMethod.Post, new { id = "lsdpermiform", @autocomplete = "off" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(m => m.LsdFormNo)
+                        @Html.HiddenFor(m => m.FormType)
+                        @Html.HiddenFor(m => m.PermitNo)
+                        @Html.HiddenFor(m => Model.TFileIds)
+                        @Html.HiddenFor(m => m.TDrawingFields, new { id = "attachdrawingFiles" })
+                        <input type="hidden" name="AttachFiles" value="" id="attachFiles" />
+                       
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12">
+                                <h4>SECTION 1:  Basic Information</h4>
+                            </div>
+                            <div class="col-md-6">
+                                <p>Select project name from list of projects in drop down.  If desired project does not appear or you are unsure as to which project should be chosen, select “unsure” in drop down</p>
+                            </div>
+                            <div class="col-md-6">
+                                @await Html.PartialAsync("_PermitCommonMsg")
+                            </div>
+                        </div>
+                          
+
+                            <div class="row mopform-step1">
+                                <div class="col-md-3">
+                                    <label class="permitNumber">Permit #:  @(Model.LsdFormNo > 0 ? Model.PermitNo : Localizer["PermitNumber"])</label>
+                                    @*<label class="permitNumber">Permit #: <span style="@(Model.LsdFormNo>0 ? "display:block;" :"display:none;")">@Model.PermitNo</span></label>*@
+                                </div>
+                                <div class="col-md-3 text-right">
+                                    @if (Model.ProjectId != 0)
+                                    {
+
+                                        <div class="dropdown icratable-drop">
+                                            <button class="btn dropdown-toggle button1" type="button" data-toggle="dropdown">
+                                                See Associated Permits
+                                            </button>
+                                            @await Html.PartialAsync("~/Views/Shared/_projectPermitoptions.cshtml", Model.TIcraProject)
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6 mop-checkBox">
+                                    <span class="mop-padding">@Html.CheckBoxFor(x => x.IsMOPSubmission)<span></span><label>MOP Submission</label></span>
+                                    <span>@Html.CheckBoxFor(x => x.IsFinalSubmission)<span></span><label>Final Submission</label></span>
+                                </div>
+                            </div>
+                            <div class="row mopform-step1">
+                                <div class="col-lg-6 form-group">
+                                    <label style="display:block">Project Name: <em class="required-field">*</em></label>
+                                    <input type="hidden" name="ProjectId" id="ProjectId" />
+                                    @*@Html.Action("ProjectCustomDDL", "Common", new { type = "SINGLE", ProjectId = Model.ProjectId })*@
+                                    @await Component.InvokeAsync("CommonProjectCustomDDL", new { type = "SINGLE", ProjectId = Model.ProjectId.ToString() })
+
+                                    <input type="text" id="txtprojectName" name="txtprojectName" class="ddlproject" required />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label> Date [of Request]:<em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.DateOfRequest, $"{Model.DateOfRequest:MMM d, yyyy}", new { @class = "form-control datepicker readonly", @autocomplete = "off" })
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>Requestor: <em class="required-field">*</em></label>
+
+                                    @*@Html.UsersList("Requestor", (Model.Requestor.HasValue) ? Model.Requestor.Value : 0,
+        "-- Select --", new
+             {
+                 @class = Model.LsdFormNo > 0 && Model.Status != -1 ? "form-control disable" : "form-control",
+            required = "required"
+             }, "", true)*@
+
+                                    <userslist name="Requestor"
+                                               isVendorUseronly="true"
+                                               class="@(Model.LsdFormNo > 0 && Model.Status != -1 ? "form-control disable" : "form-control")"
+                                               required="required"
+                                               selectedvalue="@((Model.Requestor.HasValue) ? Model.Requestor.Value : 0)"
+                                               firsttext="-- Select --">
+                                    </userslist>
+                                    @*@Html.TextBoxFor(m => m.Requestor, null, new { @class = "form-control", required = "required" })*@
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Contractor: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.Contractor, null, new { @class = "form-control ", required = "required" })
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Building(s): <em class="required-field">*</em></label>
+
+                                    <input type="hidden" id="Buildingddl" name="BuildingId" />
+                                    <input type="hidden" id="buildingIdName" name="BuildingName" />
+                                    <input type="hidden" name="lstBuildingDetails" id="lstBuildingDetails" />
+
+                                    <div class="asset_list_affected">
+                                        @await Component.InvokeAsync("Permitlifesafetybuildingddl", new { type = "MULTI", ProjectId = Model.ProjectId.ToString() })
+
+                                        @*@Html.Action("lifesafetybuildingddl", "Permit", new { type = "MULTI" })*@
+                                        <input type="text" id="txtbuilding" name="txtbuilding" class="ddlproject" required />
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-md-6 form-group">
+                                    <label>Floor(s): </label>
+
+                                    <input type="hidden" id="Floorddl" name="FloorId" />
+                                    @*<input type="hidden" id="floorIdName" name="FloorName" />*@
+                                    <input type="hidden" name="lstFloorDetails" id="lstFloorDetails" />
+
+                                    <div class="asset_list_affected">
+                                        @Html.TextBoxFor(m => m.FloorName, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>Zone(s):</label>
+                                    @Html.TextBoxFor(m => m.Zones, new { @class = "form-control" })
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Email Address: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.EmailAddress, null, new { @class = "form-control", @type = "Email", required = "required" })
+                                    @Html.ValidationMessageFor(m => m.EmailAddress)
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Phone #: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.PhoneNumber, null, new { @class = "form-control phone", maxlength = 15, minlength = 10, required = "required" })
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Device Types: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.DeviceType, null, new { @class = "form-control ", required = "required" })
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label>Brief Description of Work: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(m => m.Description, null, new { @class = "form-control ", required = "required" })
+                                </div>
+
+                                <div class="col-md-6 form-group divattachment">
+                                    <label class="attachedfile-lable">Add Attachments:</label>
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnuploadfile" data-toggle="modal" data-target="#modal-container" /><sup id="attchFileCount" style="display:none;"></sup>
+                                    <div id="file-upload-list">
+                                        <div id="file-lists">
+                                            <ul class="col-lg-12 attachfileitems">
+                                                @foreach (var item in Model.Attachments)
+                                                {
+                                                    <li class="list-group-item files" id="lidv_@item.TFileId">
+                                                        @if (!string.IsNullOrEmpty(item.FileName))
+                                                        {
+                                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc =item.FilePath, title = "Preview" })" class="modal-link allowclick">
+
+                                                                @item.FileName
+                                                            </a>
+                                                            <a data-id="@item.TFileId" class="deletefile allowclick">
+                                                                <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                            </a>
+                                                        }
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 form-group divattachment">
+                                    <label class="attachedfile-lable">Attach Drawings:</label> 
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnattachingdrawings" data-toggle="modal" data-target="#modal-container1" />
+
+                                    <div id="drawing-upload-list">
+                                        <div id="drawing-lists">
+                                            <ul class="col-lg-12 attachdrawingfiles ">
+                                                @foreach (var item in Model.DrawingAttachments)
+                                                {
+                                                    <li class="list-group-item files" id="lidrawingdv_@item.FloorPlanId">
+                                                        @if (!string.IsNullOrEmpty(item.FullFileName))
+                                                        {
+                                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = item.FloorName + " , " + item.BuildingName })" title="@item.FileName" class="modal-link allowclick">
+                                                                @*<a href="@Url.Action("DrawingPreview", "Common", new { floorPlanId = item.FloorPlanId, mode = "drawing" ,permitId = 0})" title="@item.FileName" class="modal-link allowclick">*@
+                                                                @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FullFileName" />*@
+                                                                @item.FullFileName
+                                                            </a>
+                                                            <a data-id="@item.FloorPlanId" class="deletedrawing allowclick">
+                                                                <img id="deletedrawing" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                            </a>
+                                                        }
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mopform-step2">
+                                <div class="col-md-12">
+                                    <div class="sitelocationhide">
+                                        <div id="sitesList" class="sitelist">
+                                            <h4>
+                                                SECTION 2:  Life Safety Device List: <input type="button" class="button1" value="Add Device" id="btnAddDevice" />
+                                            </h4>
+                                            <table class="table table-bordered js-serial" id="deviceTbl">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Device # </th>
+                                                        <th>Building</th>
+                                                        <th>Location / FACP Alias </th>
+                                                        <th>Device Type </th>
+                                                        <th>Make / Model </th>
+                                                        <th>
+                                                            @((Model.FormType == 1) ? "Date Added " : "Date Removed")
+                                                        </th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (int i = 0; i < Model.LifeSafetyDeviceList.Count; i++)
+                                                    {
+                                                        @*@await Html.PartialAsync("_LifeSafetyDevicesForms", Model.LifeSafetyDeviceList[i], new ViewDataDictionary {
+            { "type", Model.FormType }, { "sequence", i }, { "BuildingId", Model.BuildingId !=null ?Model.BuildingId:"0"},
+            { "DeviceType", Model.DeviceType != null ? Model.DeviceType : string.Empty } })*@
+
+                                                        @await Html.PartialAsync("_LifeSafetyDevicesForms", Model.LifeSafetyDeviceList[i],
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "type", Model.FormType }, { "sequence", i }, { "BuildingId", Model.BuildingId !=null ?Model.BuildingId:"0"},
+            { "DeviceType", Model.DeviceType != null ? Model.DeviceType : string.Empty } }
+                              )
+
+                                                    }
+<tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "row" :"row disable")">
+                                <div class="mopform-step3">
+                                    <div class="col-lg-12">
+                                        <input type="hidden" id="hdn_PermitAuthorizedSignature_LocalSignDateTime" name="PermitAuthorizedSignature.LocalSignDateTime" />
+                                        <input type="hidden" id="hdn_PermitAuthorizedSignature_CreatedBy" name="PermitAuthorizedSignature.CreatedBy" />
+                                        <input type="hidden" id="PermitAuthorizedSignature.FileName" name="PermitAuthorizedSignature.FileName" value="" />
+                                        <input type="hidden" id="PermitAuthorizedSignature.FileContent" name="PermitAuthorizedSignature.FileContent" value="" />
+                                        <h4>SECTION 3:  Approval  [Hospital Employee’s Only]</h4>
+                                    </div>
+                                </div>
+                                <div class="row col-lg-12">
+                                    <div class="col-lg-6">
+                                        <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "form-group" :"form-group disable")">
+                                            <label>Status: </label>
+                                            @*@Html.ApprovalStatusDropDownList("Status", Model.Status, new { @class = "form-control", required = "required", @onchange = "checkAppprovalStatus();" })*@
+                                        <approvalstatusdropdownlist name="Status" selectedvalue="@Model.Status" required="required" class="form-control"></approvalstatusdropdownlist>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Date: <em class="required-field">*</em></label>
+                                            @Html.TextBoxFor(m => m.SignDate, $"{Model.SignDate:MMM d, yyyy}", new { @class = "form-control  datepicker readonly", @autocomplete = "off" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label>Approver Name:<em class="required-field approverby">*</em> </label>
+                                            @*@Html.UsersList("ApprovedBy", (Model.ApprovedBy.HasValue) ? Model.ApprovedBy.Value : 0, "-- Select --", new { @class = "form-control" })*@
+                                        <userslist name="ApprovedBy"
+                                                   isVendorUseronly="true"
+                                                   class="form-control"
+                                                   required="required"
+                                                   selectedvalue="@((Model.ApprovedBy.HasValue) ? Model.ApprovedBy.Value :-1)"
+                                                   firsttext="-- Select --">
+                                        </userslist>
+
+                                        </div>
+                                        <div class="form-group showonreject">
+                                            <label id="lbltext"></label>
+                                            @Html.TextAreaFor(model => model.Reason, new { @class = "form-control", @rows = "3" })
+                                        </div>
+                                        <div class="form-group showonapproved">
+                                            <div class="crxSignBox">
+                                                <p>Signature:<em class="required-field">*</em> </p>
+                                                @Html.HiddenFor(x => x.PermitAuthorizedSignatureId)
+                                                <input type="hidden" id="PermitAuthorizedSignature.DigSignatureId" name="PermitAuthorizedSignature.DigSignatureId" value="" />
+                                               
+
+                                                <div class="sign_PermitAuthorizedSignature">
+                                                    @await Component.InvokeAsync("ViewDigitalSign", new HCF.Web.ViewModels.DigitalSignatureViewModel()
+                                               {
+                                                   signs = Model.PermitAuthorizedSignature,
+                                                   MainSignatureClass = "imgPermitAuthorizedSignature allowclick",
+                                                   //ImgSignatureClass = "approverbysign",
+                                                   HiddenFileControl = "PermitAuthorizedSignature",
+                                                   ApprovalStatus = Model.Status,
+                                                   SignatureControlId = "PermitAuthorizedSignatureId"
+
+                                               })
+                                                </div>
+                                                <input type="text" value="@(Model.PermitAuthorizedSignature != null && Model.PermitAuthorizedSignature.DigSignatureId > 0?Model.PermitAuthorizedSignature.FileName:"")" id="hdn_PermitAuthorizedSignature" class="ddlproject hassigned" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 text-right button_Div">
+                                    <input type="submit" name="submit" value='@Localizer["Submit"] ' id="save" class="comm-button" />
+                                    <input name="submit" formnovalidate="formnovalidate" type="submit" id="btnIncomplete" value='Save Incomplete' class="@((Model.LsdFormNo > 0 && Model.Status > -1 &&  ViewBag.ShowIncomplete == 0) ? "comm-bluebutton hide" : "comm-bluebutton")" />
+                                    @*@Html.ActionLink("Cancel ", "LifeSafetyDevicesForms", "Permit", new { @class = "comm-button" })*@
+                                    @Html.ActionLink("Cancel", "LifeSafetyDevicesForms", new { controller = "Permit" }, new { @class = "comm-Cancelbutton" })
+                                </div>
+                            </div>
+
+                        <input type="hidden" id="IsRequestEdited" name="IsRequestEdited" value="@ViewBag.IsRequestEdited" />
+
+                        <input type="hidden" id="hdnbuidlingid" name="hdnbuidlingid" value="@Model.BuildingId" />
+                        <input type="hidden" id="hdnDeviceType" name="hdnLocation" value="@Model.DeviceType" />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+<div class="modal fade" id="popUpModal" role="dialog">
+</div>
+<input type="hidden" id="RejectMessage" name="RejectMessage" value="0" />
+<style>
+    .input-hidden {
+        height: 0;
+        width: 0;
+        visibility: hidden;
+        padding: 0;
+        margin: 0;
+    }
+    .asset_list_affected {
+        width: 100%;
+    }
+
+    .selectList {
+        width: calc(100% - 0px);
+    }
+    .asset_list_affected #ullistitem {
+        width: 100%;
+    }
+    .asset_list_affected ul li {
+        width: 100%;
+    }
+    .deleteTr {
+        font-size: 20px;
+    }
+    
+</style>
+<script>
+
+    var btnAddDevice = $("#btnAddDevice");
+    var deviceTbl = $("#deviceTbl");
+    var statusddl = $("#Status");
+    $(document).ready(function () {
+        var status =  parseInt('@Model.Status');
+        var projectid = parseInt('@Model.ProjectId');
+        if (projectid > 0) {
+            $('.chkSigleSelect input[type="checkbox"][value="' + projectid + '"]').prop('checked', true).trigger('change');
+        }
+        if ('@Model.LsdFormNo' > 0) {
+            statusddl.val(status);
+        }
+        checkAppprovalStatus();
+        $("body").on("click", ".dateSelector", function () {
+            $(this).datepicker();
+            $(this).datepicker("show");
+        });
+
+        $(document).on('click', '.openAssetsSearchPopUp', function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            var trid = $(this).attr("trid");
+            loadPopUp(trid);
+        });
+
+        function addRowCount() {
+            $("#deviceTbl tbody tr:not(.hide)").each(function (index) {
+                debugger
+                $(this).find(".rowNo").html(index+1);
+            });
+        }
+
+
+        $(document).on('click', '.deleteTr', function () {
+            var trid = $(this).attr("trid");
+            swal({
+                title: "Delete!",
+                text: "Are you sure you want to delete this records?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Yes',
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $("#" + trid).find("input").each(function () {
+                            $(this).val("");
+                            console.log($(this));
+                            $(this).attr("required", false);
+                        });
+                        $("#" + trid).find("textarea").each(function () {
+                            $(this).html("");
+                           
+                            console.log($(this));
+                            $(this).attr("required", false);
+                        });
+                        $("#" + trid).addClass("hide");
+                        addRowCount();
+                        
+                    }
+                });
+        });
+
+
+        $(document).on('click', '.linkAssets', function () {
+            var currentCtr = $(this).closest("tr");
+            var floorAssetId = $(this).attr("floorAssetId");
+            var ctrid = $(this).attr("ctrid");
+            var deviceType = currentCtr.find(".deviceType").text().trim();
+            var assetNo = currentCtr.find(".assetNo").text().trim();
+            var assetName = currentCtr.find(".assetName").text().trim();
+            var assetMake = currentCtr.find(".assetMake").text().trim();
+            var assetLocation = currentCtr.find(".assetLocation").text().trim();
+            var assetNearBy = currentCtr.find(".assetNearBy").text().trim();
+            //console.log(deviceType);
+            var destinationCtr = $("#" + ctrid);
+
+            destinationCtr.find(".deviceType").val(deviceType);
+            destinationCtr.find(".assetNo").val(assetNo);
+            destinationCtr.find(".assetName").val(assetName);
+            destinationCtr.find(".assetMake").val(assetMake);
+            destinationCtr.find(".assetLocation").val(assetLocation);
+            destinationCtr.find(".assetNearBy").val(assetNearBy);
+            $('#popUpModal').modal('hide');
+        });
+
+        var loadPopUp = function (trid) {
+            $.ajax({
+                url: '@Url.Action("SearchAssetsPopUp", "Assets")' + "?clickCtr=" + trid,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+
+
+        $("#btnIncomplete").click(function () {
+            $("#txtprojectName").prop('required', true);
+            var IsValid = true;
+            if ($("#ProjectId").val() == "") {
+                swalalert("Please select Project");
+                IsValid = false;
+                return false;
+            }
+            if ($("#PhoneNumber").val() != "") {
+                var phone = $("#PhoneNumber").val().replace(/[^0-9]/g, '');
+                if (phone.length != 10) {
+                    swalalert("Please Enter Valid Phone #");
+                    IsValid = false;
+                    return false;
+                }
+
+            }
+
+
+            $(".loadingModal").show();
+            if (IsValid) {
+                if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                    IsValid = false;
+
+                    swal({
+                        html: true,
+                        title: "Message",
+                        text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes, reject permit",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            $("#RejectMessage").val("1");
+                            $(".loadingModal").show();
+                            $("#btnIncomplete").click();
+
+                        }
+
+                    });
+                    if ($("#RejectMessage").val() == "0") {
+                        return false;
+                    }
+
+                }
+                else {
+                    $("#AddLifeSafetyDevicesFormsPermit").submit();
+                }
+            }
+            else {
+                $(".loadingModal").hide();
+
+            }
+
+        });
+
+        $("#DeviceType").on("input", function () {
+          
+
+            $("#deviceTbl tr").each(function (index) {
+                debugger;
+                $(this).find("td").find(".deviceType").val($("#DeviceType").val());
+            });
+        });
+      
+        //$(".datechanged").datepicker({
+        //    showOn: "both",
+        //    buttonImage: ImgUrls.datepicker_calendar,
+        //    buttonImageOnly: true,
+        //    dateFormat: $.CRx_DateFormat,
+        //    beforeShow: changeYearButtons,
+        //    onChangeMonthYear: changeYearButtons,
+        //    onSelect: function (dateText) {
+        //        //console.log("Selected date: " + dateText + "; input's current value: " + this.value);
+        //        $("#deviceTbl tr").each(function (index) {
+        //            debugger;
+        //            if ($(this).find("td").find(".futuredatepicker").val() == "") {
+        //                $(this).find("td").find(".futuredatepicker").val($(".datechanged").val());
+        //            }
+                   
+        //        });
+        //    }
+        //});
+        btnAddDevice.click(function () {
+            debugger;
+            var trCount = parseInt($('#deviceTbl tr').length) - 1;
+            var Building="0";
+            $(".chkBuildMultiSelect").each(function (index) {
+                if ($(this).find('input:checkbox').is(':checked')) {
+                    Building += $(this).find('input:checkbox').val()+",";
+                }
+
+                });
+            $("#hdnDeviceType").val($("#DeviceType").val());
+        var url = '@Url.Action("BindDeviceList", "Permit")';
+            $.ajax({
+
+                url: url + '?sequence=' + trCount + '&type=' + @Model.FormType+ '&BuildingId=' + Building,
+            cache: false,
+            type: "GET",
+            success: function (trResult) {
+                $('#deviceTbl tr:last').after(trResult);
+                addRowCount();
+
+                var datetxt = "txt_date_" + (trCount+1);
+                    $('#' + datetxt).datepicker({
+                        showOn: "both",
+                        buttonImage: ImgUrls.datepicker_calendar,
+                        buttonImageOnly: true,
+                        dateFormat: $.CRx_DateFormat,
+                        beforeShow: changeYearButtons,
+                        onChangeMonthYear: changeYearButtons
+                    });
+                var datetxt1 = "txt_devicenumber_" + (trCount + 1);
+                    $('#' + datetxt1).on('input', function () {
+                    $(this).outerHeight(34).outerHeight(this.scrollHeight);
+                });
+                $('#' + datetxt1).trigger('input');
+            }
+        });
+        });
+
+        bindBuildingdll();
+       // bindFloordll();
+        //Save on any menu click for not loosing data
+        $("a").not("#lsdpermiform .allowclick").not(".dropdown-toggle").each(function () {
+            $(this).addClass("stopunload");
+            var url = this.href;
+            //if link has url or click events will create duplicate
+            if (url != '' || url == '#') {
+                $(this).attr("linkurl", url);
+                $(this).removeAttr("href");
+            }
+            else {
+                $(this).clone().insertAfter(this);
+                $(this).addClass("originallink");
+                $(this).hide();
+            }
+        });
+
+
+        $("a").not(".originallink").not("#lsdpermiform allowclick").removeAttr("onclick");
+
+        $(".stopunload").not(".dropdown-toggle").click(function (e) {
+            //e.stopPropagation();
+            e.preventDefault();
+            if ($("#lsdpermiform").data("changed") || typeof $("#lsdpermiform").data("changed") !== 'undefined') {
+                Restrictpageload(this);
+            }
+            else {
+                Resetlinkclick(this);
+            }
+            e.preventDefault();
+        });
+        //check any changes done on page
+        $("#lsdpermiform :input").change(function () {
+            $("#lsdpermiform").data("changed", true);
+            $('#btnbackpageUrl').addClass("stopunload");
+        });
+         if ('@Model.Status' == '1' && '@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+            debugger;
+             $("#lsdpermiform").find("input,textarea,select").addClass("disabled");
+             $(".selectList").addClass("disable");
+             $("select").addClass("disable");
+             $("input:submit").addClass("disable");
+             $("#btnattachingdrawings").addClass("disable");
+             $("#btnuploadfile").addClass("disable");
+
+             $(".allowclick").not(".modal-link").addClass("disable");
+             $("input:hidden").removeClass("disabled");
+             $(".deleteTr").addClass("disabled");
+        }
+      if ('@Model.Status' == '1'  && ('@HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")' == 'True' ) && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+            debugger;
+          //$("#lsdpermiform").find("input,textarea,select").attr("disabled", "disabled");
+          $("#lsdpermiform").find("input,textarea,select").addClass("disabled");
+          $(".selectList").addClass("disable");
+          $("select").addClass("disable");
+          $(".allowclick").not(".modal-link").addClass("disable");
+          $("input:submit").removeClass("disabled");
+            $("#btnattachingdrawings").addClass("disable");
+          $("#btnuploadfile").addClass("disable");
+          $("input:hidden").removeClass("disabled");
+          $(".deleteTr").addClass("disabled");
+
+
+        }
+         var isincomplete = -1;
+        if ('@Model.LsdFormNo' != 0 && isincomplete!='@Model.Status') {
+            $("#Status>option[value=-1]").hide();
+        }
+        if ('@Model.LsdFormNo' > 0 ) {
+            $(".ddlprojects").addClass("disable");
+        }
+        $("#Status>option[value=4]").hide();
+        $("#Status>option[value=5]").hide();
+        $("#Status>option[value=6]").hide();
+
+        $('#btnbackpageUrl').removeClass("stopunload");
+    });
+    function Resetlinkclick(thisobj) {
+        if (thisobj.id == "btnbackpageUrl") {
+            var screenName = '@string.Format("{0}_{1}", ViewContext.RouteData.Values["Controller"].ToString().ToLower(), ViewContext.RouteData.Values["Action"].ToString().ToLower())';
+            window.location.href = ('@Url.Action("RedirectTobackpage", "Common")' + "?pageUrl=" + window.location.href + "&screenName=" + screenName).replace('#', '');
+        } else {
+            var url = $(thisobj).attr("linkurl");
+            if (typeof url !== 'undefined')
+                window.location = url;
+            else {
+                var clickev = $(thisobj).prev(".originallink").attr("onclick");
+                if (typeof clickev !== 'undefined') {
+                    $(thisobj).hide();
+                    var prevlink = $(thisobj).prev(".originallink");
+                    $(thisobj).prev(".originallink").show();
+                    $(prevlink).click();
+                    $(thisobj).prev(".originallink").hide();
+                    $(thisobj).show();
+                }
+            }
+        }
+
+    }
+
+    function Restrictpageload(thisobj) {
+        swal({
+            title: "Changes you made may not saved",
+            text: "Do you want to save your data before leaving this page?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes',
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: true
+        },
+            function (isConfirm) {
+                swal.close();
+                if (isConfirm) {
+
+                    setTimeout(function () {
+                        if ($("#btnIncomplete").is(":visible")) {
+                            $('#btnbackpageUrl').removeClass("stopunload");
+                            $("#btnIncomplete").click();
+                        }
+                        else {
+                            $('#btnbackpageUrl').removeClass("stopunload");
+                            $("#save").click();
+                        }
+                    }, 1000)
+                }
+                else {
+                    //swal.close();
+                    setTimeout(function () {
+                        $('#btnbackpageUrl').removeClass("stopunload");
+                        Resetlinkclick(thisobj);
+                    }, 1000)
+                }
+            });
+    }
+
+    $(document).on('input', '.assetNo', function () {
+        var text = $(this).val();
+        if (text != undefined && text.length > 0) {
+            $(this).closest("tr").find(".dateSelector").attr("required", true);
+        } else {
+            $(this).closest("tr").find(".dateSelector").attr("required", false);
+        }
+    });
+
+
+    $(".signCtr").click(function () {
+        loadSignView('PermitAuthorizedSignature.FileName', 'PermitAuthorizedSignature.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+
+    function checkAppprovalStatus() {
+        var StatusId = $("#Status").val();
+        if (StatusId == 0 || StatusId == 3) {
+            var lbltext = StatusId == 0 ? "Reason(s) for Rejection:" : "Reason(s) for Hold/Pending:";
+            lbltext += '<em class="required-field approverby">*</em>';
+            $("#lbltext").html(lbltext);
+            $(".showonreject").show();
+            $(".showonapproved").hide();
+            $(".approverby").show();
+            $("#SignDate").prop('required', false);
+            $("#SignDate").prev("label").find("em").hide();
+            $("#ApprovedBy").prop('required', true);
+            $("#ApprovedBy").prev("label").find("em").show();
+            $("#Reason").prop('required', true);
+            $("#hdn_PermitAuthorizedSignature").prop('required', false);
+        } else if (StatusId == 1) {
+
+            $(".showonreject").hide();
+            $(".showonapproved").show();
+            $(".approverby").show();
+            $("#SignDate").prop('required', true);
+            $("#SignDate").prev("label").find("em").show();
+            $("#ApprovedBy").prop('required', true);
+            $("#ApprovedBy").prev("label").find("em").show();
+            $("#Reason").prop('required', false);
+            $("#hdn_PermitAuthorizedSignature").prop('required', true);
+        } else {
+            $(".showonreject").hide();
+            $(".showonapproved").hide();
+            $(".approverby").hide();
+            $("#SignDate").prop('required', false);
+            $("#SignDate").prev("label").find("em").hide();
+            $("#Reason").prop('required', false);
+            $("#ApprovedBy").prev("label").find("em").hide();
+            $("#ApprovedBy").prop('required', false);
+            $("#hdn_PermitAuthorizedSignature").prop('required', false);
+        }
+    }
+    $(".readonly").on('keydown paste', function (e) {
+        e.preventDefault();
+    });
+
+        $(document).off("click", "#save").on("click", "#save", function () {
+        var IsValid = true;
+        debugger;
+        if ($('#lsdpermiform')[0].checkValidity()) {
+            if ($("#PhoneNumber").val() != "") {
+                var phone = $("#PhoneNumber").val().replace(/[^0-9]/g, '');
+                if (phone.length != 10) {
+                    swalalert("Please Enter Valid Phone #");
+                    IsValid = false;
+                    return false;
+                }
+
+            }
+
+
+            $(".loadingModal").show();
+            if (IsValid) {
+
+                if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                    IsValid = false;
+
+                    swal({
+                        html: true,
+                        title: "Message",
+                        text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes, reject permit",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: true,
+                        closeOnCancel: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            $("#RejectMessage").val("1");
+                            $(".loadingModal").show();
+                            $("#save").click();
+
+                        }
+
+                    });
+                    if ($("#RejectMessage").val() == "0") {
+                        $(".loadingModal").hide();
+                        return false;
+                    }
+
+                }
+                else {
+                    $("#lsdpermiform").submit();
+                }
+            }
+            else {
+                $(".loadingModal").hide();
+                return false;
+            }
+        }
+        else {
+
+        }
+
+    });
+
+    var buildingddl = $("#Buildingddl");
+    buildingddl.change(function () {
+
+        mopBuildingDetails();
+    });
+
+    function mopBuildingDetails() {
+        var tfsbpbuildetails = [];
+        var buildingIds = getCheckedValue('chkBuildMultiSelect');
+        debugger;
+        $(".chkFloorMultiSelect").hide();
+        if ($("#UncheckBuilding").val() != "") {
+            $(`input[type="checkbox"][data-buildingid="${$("#UncheckBuilding").val()}"]`).prop('checked', false);
+        }
+        for (var i = 0; i < buildingIds.length; i++) {
+            var tfsbpbuildetail = { BuildingName: buildingIds[i].BuildingName, BuildingId: buildingIds[i].BuildingId, SiteBuildingName: buildingIds[i].SiteBuildingName };
+            tfsbpbuildetails.push(tfsbpbuildetail);
+
+            $(`input[type="checkbox"][data-buildingid="${buildingIds[i].BuildingId}"]`).parent("li").show();
+
+        }
+        debugger;
+        $("#lstBuildingDetails").val(JSON.stringify(tfsbpbuildetails));
+        debugger;
+        if ($('#lstBuildingDetails').val() != "[]")
+            $("#txtbuilding").val($('#lstBuildingDetails').val());
+        else
+            $("#txtbuilding").val("");
+
+       // mopFloorDetails();
+
+    }
+
+    var bindBuildingdll = () => {
+        debugger;
+        var chkedBuildingId = '@Model.BuildingId';
+        debugger;
+        var buildingIds = chkedBuildingId.split(',');
+        $('.chkBuildMultiSelect input[type="checkbox"]').prop('checked', false)
+
+        for (var i = 0; i < buildingIds.length; i++) {
+            $(`.chkBuildMultiSelect input[type="checkbox"][value="${buildingIds[i]}"]`).prop('checked', true)
+            $('.chkBuildMultiSelect').parent().parent().children('label').text(selectLabel($('.chkBuildMultiSelect')))
+        }
+        mopBuildingDetails();
+    }
+
+    var Floorddl = $("#Floorddl");
+    Floorddl.change(function () {
+        mopFloorDetails();
+    });
+
+    $("#Status").change(function () {
+        checkAppprovalStatus();
+    });
+
+    function mopFloorDetails() {
+        var tFloordetails = [];
+        var floorIds = getCheckedFloorValue('chkFloorMultiSelect');
+        debugger;
+        if (floorIds.length > 0) {
+            for (var i = 0; i < floorIds.length; i++) {
+                var tFloordetail = { FloorName: floorIds[i].FloorName, FloorId: floorIds[i].FloorId };
+                $('.chkFloorMultiSelect').parent().parent().children('label').text(selectLabelFloor($('.chkFloorMultiSelect')))
+                tFloordetails.push(tFloordetail);
+            }
+            debugger;
+            $("#lstFloorDetails").val(JSON.stringify(tFloordetails));
+
+
+        }
+        else {
+            $("#lstFloorDetails").val(JSON.stringify(tFloordetails));
+            $('.chkFloorMultiSelect input[type="checkbox"]').prop('checked', false);
+            $('.chkFloorMultiSelect').parent().parent().children('label').text("--Select Floor--");
+        }
+        debugger;
+        if ($('#lstFloorDetails').val() != "[]")
+            $("#txtFloor").val($('#lstFloorDetails').val());
+        else
+            $("#txtFloor").val("");
+
+    }
+
+    var bindFloordll = () => {
+        debugger;
+        var chkedFloorId = '@Model.FloorId';
+         var chkedBuildingId = '@Model.BuildingId';
+        debugger;
+        var floorIds = chkedFloorId.split(',');
+        var buildingIds = chkedBuildingId.split(',');
+        $('.chkFloorMultiSelect input[type="checkbox"]').prop('checked', false)
+        for (var i = 0; i < floorIds.length; i++) {
+            $(`.chkFloorMultiSelect input[type="checkbox"][value="${floorIds[i]}"]`).prop('checked', true)
+            $('.chkFloorMultiSelect').parent().parent().children('label').text(selectLabelFloor($('.chkFloorMultiSelect')))
+        }
+
+        mopFloorDetails();
+    }
+
+
+     $(document).on('click', '#btnattachingdrawings', function () {
+        LoadDrawingPathway();
+        $('#modal-container1').modal('show');
+    });
+    var TDrawingFields = $("#attachdrawingFiles");
+    $(document).on('click', 'a.deletedrawing', function (e) {
+       // TDrawingFields = $("#attachdrawingFiles");
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TDrawingFields.val() != undefined && TDrawingFields.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TDrawingFields.val(), TFileId.toLowerCase(), ",");
+
+                    TDrawingFields.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Permit_DeleteLSDDrawings + "?LsdFormNo=" + '@Model.LsdFormNo' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidrawingdv_" + TFileId).remove();
+                            deletedrawings(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    deletedrawings(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                }
+            });
+    });
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+
+     var TFileIds = $("#TFileIds");
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TFileIds.val() != undefined && TFileIds.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TFileIds.val(), TFileId, ",");
+                    TFileIds.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Permit_DeleteLSDFiles + "?LsdFormNo=" + '@Model.LsdFormNo' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidv_" + TFileId).remove();
+                            deleteattachfile(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    debugger;
+                    deleteattachfile(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                    //console.log(ret);
+                }
+            });
+    });
+
+    $('textarea').on('input', function () {
+        $(this).outerHeight(34).outerHeight(this.scrollHeight);
+    });
+    $('textarea').trigger('input');
+
+
+    function checkedBuilding(thisbj) {
+        debugger;
+        var isChecked = $(thisbj).is(':checked');
+        var checkboxtype = $(thisbj).attr('checkboxtype');
+        var sequence = $(thisbj).attr('sequence');
+        var classtext = $(thisbj).attr('classtext');
+        var ele = thisbj;
+        if (checkboxtype.toLowerCase() == "single") {
+            var thisVal = "0"
+            if (isChecked) {
+                thisVal = $(thisbj).val()
+            }
+
+            $('.' + classtext + ' input[type="checkbox"]').prop('checked', false)
+            $(thisbj).prop('checked', isChecked)
+            $('.' + classtext).parent().parent().children('label').text(selectLabel($('.' + classtext)));
+            $('#Buildingddl' + sequence).val(thisVal);
+            $('#txtbuildingName' + sequence).val($(thisbj).attr("data-sitebuildingname"));
+            $('#buildingIdName' + sequence).val($(thisbj).attr("data-sitebuildingname"));
+
+        }
+        else {
+            var val = getCheckedValue(classtext)
+            console.log(selectLabel($('.' + classtext)))
+            $('.chkBuildMultiSelect').parent().parent().children('label').text(selectLabel($('.' + classtext)));
+            if ($(thisbj).prop("checked") == false) {
+                $("#UncheckBuilding" + sequence).val($(thisbj).val());
+            }
+            else {
+                $("#UncheckBuilding" + sequence).val("");
+            }
+            $("#Buildingddl" + sequence).trigger('change');
+
+            if (window.location.href.indexOf("life-safety-device") > -1) {
+
+                var lstbuilding = $(thisbj).parent("li").html().replace('MULTI', 'SINGLE');
+                var lstaddhtml = "";
+                $("#deviceTbl tbody tr:not(.hide)").each(function (index) {
+                    lstaddhtml = "";
+                    lstaddhtml = lstbuilding.replace('chkBuildMultiSelect', 'chkBuildSigleSelect' + $(this).find(".rowNo").html());
+                    lstaddhtml = lstaddhtml.replace("sequence=", "sequence='" + $(this).find(".rowNo").html() + "'");
+                    if ($(ele).prop("checked")) {
+                        $(this).find("td.tdbuilding").find("div.selectList").find("ul.ullistitem").append(" <li sequence=" + $(this).find(".rowNo").html() + " class=" + "chkBuildSigleSelect" + $(this).find(".rowNo").html() + ">" + lstaddhtml + "</li>");
+                    }
+                    else {
+                        $(this).find("td.tdbuilding").find("div.selectList").find("ul.ullistitem").find("li").each(function (index) {
+                            if ($(this).find("input[type=checkbox]").val() == $(ele).val()) {
+                                $(this).remove();
+                            }
+
+                        });
+                    }
+
+                });
+            }
+        }
+
+
+    }
+    function getCheckedValue(className) {
+        var checkedVallst = [];
+        debugger;
+        $('.' + className + ' input[type="checkbox"]:checked').each((i, data) => {
+            var checkedVals = { BuildingName: $(data).attr('data-text'), BuildingId: $(data).val(), SiteBuildingName: $(data).attr('data-sitebuildingname') };
+            checkedVallst.push(checkedVals);
+        })
+        return checkedVallst
+    }
+
+    var selectLabel = (input) => {
+        var chkCount = $(input).find('input[type="checkbox"]:checked').length
+        var txt = '--Select Building--'
+        if (chkCount == 0) {
+            return txt;
+        }
+        if (chkCount < 2) {
+            console.log($(input).find('input[type="checkbox"]:checked').data('text'))
+            txt = $(input).find('input[type="checkbox"]:checked').data('text')
+        }
+        else {
+            txt = chkCount + ' Building Selected'
+        }
+        return txt;
+    }
+</script>
+<style>
+   
+    .mopform-step1 .col-md-6, .mopform-step1 .col-md-12.col-xs-12 {
+        padding-bottom: 15px;
+        display: inline-block;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Permit/PermitSignature.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>

@@ -1,0 +1,128 @@
+﻿@model  HCF.BDO.EpAssets
+
+@{
+    ViewBag.Title = "Set Goal";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Assign EPs
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                        <div class="row">
+
+                            <form asp-controller="Assets" asp-action="SetGoal"
+                                  data-ajax-success="onSucess"
+                                  data-ajax="true" data-ajax-method="POST">
+                                @*@using (Ajax.BeginForm("SetGoal", "Assets", new { OnSuccess = "onSucess" })){*@
+
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        Asset
+                                        @*@Html.AssetsDownList("AssetId", Model.AssetId.ToString(), "Select", new { @class = "form-control",
+                    @onchange = "FillEPDetails()" })*@
+
+                                        <assetsdownlist firsttext="Select"
+                                                        required="required"
+                                                        class="form-control"
+                                                        selectedvalue=""
+                                                        name="AssetId">
+                                        </assetsdownlist>
+                                        @Html.ValidationMessageFor(model => model.AssetId)
+                                    </div>
+                                    <div class="form-group">
+                                        Standard
+                                        @Html.DropDownListFor(model => model.EPDetail.Standard.StDescID, new SelectList(ViewBag.Standards, "StDescID", "TJCStandard"),
+                                         "Select Standard",
+                                      new { @class = "form-control", @onchange = "FillEPnumber()" })
+                                        @Html.ValidationMessageFor(model => model.EPDetailId)
+                                    </div>
+
+                                    <div class="form-group">
+                                        EP
+                                        @Html.DropDownListFor(model => model.EPDetailId,
+                                     new SelectList(Enumerable.Empty<SelectListItem>(), "EPDetailId", "EPNumber"),
+                                     "Select EP", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.EPDetailId)
+                                    </div>
+                                    <div class="button_Div">
+                                        <input type="submit" value="Set EP" class="btn comm-button" />
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="col-lg-6">
+                              
+                                    <div id="mappingEPDetails">
+                                        @await Html.PartialAsync("_setGoalEpAssets", (HCF.BDO.Assets)ViewBag.MappingEPAssets)
+                                    </div>
+                                
+                            </div>
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section Scripts{
+    <script>
+
+        function onSucess(data) {
+            console.log(data);
+            if (data.MappingId > 0) {
+                swalalert("EP link with assets sucessfully.");
+                FillEPDetails();
+            }
+        }
+        function FillEPnumber() {
+            $("#EPDetailId").html("");
+            $(".epdeatils").empty();
+            $("#EPDetailId").append(
+                            $('<option></option>').val("").html("Select EP"));
+            var StdescId = $('#EPDetail_Standard_StDescID').val();
+            var postUrl = '@Url.Action("FillEPnumber", "Goal")';
+            if (StdescId != "") {
+                $.ajax({
+                    url: postUrl,
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { stdescId: StdescId },
+                    success: function (epNumbers) {
+                        $.each(epNumbers, function (i, epNumber) {
+                            $("#EPDetailId").append(
+                                $('<option></option>').val(epNumber.EPDetailId).html(epNumber.EPNumber));
+                        });
+                    }
+                });
+            }
+        }
+        function FillEPDetails() {
+            var assetId = $('#AssetId').val();
+            var postUrl = '@Url.Action("FillEPDetails", "Assets")';           
+            if (assetId != "") {
+                $.ajax({
+                    url: postUrl,
+                    type: "GET",
+                    dataType: "html",
+                    data: { id: assetId },
+                    success: function (res) {
+                        $("#mappingEPDetails").empty();
+                        $("#mappingEPDetails").html(res);
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+

@@ -1,0 +1,13 @@
+﻿@if (ViewContext.ModelState.IsValid == false)
+{
+    <div class="alert alert-danger">
+        <div asp-validation-summary="All" class="danger"></div>
+        <a href="#" class="close" data-dismiss="alert" aria-label="close" title="close">×</a>
+    </div>
+}
+
+<script>
+    $(".alert").delay(4000).slideUp(200, function() {
+        $(this).alert('close');
+    });
+</script>

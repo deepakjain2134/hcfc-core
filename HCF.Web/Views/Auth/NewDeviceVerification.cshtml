@@ -1,0 +1,170 @@
+﻿@{
+    /**/
+
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Two-Factor Authentication
+        </h1>
+    </section>
+}
+
+
+
+
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="recover-form">
+                            <div class="col-md-12 form-group">
+                                <h3 class="verficationMessage">This Device is not recognized by our system. <br /><span>Please check your email for verification code.</span></h3>
+                            </div>
+                            <div class="col-md-12 form-group VerificationCode">
+                                <label>Enter Verification Code </label>
+                                @*<div class="form-group verificationinputGroup">
+                                        <input type="text" maxlength="1" class="form-control" required />
+                                        <input type="text" maxlength="1" class="form-control" required />
+                                        <input type="text" maxlength="1" class="form-control" required />
+                                        <input type="text" maxlength="1" class="form-control" required />
+                                        <input type="text" maxlength="1" class="form-control" required />
+                                    </div>*@
+                                <div class="col-md-12 form-group has-feedback">
+                                    @Html.Hidden("VerificationCode", null, new { @class = "form-control", required = "required" })
+                                    <div class="pinbox" id="pinboxInput"></div>
+                                </div>
+                                <div class="col-md-12 hidden">
+                                    @Html.Hidden("UserId", TempData["UserId"]);                                    
+                                </div>
+                                <div class="col-md-12">
+                                    <span style="color:red;">@TempData["Message"]</span>
+                                    <span style="color:green;">@TempData["SuccessMessage"]</span>
+                                    @*<p class="expire-desc">This code will expire within 20 minutes of request !</p>*@
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group text-right">                           
+                                <input type="submit" value='Verify' name='Verify' class="btn comm-button" />
+                                <input type="submit" value='Re-Send Otp' name='Re-SendOtp' class="btn comm-bluebutton" />
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+    <script>
+        var pinbox = $('#pinboxInput').pinlogin({
+            fields: 5,
+            placeholder: '*',
+            reset: false,
+            autofocus: false,
+            complete: function (pin) {
+                pincode = pin;
+                pinbox.disable();
+                $("#VerificationCode").val(pin);
+            }
+        });
+    </script>
+}
+
+<style>
+    .recover-form {
+        max-width: 400px;
+        margin: 22px auto 42px auto;
+        box-shadow: 0px 3px 10px #ccc;
+        padding: 26px 15px;
+        background: #ffffff;
+        border-radius: 4px;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .main-footer {
+        font-size: 12px;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 0;
+        text-align: center;
+        background: #fff;
+        color: #444;
+        border-top: 1px solid #d2d6de;
+        display: block;
+    }
+
+    .public_page header.main-header.public_header {
+        padding: 4px 15px;
+        box-shadow: 0px 3px 2px #f1f1f1;
+        background: #fff;
+        min-height: 67px;
+        position: relative;
+        max-height: 100px;
+        z-index: 99;
+    }
+
+    .form-control-feedback.fa {
+        line-height: 39px;
+        left: 4px;
+    }
+
+    .recover-form .form-control {
+        border-radius: 20px;
+        height: 40px;
+        text-align: center;
+    }
+
+    .VerificationCode label {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .expire-desc {
+        font-size: 12px;
+        color: red;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .verificationinputGroup {
+        display: flex;
+    }
+
+        .verificationinputGroup .form-control {
+            margin: 0 4px;
+            border-radius: 4px;
+            text-align: center;
+            height: 34px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+    .verficationMessage {
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'Source Sans Pro', sans-serif;
+        margin-top: 0;
+        margin-bottom: 34px;
+        line-height: 21px;
+        color: #333;
+    }
+
+        .verficationMessage span {
+            color: red;
+        }
+</style>

@@ -1,0 +1,169 @@
+﻿@{
+    ViewBag.Title = "UpdateContactDetails";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Update Contact Details
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 settingnewBox">
+            @await Html.PartialAsync("_MoreConfig")
+            <div class="rightcol-setting">
+                <div class="box box-primary">
+
+                    <div class="row update-contactdetails">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+
+                        <div class="col-md-12 form-group">
+                            <label>Vendor:</label>
+                            @Html.DropDownList("ActiveVendor",
+                            new SelectList(ViewBag.Vendors, "Value", "Text", 0),
+                            "All Vendor", new { @class = "selectpicker form-control", @id = "ddlVendor", required = "required", @onchange = "GetContactDetails();" })
+                            
+                        </div>
+
+                            <div class="col-md-12 form-group htmleditorupdate" id="htmlEditorDiv">
+                                <label>Contacts:</label>
+                                @await Html.PartialAsync("_commonHtmlEditor")
+                            </div>
+                            <div class="col-md-12 form-group comman_checkbox">
+                                <span>
+
+                                    @Html.CheckBox("Status", new { @class = "form-control", @value = "Status" }) <span></span>
+                                    <label>@Html.Label("Status")</label>
+                                </span>
+                            </div>
+
+                            <div class="col-md-12 form-group">
+                                <label>Message To Contractor From Facility:</label>
+                                @Html.TextArea("MessageToContractor", new { @class = "form-control", @rows = "2" })
+                            </div>
+
+
+                            <div class="col-md-12 text-right form-group button_Div">
+                                <input type="button" title="Update Contact Details" value="Update" onclick="UpdateContactDetails()" class="btn comm-button" />
+
+                                <a class="comm-Cancelbutton" href="@Url.Action("Vendordashboard", "Vendor", new { view =ViewBag.view })">
+                                    <span>Cancel</span>
+                                </a>
+
+                            </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            let vendorid;
+            if (parseInt('@ViewBag.VendorId') > 0) {
+                vendorid=@ViewBag.VendorId;
+                $('#ddlVendor').val(vendorid);
+            }
+            $("#ddlVendor option[value='']").attr("disabled", true);
+            setTimeout(GetContactDetails, 1000);
+
+        });
+        function UpdateContactDetails() {
+
+            let vendorid = $('#ddlVendor').val();
+            let contactDetails = $("#htmlEditorDiv iframe").contents().find('body').html();
+            let messageToContractor = $('#MessageToContractor').val();
+            // let Status =
+            if ($('#ddlVendor :selected').val() == "") {
+                swalalert("Please Select Vendor Name");
+                return false;
+            }
+            if ($('#Status').is(":checked")) {
+                var Status = 1;
+            }
+            else {
+                Status = 0;
+            }
+
+            const url = CRxUrls.Vendor_UpdateContactDetails;  //+ '?vendorId=' + vendorid + '&htmltext=' + contactDetails + '&messageToContractor=' + messageToContractor;
+            $.post(url,
+                { vendorId: vendorid, htmltext: contactDetails, messageToContractor: messageToContractor, Status: Status },
+                function (message) {
+                    if (message) {
+                        swal({
+                            html: true,
+                            title: "Message",
+                            text: "<label>Contact details updated successfully.</label>",
+                            type: "success",
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "OK",
+                            closeOnConfirm: false
+                        },
+                            function (isConfirm) {
+                                if (isConfirm) {
+                                    window.location.href = '@Url.Action("VendorDashboard", "Vendor")';
+                                }
+                            });
+                    }
+                    else
+                        swalalert("Contact details update failed");
+                });
+        }
+
+    // get contact details on active vendor dropdown index change
+        function GetContactDetails() {
+            debugger;
+            let vendorid = $('#ddlVendor').val();
+            let textArea = $("#htmlEditorDiv iframe").contents().find('body');
+            let messageToContractorControl = $('#MessageToContractor');
+            let Status = $('#Status');
+            const url = CRxUrls.Vendor_GetContactDetails + '?vendorId=' + vendorid;
+            $.post(url, function (data) {
+                debugger;
+                textArea.html(data[0]);
+                messageToContractorControl.val(data[1]);
+                if (data[2] == 'True') {
+                    $('#Status').prop('checked', true);
+                }
+                else {
+                    $('#Status').prop('checked', false);
+                }
+
+            });
+        }
+
+        $(document).ready(function () {
+            debugger;
+            CKEDITOR.replace('htmlEditor', {
+                height: 150,
+                toolbar: [
+                    { name: 'document', groups: ['mode', 'document', 'doctools'], items: ['-', 'Save', 'NewPage', 'Preview', '-', 'Templates'] },
+                    '/',
+                    { name: 'basicstyles', groups: ['basicstyles', 'cleanup'], items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi'], items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'] },
+                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                    { name: 'insert', items: ['HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+                    { name: 'basicstyles', items: ['Font', 'FontSize'] },
+                    { name: 'colors', items: ['TextColor', 'BGColor'] },
+                    { name: 'others', items: ['-'] }
+                ]
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,387 @@
+﻿@model HCF.BDO.TIlsm
+@{
+    ViewBag.Title = "Create New ILSM";
+    string buildingId = Model.Floor?.BuildingId.ToString() ?? "";
+    int floorId = Model.Floor?.FloorId ?? 0;
+    if (string.IsNullOrEmpty(buildingId) && ViewBag.FSBBuilding != null)
+    {
+        buildingId = ViewBag.FSBBuilding;
+    }
+
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add ILSM
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm("AddILSM", "ILSM", FormMethod.Post, new { id = "manualILSM" }))
+                {
+                    <input type="hidden" id="epdetails" name="epdetails" />
+                    @Html.HiddenFor(x => x.IssueId)
+                    @Html.HiddenFor(x => x.TRoundId)
+                    @Html.AntiForgeryToken()
+
+
+                    <div class="row tablelist-topform">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-3 form-group">
+                                    <label>Reason for this ILSM Creation: <em class="required-field">*</em></label>
+                                    @Html.TextAreaFor(x => x.Notes, new { @class = "form-control", required = "required" })
+                                    @Html.HiddenFor(x => x.TicraId)
+                                </div>
+                                <div class="col-lg-3 form-group">
+                                    <label>Name: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(x => x.Name, new { @class = "form-control", required = "required" })
+                                </div>
+                                <div class="col-lg-3 form-group">
+                                    <label>ILSM date: <em class="required-field">*</em></label>
+                                    @Html.TextBoxFor(x => x.llsmDate, new { @class = "form-control", required = "required" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-3 form-group buildingSelectBox">
+                                    <label>Building:</label>
+                                    @Html.HiddenFor(x => x.BuildingIds)
+                                    @*@Html.MultiSelectBuildingDropDownList("ddlBuilding", buildingId, "",
+                                        new { @class = "form-control ddlbox", multiple = "multiple",
+                                        data_selected_text_format = "count > 1",
+                                        data_live_search = "true"
+                                        })*@
+                                    <multiselectbuildingdropdownlist class="form-control ddlbox" name="ddlBuilding" multiple="multiple"
+                                                                     selectedvalue="@buildingId">
+                                    </multiselectbuildingdropdownlist>
+                                </div>
+                                <div class="col-lg-3 form-group buildingSelectBox ilsmFloor">
+                                    <label>Floor:</label>
+                                    @Html.HiddenFor(x => x.FloorIds)
+                                    <select id="FloorId" name="FloorId" class="form-control ddlbox" multiple="multiple"
+                                            data-selected-text-format="count > 3">
+                                        <option value="">Select</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3 form-group">
+                                    <label>ILSM time:</label>
+                                    @Html.TextBoxFor(x => x.llsmStartTime, new { @class = "form-control timepicker ", @readonly = "readonly", @autocomplete = "off" })
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="col-lg-3 form-group">
+                                <label>Reason for this ILSM Creation: <em class="required-field">*</em></label>
+                                @Html.TextAreaFor(x => x.Notes, new { @class = "form-control", required = "required" })
+                                @Html.HiddenFor(x => x.TicraId)
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>Name: <em class="required-field">*</em></label>
+                                @Html.TextBoxFor(x => x.Name, new { @class = "form-control", required = "required" })
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>ILSM date: <em class="required-field">*</em></label>
+                                @Html.TextBoxFor(x => x.llsmDate, new { @class = "form-control", required = "required" })
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <label>ILSM time:</label>
+                                @Html.TextBoxFor(x => x.llsmStartTime, new { @class = "form-control timepicker", @autocomplete = "off" })
+                            </div>
+
+                            <div class="col-lg-3 form-group buildingSelectBox">
+                                <label>Building:</label>
+                                @Html.HiddenFor(x => x.BuildingIds)
+                                <multiselectbuildingdropdownlist class="form-control ddlbox"
+                                                             name="ddlBuilding"
+                                                             multiple="multiple"
+                                                             selectedvalue="@buildingId">
+                                </multiselectbuildingdropdownlist>
+                            </div>
+                            <div class="col-lg-3 form-group buildingSelectBox ilsmFloor">
+                                <label>Floor:</label>
+                                @Html.HiddenFor(x => x.FloorIds)
+                                <select id="FloorId"
+                                    name="FloorId" class="form-control ddlbox"
+                                    multiple="multiple" data-selected-text-format="count > 3">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>*@
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="activity_history stylish">
+                                @for (int i = 0; i < Model.MainGoal.Count; i++)
+                                {
+                                    <li>
+                                        @Html.HiddenFor(m => Model.MainGoal[i].MainGoalId)
+                                        <strong>@Model.MainGoal[i].Goal</strong>
+                                        <ul style="padding-top:8px;">
+                                            @for (int j = 0; j < Model.MainGoal[i].Steps.Count; j++)
+                                            {
+                                                <li class="editor-field">
+                                                    @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].Status)
+                                                    <input type="checkbox" id="@($"stepId{Model.MainGoal[i].Steps[j].StepsId}")"
+                                                           class="checkBox stepsChk" name="MainGoal[@i].Steps[@j].Status" value="@Model.MainGoal[i].Steps[j].StepsId" /><span></span>
+                                                    @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].StepsId)
+                                                    @Model.MainGoal[i].Steps[j].Step
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="button" value="Create ILSM" class="comm-button" id="addIlsm" />
+                            <a href="@Url.RouteUrl("ilsmView")" class="comm-Cancelbutton"><span>Cancel</span></a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+     var buildingdddlCtr = $("#ddlBuilding");
+     var floorsddlCtr = $("#FloorId");
+     var hdnfloorIds = $("#FloorIds");
+     var hdnbuildingIds = $("#BuildingIds");
+
+    $(document).ready(function () {
+        //debugger;
+        var buildingId = '@buildingId';
+        if (buildingId != "") {
+            hdnbuildingIds.val(buildingId);
+            bindBuildingsFloorddlbyFSBP(buildingId, floorsddlCtr, 0);
+         }
+     });
+
+
+
+     var bindBuildingsFloorddlbyFSBP = function (buildingddl, floorddl, selectedfloorId, firstvalue, firsttext) {
+         debugger;
+
+         floorddl.html("<option> loading ... </option>");
+         if (firstvalue == undefined) {
+             firstvalue = "";
+         }
+         if (firsttext == undefined) {
+             firsttext = $.Constants.Floor_ddl_text_Select_Floor;
+         }
+         var ishaveselectedfloor = false;
+         floorddl.html("");
+
+         var buildingID = buildingddl;
+
+         floorddl.empty();
+         floorddl.append($('<option></option>').val(firstvalue).html(firsttext));
+         floorddl.selectpicker('refresh');
+
+         if (buildingID) {
+             $.ajax({
+                 url: CRxUrls.Organization_FillBuildingFloors,
+                 global: false,
+                 type: "GET",
+                 dataType: "JSON",
+                 data: { buildingIds: buildingID },
+                 success: function (buildings) {
+                     console.log(buildings);
+
+                     $.each(buildings, function (index) {
+                         var optgroup = $('<optgroup>');
+                         optgroup.attr('label', buildings[index].BuildingName);
+
+                         $.each(buildings[index].Floor, function (i) {
+                             var option = $("<option></option>");
+                             option.val(buildings[index].Floor[i].FloorId);
+                             option.text(buildings[index].Floor[i].FloorName);
+
+                             optgroup.append(option);
+                         });
+                         floorddl.append(optgroup);
+                     });
+
+                     floorddl.selectpicker('refresh');
+                 }
+             });
+         }
+     };
+
+
+
+
+
+
+
+     buildingdddlCtr.change(function () {
+        // debugger
+         if (buildingdddlCtr.val()) {
+            // console.log(buildingdddlCtr.val());
+             $(document).click();
+             debugger;
+             var buildingIds = buildingdddlCtr.val().join();
+            // console.log(buildingIds);
+             hdnbuildingIds.val(buildingIds);
+             bindBuildingsFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+         }
+     });
+
+     floorsddlCtr.change(function () {
+         debugger
+         var floorIds = floorsddlCtr.val().join();
+         hdnfloorIds.val(floorIds);
+     });
+
+     var bindBuildingsFloorddl = function (buildingddl, floorddl, selectedfloorId, firstvalue, firsttext) {
+         debugger;
+
+         floorddl.html("<option> loading ... </option>");
+         if (firstvalue == undefined) {
+             firstvalue = "";
+         }
+         if (firsttext == undefined) {
+             firsttext = $.Constants.Floor_ddl_text_Select_Floor;
+         }
+         var ishaveselectedfloor = false;
+         floorddl.html("");
+
+       //  var buildingID = buildingddl.val();
+         try {
+             var buildingID = buildingddl.val().join();
+         }
+         catch (err) {
+             var buildingID = buildingddl.val();
+         }
+
+         floorddl.empty();
+         floorddl.append($('<option></option>').val(firstvalue).html(firsttext));
+         floorddl.selectpicker('refresh');
+
+         if (buildingID) {
+             $.ajax({
+                 url: CRxUrls.Organization_FillBuildingFloors,
+                 global: false,
+                 type: "GET",
+                 dataType: "JSON",
+                 data: { buildingIds: buildingID },
+                 success: function (buildings) {
+                     console.log(buildings);
+                     floorddl.empty();
+                     //floorddl.append($('<option></option>').val(firstvalue).html(firsttext)) //.prop('disabled', true);;
+                     $.each(buildings, function (index) {
+                         var optgroup = $('<optgroup>');
+                         optgroup.attr('label', buildings[index].BuildingName);
+
+                         $.each(buildings[index].Floor, function (i) {
+                             var option = $("<option></option>");
+                             option.val(buildings[index].Floor[i].FloorId);
+                             option.text(buildings[index].Floor[i].FloorName);
+
+                             optgroup.append(option);
+                         });
+                         floorddl.append(optgroup);
+                     });
+
+                     floorddl.selectpicker('refresh');
+
+
+                 }
+             });
+         }
+     };
+
+
+
+     $("#addIlsm").click(function () {
+         var checkCount = $('.stepsChk:checkbox:checked').length;
+         var reason = $('#Notes').val().trim();
+         var name = $('#Name').val().trim();
+         debugger;
+         if (name == "") {
+             swalalert("Please enter the name");
+             return false;
+         }
+         if (reason != "") {
+             if (checkCount > 0)
+                 $('#manualILSM').submit();
+             else {
+                 swalalert("select at least one check box to create ILSM.");
+                 return false;
+             }
+         } else {
+             swalalert("Please enter the reason");
+             return false;
+         }
+     });
+
+
+     $(".checkBox").click(function () {
+         var control = $(this).attr("name");
+         if ($(this).is(":checked")) {
+             $("input[name='" + control + "'][type=hidden]").val(1);
+         } else { $("input[name='" + control + "'][type=hidden]").val(0); }
+     });
+
+     $(document).ready(function () {
+
+         $("#llsmStartTime").clockpicker({
+             autoclose: false,
+             twelvehour: true,
+             donetext: "Done",
+             'default': 'now'
+         });
+
+
+         $("#llsmDate").datepicker({
+             showOn: "both",
+             buttonImage: ImgUrls.datepicker_calendar,
+             buttonImageOnly: true,
+             dateFormat: $.CRx_DateFormat,
+             maxDate: 30,
+             minDate: -30,
+         }).datepicker("setDate", new Date());
+
+
+         var floorId = '@floorId';
+         if (floorId > 0) {
+             bindBuildingsFloorddl(buildingdddlCtr, floorsddlCtr, floorId);
+             //bindFloorddl(buildingdddlCtr, floorsddlCtr, floorId);
+         }
+
+
+         //debugger;
+         let url = window.location.href;
+         url = decodeURIComponent(url);
+         let params = url.split('?')[1];
+         if (params != undefined) {
+             let keyValuePairs = params.split('&');
+             for (let keyValuePair of keyValuePairs) {
+                 let item = keyValuePair.split('=');
+                 if (item[0].trim().toLowerCase() == 'problem') {
+                     $('textarea#Notes').val(item[1].trim());
+                 }
+                 if (item[0].trim().toLowerCase() == 'location') {
+                     let location = item[1].split(',');
+                     let buildingOption = $(`#ddlBuilding option:contains('${location[1].trim()}')`);
+                     $(buildingOption).attr('selected', 'selected');
+                     bindBuildingsFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+                     //bindFloorddl(buildingdddlCtr, floorsddlCtr, 0);
+                     setTimeout(function () {
+                         let floorOption = $(`#FloorId option:contains('${location[0].trim()}')`);
+                         $(floorOption).attr('selected', 'selected');
+                     }, 1000);
+                 }
+             }
+         }
+     });
+    </script>
+}

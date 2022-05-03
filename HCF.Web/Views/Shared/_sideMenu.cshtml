@@ -1,0 +1,116 @@
+﻿<section class="sidebar">
+    <div class="user-panel">
+        <div class="pull-left image">
+            @await Html.PartialAsync("_UserImage")
+        </div>
+        <div class="pull-left info">
+            <p> @HCF.Web.Base.UserSession.CurrentUser.FullName</p>            
+        </div>
+    </div>
+    <ul class="sidebar-menu">
+        <li class="active">
+            <a href="/dashboard">
+                <i class="icon">
+                    <img src="/dist/img/home_icon.png" alt="" />
+                </i>
+                <span>@Localizer["TitleHome"]</span>
+            </a>
+        </li>
+        <li class="treeview">
+            <a href="#">
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i> <span>Organization</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu" style="display: none;">
+                <li>
+                    <a href="/buildings">
+                        <i class="fa fa-circle-o"></i> <span>@Localizer["TitleBuilding"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/floors">
+                        <i class="fa fa-circle-o"></i>   <span>@Localizer["TitleFloors"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/wings">
+                        <i class="fa fa-circle-o"></i>   <span>@Localizer["TitleWing"]</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="treeview">
+            <a href="#">
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i> <span>Assets</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu" style="display: none;">
+                <li>
+                    <a href="/assetstype">
+                        <i class="fa fa-circle-o"></i> <span>@Localizer["AssetType"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/assets">
+                        <i class="fa fa-circle-o"></i>   <span>@Localizer["Asset"]</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href='/goals'>
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i>
+                <span>@Localizer["Standard"]</span>
+            </a>
+        </li>
+        <li>
+            <a href="/workorder">
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i> <span> @Localizer["ServicesRequest"]</span>
+            </a>
+        </li>
+        <li class="treeview">
+            <a href="#">
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i> <span>User Management</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu" style="display: none;">
+                <li>
+                    <a href="/usergroups">
+                        <i class="fa fa-circle-o"></i><span>@Localizer["TitleUserGroup"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Users">
+                        <i class="fa fa-circle-o"></i> <span>@Localizer["TitleUser"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/vendors">
+                        <i class="fa fa-circle-o"></i><span>Vendors </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/permissions">
+                        <i class="fa fa-circle-o"></i><span>@Localizer["UserPermission"]</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/userep">
+                        <i class="fa fa-circle-o"></i> <span>User EP</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <a href="/setup">
+                <i class="icon"><img src="@Url.Content("~/dist/img/asset_icon.png")" alt="" /></i> <span>Setup</span>
+            </a>
+        </li>
+    </ul>
+</section>

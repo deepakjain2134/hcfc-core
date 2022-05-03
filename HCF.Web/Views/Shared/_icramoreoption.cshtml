@@ -1,0 +1,59 @@
+﻿@{
+    string icraId = this.ViewData.ContainsKey("icraId") ? this.ViewData["icraId"].ToString() : string.Empty;
+    string index = this.ViewData.ContainsKey("index") ? this.ViewData["index"].ToString() : string.Empty;
+    string formname = "icrapermit_" + index;
+    string formname2 = "icrapermitworksheet_" + index;
+    string formname3 = "icrapermitworksheet3_" + index;
+    string permitno = this.ViewData.ContainsKey("permitno") ? this.ViewData["permitno"].ToString() : string.Empty;
+    string permittype = this.ViewData.ContainsKey("permittype") ? this.ViewData["permittype"].ToString() : string.Empty;
+    string status = this.ViewData.ContainsKey("status") ? this.ViewData["status"].ToString() :"1";
+    string IsAllPermit = this.ViewData.ContainsKey("status") ? this.ViewData["IsAllPermit"].ToString() : string.Empty;
+}
+
+<ul class="dropdown-menu ctmenu" icraid="@icraId">
+    <li data-action="icrapermit" style="@(!string.IsNullOrEmpty(IsAllPermit)?"display:none;":"display:block;")">
+        @using (Html.BeginForm("ICRAPermit", "Pdf", FormMethod.Post, new { id = formname }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="ICRAPermit" />
+
+            <a href="javascript:document.getElementById('@formname').submit()">Print ICRA Permit</a>
+        }
+    </li>
+    <li data-action="icrapermitworksheet">
+        @using (Html.BeginForm("ICRAPermitWorksheet", "Pdf", FormMethod.Post, new { id = formname2 }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="ICRAPermitworksheet" />
+            <input type="hidden" name="hasattachment" value="0" />
+            <a href="javascript:document.getElementById('@formname2').submit()">Print ICRA Permit and worksheet</a>
+        }
+    </li>
+    <li data-action="icrapermitworksheet">
+        @using (Html.BeginForm("DownloadICRAAttachments", "ICRA", FormMethod.Post, new { id = formname3 }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="icraId" value="@icraId" />
+            <input type="hidden" name="PDFName" value="ICRAPermitworksheet" />
+            <input type="hidden" name="hasattachment" value="1" />
+            <a href="javascript:document.getElementById('@formname3').submit()">Print ICRA Permit, worksheet and attachments</a>
+        }
+    </li>
+    <li data-action="observationReport">
+        <a href="@Url.Action("ObservationReports","ICRA",new {modulename="icra",icraId=icraId, permittype =2, permitno = permitno})">Observation Reports</a>
+    </li>
+    <li data-action="manualsignedReport">
+        <a href="@Url.Action("TicraFiles","ICRA",new {modulename="ICRAFiles",icraId=icraId, permittype =2})">Manual Signed Report <span class="reportCount"></span></a>
+    </li>
+    <li data-action="history">
+        <a href="@Url.Action("IcraHistory","ICRA",new {modulename="ICRAHistory",icraId=icraId, permittype =2})">History</a>
+    </li>
+
+    <li data-action="deletepermit" style="@(!string.IsNullOrEmpty(permittype)?"display:block;":"display:none;")">
+        <a data-id="@icraId" data-permittype="@permittype" class="@(status!="1" ? "deletepermit" :"deletepermit disable")">
+            <span>Delete Permit</span>
+        </a>
+    </li>
+</ul>

@@ -1,0 +1,283 @@
+﻿@model HCF.BDO.TFloorAssets
+@using HCF.Utility
+@{
+    ViewBag.Title = Localizer["AssetEpsTitle"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var first = true;
+    //var assetEPs = Model.EPDetails;
+}
+
+    @section pageHeader{
+        <section class="content-header">
+                <h1>
+                    @Localizer["AssetEpsTitle"]
+                   
+                </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        @if (Model != null)
+        {
+            <input type="hidden" name="inspectionGroupId" id="inspectionGroupId" value="@Model.InspectionGroupId" />
+            <div class="row">
+                <div class="col-lg-3 col-xs-3 col-left">
+                    <div class="box box-primary assetsInspection" id="goal_assetsInspection">
+
+                        @if (Model.EPDetails.Count > 0)
+                        {
+                            @*@AsyncLoader.Render("Goal", "AssetsInspection", "goal_assetsInspection", 
+                           new { inspectionId = 0, epId = Model.EPDetails[0].EPDetailId, floorAssetId = Model.FloorAssetsId, 
+                               ismultipleEP = Model.EPDetails.Count > 1 ? 1 : 0 })*@
+
+                            @await Component.InvokeAsync("GoalAssetsInspection",
+                            new
+                            {
+                                inspectionId = 0,
+                                epId = Model.EPDetails[0].EPDetailId,
+                                floorAssetId = Model.FloorAssetsId,
+                                ismultipleEP = Model.EPDetails.Count > 1 ? 1 : 0
+                            })
+
+                           
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-9 col-xs-9">
+                    <div class="box box-primary epBoxSlider">
+
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-3 form-group" title="@Localizer["Asset"]">
+                                        <label>@Localizer["Asset"] :</label> @Model.Assets.Name
+                                        
+                                    </div>
+                                    <div class="col-md-3 form-group" title="@Localizer["AssetNo"]">
+                                        <label>@Localizer["AssetNo"] :</label> @Model.AssetNo
+                                       
+                                    </div>
+                                    <div class="col-md-3 form-group" title="@Localizer["Location"]">
+                                        <label>@Localizer["Location"] :</label> @commonModelFactory.GetFloorAssetLocation(Model)
+                                        
+                                    </div>
+                                    <div class="col-md-3 form-group" title="@Localizer["NearBy"]">
+                                        <label>@Localizer["NearBy"] :</label> @Model.NearBy
+                                        
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 form-group" title="Model #">
+                                        <label>Model # : </label>
+                                        @Model.Model
+                                    </div>
+                                    <div class="col-md-3 form-group" title="Barcode #">
+                                        <label>Barcode # : </label>
+                                        @Model.BarCodeNo
+                                    </div>
+                                    <div class="col-md-3 form-group" title="Make">
+                                        <label>Make : </label>
+                                        
+                                            @if (Model.Make != null && !string.IsNullOrEmpty(Model.Make.ManufactureName))
+                                            {
+                                                @Model.Make.ManufactureName
+                                            }
+                                            else
+                                            {
+                                                <span>NA</span>
+                                            }
+                                        
+                                    </div>
+                                    <div class="col-md-3 form-group" title="@Localizer["Description"]">
+                                        <label>@Localizer["Description"] : </label>
+                                        @Model.Description
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tble_shadow" style="display:none">
+                            <p id="EpMsg"></p>
+                        </div>
+                        <div class="rbn_container assetsradio">
+                            <div id="exTab1" class="container">
+                                <ul class="nav nav-pills" data-toggle="buttons">
+                                    @foreach (var epDetails in Model.EPDetails.Where(x => x.EPFrequency != null && x.EPFrequency.Count > 0).OrderBy(x => x.StandardEp))
+                                    {
+                                        if (epDetails.EPFrequency != null && epDetails.EPFrequency.FirstOrDefault() != null)
+                                        {
+                                            <li>
+                                                <a class="btn @(first ? "active" : string.Empty)" data-toggle="tab" href="@($"#{epDetails.EPDetailId}a")">
+                                                    <input type="radio" epid="@epDetails.EPDetailId" class="@(first ? "active'" : string.Empty)"
+                                                           @(first ? "checked='checked'" : string.Empty)
+                                                           name="drpAssetEps" value="@epDetails.EPFrequency.FirstOrDefault().Frequency.FrequencyId" />
+                                                    <span class="freqtext hide">@epDetails.EPFrequency.FirstOrDefault().Frequency.Days</span>
+                                                    <span class="summaryRadio"> @Html.Raw($"{epDetails.StandardEp} <br />{epDetails.GetFrequencyName()}")</span>
+                                                </a>
+                                            </li>
+                                            first = false;
+                                        }
+                                    }
+                                </ul>
+                                <div class="tab-content clearfix" id="assetsEpInspDetails">
+                                    @await Html.PartialAsync("_AssetsEpsInspDetails", Model)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+@if (Model.EPDetails != null && Model.EPDetails.Count > 0)
+{
+    <input type="hidden" value="@Model.EPDetails.OrderBy(x => x.EPNumber).FirstOrDefault().EPDetailId" id="epIdhidden" />
+}
+else
+{
+    <input type="hidden" value="0" id="epIdhidden" />
+}
+
+
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+            
+  });
+
+    var assetsEpInspDetails = $("#assetsEpInspDetails");
+    var floorAssetsId = '@Model.FloorAssetsId';
+
+
+    $('input[type=radio][name=drpAssetEps]').change(function() {
+        console.log($(this).attr("epid"));
+        var epId = $(this).attr("epid");
+        loadLeftData(epId);
+    });
+
+    function gotoAssetWorkOrder(floorAssetId, epdetailId) {
+      var urlAction = '@Url.Action("Index", "WorkOrder")';
+        window.location.href = urlAction + "?page=1&floorAssetId=" + floorAssetId + "&EPdetailId=" + epdetailId;
+    }
+
+    function CheckInspection(inspectionStatus, _floorAssetsId, _ePDetailId, _assetNo, count, frequencyId) {
+        console.log(inspectionStatus);
+        debugger
+            if (frequencyId == 27) { // ongoing EPs
+                swal({
+                    html: true,
+                    title: "Asset Inspection",
+                    text: $.Constants.EP_Inspection_Ongoing_User,
+                    type: "info",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                      //  window.location.href = cancelRedirectUrl;
+                    }
+                    else {
+                       // window.location.href = cancelRedirectUrl;
+                    }
+                });
+            } else {
+                redirecttoinspe(_floorAssetsId, _ePDetailId, _assetNo, count, frequencyId);
+            }
+        }
+
+
+    function redirecttoinspe(_floorAssetsId, _ePDetailId, _assetNo, count, frequencyId) {
+            if (count > 0) {
+                var table = $("#inspection_" + frequencyId);
+                var activityStatus = table.find(".activitystatus").val();
+                if (activityStatus == 1) {
+                    var inspectiondate = table.find(".inspectiondate").val();
+                    var userName = table.find(".userName").val();
+                    var dueDate = table.find(".dueDate").val();
+                    if (activityStatus == "0") {
+                        dueDate = "";
+                    }
+                    var CurrentDate = new Date();
+                    var SelectedDate = new Date(dueDate);
+                    if (CurrentDate < SelectedDate) {
+                        swal({
+                            html: true,
+                            title: "This inspection is not due yet. Are you sure you want to proceed?",
+                            text:
+                                '<div style="color: black;font-size: 24px;"><a href="#" class="swalcustomclose" onclick="swal.close(); return false;">x</a> <div class="agenerator"><label>Asset:</label> <label>' +
+                                _assetNo +
+                                '</label><br /><label>Last Inspection:</label> <label>' +
+                                inspectiondate +
+                                '</label><br /><label>Inspected By:</label> <label>' +
+                                userName +
+                                '</label><br /><label>Next Due:</label> <label>' +
+                                dueDate +
+                                '</label></div></div>',
+                            type: "info",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Yes",
+                            cancelButtonText: "No",
+                            closeOnConfirm: true,
+                            closeOnCancel: true,
+                            showCloseButton: true
+                        },
+                            function (isConfirm) {
+                                if (isConfirm) {
+
+                                    var urlAction = CRxUrls.Goal_EPstate;
+                                    window.location.href =
+                                        urlAction +
+                                        "?floorAssetId=" +
+                                        _floorAssetsId +
+                                        "&epId=" +
+                                        _ePDetailId +
+                                        "&frequencyId=" +
+                                        frequencyId;
+                                }
+                            });
+                    }
+                    else {
+                        var urlAction = CRxUrls.Goal_EPstate;
+                        window.location.href = urlAction + "?floorAssetId=" + _floorAssetsId + "&epId=" + _ePDetailId + "&frequencyId=" + frequencyId;
+                    }
+                    
+                } else {
+                    var urlAction = CRxUrls.Goal_EPstate;
+                    window.location.href = urlAction +
+                        "?floorAssetId=" +
+                        _floorAssetsId +
+                        "&epId=" +
+                        _ePDetailId +
+                        "&frequencyId=" +
+                        frequencyId;
+                }
+            } else {
+                var urlAction = CRxUrls.Goal_EPstate;
+                window.location.href = urlAction + "?floorAssetId=" + _floorAssetsId + "&epId=" + _ePDetailId + "&frequencyId=" + frequencyId;
+            }
+        }
+
+
+
+    function loadLeftData(epId) {
+        var url = '@Url.Action("AssetsInspection", "Goal")';
+        $.ajax({
+            url: url + '?epId=' + epId + '&inspectionId=' + 0 + '&floorAssetId=' + floorAssetsId + "&ismultipleEP=1",
+            type: "GET",
+            global: false,
+            success: function (data) {
+                $('.assetsInspection').empty();
+                $('.assetsInspection').html(data);
+            }
+        });
+        }
+
+
+    </script>
+
+}

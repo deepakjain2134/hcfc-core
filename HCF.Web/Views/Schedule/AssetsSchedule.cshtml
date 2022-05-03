@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "AssetsSchedule";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Schedule Inspection
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                    <div class="comman_checkbox1">
+                        <div class="row">
+                            <div class="col-lg-3 col-xs-3">
+                                Assets Type
+                                <epassetsdropdownlist name="drpAssetTypes" selectevalue="0" firsttext="Select" class="form-control"></epassetsdropdownlist>
+                                @*@Html.EPAssetTypeDropDownList("drpAssetTypes", 0, "Select", new { @class = "form-control" })*@
+                            </div>
+                            <div class="col-lg-3 col-xs-3">
+                                Assets
+                                <select id="assetsDDL" class="form-control">
+                                    <option value="0"> Select </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-xs-3">
+                                Buildings
+                                <select id="drpBuildings" class="form-control">
+                                    <option value="0"> All </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-xs-3">
+                                Floors
+                                <select id="drpFloors" class="form-control">
+                                    <option value="0"> All </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-xs-3" style='margin: 12px 0 0 0;'>
+                                Schedule
+                                <scheduledropdownlist name="drpSchedule" selectedvalue="0" firsttext="Select" class="form-control"></scheduledropdownlist>
+                                @*@Html.ScheduleDropDownList("drpSchedule", 0, "Select", new { @class = "form-control" })*@
+                            </div>
+                            <div class="col-lg-9 col-xs-9">
+                                <div id="scheduleinfo" style='margin: 36px 0 0 0;'>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div id="epsLists" style="margin: 8px 0 0 0">
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+    var assetTypeDDL = $("#drpAssetTypes");
+    var assetsDDL = $("#assetsDDL");
+    var drpBuildings = $("#drpBuildings");
+    var drpFloors = $("#drpFloors");
+    var drpSchedule = $("#drpSchedule");
+
+    $(document).ready(function (e) {
+        var scheduleId = getParameterByName('scheduleId');
+        if (scheduleId > 0 && scheduleId != undefined) {
+            drpSchedule.val(scheduleId);
+            drpSchedule.trigger("change");
+        }
+    });
+
+
+    assetTypeDDL.change(function () {
+        var typeId = assetTypeDDL.val();
+        if (typeId) {
+            assetsDDL.empty();
+            refreshbuildingAndFloor();
+            $.ajax({
+                url: CRxUrls.Assets_GetAssets,//CRxUrls.Organization_GetEPAssets,
+                type: "GET",
+                dataType: "JSON",
+                data: { assetTypeId: typeId },
+                success: function (res) {
+                    debugger;
+                    assetsDDL.append(
+                        $('<option></option>').val(0).html("Select"));
+                    if (res.length > 0) {
+                        $.each(res, function (i, asset) {
+                            assetsDDL.append(
+                                $('<option></option>').val(asset.AssetId).html(asset.Name));
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    var loadEPLists = function (assetId) {
+        $.ajax({
+            url: '@Url.Action("EPbyAssets", "Schedule")',
+            type: "GET",
+            dataType: "HTML",
+            data: { assetId: assetId },
+            success: function (data) {
+                $("#epsLists").empty();
+                $("#epsLists").html(data);
+                loadfloorAssets();
+            }
+        });
+    }   
+
+
+    assetsDDL.change(function () {
+        var assetId = $(this).val();
+        if (assetId) {
+            refreshbuildingAndFloor();
+            $.ajax({
+                url: CRxUrls.Organization_GetAssetsBuilding,
+                type: "GET",
+                dataType: "JSON",
+                data: { assetId: assetId },
+                success: function (buildings) {
+                    console.log(buildings);
+                    if (buildings.length > 0) {
+                        console.log(buildings);
+                        $.each(buildings, function (i, building) {
+                            drpBuildings.append(
+                                $('<option></option>').val(building.BuildingId).html(building.BuildingName));
+                        });
+                    }
+                }
+            });
+            loadEPLists(assetId);
+        }
+    });
+
+    drpBuildings.change(function () {
+        var buildingId = $(this).val();
+        var assetId = assetsDDL.val();
+        if (buildingId) {
+            drpFloors.empty();
+            $.ajax({
+                url: CRxUrls.Organization_GetAssetsFloor,
+                type: "GET",
+                dataType: "JSON",
+                data: { buildingId: buildingId, assetId: assetId },
+                success: function (data) {
+                    drpFloors.append(
+                        $('<option></option>').val(0).html("All"));
+                    console.log(data);
+                    if (data.length > 0) {
+                        var floors = data[0].Floor;
+                        console.log(floors);
+                        $.each(floors, function (i, floor) {
+                            drpFloors.append(
+                                $('<option></option>').val(floor.FloorId).html(floor.FloorName));
+                        });
+                    }
+                }
+            });
+            filterdatabybuildingfloor();
+        }
+    });
+
+
+    drpFloors.change(function () {
+        var floorId = $(this).val();
+        if (floorId) {
+            filterdatabybuildingfloor();
+        }
+    });    
+
+
+    function refreshbuildingAndFloor() {
+        drpBuildings.empty();
+        drpFloors.empty();
+        drpBuildings.append(
+            $('<option></option>').val(0).html("All"));
+        drpFloors.append(
+            $('<option></option>').val(0).html("All"));
+    }
+
+
+    drpSchedule.change(function () {
+        var scheduleId = $(this).val();
+        $.ajax({
+            url: CRxUrls.Schedule_GetSchedules,
+            type: "GET",
+            dataType: "JSON",
+            data: { scheduleId: scheduleId},
+            success: function (data) { 
+                debugger;
+                var date = new Date(parseInt(data.result.StartDate.substr(6))).toLocaleDateString();
+                $("#scheduleinfo").empty();
+                var htmlstr = "<div><strong><label>Description: </label></strong><label>" + data.result.Description + "</label>&nbsp;&nbsp;";
+                $.each(data.result.ScheduleFrequency, function (i, schefreq) {
+                    htmlstr += "<strong><label>Frequency: </label></strong><label>" + schefreq.Frequency.DisplayName + "</label>";
+                });
+                htmlstr += "</div>";
+                $("#scheduleinfo").append(htmlstr); 
+                console.log(data);               
+            }
+        });
+        loadfloorAssets();
+        //var epId = $("input[name=epdetail]:radio:checked").val();
+        //if (epId) {
+        //    loadfloorAssets();
+        //}
+    });
+
+    function loadfloorAssets() {   
+        debugger;
+        var epDetailId = $("input[name=epdetail]:radio:checked").val();
+        var assetid = assetsDDL.val();
+        var buildingid = drpBuildings.val();
+        var floorid = drpFloors.val();
+        if (assetid > 0) {
+            $.ajax({
+                url: CRxUrls.Assets_ScheduleAssets,
+                type: "GET",
+                dataType: "HTML",
+                data: { assetId: assetid, epDetailId: epDetailId, buildingId: buildingid, floorId: floorid },
+                success: function (data) {
+                    $("#assets_view").empty().html(data);
+                    filterdatabybuildingfloor();                  
+                }
+            });
+        }
+    }  
+    
+
+</script>

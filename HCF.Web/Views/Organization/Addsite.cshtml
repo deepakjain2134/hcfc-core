@@ -1,0 +1,141 @@
+﻿@model HCF.BDO.Site
+@{
+    ViewBag.Title = Localizer["AddSite"];
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["AddSite"]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            @Html.HiddenFor(model => model.CreatedBy)
+                            @Html.HiddenFor(m => m.StateId)
+                            @Html.HiddenFor(m => m.CityId)
+                            
+                                <div class="row">
+                                    @Html.HiddenFor(x => x.SiteId)
+                                    @Html.HiddenFor(x => x.SiteTypeId)
+
+
+                                    <div class="col-md-6 form-group">
+                                        <label>@Html.DisplayNameFor(m => m.SiteTypeName)</label>
+                                        <sitetypedropdownlist name="SiteType" selectedvalue="@Model.SiteTypeId" firsttext="Select Site Type" class="form-control" required="required"> </sitetypedropdownlist>
+                                        @*@Html.SiteTypeDropDownList("SiteType", Model.SiteTypeId, "Select Site Type", new { @class = "form-control", required = "required" })*@
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                        @Html.ValidationMessageFor(model => model.Name)
+                                    </div>
+
+                                    <div class="col-md-6 form-group">
+                                        @Html.LabelFor(model => model.Address)
+                                        @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @maxlength = "250" })
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        @Html.LabelFor(model => model.Code)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Code, new { @class = "form-control", required = "required", @maxlength = "50" })
+                                        @Html.ValidationMessageFor(model => model.Code)
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>State</label>
+                                        <statedropdownlist asp-for-onchange = "loadCities()" name="State" selectedvalue="@(Model.StateId.HasValue ? Model.StateId.Value : 0)" onchange="loadCities()" firstvalue="Select State"
+                                                           class="form-control"> </statedropdownlist>
+                                        @*@Html.StateDropDownList("State", Model.StateId.HasValue ? Model.StateId.Value : 0, "Select State", new { @onchange = "loadCities()", @class = "form-control" })*@
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>City</label>
+                                        @*@Html.CityDropDownList("City", Model.CityId.HasValue ? Model.CityId.Value : 0, Model.StateId.HasValue ? Model.StateId.Value : 0,
+            "Select City", new { @onchange = "SetCityId()", @class = "form-control" })*@
+
+                                        <citydropdownlist name="City" firsttext="Select City"  asp-for-onchange = "SetCityId()" class="form-control" stateId="@(Model.StateId.HasValue ? Model.StateId.Value : 0)" selectedvalue="@(Model.CityId.HasValue ? Model.CityId.Value : 0)"></citydropdownlist>
+                                    </div>
+                                   
+                                    @*<div class="form-group comman_checkbox">
+            IsInternal
+           @Html.CheckBoxFor(m => m.IsInternal, true)<span></span>
+           @Html.ValidationMessageFor(m => m.IsInternal)
+        </div>*@
+
+                                    <div class="col-md-12 form-group">
+                                        @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                                        @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.Description)
+                                    </div>
+                                    <div class="col-md-12 form-group comman_checkbx">
+
+                                        @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                                        @Html.ValidationMessageFor(m => m.IsActive)
+                                        <label>Active</label>
+                                    </div>
+                                    <div class="col-md-12 text-right button_Div">
+                                        <input type="submit" value='Save' class="comm-button" />
+                                        @*@Html.ActionLink("Cancel ", "Site", "Organization", new { @class = "comm-button" })*@
+                                        @Html.ActionLink("Cancel", "Site", new { controller = "Organization" }, new { @class = "comm-Cancelbutton" })
+                                    </div>
+                                </div>
+                            
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+    const codeField = $('input[type="text"][name="Code"]');
+    const code = codeField.val();
+    if (!code || code.trim() == '') {
+        $(codeField).removeAttr('readonly');
+        $(codeField).attr("title", "Code")
+    } else {
+        $(codeField).attr("readonly", "readonly");
+        $(codeField).attr("title", "Code can't be edited during edit")
+    }
+
+    $('input[type="submit"]').click(function () {
+        let siteType = $('#SiteType');
+        let siteTypeVal = siteType.val();
+        let hfSiteTypeId = $('input[type="hidden"][name="SiteTypeId"]')
+        hfSiteTypeId.val(siteTypeVal);
+    });
+
+    function loadCities() {
+
+        let stateId = $('select#State').val();
+       // alert(stateId);
+        $('input[type="hidden"][name="StateId"]').val(stateId);
+        stateId = stateId != null ? parseInt(stateId) : 0;
+        let url = CRxUrls.Common_GetCities;
+        let htmlData = '<option value="">Select City</option>';
+        $.get(url + "?stateId=" + stateId, function (data) {
+         
+            for (var item of data) {
+                htmlData += '<option value="' + item.CityId + '">' + item.CityName + '</option>';
+            }
+            $('select#City').html(htmlData);
+        });
+    }
+
+    function SetCityId() {
+        let hfCity = $('input[type="hidden"][name="CityId"]');
+        let cityId = $('select#City').val();
+        hfCity.val(cityId);
+    }
+</script>

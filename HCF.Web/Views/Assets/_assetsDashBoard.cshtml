@@ -1,0 +1,245 @@
+﻿@model List<HCF.BDO.Assets>
+
+<div class="table-res">
+    <table class="table table-bordered table-striped" id="assetsTable">
+        <thead>
+            <tr>
+                <th>Asset #</th>
+                <th>Name</th>
+                <th>Barcode #</th>
+                <th>Asset</th>
+                <th>Location</th>
+                <th>Last Inspection</th>
+                <th>Due Date</th>
+                <th style="width: 112px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Where(x => x.IsActive).OrderByDescending(x => x.Name))
+            {
+                foreach (var floorAssets in item.TFloorAssets.OrderBy(x => x.AssetNo))
+                {
+
+                    <tr class="@($"{item.AssetId}assets")" id="@floorAssets.FloorAssetsId">
+                        <td>
+                            <span class="processType-Sprite @commonModelFactory.GetTranStatus(floorAssets.InspStatus)" alt="@floorAssets.InspStatus"></span>
+                            <a onclick="openShowPopUp('@floorAssets.FloorAssetsId')" floorAssetId="@floorAssets.FloorAssetsId">
+                                @floorAssets.AssetNo.CastToNA().Trim()
+                            </a>
+                        </td>
+                        <td>
+                            @floorAssets.Name
+                        </td>
+                        <td>
+                            @floorAssets.BarCodeNo.CastToNA()
+                        </td>
+                        <td>
+                            <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" />
+                            @item.Name
+                        </td>
+                        <td>
+                            <span title="@floorAssets.GetLocation()">
+                                @floorAssets.GetShortLocation()
+                            </span>
+                        </td>
+
+                        @if (floorAssets.TInspectionActivity != null && floorAssets.TInspectionActivity.Count > 0)
+                        {
+                            var activity = floorAssets.TInspectionActivity.OrderBy(x => x.ActivityInspectionDate).FirstOrDefault();
+                            <td data-sort="@activity.ActivityInspectionDate.DateSort()">
+                                <span>
+                                    @activity.ActivityInspectionDate.ToFormatDate()
+                                </span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+
+                        
+                        
+                        @if (floorAssets.TInspectionActivity != null && floorAssets.TInspectionActivity.Count > 0)
+                        {
+                            var activity = floorAssets.TInspectionActivity.OrderBy(x => x.ActivityInspectionDate).FirstOrDefault();
+                            <td data-sort="@activity.DueDate.DateSort()">
+                                <span class="details @(activity.DueDate < DateTime.Now.Date ? "fail" : "" )">
+                                    @activity.DueDate.ToFormatDate()
+                                </span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+
+                        <td>
+                            <img style="cursor:pointer; max-width: 24px;" floorId="@floorAssets.FloorId"
+                                 class="location @(@floorAssets.Floor != null && floorAssets.Floor.IsActive ? "" : "disable")"
+                                 src="@Url.Content("~/dist/Images/Icons/location_icon.png")" title="Go to floor Plan" alt="Location" />
+
+                            <img style="cursor:pointer" src="@Url.Content("~/dist/Images/Icons/history_icon.png")"
+                                 class="inspassetsa @(@item.StandardEps.Count > 0 || item.IsRouteInsp ? "" : "disable")"
+                                 title="Asset Histroy"
+                                 onclick="location.href = '@Url.Action("AssetsHistory", "Assets", new {floorassetId = floorAssets.FloorAssetsId, epId = 0})'" />
+
+                            <a class="inspassetsa @(@item.StandardEps.Count > 0 || item.IsRouteInsp ? "" : "disable")"
+                               onclick="openInspPopUp('@floorAssets.FloorAssetsId')">
+                                <img style="cursor:pointer" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")" title="Inspection" />
+                                <sup>
+                                    @item.StandardEps.Count
+                                </sup>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="assetsInfoPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+<div style="display:none">
+    <span id="dvgeneratedby">
+        @($"{Localizer["PrintGeneratedFromTitle"]} : {Localizer["PrintGeneratedFromText"]} \n\n\n {Localizer["PrintGeneratedByTitle"]} : {HCF.Web.Base.UserSession.CurrentUser.Name}")
+    </span>
+</div>
+<script>
+
+    $('#assetsTable tbody').on('click', 'tr', function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        }
+        else {
+            table.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+        }
+    });
+
+    $(".location").click(function (e) {
+        e.preventDefault();
+        var floorId = $(this).attr("floorId");
+        var urlAction = CRxUrls.Assets_GetTfloorAssets;
+        window.location.href = urlAction + '?floorId=' + floorId + "&type=1";;
+    });
+
+    var table = $('#assetsTable').DataTable({
+        lengthChange: false,
+        searching: true,
+        bPaginate: $('#assetsTable tbody tr').length > 30,
+        bInfo: false,
+        aaSorting: [[3, 'asc']],
+        language: {
+            "emptyTable": "No data available in table"
+        },
+       /* dom: 'Bfrtip',*/
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions' <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        buttons: [{
+            extend: 'pdfHtml5',
+            orientation: 'portrait',
+            title: 'Assets',
+            messageBottom: function () {
+                return $("#dvgeneratedby").text();
+            },
+            exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5, 6]
+            },
+            customize: function (doc) {
+                doc.content.splice(0, 1);
+                var now = new Date();
+                var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                var logo = localStorage.getItem("logoimgbase64");
+                doc.pageMargins = [20, 60, 20, 30];
+                doc.defaultStyle.fontSize = 8;
+                doc.styles.tableHeader.fontSize = 7;
+                doc['header'] = (function () {
+                    return {
+                        columns: [
+                            { image: logo, width: 40 },
+                            {
+                                alignment: 'left',
+                                italics: true,
+                                text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                fontSize: 14,
+                                margin: [0, 6, 0, 0],
+                                width: 200,
+                            },
+                            {
+                                alignment: 'middle',
+                                fontSize: 14,
+                                text: 'Assets',
+                                margin: [0, 6, 0, 0]
+                            }
+                        ],
+                        margin: 20
+                    }
+                });
+                doc['footer'] = (function (page, pages) {
+                    return {
+                        columns: [
+                            {
+                                alignment: 'left',
+                                text: ['Created on: ', { text: jsDate.toString() }]
+                            },
+                            {
+                                alignment: 'right',
+                                text: ['Generated from: ', { text: 'CRx' }]
+                            },
+                            {
+                                alignment: 'right',
+                                text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                            },
+                            {
+                                alignment: 'right',
+                                text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                            }
+                        ],
+                        margin: 20
+                    }
+                });
+                var objLayout = {};
+                objLayout['hLineWidth'] = function (i) { return .5; };
+                objLayout['vLineWidth'] = function (i) { return .5; };
+                objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                objLayout['paddingLeft'] = function (i) { return 4; };
+                objLayout['paddingRight'] = function (i) { return 4; };
+                doc.content[0].layout = objLayout;
+            }
+        },
+        {
+            extend: 'excel',
+            title: 'Assets',
+            messageBottom: function () {
+                return $("#dvgeneratedby").text();
+            },
+            exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5, 6],
+                orthogonal: 'export'
+            }
+        }]
+    });
+
+    function openShowPopUp(floorAssetId) {
+        var url = CRxUrls.Assets_tfloorAssetEdit;
+        $.get(url + '?mode=Inspection&tfloorAssetId=' + floorAssetId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#assetsInfoPopup').modal('show');
+        });
+    }
+
+    function openInspPopUp(floorAssetId) {
+        var url = CRxUrls.Assets_DashBoardInspPopup;
+        $.get(url + '?floorAssetId=' + floorAssetId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#assetsInfoPopup').modal('show');
+        });
+    }
+
+</script>

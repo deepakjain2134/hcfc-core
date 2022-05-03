@@ -1,0 +1,251 @@
+﻿@model HCF.BDO.EPDetails
+@{
+    ViewBag.Title = Localizer["TitleAddEP"];
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["TitleAddEP"]
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+
+                      
+                    <div class="row">
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            @Html.LabelFor(model => model.Standard)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.StDescID, new SelectList(ViewBag.Goals, "StDescID", "TJCStandard", ViewBag.StdescId),
+                             "Select Goal", new { @class = "form-control enabled", required = "required" })
+                            @Html.ValidationMessageFor(model => model.StDescID)
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>Score</label><em class="required-field"> </em>
+                            @Html.DropDownListFor(model => model.ScoreId, new SelectList(ViewBag.Scores, "Id", "Name"),
+                            "Select Score", new { @class = "form-control" })
+                            @*@Html.ValidationMessageFor(model => model.ScoreId)*@
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>TJC Frequency</label><em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.EPFrequency[0].TjcFrequencyId, new SelectList(ViewBag.Frequencs, "FrequencyId", "DisplayName", ViewBag.TjcFrequencyId),
+                            "Select Frequency", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.EPFrequency[0].TjcFrequencyId)
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>CRx Rec Frequency</label>
+                            @Html.DropDownListFor(model => model.EPFrequency[0].RecFrequencyId, new SelectList(ViewBag.Frequencs, "FrequencyId", "DisplayName", ViewBag.RecFrequencyId),
+                            "Select Frequency", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.EPFrequency[0].FrequencyId)
+                        </div>
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            @Html.LabelFor(model => model.EffectiveDate) <em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.EffectiveDate, $"{Model?.EffectiveDate:MMM d, yyyy}", new { @class = "form-control startDate", required = "required", @autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.EffectiveDate)
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            @Html.LabelFor(model => model.ExpiryDate)
+                            @Html.TextBoxFor(model => model.ExpiryDate, $"{Model?.ExpiryDate:MMM d, yyyy}", new { @class = "form-control endDate", @autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.ExpiryDate)
+                        </div>
+
+
+
+
+
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>EP #</label><em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.EPNumber, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.EPNumber)
+                        </div>
+
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            @Html.LabelFor(model => model.Priority)
+                            @Html.LabelFor(model => model.Priority)
+                            <select name="Priority" id="Priority" class="form-control">
+                                <option value="0">Select Priority</option>
+                                <option value="1">High</option>
+                            </select>
+                        </div>
+                        @*<div class="form-group">
+            @Html.LabelFor(m => m.IsDocRequired)
+            @Html.CheckBoxFor(m => m.IsDocRequired)<span></span>
+            @Html.ValidationMessageFor(m => m.IsDocRequired)
+        </div>*@
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>Doc Type</label>
+                            @Html.DropDownList("docTypeId", new SelectList(ViewBag.DocumentTypes, "DocTypeId", "Name", ViewBag.DocTypeId), "Non-Document EP", new { @class = "form-control" })
+                        </div>
+
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <label>Assets</label>
+                            @*@Html.AssetsDownList("assetId", "-2", "Non-Assets EP ", new { @class = "form-control" })*@
+
+                            <assetsdownlist name="assetId" selectedvalue="-2" firstvalue="Non-Assets EP" class="form-control"></assetsdownlist>
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <div class="addep-desc">
+                                <a href="#" class="pull-right">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add More Description" alt="3d_add_button" id="btnaddmoredesc" style="width:20px;"/>
+                                </a>
+                            </div>
+                            <div>
+                                @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Description)
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-4 col-sm-6">
+                            <br />
+                            @Html.CheckBoxFor(m => m.IsActive, true)<span></span>
+                            @Html.ValidationMessageFor(m => m.IsActive)
+                            <label>TJC Active</label>
+                        </div>
+
+                    </div>
+                            <div class="modal fade" id="addmoredescription" role="dialog">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">
+                                                <b>Description </b>
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="epitems">
+                                                <div class="col-lg-3">
+                                                    <label>Hospital Type</label>
+                                                </div>
+                                                <div class="col-lg-9">
+                                                    @Html.LabelFor(model => Model.Description)
+                                                </div>
+                                            </div>
+                                            @for (int i = 0; i < Model?.EPDescriptions.Count; i++)
+                                            {
+                                                <div class="epitems ePDescriptions" epDetailId="@Model.EPDetailId" hospitaltypeId="@Model.EPDescriptions[i].HospitalTypeId" epdescriptionId="@Model.EPDescriptions[i].EPDescriptionId">
+                                                    <div class="col-lg-3">
+                                                        @Html.HiddenFor(x => Model.EPDescriptions[i].HospitalTypeId)
+                                                        @Html.HiddenFor(x => Model.EPDescriptions[i].EPDescriptionId)
+                                                        <label>@Model.EPDescriptions[i].Type</label>
+                                                    </div>
+                                                    <div class="col-lg-9">
+                                                        @Html.TextAreaFor(model => Model.EPDescriptions[i].Description, new { @class = "form-control description" })
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="modal-footer">
+                                            @if (Model?.EPDetailId > 0)
+                                            {
+                                                <button type="button" class="btn comm-button" data-dismiss="modal" id="btnupdatedescription">Update</button>
+                                            }
+                                            <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="button_Div text-right">
+                                <input type="submit" value='@ViewBag.SubmitValue' class="comm-button" name="submitType" />
+                                @Html.ActionLink("Cancel", "addepdetails", new { StDescID = ViewBag.StdescId }, new { @class = "comm-Cancelbutton" })
+                            </div>
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+    $(function () {
+          @if (Model?.Priority!=null) {
+       @: $("#Priority").val('@Model.Priority');
+          }
+        @if (Model?.Assets.Count > 0) {
+            @:$("#assetId").val('@Model.Assets.FirstOrDefault().AssetId');
+        }
+        $(".docTypeDiv").hide();
+        IsDocRequired();
+        $("#IsDocRequired").click(function () {
+            IsDocRequired();
+        });
+        function IsDocRequired() {
+            if ($("#IsDocRequired").is(':checked')) {
+                $(".docTypeDiv").show();
+            }
+            else {
+                $(".docTypeDiv").hide();
+                $("#DocumentType_0__DocTypeId").val(0);
+            }
+        }
+
+        $("#EPFrequency_0__RecFrequencyId").change(function () {
+            validateCustomFreq();
+        });
+
+        $("#EPFrequency_0__TjcFrequencyId").change(function () {
+            validateCustomFreq();
+        });
+
+        var validateCustomFreq = function () {
+            var parentId = $("#EPFrequency_0__TjcFrequencyId").prop('selectedIndex');
+            var currentIndex = $("#EPFrequency_0__RecFrequencyId").prop('selectedIndex');
+            if (currentIndex > parentId) {
+                //swalalert("The frequency must be less than TJC Frequency.", "Error");
+                swal("Warning", "The frequency must be less than TJC Frequency.", "error");
+                $("#EPFrequency_0__RecFrequencyId").val("");
+                $("#EPFrequency_0__TjcFrequencyId").val("");
+            }
+        }
+    });
+
+    $("#btnaddmoredesc").click(function () {
+        $('#addmoredescription').modal('show');
+    });
+
+    $("#btnupdatedescription").click(function () {
+        //alert("Call");
+        //debugger;
+        var EPDetails = {};
+        var epdescriptions = [];
+        $(".ePDescriptions").each(function (index) {
+            var epdescription = {
+                EPDescriptionId: $(this).attr('epdescriptionId'),
+                EPDetailId: $(this).attr('epDetailId'),
+                HospitalTypeId: $(this).attr('hospitaltypeId'),
+                Description: $(this).find(".description").val()
+            }
+            epdescriptions.push(epdescription);
+        });
+        EPDetails = {
+            EPDetailId: '@Model.EPDetailId',
+            EPDescriptions: epdescriptions
+        }
+        //debugger;
+        $.ajax({
+            url: CRxUrls.Goal_SaveEPDescriptions,
+            method: "POST",
+            data: JSON.stringify({ model: EPDetails }),
+            contentType: 'application/json',
+            success: function (data) {
+                swalalert('Updated Successfully');
+            }
+        })
+    });
+
+    </script>

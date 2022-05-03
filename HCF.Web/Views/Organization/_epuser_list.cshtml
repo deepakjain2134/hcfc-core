@@ -1,0 +1,31 @@
+﻿@model HCF.BDO.EPDetails
+@{
+    var item = Model.EPUsers.ToList();
+    var UserId_CSV =string.Join(",", item.Select(x => x.UserId).ToList());
+    var UserName_CSV = string.Join(",", item.Select(x => x.FullName).ToList());
+}
+@if (item.Any())
+{
+    var countUser = item.Count;
+    if (countUser > 1)
+    {
+        <div data-toggle="modal" data-target="#addEpAssigneeModel"
+             class="addEpAssignee" title="Assign User"
+             id="EPDetailId_@Model.EPDetailId"
+             data-userlist="@UserId_CSV">
+            <a href="javascript:void(0);">@($"{UserName_CSV.Split(',').ToList().FirstOrDefault()}{" + "}{countUser - 1}{" More"}")</a>
+        </div>
+    }
+    else if (countUser > 0)
+    {
+        <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="@UserId_CSV">
+            <a href="javascript:void(0);">@UserName_CSV.Split(',').ToList().FirstOrDefault()</a>
+        </div>
+    }
+}
+else
+{
+    <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="">
+        <a href="javascript:void(0);">Assign User</a>
+    </div>
+}

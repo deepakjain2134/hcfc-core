@@ -1,0 +1,160 @@
+﻿@model HCF.BDO.Questionnaire
+@using (Html.BeginForm("AddQuestionnaireSteps", "Questionnaire", FormMethod.Post, new { id = "addroundquestonariesform" }))
+{
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Questionnaire Steps </h4>
+    </div>
+    <div class="modal-body">
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <div class="">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    @Html.HiddenFor(m => m.QuestionnaireId)
+                    @Html.HiddenFor(m => m.QuestionnaireStep.QuestionnaireStepId)
+                    @Html.HiddenFor(m => m.QuestionnaireStep.IsActive)
+                    @Html.LabelFor(model => model.QuestionnaireStep.Step)<em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.QuestionnaireStep.Step, new { @class = "form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.QuestionnaireStep.Step)
+                </div>
+            </div>
+            @*<div class="col-lg-6">
+                <div class="form-group comman_checkbox">
+                    Active
+                    @Html.CheckBoxFor(model => model.QuestionnaireStep.IsActive, new { @checked = "checked" })<span></span>
+                    @Html.ValidationMessageFor(model => model.QuestionnaireStep.IsActive)
+                </div>
+            </div>*@
+        </div>
+        <div class="col-md-12">
+            <table id="q_steps" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="@(Model.QuestionnaireOptions.Count > 0?"":"hide")">
+                            Header Type
+                        </th>
+                        <th>
+                            Input Type
+                        </th>
+                        <th>
+                            Recommended Value
+                        </th>
+                        <th>
+                            Min Value
+                        </th>
+                        <th>
+                            Max Value
+                        </th>
+                        <th>
+                            Format
+                        </th>
+                        <th style="max-width:210px;min-width:210px;">
+                            Options
+                        </th>
+                    </tr>
+                </thead>
+                @for (var i = 0; i < Model.QuestionnaireStep.QuestionnaireStepDetail.Count; i++)
+                {
+            <tr id="@($"rowid_{i}")" class="steps">
+                @if (Model.QuestionnaireOptions.Count > 0)
+                {
+                    <td>
+                        <input type="text" value="@Model.QuestionnaireOptions[i].QuestionnaireHeaderType.Name" disabled class="form-control" />
+                        <input type="hidden" name="QuestionnaireStep.QuestionnaireStepDetail[@i].QuestionnaireHeaderTypeId" value="@Model.QuestionnaireOptions[i].QuestionnaireHeaderType.QuestionnaireHeaderTypeId" />
+                    </td>
+                }
+                else
+                {
+                    <td class="hide">
+                    </td>
+                }
+                @*@Html.Action("EditquestionnaireStep", "Questionnaire",
+        new { rowscount = i, questionnaireSteps = Model.QuestionnaireStep })*@
+
+                @await Component.InvokeAsync("QuestionnaireEditquestionnaireStep",
+               new { rowscount = i, questionnaireSteps = Model.QuestionnaireStep })
+            </tr>
+                }
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer button_Div">
+        <button type="submit" class="comm-button" id="btn_submit">Save</button>
+        <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btn_submit").click(function () {
+            debugger
+            var tbodylength = $("#q_steps tbody").children().length;
+            var countlength = tbodylength;
+            if (tbodylength > 1) {
+                var count = 0;
+                for (var i = 0; i < tbodylength;i++) {
+                    var optionvalue = $("#q_steps tbody").children()[i].children[6].children[1].children[1].children[0].children[0].children[0].innerHTML;
+                    var recommnedvalue = $("#q_steps tbody").children()[i].children[2].children[1].value;
+                        recommnedvalue = recommnedvalue.split(',');
+                    var inputvalue = $($("#q_steps tbody").children()[i].children[1].children[0]).children(":selected")[0].innerText;
+                    if (inputvalue == "Dropdown") {
+                        var optionarr = optionvalue.split(',');
+                        $.each(optionarr, function (index, value) {
+                            optionarr[index] = $.trim(value).toUpperCase();
+                        });
+                        optionarr.push("N/A");
+                        $.each(recommnedvalue, function (index, value) {
+                            recommnedvalue[index] = $.trim(value).toUpperCase();
+                        });
+                        let checker = (arr, target) => target.every(v => arr.includes(v));
+                        const found = checker(optionarr, recommnedvalue);
+                        if (found == true) {
+                            count++;
+                        }                       
+                    }
+                    else {
+                        countlength--;
+                    }
+                }
+                if (count == countlength) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                var isValid = false;
+                var inputvalue = $($("#q_steps tbody").children()[0].children[1].children[0]).children(":selected")[0].innerText;
+                if (inputvalue == "Dropdown") {
+                    var optionvalue = $(".filter-option-inner-inner").text();
+                    var recommnedvalue = $(".recommendtxtbox").val().split(',');
+                    var optionarr = optionvalue.split(',');                    
+                    $.each(optionarr, function (index, value) {
+                        optionarr[index] = $.trim(value).toUpperCase();
+                    });
+                    $.each(recommnedvalue, function (index, value) {
+                        recommnedvalue[index] = $.trim(value).toUpperCase();
+                    });
+                    optionarr.push("N/A");
+                    let checker = (arr, target) => target.every(v => arr.includes(v));
+                    const found = checker(optionarr, recommnedvalue)
+                    if (found == true) {
+                        isValid = true;
+                    }
+                }
+                else {
+                    isValid = true;
+                }
+                
+                if (isValid) {
+                    return isValid;
+                }
+                else {
+                    return isValid;
+                }
+            }            
+        });
+    });
+</script>

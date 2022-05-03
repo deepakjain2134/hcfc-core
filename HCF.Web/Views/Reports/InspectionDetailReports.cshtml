@@ -1,0 +1,186 @@
+﻿@model List<HCF.BDO.UserProfile>
+@{
+    ViewBag.Title = "Inspection Detail Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var users = Model; //Users.GetUsers().Where(x => (x.IsActive && !string.IsNullOrEmpty(x.Email) && x.EpsCount > 0) || x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId).OrderBy(x => x.FullName).ToList();
+
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Compliance History
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="button-complianceyear">
+                        <div class="row tablelist-topform">
+                            <div class="col-xs-2">
+                                @Html.DropDownList("year", Enumerable.Range(DateTime.Now.Year - 2, 3).OrderByDescending(x => x.ToString()).Select(x => new SelectListItem { Text = x.ToString() }), new { @class = "form-control" })
+                                @*<select id="year" name="year" class="form-control">
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
+                </select>*@
+                            </div>
+                            <div class="col-xs-4">
+                                @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                {
+                                    <select name="ddlUsers" id="ddlUsers" class="form-control">
+                                        <option value="0"> All Users</option>
+                                        @foreach (var data in users)
+                                        {
+                                            <option value="@data.UserId">
+                                                @($"{data.FullName} ({((data.IsPowerUser == true) ? "PU " + data.EpsCount.ToString() : data.EpsCount.ToString())})")
+                                            </option>
+
+                                        }
+
+                                    </select>
+                                }
+                            </div>
+                        </div>
+                        @*<div id="catfilter" class="dashboard_filter text-right">
+                            @await Html.PartialAsync("_epChapters")
+                        </div>*@
+                        <div id="inspectionContents">
+
+                            @*@Html.Action("InspectionSummary", "Reports",
+            new { year = DateTime.Now.Year, userId = HCF.Web.Base.UserSession.CurrentUser.UserId })*@
+
+                            @await Component.InvokeAsync("ReportsInspectionSummary",
+                                new { year = DateTime.Now.Year, userId = 0 }
+                                )
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+    <script type="text/javascript">
+
+
+        $("#year").change(function () {
+            getInspectionSummary();
+        });
+
+        $("#ddlUsers").change(function () {
+            getInspectionSummary();
+        });
+
+
+        function getInspectionSummary() {
+            debugger;
+            var year = $("#year").val();
+            var catId = $("input[name='dashEPCat']:checked").val();
+            var sortOrder = localStorage.getItem("ISortOrder");
+            var orderbySort = localStorage.getItem("IOrderbySort");
+            var userId = '@HCF.Web.Base.UserSession.CurrentUser.UserId';
+            if ($("#ddlUsers").val() != undefined) {
+                userId = $("#ddlUsers").val();
+            }
+            var url = '@Url.Action("InspectionSummary", "Reports")' + '?year=' + year + '&userId=' + userId + '&sortOrder=' + sortOrder + "&OrderbySort=" + orderbySort + "&categoryId=" + catId;
+            $.get(url, function (data) {
+                $('#inspectionContents').html(data);
+                $('#inspectionContents').fadeIn('fast');
+                // $("[data-rel=popover]").popover();
+
+            }).done(function (data) {
+                console.log(data);
+                $("[data-rel=popover]").popover();
+            });
+        }
+
+    </script>
+}
+
+<style>
+    .popover-content.popover-scrollBar {
+        max-height: 120px;
+        overflow: auto;
+        margin-bottom: 10px;
+    }
+
+    .notfound {
+        display: none;
+    }
+
+    .frequency_1 {
+        background: #b7dee8;
+    }
+
+    .frequency_25 {
+        background: #f2dcdb;
+    }
+
+    .frequency_6 {
+        background: #c5be97;
+    }
+
+    .frequency_7 {
+        background: #c0c0c0;
+    }
+
+    select#year {
+        max-width: 240px;
+        float: left;
+    }
+
+    .compliane-search.form-control {
+        max-width: 240px;
+        float: right;
+    }
+
+    .button-complianceyear .table-bordered > tbody > tr > td,
+    .table-bordered > thead > tr > th {
+        vertical-align: middle !important;
+        border-color: #7d7b7b;
+    }
+
+    .compliance-responsive table {
+        text-align: left;
+        position: relative;
+        border-collapse: collapse;
+    }
+
+    .compliance-responsive th {
+        background: white;
+        position: sticky;
+        top: -1px;
+        box-shadow: -2px 0px 0px -1px #ccc;
+        z-index: 9;
+    }
+    .compliance-responsive {
+        max-height: 422px;
+        min-height: 422px;
+        overflow: auto;
+        /*border-top: 1px solid #ccc;*/
+    }
+    .year_0 {
+        background: yellow;
+    }
+
+    .year_1 {
+        background: #9ae422;
+    }
+
+    .year_2 {
+        background: #ffd400;
+    }
+
+    .False {
+        cursor: not-allowed;
+    }
+
+    .duePassed {
+        background: red !important;
+    }
+</style>

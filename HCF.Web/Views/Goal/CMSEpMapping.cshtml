@@ -1,0 +1,218 @@
+﻿@model HCF.Web.ViewModels.Goal.CmsEpMappingViewModel
+@{
+    /**/
+
+    ViewBag.Title = "CMS EpMapping";
+    var epDetails = Model.EPDetails; //EpRepository.GetEpDetails();
+    var list = Model.CopDetails; //EpRepository.GetCopDetails().ToList();
+
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @ViewBag.Title
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="">
+                        <div class="box box-primary col-lg-12" id="Setting_Content">
+                           
+                                <div class="col-lg-6" id="epdetails">
+                                    <div class="selectList" id="ullistitem">
+                                        <label>Select Standard EP</label>
+                                        <ul class="ullistitem">
+                                            <li>
+                                                <input class="form-control" type="text" id="SearchEps" />
+                                            </li>
+                                            @foreach (var build in epDetails.OrderBy(x => x.StandardEp))
+                                            {
+                                                <li class="chkEpMultiSelect" id="chkEpMultiSelect_@build.EPDetailId">
+                                                    <input type="checkbox" value="@build.EPDetailId" /><span></span> @string.Format("{0}", build.StandardEp)
+                                                </li>
+
+                                            }
+                                        </ul>
+                                    </div>
+                                    <input type="hidden" name="UncheckStandardEps" id="UncheckStandardEps" value="@ViewBag.StandardEps" />
+                                    <div id="cmseplists">
+                                        @*@if (Model.Count != 0)
+                                            {
+                                                @await Html.PartialAsync("_CMSstandardep", epDetails)
+                                            }*@
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6" id="epdetails">
+                                    <div class="selectList" id="ullistitem">
+                                        <label>Select CoP Text</label>
+                                        <ul class="ulcmslistitem">
+                                            <li>
+                                                <input class="form-control" type="text" id="SearchCopText" />
+                                            </li>
+                                            @foreach (var cms in list.OrderBy(x => x.CopText))
+                                            {
+                                                <li class="cmsdetails">
+                                                    <input type="checkbox" value="@cms.CopDetailsId"
+                                                           @*@((Model.Where(x => x.CopDetailsId == cms.CopDetailsId).FirstOrDefault() != null) ? "checked='checked'" : "")*@ /><span></span> @string.Format("{0}", cms.RequirementName)
+                                                    </li>
+                                                }
+                                        </ul>
+                                    </div>
+                                    <input type="hidden" name="UncheckCMS" id="UncheckCMS" value="@ViewBag.CMSText" />
+                                    <div id="cmslist">
+                                        @*@if (Model.Count != 0)
+                                            {
+                                                @await Html.PartialAsync("_CMSdetails", list)
+                                            }*@
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="button_Div">
+                                        <input type="submit" value='@Localizer["Save"]' id="btnCmsSave" class="comm-button" />
+                                    </div>
+                                </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var valueArray = [];
+    var cmsvalue = [];
+
+    $(document).ready(function () {       
+        var cmsval = "";
+        var standardeps = "";
+        debugger;
+        var standardEpsId = $("#UncheckStandardEps").val();
+        var cmsIds = $('#UncheckCMS').val();
+        if (standardEpsId != "")
+            for (var id of standardEpsId.split(',')) {
+                valueArray.push(id);
+            }
+
+        if (cmsIds != "")
+            for (var ids of cmsIds.split(',')) {
+                cmsvalue.push(ids);
+            }
+        $("#UncheckCMS").val(cmsvalue);
+        cmsval = $("#UncheckCMS").val();
+        $('.chkEpMultiSelect input[type="checkbox"]').change(function () {
+           // debugger;
+            if ($(this).is(":checked")) {
+                valueArray.push($(this).val());
+            } else {
+                valueArray.pop($(this).val());
+            }
+            $("#UncheckStandardEps").val(valueArray);
+
+            if ($("#UncheckStandardEps").val() != "") {
+                standardeps = $("#UncheckStandardEps").val();
+                $.get('@Url.Action("CMSstandardep", "Goal")' + '?standardeps=' + standardeps + '&cmsval=' + cmsval, function (data) {
+                    if (data != null) {
+                        $('#cmseplists').html(data);
+                        $('#cmseplists').fadeIn('fast');
+                    }
+                });
+
+            }
+        })
+
+
+        $('.cmsdetails input[type="checkbox"]').change(function () {
+            debugger;
+            if ($(this).is(":checked")) {
+                cmsvalue.push($(this).val());
+            } else {
+                cmsvalue.pop($(this).val());
+            }
+            $("#UncheckCMS").val(cmsvalue);
+            if ($("#UncheckCMS").val() != "") {
+                debugger;
+                cmsval = $("#UncheckCMS").val();
+                standardeps = $("#UncheckStandardEps").val();
+                $.get('@Url.Action("CMSdetails", "Goal")' + '?cmsvalue=' + cmsval + '&standardeps=' + standardeps, function (data) {
+                    if (data != null) {
+                        $('#cmslist').html(data);
+                        $('#cmslist').fadeIn('fast');
+                    }
+                });
+            }
+        })
+
+        $('#btnCmsSave').on('click', function () {
+            debugger;
+           var standardEpsId = $("#UncheckStandardEps").val();
+            var cmsval = $('#UncheckCMS').val();
+            $.get('@Url.Action("SaveCMSdata", "Goal")' + '?standardeps=' + standardEpsId + '&cmsval=' + cmsval, function (data) {
+                if (data != null && data != '') {
+                    successAlert('EPs is successfully link with COP');
+                    }
+             });
+        });
+
+
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+
+        $('#SearchEps').bind('keyup', function () {
+            debugger
+            var searchString = $(this).val();
+            filterData(searchString);           
+        });
+
+        $('#SearchCopText').bind('keyup', function () {
+            debugger
+            var searchString = $(this).val();
+            filterCopText(searchString);
+        });
+
+
+        function filterData(searchString) {
+            debugger;
+            $("ul.ullistitem li").each(function (index, value) {
+                currentName = $(value).text().trim();
+                if (currentName != "") {
+                    if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                        $(value).show();
+                    } else {
+                        $(value).hide();
+                    }
+                }
+            });
+        }
+
+        function filterCopText(searchString) {
+            debugger;
+            $("ul.ulcmslistitem li").each(function (index, value) {
+                currentName = $(value).text().trim();
+                if (currentName != "") {
+                    if (currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                        $(value).show();
+                    } else {
+                        $(value).hide();
+                    }
+                }
+            });
+        }
+      
+    });
+</script>

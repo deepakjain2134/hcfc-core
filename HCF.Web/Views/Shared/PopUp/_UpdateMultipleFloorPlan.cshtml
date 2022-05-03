@@ -1,0 +1,84 @@
+﻿@model List<HCF.BDO.Buildings>
+    @{
+        var allbuilding = Model; ///BuildingsRepository.GetBuildingFloor();
+    }
+    <div class="col-lg-12 row">
+        <div class="col-lg-12">
+            <div class="mutliSelect">
+                <ul class="mutliSelectUl">
+                    @foreach (var build in allbuilding.Where(x => x.Floor.Count > 0))
+                    {
+                        <li>
+                            @build.BuildingName
+                            <ul>
+                                @foreach (var floor in build.Floor)
+                                {
+                                    <li class='@(string.IsNullOrEmpty(floor.ImagePath) ? "comman_checkbox1 noplan" : "comman_checkbox1 plan")' style="width:100%"><input id="floorid" type="checkbox" class="floors" value="@floor.FloorId" data-floorname="@floor.FloorName" data-isactive="@floor.IsActive" /><span></span> @floor.FloorName</li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="button_Div">
+                <button name="submitButton" class="comm-button" id="btnSubmit" data-dismiss="modal" type="button">Save</button>
+                <button name="cancelButton" class="comm-Cancelbutton" id="cancelButton" data-dismiss="modal" type="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#btnSubmit").click(function () {
+            var Ids = "";
+            var floors = [];
+            $('input:checkbox[id^="floorid"]').each(function () {
+                var $this = $(this);
+                if ($this.is(":checked")) {
+                    if ($(this).val() != "on") {
+                        var floor = {
+                            FloorId: $(this).val(),
+                            FloorName: $(this).data("floorname"),
+                            IsActive: $(this).data("isactive")
+                        }
+                        floors.push(floor);
+                        //Ids = Ids + $(this).val() + ",";
+                    }
+                }
+            });
+            $("#strJson").val(JSON.stringify(floors));
+            alert(JSON.stringify(floors));
+        });
+
+        $(document).ready(function () {
+            $("input[type=checkbox][class=floors]").change(function () {
+                var ischecked = $(this).is(':checked');
+                var value = $(this).val();
+                var cntrl = $(this);
+                debugger;
+                if (ischecked) {
+                    var hasclass = $(this).parent().hasClass("plan")
+                    if (hasclass) {
+                        swal({
+                            html: true,
+                            title: "Confirmation",
+                            text: "<label>This floor already have a floorplan, Do you want to replace this floorplan to new floorplan?</label>",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Yes",
+                            cancelButtonText: "No",
+                            closeOnConfirm: true
+                            //closeOnCancel: true
+                        }, function (isConfirm) {
+                            if (isConfirm) {
+                                return true;
+                            } else {
+                                debugger;
+                                $(cntrl).attr('checked', false);
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+    </script>

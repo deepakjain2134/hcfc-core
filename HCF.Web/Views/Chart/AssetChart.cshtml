@@ -1,0 +1,49 @@
+﻿<div id="assetcontainer" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<input type="hidden" id="assetChart" value="@ViewBag.AssetChart" />
+<script>
+
+    var chartvalue = JSON.parse($("#assetChart").val());
+    Highcharts.chart('assetcontainer', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Assets Inspection Status'
+        },
+        xAxis: {
+            categories: chartvalue.ChartX.categories,
+            crosshair: true
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Total Assets (#)'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+       
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        series: getSeries(chartvalue.AssetSeries)
+    });
+
+</script>

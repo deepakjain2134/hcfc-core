@@ -1,0 +1,231 @@
+﻿@model HCF.BDO.VendorResource
+@{
+    ViewBag.Title = "Vendor Resources";
+}
+<style>
+    .ui-datepicker {
+        z-index: 9999 !important;
+    }
+
+    #imagepreview .modal-body {
+        background-color: #fff !important;
+        border-radius: 0;
+    }
+
+    #imagepreview {
+        max-width: 90%;
+        margin: 0px auto;
+        background-color: transparent;
+        top: 25px;
+    }
+
+    .view_file {
+        padding: 4px 6px;
+    }
+</style>
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @ViewBag.PageTitle
+        </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm("AddVendorResources", "Vendor", FormMethod.Post, new { id = "VendorResourceform" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="row">
+                        @Html.HiddenFor(x => x.VendorResId)
+                        <div class="form-group col-md-4">
+                            <label class="updatelabel">Vendor:</label>
+                            @Html.DropDownList("VendorId",
+                           new SelectList(ViewBag.Vendors, "Value", "Text", Model.VendorId),
+                           "All Vendor", new { @class = "selectpicker form-control", @id = "ddlVendor" })
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Upload Link:<em class="required-field">*</em></label>
+                            @Html.TextBoxFor(m => m.UploadLink, new { @class = "form-control", autocomplete = "off", TabIndex = 3, required = "required" })
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            @if (@ViewBag.SubmitValue == "Update")
+                            {
+                                <label class="EffectiveDate">Date:</label>
+                                <input type="text" id="EffectiveDate" name="EffectiveDate" class="form-control datepicker" autocomplete="off" value="@Model.EffectiveDate.ToFormatDate()" />
+
+                            }
+                            else
+                            {
+                                <label class="EffectiveDate">Date:</label>
+                                <input type="text" id="EffectiveDate" name="EffectiveDate" class="form-control datepicker" autocomplete="off" />
+                            }
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="CustomName">Custom Name: <em class="required-field">*</em></label>
+                            @Html.TextAreaFor(m => m.CustomName, new { @class = "form-control", TabIndex = 5, required = "required" })
+                            @Html.ValidationMessageFor(m => m.CustomName)
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <input type="hidden" id="TFileId" name="TFileId" value=@Model.TFileId>
+                            <div class="filelist form-group">
+                                @foreach (var tfile in Model.File)
+                                {
+                                    <span onclick="deletefile('@tfile.TFileId');" class="view_file @tfile.TFileId">
+                                        <a>
+                                            <img src="/dist/Images/Icons/document_icon.png" alt="@tfile.FileName" title="@tfile.FileName">
+                                            <sup><img src="/dist/Images/Icons/red_cross.png" alt="Delete" title="Delete"></sup>
+                                        </a>
+                                    </span>
+                                }
+                            </div>
+                            <a class="button1" id="btnAddDoc">Upload Document</a>
+
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <span>
+                                @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                                @Html.ValidationMessageFor(m => m.IsActive)
+                                <label class="IsActive">Status</label>
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="text-right button_Div">
+
+                        @*<input type="hidden" id="TFileId" name="TFileId" value=@Model.TFileId>
+
+                            <div class="filelist form-group">
+                                @foreach (var tfile in Model.File)
+                                {
+                                    <span onclick="deletefile('@tfile.TFileId');" class="view_file @tfile.TFileId">
+                                        <a>
+                                            <img src="/dist/Images/Icons/document_icon.png" alt="@tfile.FileName" title="@tfile.FileName">
+                                            <sup><img src="/dist/Images/Icons/red_cross.png" alt="Delete" title="Delete"></sup>
+                                        </a>
+                                    </span>
+                                }
+                            </div>
+                            <a class="comm-bluebutton" id="btnAddDoc">Upload Document</a>*@
+                        <input type="submit" value='@ViewBag.SubmitValue' class="comm-button" name="submitType" id="btnSubmit" />
+                        @*@Html.ActionLink("Cancel", "VendorResources", "Vendor", new { @class = "btnAddDoc" })*@
+                        @Html.ActionLink("Cancel", "VendorResources", "Vendor", new { controller = "HotWorkPermit" }, new { @class = "comm-Cancelbutton" })
+
+                    </div>
+
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        $(document).ready(function () {
+
+            $("#ddlVendor option[value='']").attr("disabled", true);
+        });
+        var btnAddDoc = $("#btnAddDoc");
+        btnAddDoc.click(function () {
+
+            LoadRecentFiles();
+        });
+
+        function fileUploadSuccess(tFiles) {
+            var fileid="";
+            $.each(tFiles, function (index, value) {
+                //console.log(value);
+
+                $(".filelist").append('<span onclick="deletefile(' + value.TFileId + ');" class="view_file ' + value.TFileId + '"><a><img src="/dist/Images/Icons/document_icon.png" alt="' + value.FileName + '" title="' + value.FileName + '"><sup><img src="/dist/Images/Icons/cross_icon.png" alt="Delete" title="Delete"></sup></a></span>');
+                fileid += value.TFileId + ',';
+                //alert(fileid);
+
+            });
+            console.log(fileid);
+            var _oldFile = $("#TFileId").val()       
+            var _fileid = _oldFile + "," + fileid;
+            if (_fileid.startsWith(",")) {
+                _fileid = _fileid.substr(1);
+            }
+            //_fileid = _fileid.replace(/,\s*$/, "");
+            var filearray = new Array();
+            filearray = _fileid.split(",")
+            var filenew = filearray.join();
+            $("#TFileId").val(filenew);
+
+            //console.log(fileFolders);
+
+        }
+        function deletefile(folderId) {
+            swal({
+                title: "Are you sure?",
+                text: "You will not be able to recover this Folder/File!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                closeOnConfirm: false
+            },
+                function () {
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Documents_DeleteBinderFolder + "?folderId=" + folderId,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("." + folderId).remove();
+                            console.log(folderId);
+                            var filestr = $("#TFileId").val();
+                            var fileArray = filestr.split(',').map(Number);
+                            console.log(fileArray);
+
+                            var newFileArray = fileArray.filter(function (item) {
+                                return (item != folderId) && (item != 0);
+                            });
+                            console.log("newFileArray", newFileArray);
+
+                            $("#TFileId").val(newFileArray.join(','));
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+
+                });
+        }
+
+        $(function () {
+            $('#btnSubmit').click(function () {
+                var uploadlink = $('#UploadLink').val();
+                var result = uploadlink.indexOf("//");
+                uploadlink = "https://" + uploadlink;
+                //alert(result);
+                if ($('#ddlVendor :selected').val() == "") {
+                    swalalert("Please Select Vendor Name");
+                    return false;
+                }
+                else if ($("#UploadLink").val() == "") {
+                    swalalert("Upload Link is Required");
+                    return false;
+                }
+                else if ($("#CustomName").val() == "") {
+                    swalalert("Custom Name is Required");
+                    return false;
+                }
+                else if (result == -1) {
+                    $('#UploadLink').val(uploadlink);
+                }
+            });
+        })
+
+    </script>
+
+}

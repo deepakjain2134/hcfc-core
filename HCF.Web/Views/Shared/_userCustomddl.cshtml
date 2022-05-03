@@ -1,0 +1,11 @@
+﻿@model List<HCF.BDO.UserProfile>
+@{
+    Layout = null;
+
+}
+<select class="ddlboxLive form-control" id="ddlMultiUser" multiple="multiple" data-selected-text-format="count > 1" data-live_search="true">
+    @foreach (var user in Model)
+    {
+        <option value="@user.UserId"> @string.Format("{0} ({1})", user.FullName, (!string.IsNullOrEmpty(user.Email) ? user.Email : "NA"))</option>
+    }
+</select>

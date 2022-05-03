@@ -1,0 +1,108 @@
+﻿@model IEnumerable<HCF.BDO.FloorTypes>
+@{
+    ViewBag.Title = "FloorPlanIndex";
+
+    int selectedFloorId = 0;
+   
+    var floorTypes = Model.ToList();
+
+    if (floorTypes.Any())
+    {
+        selectedFloorId = floorTypes.OrderBy(x => x.FloorTypeId).FirstOrDefault().FloorTypeId;
+    }
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Drawings
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-sm-4 col-left asset_list_view">
+                <div class="box box-primary finalizeleft_view">
+                    <input type="hidden" value="@selectedFloorId" id="floorTypeId" />
+                    <ul class="list drawings-list" id="floorTypeUl">
+                        @foreach (var item in floorTypes.OrderBy(x => x.FloorTypeId))
+                        {
+
+                            if (floorTypes.OrderBy(x => x.FloorTypeId).First() == item)
+                            {
+                            <li id="@item.FloorTypeId" class="floorTypeli">
+                                <a>
+                                    <label>
+                                        <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" />&nbsp;&nbsp;
+                                        <span for="@($"cb1{item.FloorType}")" id="lbl">
+                                            @item.FloorType
+                                        </span>
+                                    </label>
+                                    <span class="drawings-checkicon"><img src="/dist/img/Artboard 2.png"></span>
+                                </a>
+                                
+                            </li>
+                            }
+                        }
+                        @foreach (var item in floorTypes.OrderBy(x => x.FloorType))
+                        {
+                            if (selectedFloorId != item.FloorTypeId)
+                            {
+                            <li id="@item.FloorTypeId" class="floorTypeli">
+                                <a>
+                                    <label>
+                                        <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" />&nbsp;&nbsp;
+                                        <span for="@($"cb1{item.FloorType}")" id="lbl">
+                                            @item.FloorType
+                                        </span>
+                                    </label>
+                                    <span class="drawings-checkicon"><img src="/dist/img/Artboard 2.png"></span>
+                                </a>
+                                
+                            </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-8">
+                <div class="box box-primary">
+                    @*<div class="box-header vender_page">
+                    </div>*@
+                    <div class="" id="partialContents">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+    
+    <script>
+        $(document).ready(function () {
+            loadDrwaings();
+        });
+
+        $(".floorTypeli").click(function () {
+            var floorTypeId = $(this).attr("id");
+            $("#floorTypeId").val(floorTypeId);
+            loadDrwaings()
+        });
+
+
+        function loadDrwaings() {
+            var floorTypeId = $("#floorTypeId").val();
+            if (floorTypeId > 0) {
+                $("#partialContents").html('');
+                $(".floorTypeli").removeClass('active');
+                var url = '@Url.Action("DrwaingsFloorPlans", "Drawing")';
+                $.get(url + "?floorTypeId=" + floorTypeId, function (data) {
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                    $('#floorTypeUl li[id=' + floorTypeId + ']').addClass('active');
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,134 @@
+﻿@model List<HCF.BDO.Buildings>
+@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @ViewBag.Title
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-lg-6"><h4>Buildings</h4></div>
+                        <div class="col-lg-6">
+                            <h4 style="float:left">Floors</h4>
+                            <ul class="legand">
+                                <li class="box_noplan"></li>
+                                <li>No Floor Plan</li>
+                                <li class="fail"></li>
+                                <li>Deficiency Exists</li>
+                            </ul>
+                        </div>
+                    </div>
+                    @if (Model != null)
+                    {
+                        var results = Model.Where(y => y.IsActive && y.Floor.Any(f => f.IsActive))
+                            .GroupBy(x => x.SiteCode).Select(g => g.OrderBy(x => x.SiteName).FirstOrDefault());
+                        foreach (var item in results)
+                        {
+                            <h4>@item.SiteName</h4>
+                            foreach (var building in Model.Where(x => x.IsActive = true && x.SiteCode == item.SiteCode && x.Floor.Any(f => f.IsActive)))
+                            {
+                                <div class="asset_list">
+                                    <label style="width:45%">@building.BuildingName</label>
+                                    <div class="buildingFloors" style="float:right;width:55%">
+                                        @foreach (var floor in building.Floor.Where(x => x.IsActive = true))
+                                        {
+                                            <ul class="floor_no">
+                                                <li id="@floor.FloorId" title="@floor.FloorName" class='@(string.IsNullOrEmpty(floor.ImagePath) ? "noplan" : "plan")'>
+                                                    <a onclick="GoToPage('@floor.FloorId',this)">@floor.Alias.ToUpper().Substring(0, Math.Min(floor.Alias.Length, 2))</a>
+                                                </li>
+                                            </ul>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+   
+
+@section scripts{
+    <script>
+
+        $(document).ready(function() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetActiveRoundDeficiency", "Rounds")',
+                success: function(datas) {
+                    console.log(datas);
+                    for (i = 0; i < datas.Result.length; i++) {
+                        $("li#" + datas.Result[i]).addClass("fail-color");
+                    }
+                },
+                dataType: "json",
+                traditional: true
+            });
+        });
+
+        function GoToPage(floorId, control) {
+            var li = control.parentNode.id;
+            var ishave = $("#" + li).hasClass("plan");
+            if (ishave) {
+                var urlAction = '@Url.Action("FloorRoundInspection", "Rounds")';
+                var url = urlAction + '?floorId=' + floorId;
+                window.location.href = url;
+            } else {
+                AlertWarningMsg("No floor plan!");
+            }
+        }
+
+    </script>
+
+    
+}
+
+<style>
+    .legand {
+        margin: 0;
+        padding: 0;
+        float: right;
+        list-style: none;
+    }
+
+        .legand li {
+            float: left;
+            margin-right: 5px;
+        }
+
+            .legand li.gray {
+                background: #A8AED0;
+                width: 19px;
+                height: 18px;
+            }
+
+            .legand li.blue {
+                width: 19px;
+                height: 18px;
+                background: blue;
+            }
+
+            .legand li.fail {
+                background: red;
+                width: 19px;
+                height: 18px;
+            }
+
+
+    .Inprogress-color {
+        background-color: #33639e;
+    }
+</style>

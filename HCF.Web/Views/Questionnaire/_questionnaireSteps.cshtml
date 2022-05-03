@@ -1,0 +1,134 @@
+﻿@{
+    Layout = null;
+}
+@model HCF.BDO.Questionnaire
+<div class="slider">
+    <table id="questionsteps" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Sequence</th>
+                <th>
+                    Step
+                </th>
+                <th>Details</th>
+                <th> @Localizer["Edit"] </th>
+            </tr>
+        </thead>
+        <tbody class="maintbody">
+           
+
+            @foreach (var step in Model.QuestionnaireSteps)
+            {
+                <tr>
+                    <td quesstepid=@step.QuestionnaireStepId quesnnaireid=@step.QuestionnaireId>@step.Sequence</td>
+                    <td>@step.Step</td>
+                    <td>
+                        <table class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Input Type</th>
+                                    <th>Recommended Value</th>
+                                    <th>Min. Value</th>
+                                    <th>Max. Value</th>
+                                    <th>Format</th>
+                                    <th>Status</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in step.QuestionnaireStepDetail)
+                                {
+                                    <tr>
+                                        <td>@Enum.GetName(typeof(HCF.BDO.Enums.InputType), item.InputType)</td>
+                                        <td>@item.RecommendedValue</td>
+                                        <td>@item.MinValue</td>
+                                        <td>@item.MaxValue</td>
+                                        <td>@item.Format</td>
+                                        <td class="comman_checkbox1">
+                                            <input type="checkbox" checked="@(step.IsActive)" id="@step.QuestionnaireStepId" class="statuschk"><span></span>
+                                            @*@Html.CheckBoxFor(m => step.IsActive)<span></span>*@
+                                        </td>
+                                        <td>@item.InputValueHeaderText</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("AddQuestionnaireSteps", "Questionnaire", new { questionnaireId = step.QuestionnaireId,questionnaireStepId = step.QuestionnaireStepId})" class="modal-link">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" alt="">
+                        </a>
+                    </td>
+                </tr>
+
+            }
+
+        </tbody>
+    </table>
+</div>
+<script>
+    $(".statuschk").change(function () {
+        //alert("Call");
+        debugger;
+        var cntrol = $(this);
+        var quesStepId = cntrol.attr("id");
+        var status = $(this).is(':checked');
+        if (status) {
+            MakeStatusActive(quesStepId, status);
+        } else {
+            swal({
+                title: "Are you sure? ",
+                text: "Do you want to deactivate this step!",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    MakeStatusActive(quesStepId, status);
+                } else { cntrol.prop('checked', true); }
+            });
+        }
+    });
+
+    function MakeStatusActive(quesStepId, status) {
+        $.get(CRxUrls.questionnaire_UpdateQuestionnaireSteps + '?quesstepsId=' + quesStepId + "&status=" + status, function (data) {
+
+        });
+    }
+
+    $("#questionsteps .maintbody").sortable({        
+        update: function (event, ui) {
+            debugger
+            var seqid = [];
+            var quesstepid = [];
+            var quesnnaireid = [];
+            $(this).children().each(function (count) {
+                seqid[count] = parseInt($("#questionsteps .maintbody").children()[count].children[0].textContent);
+                quesstepid[count] = parseInt($("#questionsteps .maintbody").children()[count].children[0].attributes.quesstepid.value);
+                quesnnaireid[count] = parseInt($("#questionsteps .maintbody").children()[count].children[0].attributes.quesnnaireid.value);
+            });
+            seqid.sort((a,b) => a-b);
+            $(this).children().each(function (index) {
+                $(this).find('td').first().html(seqid[index]);
+            });
+            if ((seqid.length != null || seqid.length != 0) && (quesstepid != null || quesstepid != 0) && (quesnnaireid != null || quesnnaireid != 0)) {
+                $.ajax({
+                    url: "/Questionnaire/UpdateQuestionnaireStepSequence?seqIds=" + seqid + "&quesstepId=" + quesstepid + "&quesnnaireid=" + quesnnaireid,
+                    method: "GET",
+                    contentType: 'application/json',
+                    success: function (data) {
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            }
+        }
+    });
+
+</script>

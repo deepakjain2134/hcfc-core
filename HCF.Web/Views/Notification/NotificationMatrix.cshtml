@@ -1,0 +1,317 @@
+﻿@model IEnumerable<HCF.BDO.NotificationMapping>
+
+@{
+    ViewBag.Title = "permissions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Notification Configuration
+        </h1>
+    </section>
+        }
+    <!-- Main content -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="Setting_Content">
+                        <div class="table-responsive">
+                            <table id="dataTable" class="table table-bordered table-striped no-footer permission comman_checkbox" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Category / Event -></th>
+                                        @foreach (var NotifEvent in Model.GroupBy(p => new { p.NotificationEventId }).Select(g => g.First()).ToList())
+                                        {
+                                            <th>
+                                                @($"{@NotifEvent.NotificationEvent.EventDescription}")
+                                            </th>
+                                        }
+                                        <th>
+                                            Emails
+                                        </th>
+                                        <th style="display:none">
+                                            Emails
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var partner in Model.GroupBy(p => new { p.NotificationCatId }).Select(g => g.First()).ToList())
+                                    {
+                                        <tr>
+                                            <td>@partner.NotificationCategory.CategoryDescription</td>
+                                            @foreach (var cat in Model.Where(x => x.NotificationCatId == partner.NotificationCatId).ToList())
+                                            {
+                                                if (cat.Status >= 0)
+                                                {
+                                                    <td align="center" id="@cat.NotificationMappingId">
+                                                        @Html.CheckBoxFor(modelItem => cat.BoolStatus, new { @notificationCatId = cat.NotificationCatId, @notificationEventId = cat.NotificationEventId, @class = "FlagT" })<span></span>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td align="center" id="@cat.NotificationMappingId">NA</td>
+                                                }
+                                            }
+                                            <td>
+                                                <a data-toggle="modal"
+                                                   data-target="#addEmailModel"
+                                                   class="addEmail"
+                                                   title="Assign User"
+                                                   id="@partner.NotificationCatId" href="javascript:void(0);">Assign Emails</a><br />
+
+                                                @{
+                                                    var notificationEmails = Model.Where(x => x.NotificationCatId == partner.NotificationCatId).FirstOrDefault().NotificationCategory.NotifyEmails;
+
+                                                    if (notificationEmails != null)
+                                                    {
+                                                        <span>
+                                                            To: @notificationEmails.NotificationEmail.Substring(0, Math.Min(notificationEmails.NotificationEmail.Length, 15))
+                                                        </span>
+                                                        <a href="javascript:void(0);"
+                                                           tabindex="0"
+                                                           class="descriptions emails"
+                                                           data-toggle="popover"
+                                                           title='To Emails'
+                                                           data-trigger="focus"
+                                                           data-emails='@notificationEmails.NotificationEmail'>@string.Format("{0}", "...See More")</a>
+                                                        <br />
+                                                        <span>
+                                                            Cc :@notificationEmails.NotificationCCEmail.Substring(0, Math.Min(notificationEmails.NotificationCCEmail.Length, 15))
+                                                        </span>
+                                                        <a href="javascript:void(0);"
+                                                           tabindex="0"
+                                                           data-toggle="popover"
+                                                           class="descriptions emails"
+                                                           title='CC Emails'
+                                                           data-trigger="focus"
+                                                           data-emails='@notificationEmails.NotificationCCEmail'>@string.Format("{0}", notificationEmails.NotificationCCEmail == "" ? "" : "...See More")</a>
+
+                                                    }
+                                                }
+                                            </td>
+                                            <td style="display:none">
+                                                @{
+                                                    var notificationEmailsDisp = Model.Where(x => x.NotificationCatId == partner.NotificationCatId).FirstOrDefault().NotificationCategory.NotifyEmails;
+
+                                                    if (notificationEmailsDisp != null)
+                                                    {
+                                                        <span>
+                                                            To: @notificationEmailsDisp.NotificationEmail
+                                                        </span>
+
+                                                        <br />
+                                                        <span>
+                                                            Cc :@notificationEmailsDisp.NotificationCCEmail
+                                                        </span>
+
+
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal fade" id="addEmailModel" role="dialog">
+    <div class="modal-dialog model_big" id="modelContent">
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function makeTableHTML(myArray) {
+            var result = "<table border=0>";
+            for (var i = 0; i < myArray.length; i++) {
+                result += "<tr><td>" + myArray[i] + "</td></tr>";
+            }
+            result += "</table>";
+
+            return result;
+        }
+
+
+        $("[data-toggle=popover]").popover({
+            html: true,
+            placement:'left',
+            content: function () {
+                var content = $(this).attr("data-emails")
+                array = content.split(',');
+                if (content) {
+                    content = makeTableHTML(array);
+                } else {
+                    content = 'No email Assigned';
+                }
+                return content;
+            }
+        });
+
+
+
+        $(document).ready(function () {
+            $(".FlagT").change(function () {
+                $.ajax({
+                    url: '@Url.Action("UpdateNotificationMatrix", "Notification")',
+                    type: "POST",
+                    data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), newValue: $(this).is(':checked'), notificationCatId: $(this).attr('notificationCatId'), notificationEventId: $(this).attr('notificationEventId') }, //data,
+                    dataType: 'json',
+                    success: function (result) {
+                    }
+                });
+            })
+
+            $('.descriptions').popover({
+                trigger: 'focus'
+            });
+        });
+
+        $('body').on('click', '.addEmail', function () {
+            var emailurl = CRxUrls.notification_getEmails;
+            var notiCatId = $(this).attr("id")
+            $.ajax({
+                url: emailurl + "?notiCatId=" + notiCatId,
+                method: "GET",
+                success: function (data) {
+                    $('#modelContent').html($(data));
+                    //$(".modelTitle").text("Users");
+                }
+            })
+        });
+
+
+        $('#dataTable').dataTable({
+            "searching": true,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#dataTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            columnDefs: [
+                {
+                    targets: [1, 2, 3, 4, 5, 6],
+                    "searchable": false,
+                    "orderable": false
+                }
+            ],
+            dom: "Blfrtip",
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Notification Matrix Report',
+                    exportOptions: {
+                        columns: [0, -1]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Notification Matrix Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Created on: ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated from: ', { text:  'CRx' }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: [{ text: page.toString()},' of ',{ text: pages.toString()}]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Notification Matrix Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [0, -1],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+        HideTableSorting();
+        $('#dataTable thead').click(function (){
+            HideTableSorting();
+        });
+
+        function HideTableSorting() {
+            debugger;
+            const els = $('#dataTable th');
+            for (var index in els) {
+                if (index != 0 && index < (els.length -1)) {
+                    const el = els[index];
+                    $(el).removeClass('sorting').removeClass('sorting_asc').removeClass('sorting_desc');
+                }
+            }
+        }
+    </script>
+}

@@ -1,0 +1,371 @@
+﻿@model HCF.BDO.TICRAReports
+
+@Html.HiddenFor(m => m.TICRAId)
+@Html.HiddenFor(m => m.ProjectIds)
+@Html.HiddenFor(m => m.TICRAReportId)
+
+<input type="hidden" value="@Model.ProjectIds" id="ModelProjectIds" />
+
+<div class="row">
+    <div class="col-md-4 form-group">
+        <div class="reports_short">
+            <label>Project Name:</label>
+            @string.Join(", ", Model.Projects.Select(x => x.ProjectName))
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="reports_short">
+            <label>Contractor:</label>
+            @Model.ProjectContractors
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="reports_short">
+            <label>Project Location: </label>
+            @Model.ProjectLocations
+        </div>
+    </div>
+</div>
+<div class="row" id="tblreportinfo">
+    <div class="col-md-4 form-group">
+        <label>Create New Report:</label>
+        <select style="width:100%;" id="ticraobsReports" class="form-control ticraobsReports" name="ticraobsReports"></select>
+    </div>
+
+    <div class="">
+        <div class="col-md-4 form-group">
+            <label>Report Name:</label>
+            <input type="text" name="ReportName" id="ReportName" maxlength="150" class="form-control" value="@Model.ReportName">
+        </div>
+        <div class="col-md-4 form-group">
+            <label>Observation Report Date:</label>
+            <input type="text" id="reportdatetime" name="reportdatetime" readonly class="form-control readonly" value="@($"{(Model.ReportDate != default(DateTime) ? Model.ReportDate.ToFormatDate() : DateTime.Now.ToFormatDate())}")" />
+        </div>
+
+        <div class="col-md-4 form-group" id="divpermitnumber">
+            <label>Permit #:</label>
+            <input type="text" id="PermitNumber" name="PermitNumber" readonly class="form-control readonly" value="@($"{(ViewBag.PermitNumber != null ?ViewBag.PermitNumber : "")}")" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-right" id="dveditobservationReport" style="display:none">
+        <img id="btneditobservation" src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Observation Report" alt="Edit Observation Report" />&nbsp;&nbsp;&nbsp;
+        <div class="add_button_comman float-right">
+            <a href='@Url.Action("TICRAProjectObservationReport", "ICRA" ,new {projectId = Model.ProjectIds,reportId = 0 })' class="pull-left">
+                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Observation Report" alt="3d_add_button" />
+            </a>
+        </div>
+    </div>
+
+</div>
+<div class="ObserSheet table-responsive">
+    <input type="hidden" id="hdn_DSContractorSignId_LocalSignDateTime" name="DSContractorSignId.LocalSignDateTime" value="@DateTime.Now" />
+    <input type="hidden" id="hdn_DSObserverSignId_LocalSignDateTime" name="DSObserverSignId.LocalSignDateTime" value="@DateTime.Now" />
+
+    <input type="hidden" id="DSContractorSignId.FileName" name="DSContractorSignId.FileName" value="@Model.DSContractorSignId.FileName" />
+    <input type="hidden" id="DSContractorSignId.FileContent" name="DSContractorSignId.FileContent" value="" />
+    <input type="hidden" id="DSContractorSignId.DigSignatureId" name="DSContractorSignId.DigSignatureId" value="@Model.DSContractorSignId.DigSignatureId" />
+
+    <input type="hidden" id="DSObserverSignId.FileContent" name="DSObserverSignId.FileContent" value="" />
+    <input type="hidden" id="DSObserverSignId.FileName" name="DSObserverSignId.FileName" value="" />
+    <input type="hidden" id="DSObserverSignId.DigSignatureId" name="DSObserverSignId.DigSignatureId" value="@Model.DSObserverSignId.DigSignatureId" />
+    <div class="col-md-12">
+        <div class="row">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="ysenona">Yes</th>
+                        <th class="ysenona">No</th>
+                        <th class="ysenona">N/A </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @for (int i = 0; i < Model.CheckPoints.Count(); i++)
+                    {
+                        <tr>
+                            <td class="ysenona">
+                                @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 0, Model.CheckPoints[i].Status == 0 ? new { @checked = "checked" } : null)
+                            </td>
+                            <td class="ysenona">
+                                @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 1, Model.CheckPoints[i].Status == 1 ? new { @checked = "checked" } : null)
+                            </td>
+                            <td class="ysenona">
+                                @Html.RadioButtonFor(modelItem => Model.CheckPoints[i].Status, 2, Model.CheckPoints[i].Status == 2 ? new { @checked = "checked" } : null)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => Model.CheckPoints[i].CheckPointText)
+                                @Html.HiddenFor(modelItem => Model.CheckPoints[i].ICRAReportPointId)
+                            </td>
+                        </tr>
+
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="obser_bottomform-nouse">
+    <div class="form-group" style="width:100%;">
+        <label>Comments:</label> @Html.TextAreaFor(m => m.Comment, new { @class = "form-control" })
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-4">
+            <label>Contractor Sign :</label>
+            <userslist name="ContractorId" selectedvalue="@((Model.ContractorId.HasValue && Model.ContractorId.Value > 0) ? Model.ContractorId.Value : UserSession.CurrentUser.UserId)" firsttext="-- Not Assigned --" class="form-control"></userslist>
+            @*@Html.UsersList("ContractorId", (Model.ContractorId.HasValue && Model.ContractorId.Value > 0) ? Model.ContractorId.Value : 0, "-- Not Assigned --", new { @class = "form-control" })*@
+        </div>
+        <div class="form-group col-md-4">
+            <label>Sign Date :</label> @Html.TextBoxFor(m => m.ContractorSignDate, $"{Model.ContractorSignDate:MMM d, yyyy}", new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly", @id = "obser" })
+        </div>
+        <div class="col-md-4">
+            <div>&nbsp;</div>
+            <div class="crxSignBox">
+                @if (Model.DSContractorSignId != null && Model.DSContractorSignId.DigSignatureId > 0)
+                {
+                    <a class="imgDSContractorSignId">
+                        <img id="DigSignatureId_@Model.DSContractorSignId.DigSignatureId"
+                             src="@commonModelFactory.FilePath(Model.DSContractorSignId.FilePath)" class="contractorId" />
+                        <p class="signaturebyName">@Model.DSContractorSignId.SignByUserName</p>
+                        <p class="signaturelocaltime">(@Model.DSContractorSignId.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</p>
+                    </a>
+                }
+                else
+                {
+                    <a class="imgDSContractorSignId">
+                        <img src="~/dist/Images/Icons/sign.png" id="btnContractorId" class="contractorId" />
+                        <p class="signaturebyName"></p>
+                        <p class="signaturelocaltime"></p>
+                    </a>
+                }
+                <input type="text" value="@(Model.DSContractorSignId != null && Model.DSContractorSignId.DigSignatureId > 0?Model.DSContractorSignId.FileName:"")" id="hdn_DSContractorSignId" class="ddlproject hassigned" />
+            </div>
+        </div>
+    </div>
+    <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "row" :"row disable")">
+        <div class="form-group col-md-4">
+            <label>Observer Sign :</label>
+            <userslist name="ObserverId" selectedvalue="@((Model.ObserverId.HasValue && Model.ObserverId.Value > 0) ? Model.ObserverId.Value : UserSession.CurrentUser.UserId)" firsttext="-- Not Assigned --" class="form-control"></userslist>
+            @*@Html.UsersList("ObserverId", (Model.ObserverId.HasValue && Model.ObserverId.Value > 0) ? Model.ObserverId.Value : 0, "-- Not Assigned --", new { @class = "form-control" })*@
+        </div>
+        <div class="form-group col-md-4">
+            <label>Sign Date :</label> @Html.TextBoxFor(m => m.ObserverSignDate, $"{Model.ObserverSignDate:MMM d, yyyy}", new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+        </div>
+        <div class="col-md-4">
+            <div>&nbsp;</div>
+            <div class="crxSignBox">
+                @if (Model.DSObserverSignId != null && Model.DSObserverSignId.DigSignatureId > 0)
+                {
+                    <a class="imgDSObserverSignId">
+                        <img id="DigSignatureId_@Model.DSObserverSignId.DigSignatureId"
+                             src="@commonModelFactory.FilePath(Model.DSObserverSignId.FilePath)" class="observerId" />
+                        <p class="signaturebyName">@Model.DSObserverSignId.SignByUserName</p>
+                        <p class="signaturelocaltime">(@Model.DSObserverSignId.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</p>
+                    </a>
+                }
+                else
+                {
+                    <a class="imgDSObserverSignId">
+                        <img src="~/dist/Images/Icons/sign.png" id="btnObserverId" class="observerId" />
+                        <p class="signaturebyName"></p>
+                        <p class="signaturelocaltime"></p>
+                    </a>
+                }
+                <input type="text" value="@(Model.DSObserverSignId != null && Model.DSObserverSignId.DigSignatureId > 0?Model.DSObserverSignId.FileName:"")" id="hdn_DSObserverSignId" class="ddlproject hassigned" />
+            </div>
+        </div>
+        @*<input type="text" name="UtTime" id="UtTime" class="timepicker form-control" autocomplete="off" value="@HCF.Web.Base.Common.ConvertToAMPM(Model.ObserverSignTime)" />*@
+    </div>
+</div>
+@if (Model != null)
+{
+    <div class="row">
+        <div class="col-md-12 text-right button_Div" style="display:none">
+            <input type="submit" value='@Localizer["Save"]' class="comm-button" id="btnSave" />
+            <input type="button" value="Cancel" class="comm-Cancelbutton" id="btnCancel" />
+            @*@Html.ActionLink("Cancel ", "IcraProjectPermit", "ICRA", new { @class = "comm-button" })*@
+        </div>
+    </div>
+}
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+<script>
+    @*if ('@Model.ReportStatus' == 1)
+    {
+       $("#btnSave").remove();
+    }*@
+
+     var userId = '@HCF.Web.Base.UserSession.CurrentUser.UserId';
+    $(document).ready(function () {
+        debugger;
+
+        if ('@ViewBag.PermitNumber' != '')
+            $("#PermitNumber").val('@ViewBag.PermitNumber');
+        else if ('@ViewBag.PermitNumber' == '')
+            $("#PermitNumber").val('@ViewBag.PermitNumber');
+        else
+            $("#PermitNumber").val($("#hdnpermitnumber").val());
+
+        if ($("#ticraobsReports").val() == "0") {
+            $("#PermitNumber").val($("#hdnpermitnumber").val());
+        }
+        if ($("#PermitNumber").val() != null && $("#PermitNumber").val() != "") {
+            $("#divpermitnumber").show();
+        }
+        else {
+            $("#divpermitnumber").hide();
+        }
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            maxDate: 0,
+            dateFormat: $.CRx_DateFormat,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker();
+
+        var input = $('.timepicker');
+        input.clockpicker({
+            autoclose: false,
+            twelvehour: true,
+            donetext: "Done",
+            afterDone: function () {
+            }
+        });
+
+        OpenSignature(userId, $('#ContractorId'), $("#btnContractorId"));
+        OpenSignature(userId, $('#ObserverId'), $("#btnObserverId"));
+
+        var projectIds = $("#ModelProjectIds").val();
+        var reportId = $("#TICRAReportId").val();
+        $("#reportId").val(reportId);
+        $("#projectIds").val(projectIds);
+    });
+
+    $("#btneditobservation").click(function () {
+        $(':input').removeClass("disable");
+        $(".button_Div").show();
+        $(".button_viewdiv").hide();
+        $(".showinviewmode").addClass("disable");
+        $(".crxSignBox").removeClass("disable");
+    });
+
+    $("#btnCancel").click(function () {
+        $(':input').addClass("disable");
+        $(".button_Div").hide();
+        $(".button_viewdiv").show();
+        $(".showinviewmode").removeClass("disable");
+        $(".crxSignBox").removeClass("disable");
+    });
+
+    $(".contractorId").click(function () {
+        loadSignView('DSContractorSignId.FileName', 'DSContractorSignId.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+    $("#ContractorId").change(function () {
+        if ($("#ContractorId").val() == userId) {
+            $("#hdn_DSContractorSignId").prop('required', true);
+        }
+        OpenSignature(userId, $('#ContractorId'), $("#btnContractorId"));
+    });
+
+
+    $(".observerId").click(function () {
+        loadSignView('DSObserverSignId.FileName', 'DSObserverSignId.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+    $("#ObserverId").change(function () {
+        if ($("#ObserverId").val() == userId) {
+            $("#hdn_DSObserverSignId").prop('required', true);
+        }
+        OpenSignature(userId, $('#ObserverId'), $("#btnObserverId"));
+    });
+
+
+    function OpenSignature(userId, btncntrl, imgcntrl) {
+        debugger;
+
+    }
+
+    function loadSignView(fileNameCtr, fileContentCtr) {
+        $('#signAndSave').empty();
+        var url = CRxUrls.common_digitalsignature;
+        $.ajax({
+            url: url + "?fileName=" + fileNameCtr + "&fileContent=" + fileContentCtr,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('#signAndSave').append(data);
+                $('#signAndSave').fadeIn('fast');
+            }
+        });
+    }
+</script>
+<style>
+
+
+
+    /*.ui-datepicker-trigger {
+        bottom: 9px;
+        right: 8px;
+    }
+
+    td .form-group {
+        margin-bottom: 0px !important;
+    }
+
+    .input-group {
+        display: flex;
+    }
+
+    .datepicker {
+        border-radius: 0px;
+    }
+
+    .ysenona {
+        width: 50px;
+        text-align: center;
+    }
+
+    .ul_list li {
+        margin-bottom: 0px;
+        cursor: pointer;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        float: left;
+        padding: 6px 0 0 2px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .project-report-info {
+        border: 1px solid #ccc;
+        padding: 6px;
+    }
+
+    .ul_list li a {
+        color: #333;
+    }
+
+    .ul_list li.active,
+    .ul_list li:hover {
+        background: #f5f5f5;
+        border-top: 1px solid #3c8dbc;
+    }
+
+    div#dveditobservationReport {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }*/
+</style>

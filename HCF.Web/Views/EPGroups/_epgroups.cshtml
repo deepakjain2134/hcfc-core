@@ -1,0 +1,53 @@
+﻿@model List<HCF.BDO.EPGroups>
+
+<div class="slider">
+    @if (Model.Count > 0)
+    {
+        <table class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th>
+                        @Localizer["StandardEP"]
+                                       
+                                    </th>
+                    <th>
+                        @Localizer["Description"]
+                        
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var standards in Model.FirstOrDefault().StandardEps)
+                {
+                    <tr>
+                        <td>
+                            @standards.StandardEP
+                        </td>
+                        <td>
+                            @await Html.PartialAsync("_EpDescription", standards.Description,
+                                 new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                 { { "standardEp", @standards.StandardEP }}
+                                )
+
+                            @*@await Component.InvokeAsync("EpDescription", new { epDetailId = Model.EPDetails.EPDetailId, maxLength = 0, epdetails = Model.EPDetails })*@
+
+                        </td>                      
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="tble_shadow text-center">No data available in table</div>
+    }
+</div>
+<script>
+   
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+</script>

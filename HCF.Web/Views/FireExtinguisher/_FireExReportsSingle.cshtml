@@ -1,0 +1,124 @@
+﻿
+@model List<HCF.BDO.TFloorAssets>
+@using System.Text;
+@{
+    string reportType = ViewBag.reportType;
+    var rec = Model.Where(x => x.AssetSubCategory.AscName != null).GroupBy(y => y.AssetSubCategory.AscName, (key, g) => new { AscId = key, Count = g.Count(), Name = g.FirstOrDefault().AssetSubCategory.AscName });
+    StringBuilder sb = new StringBuilder();
+    sb.Append(string.Format("{0}: {1} {2}", "Total", Model.Count, string.Empty));
+    sb.Append("".PadLeft(5, ' ').Replace(" ", "&nbsp;"));
+    foreach (var item in rec.Where(x => x.Name != "").OrderBy(x => x.Name))
+    {
+        sb.Append(string.Format("{0}: {1} {2}", item.Name, item.Count, string.Empty));
+        sb.Append("".PadLeft(5, ' ').Replace(" ", "&nbsp;"));
+    }
+    <table class="table" id="totalResult">
+        <tr style="display:none">
+            <td>Report Year: @ViewBag.Year &nbsp;&nbsp; Route : @ViewBag.RouteName</td>
+        </tr>
+        <tr>
+            <td>@Html.Raw(sb.ToString())</td>
+        </tr>
+    </table>
+}
+<table id="docsTable" class="table table-bordered table-striped" role="grid" style="max-width: 1276px; width:100%;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Asset #</th>
+            <th>Building,Floor #</th>
+            <th>Location</th>
+            <th>Type</th>
+            <th>Inspector</th>
+            <th>Date</th>
+            <th>Result</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tfloorAsset in Model.Select((value, index) => new { value, index }))
+        {
+
+            <tr>
+                <td>@string.Format("{0}", tfloorAsset.index + 1)</td>
+                <td>@tfloorAsset.value.SerialNo</td>
+                <td></td>
+                <td>@tfloorAsset.value.Stop.StopName</td>
+                <td>
+                    @if (tfloorAsset.value.AssetSubCategory.AscId > 0)
+                    {
+                        <span>@tfloorAsset.value.AssetSubCategory.CustomAscName(tfloorAsset.value.FireExtinguisherType.FeType)</span>
+                    }
+                </td>
+                @if (tfloorAsset.value.TInspectionActivity != null && tfloorAsset.value.TInspectionActivity.Count > 0)
+                {
+                    var activity = new HCF.BDO.TInspectionActivity();
+                    var monthno = !(string.IsNullOrEmpty(ViewBag.MonthNo)) ? Convert.ToInt32(ViewBag.MonthNo) : 0;
+                    var year = ViewBag.Year;
+                    string inspDateInfo = string.Empty;
+                    if (ViewBag.reportType == "SM")
+                    {
+                        activity = tfloorAsset.value.TInspectionActivity.Where(x => x.ActivityInspectionDate.Value.Month == monthno).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+                    }
+                    else
+                    {
+                        activity = tfloorAsset.value.TInspectionActivity.Where(x => x.ActivityInspectionDate.Value.Year == year).OrderByDescending(x => x.ActivityInspectionDate).FirstOrDefault();
+                    }
+                    if (activity != null)
+                    {
+                        inspDateInfo = string.Format("{0}{1} ({2})- {3}", activity.UserProfile.FirstName[0], string.IsNullOrEmpty(activity.UserProfile.LastName) ? (char?)null : activity.UserProfile.LastName[0], activity.ActivityInspectionDate.Value.Date.Day, Enum.GetName(typeof(HCF.BDO.Enums.Status), activity.Status).ToUpper()[0]);
+                        <td>@activity.UserProfile.Name</td>
+                        <td>@activity.ActivityInspectionDate.Value.Date.ToFormatDate()</td>
+                        <td>@Enum.GetName(typeof(HCF.BDO.Enums.InspectionStatus), activity.Status)</td>
+                    }
+                    else
+                    {
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    }
+                }
+                else
+                {
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<div style="display:none">
+    <span id="dvgeneratedby">
+        @string.Format("{0} : {1} \n\n\n {2} : {3}", Localizer["PrintGeneratedFromTitle"] , Localizer["PrintGeneratedFromText"], Localizer["PrintGeneratedByTitle"], HCF.Web.Base.UserSession.CurrentUser.Name)
+    </span>
+</div>
+<script>
+
+
+    var setDateFormat = function (date) {
+        var newDate = date.toLocaleDateString("en-US", { month: 'short' })
+            + " " + date.toLocaleDateString("en-US", { day: 'numeric' })
+            + ", " + date.toLocaleDateString("en-US", { year: 'numeric' });
+        return newDate;
+    };
+
+    var docsTable = $('#docsTable').dataTable({
+        "searching": false,
+        "ordering": false,
+        "pageLength": 20,
+        "lengthChange": false,
+        "bPaginate": $('#docsTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            "<'row'<'col-sm-5'i>>" //+ "Blfrtip"
+    });
+
+    $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+    $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+</script>

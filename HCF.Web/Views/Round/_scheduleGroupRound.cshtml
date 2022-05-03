@@ -1,0 +1,672 @@
+﻿@model HCF.BDO.RoundGroup
+@{
+    var roundTimeString=string.Empty;
+    if(Model != null && Model.Time.HasValue)
+    {
+        roundTimeString = Model.Time.ConvertToString();
+    }
+}
+
+<form asp-controller="Round" asp-action="ScheduleGroupRound"
+      id="groupround"
+      data-ajax-success="OnSuccess" autocomplete="off"
+      data-ajax="true" data-ajax-method="POST">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+        <div class="row tablelist-topform">
+            <div class="col-md-12 editRoundwithadd">
+            <div class="dropdown icratable-drop">
+                <button class="btn dropdown-toggle comm-bluebutton" type="button" data-toggle="dropdown">
+                    Edit Rounds
+                </button>
+                <ul class="dropdown-menu ctmenu">
+                    @if (ViewBag.RoundGroups != null)
+                    {
+                        foreach (var item in ViewBag.RoundGroups)
+                        {
+                            <li onclick="openStep1(@item.Value)"><a>@item.Text</a></li>
+                        }
+                    }
+                </ul>
+            </div>
+            <a id="addrounds" href='@(Url.Action("GroupRoundScheduler","Round"))' class="pull-right" style="display:none;">
+                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Round Group" alt="3d_add_button" />
+            </a>
+        </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 form-group">
+                <input type="hidden" value="2" name="RoundType" id="RoundType" />
+
+                @Html.HiddenFor(m => m.Frequency, new { id = "hdnFrequency" })
+                @Html.HiddenFor(m => m.Ocurrence, new { id = "hdnOcurrence" })
+
+                @Html.HiddenFor(m => m.Roundcategories, new { id = "Roundcategories" })
+                @Html.HiddenFor(m => m.RecurFor, new { id = "hdnRecurFor" })
+
+                @Html.HiddenFor(m => m.Monthno, new { id = "hdnMonthno" })
+
+                @*@Html.HiddenFor(m => m.RoundGroupId)*@
+                <input type="hidden" value="@(Model.RoundGroupId>0?Model.RoundGroupId:0)" name="RoundGroupId" id="RoundGroupId" />
+                <span class="grpRoundName">Round Name <em class="required-field"> *</em></span>
+
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.Name)
+
+                <!-- round name toltip -->
+                <div class="popover roPopOver" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="popover-header">
+                        <div class="popover-content popover-scrollBar">“The best practice for creating rounds is to name the location group after the department(s) to be rounded. In CRx, rounds can be configured for buildings and floors. Some floors may be too big to round with just one questionnaire for the whole floor. Splitting rounds by department can help to focus the scope of each round, allowing volunteers to give more detailed responses” </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-12 form-group">
+
+                <label>Enter a starting date for your round <em class="required-field"> *</em></label>
+                <p></p>
+                <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                    <label class="btn">
+                        <input id="EPCat" name="EPCat" type="radio" value="1" required>
+                        <label for="EC">Begin at a later time</label><i class="fa fa-circle-o fa-2x"></i>
+                        <i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                    <label class="btn">
+                        <input id="EPCat" name="EPCat" type="radio" value="2" required>
+                        <label for="LS">Begin round now</label><i class="fa fa-circle-o fa-2x"></i>
+                        <i class="fa fa-dot-circle-o fa-2x"></i>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="col-lg-6 form-group">
+
+                <label>Start Date <em class="required-field"> *</em></label>
+                @Html.TextBoxFor(model => model.StartDate, $"{Model.StartDate:MMM d, yyyy}", new { @class = "form-control startDate readonly", @autocomplete = "off", @style = "float: right;", required = "required" })
+
+
+            </div>
+            <div class="col-lg-6 form-group">
+
+                <div class="endDate-field">
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons" style="padding-top: 30px;">
+                        <label class="btn">
+                            <input name="IsNoEndDate" type="radio" value="1">
+                            <label for="IsNoEndDate">No End Date </label><i class="fa fa-circle-o fa-2x"></i>
+                            <i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            <input name="IsNoEndDate" type="radio" value="2">
+                            <label for="IsNoEndDate"> End Date <em class="required-field"> *</em></label><i class="fa fa-circle-o fa-2x"></i>
+                            <i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                    </div>
+                    <div class="roundEndDate">
+                        @Html.TextBoxFor(model => model.EndDate, $"{Model.EndDate:MMM d, yyyy}", new { @class = "form-control endDate readonly", @autocomplete = "off", @style = "float: right;", required = "required" })
+                    </div>
+                </div>
+
+
+
+
+            </div>
+              <div class="col-lg-12 form-group">               
+                <label>Time </label>
+                <input id="roundTime" name="roundTime" class="timepicker form-control" readonly value="@roundTimeString" type="text" style="width:250px;"/>
+            </div>
+
+            <div class="col-lg-12 form-group">               
+                <label>Status </label>
+                <select id="IsActive" name="IsActive" class="form-control" style="width:250px">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                    <option value="2">Archived</option>
+                </select>
+            </div>
+
+
+            <div class="col-lg-12 form-group">
+                <div class="roundRecurring">
+                    @Html.CheckBoxFor(x => x.IsRecurringRound)
+                    <span></span>
+                    <label> More Recurring Options</label>
+                </div>
+                <div class="patternRow" style="display:none;">
+                    <h4 class="RecuPattern">Recurrence pattern</h4>
+                    <div class="pattern-Box">
+                        <div class="pattern-col1" id="pattern-col1">
+
+                          
+
+                        </div>
+
+                        <div class="mainrecurrence" style="display:none;">
+
+                            @{ int datasort = 0;}
+                            @foreach (var value in Enum.GetValues(typeof(HCF.BDO.Enums.Frequency)))
+                            {
+                                HCF.BDO.Enums.Frequency enums = (HCF.BDO.Enums.Frequency)value;
+
+                                if (Convert.ToInt32(value) == 1 || Convert.ToInt32(value) == 2 || Convert.ToInt32(value) == 7 || Convert.ToInt32(value) == 8)
+                                {
+                                    if (Convert.ToInt32(value) == 1)
+                                    {
+                                        datasort = 4;
+                                    }
+                                    if (Convert.ToInt32(value) == 2)
+                                    {
+                                        datasort = 1;
+                                    }
+                                    if (Convert.ToInt32(value) == 8)
+                                    {
+                                        datasort = 2;
+                                    }
+                                    if (Convert.ToInt32(value) == 7)
+                                    {
+                                        datasort = 3;
+                                    }
+                                    <div data-sort='@datasort' class="btn-group btn-group-vertical mainreccurs"  data-toggle="buttons">
+                                        <label class="btn">
+                                            <input id="pattern" name="pattern" type="radio" value="@Convert.ToInt32(value)">
+                                            <label for="pattern">@enums.GetDescription()</label><i class="fa fa-circle-o fa-2x"></i>
+                                            <i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <div class="col-lg-10 col-xs-8" id="recureencepattern">
+
+                            @await Html.PartialAsync("_recurencepattern", Model,
+    new ViewDataDictionary(
+    new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+    new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+    {{ "frequency",Model.Frequency.HasValue?Model.Frequency:8 } }
+    )
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row text-right">
+            <div class="col-md-12">
+
+                <input onclick='openStep1(0)' type="button" value='Clear' class="comm-Cancelbutton" />
+                <input name="submit" type="submit" id="saverounds" value=' @Localizer["Next"] ' class="comm-button" />              
+            </div>
+        </div>
+
+
+    
+
+    <div class="col-lg-10 col-xs-8" id="roundgroup">
+
+    </div>
+    <input type="hidden" id="hdnRestrict" value="0" />
+    <input type="hidden" id="hdnRoundStatus" value="@Model.IsActive"  />
+   
+</form>
+
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+<script>
+
+    var particleView = $('#roundgroup');
+    $(document).ready(function () {
+        $("#saverounds").removeClass("disable");
+        $(".datepicker, .startDate, .endDate, .futuredatepicker, .discopy ").on("cut copy paste", function (e) { e.preventDefault(); });
+
+        $(".datepicker, .startDate, .endDate, .futuredatepicker , .discopy ").keypress(function (e) { e.preventDefault(); });
+
+        var input = $('.timepicker');
+        input.clockpicker({
+            autoclose: false,
+            default: 'now',
+            twelvehour: true,
+            donetext: "Done",
+            afterDone: function () {
+            }
+        });
+        
+        
+        var result = $('.mainreccurs').sort(function (a, b) {
+
+            var contentA = parseInt($(a).data('sort'));
+            var contentB = parseInt($(b).data('sort'));
+            return (contentA < contentB) ? -1 : (contentA > contentB) ? 1 : 0;
+        });
+
+        $('#pattern-col1').html(result);
+
+        $(".mainrecurrence").remove();
+        var from = $(".startDate").datepicker({
+            showOn: "both",
+            numberOfMonths: 1,
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            minDate: 0,
+            dateFormat: $.CRx_DateFormat,
+            beforeShow: changeYearButtonStartDate,
+            onChangeMonthYear: changeYearButtonStartDate
+        }).on("change", function () {
+            //debugger;
+
+            // to.datepicker("option", "minDate", $(this).val());
+            $(".endDate").datepicker("option", "minDate", $(".startDate").datepicker("getDate"));
+            $(".startDate").datepicker("option", "maxDate", $(".endDate").datepicker("getDate"));
+            setday();
+            //$(".startDate").focus();
+        }),
+            to = $(".endDate").datepicker({
+                showOn: "both",
+                numberOfMonths: 1,
+                minDate: 0,
+                buttonImage: ImgUrls.datepicker_calendar,
+                buttonImageOnly: true,
+                dateFormat: $.CRx_DateFormat,
+                beforeShow: changeYearButtonEndDate,
+                onChangeMonthYear: changeYearButtonEndDate
+            }).on("change", function () {
+                from.datepicker("option", "maxDate", $(this).val());
+
+            });
+      //  debugger;
+        if (@Model.RoundGroupId == 0) {
+            $('.hasDatepicker').datepicker('setDate', 'today');
+        }
+        $('input[type=radio][name=EPCat][value="1"]').prop('checked', true);
+
+        if (@Model.RoundGroupId == 0) {
+            $('input[type=radio][name=pattern][value="8"]').prop('checked', true);
+            $("#hdnFrequency").val("2");
+            setday();
+            $("#EndDate").val("");
+            $("#EndDate").addClass("disable");
+            $("#EndDate").attr("required", false);
+            $("#lblenddate").addClass("disable");
+            $("input[name=IsNoEndDate][value=1]").attr("checked", true);
+           // $('#IsActive').prop('checked', true);
+            $('#IsActive').val('1');
+            $("#hdnRoundStatus").val('1');
+               $("#hdn_locationgroupId").val("0");
+        }
+        else {
+            $("#hdn_locationgroupId").val(@Model.RoundGroupId);
+
+            $('#IsActive').val('@Model.IsActive');
+            if ($("#EndDate").val() != "") {
+                $("#lblenddate").removeClass("disable");
+                $("#EndDate").attr("required", true);
+                $("#EndDate").removeClass("disable");
+                $("input[name=IsNoEndDate][value=2]").attr("checked", true);
+            }
+            else {
+                $("#EndDate").val("");
+                $("#EndDate").addClass("disable");
+                $("#EndDate").attr("required", false);
+                $("#lblenddate").addClass("disable");
+                $("input[name=IsNoEndDate][value=1]").attr("checked", true);
+            }
+        }
+
+        // Round Name tooltip show hide
+        $('.grpRoundName').hover(function () {
+            $('.roPopOver').toggle();
+        });
+       
+
+
+       });
+
+
+    $("#IsActive").on("change",function () {
+       // debugger;
+        var selectedID = $(this).val();
+        if ($("#hdnRoundStatus").val() == 2 && $("#hdnRoundStatus").val() != selectedID) {
+
+            $("#hdnRestrict").val("1");
+            $('.hasDatepicker').datepicker('setDate', 'today');
+        }
+        else {
+            $("#hdnRestrict").val("0");
+        }
+
+
+    });
+
+    $(document).off("change", ".drpgrouproundtype").on("change", ".drpgrouproundtype", function () {
+        //debugger;
+        var selectedID = $(this).val();
+
+        $("#Name").val($(this).text());
+        $("#Name").hide();
+        $("#hdn_locationgroupId").val(selectedID);
+        openStep1(selectedID);
+
+    });
+
+
+
+    function setday() {
+
+        var n = new Date($('#StartDate').val()).getDay();
+        switch (n) {
+            case 0:
+                day = "Sunday";
+                break;
+            case 1:
+                day = "Monday";
+                break;
+            case 2:
+                day = "Tuesday";
+                break;
+            case 3:
+                day = "Wednesday";
+                break;
+            case 4:
+                day = "Thursday";
+                break;
+            case 5:
+                day = "Friday";
+                break;
+            case 6:
+                day = "Saturday";
+        }
+
+
+
+        $('input[name = DaySelection][value="' + n + '"]').prop('checked', true);
+        if ($('#IsRecurringRound:checked').length > 0) {
+
+            //var occu = $("#hdnOcurrence").val().replace(/,\s*$/, "");
+            //var occurence = occu + "," + n + ",";
+            //$("#hdnOcurrence").val(occurence);
+            if ($('input[name = pattern][value=8]:checked').length > 0) {
+                if ( @Model.RoundGroupId == 0 && '@Model.Ocurrence' == '') {
+
+                    if ($("#hdnOcurrence").val() == "") {
+                        var n = new Date($('#StartDate').val()).getDay();
+                        $("#hdnOcurrence").val(n);
+                    }
+
+                }
+            }
+
+        }
+        else {
+            $("#hdnOcurrence").val("");
+            $("#hdnFrequency").val(2);
+        }
+        //if ($(radios).is(':checked') === false) {
+        //    $('input[value="' + n + '"]').prop('checked', true);
+        //}
+
+
+    }
+
+
+    $('#IsRecurringRound').change(function () {
+        debugger;
+
+        if (this.checked) {
+            $(".patternRow").show();
+
+            $(".recur").hide();
+            $("#divrecur_8").show();
+            if ($('input[type=radio][name=pattern]:checked').val() == '8') {
+                setday();
+                $("#hdnFrequency").val($('input[type=radio][name=pattern]:checked').val());
+            }
+
+            setrecurencefield();
+        }
+        else {
+            $(".patternRow").hide();
+            $(".recur").hide();
+        }
+
+
+
+    });
+
+    function setrecurencefield() {
+        if ($("input[name=RecurFor]:checked").length == 0) {
+            if ($("#hdnFrequency").val() == "7") {
+                $("#hdnRecurFor").val("3")
+            } else {
+                $("#hdnRecurFor").val("1")
+            }
+            $('input[name=RecurFor][value="' + $("#hdnRecurFor").val() + '"]').prop('checked', true);
+
+            $("input[name=ReoccurEvery]").attr("name", "");
+            if ($("#hdnRecurFor").val() != null && $("#hdnRecurFor").val() != "") {
+                $("#txtrecurevery_" + $("#hdnRecurFor").val()).attr("name", "ReoccurEvery");
+            }
+            else {
+                $("#txtrecurevery_1").attr("name", "ReoccurEvery");
+            }
+
+        }
+        $(".form-reccur").addClass("disable");
+        $("select[name=The]").addClass("disable");
+        $("select[name=Weekno]").addClass("disable");
+        $("select[name=Monthno]").addClass("disable");
+
+        $("#divforrecur_" + $("#hdnRecurFor").val()).find("input[type=text]").removeClass("disable");
+        $("#divforrecur_" + $("#hdnRecurFor").val()).find("select[name=The]").removeClass("disable");
+        $("#divforrecur_" + $("#hdnRecurFor").val()).find("select[name=Weekno]").removeClass("disable");
+        $("#divforrecur_" + $("#hdnRecurFor").val()).find("select[name=Monthno]").removeClass("disable");
+    }
+    $('input[type=radio][name=EPCat]').change(function () {
+        if (this.value == '2') {
+
+                $(".startDate").datepicker('setDate', 'today');
+
+            $('.hasDatepicker').addClass("disable");
+        }
+        else {
+            $('.hasDatepicker').removeClass("disable");
+        }
+
+    });
+
+
+    $('input[type=radio][name=pattern]').change(function () {
+        //debugger;
+
+        var thsobj = $(this);
+        $("#hdnFrequency").val($(thsobj).val());
+
+          var url = '@Url.Action("BinRecurencePattern", "Round")';
+            $.ajax({
+
+                url: url + '?frequency=' + $(this).val(),
+            cache: false,
+            type: "GET",
+                success: function (trResult) {
+                    $("#recureencepattern").html(trResult);
+                    $("#recureencepattern").fadeIn('fast');
+                $(".patternList").hide();
+                    if ($(thsobj).val() == '8' && $('input[name=DaySelection]:checked').length == 0) {
+
+                    //swalalert("Please select one of day");
+                }
+                    if ($(thsobj).prop("checked")) {
+                        $("#hdnFrequency").val($(thsobj).val())
+                }
+                else {
+                    $("#hdnFrequency").val(0);
+                }
+                $(".recur").hide();
+                    $("#divrecur_" + $(thsobj).val()).show();
+                    if ($(thsobj).val() == '8') {
+                    $(".patternList").show();
+                    setday();
+                }
+
+            }
+        });
+
+    });
+
+    $('input[type=radio][name=IsNoEndDate]').change(function () {
+        //debugger;
+
+        if ($(this).val() == '1') {
+            $("#EndDate").val("");
+            $("#EndDate").addClass("disable");
+            $("#EndDate").attr("required", false);
+            $("#lblenddate").addClass("disable");
+
+        }
+        else {
+            $("#EndDate").val("");
+            $("#EndDate").removeClass("disable");
+            $("#EndDate").attr("required", true);
+            $("#lblenddate").removeClass("disable");
+        }
+
+
+    });
+    $(document).off("click", "#saverounds").on("click", "#saverounds", function () {
+        //debugger;
+        var IsValid = true;
+        if ($('#groupround')[0].checkValidity()) {
+            $("#saverounds").addClass("disable");
+            if ($('#IsRecurringRound:checked').length > 0) {
+                if ($('input[type=radio][name=pattern]:checked').length == 0) {
+                    swalalert("Please select one of recurrence pattern ");
+                    $("#saverounds").removeClass("disable");
+                    IsValid = false;
+                    return false;
+                }
+                else {
+                    if ($('input[type=radio][name=pattern]:checked').val() == 8 && $('input[name=DaySelection]:checked').length == 0) {
+                        swalalert("Please select one of day");
+                          $("#saverounds").removeClass("disable");
+                        IsValid = false;
+                        return false;
+                    }
+                }
+
+            }
+
+        }
+        else {
+            $("#saverounds").removeClass("disable");
+            IsValid = false;
+            //return false;
+        }
+
+
+
+        if (IsValid) {
+
+            var str = '';
+            str = str + '<p class="comman_checkbox1 firecheckBox">Round Name:' + $("#Name").val()+'</p>';
+            str = str + '<p class="comman_checkbox1 firecheckBox">Start Date:' + $("#StartDate").val() + ', End Date:' + $("#EndDate").val() + '</p>';
+            str = str + '<p class="comman_checkbox1 firecheckBox">Frequency:' + $("input[name=pattern]:checked").next("label").html()+'</p>';
+            if ($("#hdnRestrict").val() ==1) {
+                swal({
+                    html: true,
+                    title: "These update will affect your round,Please verify below and click on Finalize to save the changes",
+                    text: str,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Finalize',
+                    cancelButtonText: "Go Back",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                    function (isConfirm) {
+                        swal.close();
+                        if (isConfirm) {
+
+                            setTimeout(function () {
+                                $("#groupround").submit();
+                            }, 1000)
+
+                        }
+                        else {
+                           $("#saverounds").removeClass("disable");
+
+                        }
+                    });
+            }
+            else {
+                $("#groupround").submit();
+            }
+
+
+           // $(".loadingModal").hide();
+            return false;
+        }
+        else {
+           // $(".loadingModal").hide();
+            // return false;
+        }
+    });
+
+    function OnSuccess(data) {
+        //debugger;
+        $("#hdn_locationgroupId").val(data.Result);
+
+        var mode = $('#mode').val();
+        //debugger;
+        if (data.Result && data.IsExists == 1) {
+            $("#saverounds").removeClass("disable");
+            warningAlert("Round already exist!");
+            return false;
+        }
+        if (data.Result && data.Active == 0) {
+            successAlert("Round has been marked as Inactive");
+            openStep1();
+        }
+        else if (data.Result && data.Active == 2) {
+            successAlert("Round has been marked as Archived");
+            openStep1();
+        }
+        else {
+            successAlert("Saved Successfully");
+            openStep2RoundType(data.RoundGroupId);
+        }
+
+    }
+</script>
+<style>
+
+    .form-reccur {
+        width: 30px;
+    }
+
+    .popover.roPopOver {
+        top: -66px;
+        left: 120px;
+    }
+    .popover.roPopOver > .arrow {
+        top: 63px;
+        left: -22px;
+        border-right-color: rgba(0,0,0,.25);
+    }
+    .popover.roPopOver > .arrow:after {
+        /*content: "";
+    border-width: 10px;*/
+        border-right-color: #fff;
+        border-left-width: 0px;
+        top: -10px;
+        left: 1px;
+    }
+    .grpRoundName{
+        cursor: pointer;
+    }
+</style>

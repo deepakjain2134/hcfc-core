@@ -1,0 +1,462 @@
+﻿@model HCF.BDO.TaggedMaster
+@{
+    var allUser = Model.allUsers;
+}
+<div class="modal-content">
+    <form asp-action="DraftEmail" asp-controller="Home" id="taggeduserform" data-ajax-success="OnSuccess"
+          data-ajax="true" data-ajax-method="POST">
+        @Html.AntiForgeryToken()
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span class="modelTitle">Tagged Users</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </h4>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="Path" value="@ViewBag.Path" />
+            <h3 class="tagedUser-haeding"> Use both fields to input email addresses of users whom you want to take action or notify about a task. </h3>
+
+            <input type="hidden" id="selectedDeficiencies" name="selectedDeficiencies" value="@ViewBag.ActivityIDs" />
+            @Html.HiddenFor(x=>x.TaggedType)
+            <input type="hidden" id="AssetName" value="@ViewBag.AssetName" />
+            <input type="hidden" id="Assetids" value="@ViewBag.AssetIds" />
+            @Html.HiddenFor(m => m.IsRequired)
+
+            @for (int i = 0; i < Model.Resource.Count; i++)
+            {
+                <input type="hidden" value="@Model.Resource[i].ActivityId" name="Resource[@i].ActivityId" />
+                <input type="hidden" value="@Model.Resource[i].TaggedType" name="Resource[@i].TaggedType" />
+                <input type="hidden" value="@Model.Resource[i].IssueId" name="Resource[@i].IssueId" />
+            }
+
+            <div class="defi-tagedUser-popup">
+                <div class="form-group">
+                    <div class="titleplusbox">
+                        <label class="customLook">Tag users you wish to take action:</label>
+                        <button type="button" id="btn1">+</button>
+                    </div>
+                    <div class="draftemail-control actionTaken">
+                        <input class='customLook' id="ActionTaken" name="ActionTaken" value='' required="required" />
+                        <button type="button" class="getInfo hidden">Get Tagged Info</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="titleplusbox">
+                        <label class="customLook">Tag users you wish to notify:</label>
+                        <button type="button" id="btn2">+</button>
+                    </div>
+                    <div class="draftemail-control notify">
+
+                        <input class='customLook' id="Notify" name="Notify" value='' />
+
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Comments/Reasons for tag:</label>
+                    @Html.TextAreaFor(model => model.Comment, new { @class = "form-control", @maxlength = "1000" })
+                </div>
+                <div class="form-group">
+                    <label>Do these @(ViewBag.Tagtype!=null && ViewBag.Tagtype==3? "permits" : "deficiencies") require the sender's approval prior to being closed?</label><br />
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                        <label class="btn active">
+                            @Html.RadioButton("requiredDeficiency", "Yes", true)@Html.Label("Yes")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("requiredDeficiency", "No")@Html.Label("No")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <a class="btn comm-button emailLink openOutlook" id="OpenOutlookbtn" href="javascript:void(0);" title="Open in Outlook to Send Mail">
+                <span>Draft Email</span>
+            </a>
+            <button type="button" class="comm-Cancelbutton" id="btn_close" data-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+    <input type="hidden" id="jsonData" value="@Newtonsoft.Json.JsonConvert.SerializeObject(new {data = allUser.Select(x=>x.UserName)})" />
+</div>
+
+
+<script>
+
+
+     $(document).ready(function () {
+         $('#btn_close').click(function () {
+             $('.tagify__dropdown__wrapper').hide()
+         });
+         $('.modal-title .close').click(function () {
+             $('.tagify__dropdown__wrapper').hide()
+         });
+
+         $('#IsRequired').val(true);
+     });
+
+     function OnSuccess(data) {
+             console.log(data);
+             swal("Added!", "tag added successfully.", "success");
+         //successAlert("tagged added successfully.");
+         $('#OpenDraftEmailPopup').modal('hide');
+         $('input:checkbox[id^="tActivityId"]').attr("checked", false);
+
+             //$('.modal-backdrop').remove();
+
+         }
+
+
+     var takenmails = []  // storing to mails userid
+     var notifymails = [] // storing cc mails userid
+
+     var tomails = [] // storing to - emails
+     var ccmails = [] // storing cc - emails
+
+     var taggeduserNames = [] // names for tagged users
+
+     Array.prototype.Remove = function () {
+             var what, a = arguments, L = a.length, ax;
+             while (L && this.length) {
+                 what = a[--L];
+                 while ((ax = this.indexOf(what)) !== -1) {
+                     this.splice(ax, 1);
+                 }
+             }
+             return this;
+         };
+
+
+     $("[name=requiredDeficiency]").on('change', function () {
+             //debugger
+             var val = $(this).val();
+             if (val == "Yes") {
+             $('#IsRequired').val(true);
+             } else {
+             $('#IsRequired').val(false);
+             }
+         });
+
+
+
+
+     $('#OpenOutlookbtn').on('click', function () {
+             if (tagify2.value.length == 0 && tagify.value.length == 0) {
+                 AlertWarningMsg("Please select atleast one user you wish to notify");
+                 return;
+             }
+             openOutlook();
+             swal({
+             html: true,
+             title: "Message",
+             text: "<label> An Email has been drafted. Are you sure you want to Tag user? </label>",
+             type: "info",
+             showCancelButton: true,
+             confirmButtonColor: "#DD6B55",
+             confirmButtonText: "Yes",
+             cancelButtonText: "No",
+         }, function (isConfirm) {
+                 if (isConfirm) {
+                     Taggedformsubmit();
+                 } else {
+                    // debugger;
+                     ShowText()
+                     $('#OpenDraftEmailPopup').modal('hide');
+
+                 }
+             });
+         });
+
+     function ShowText() {
+             function saysomething() {
+                 swalalert("Tagged Users have been removed from this deficiency!")
+             }
+             setTimeout(saysomething, 500)
+         return false;
+         }
+
+         function Taggedformsubmit() {
+             debugger
+             takenmails = [];
+             notifymails = [];
+             debugger;
+             // to emails
+             for (let i = 0; i < tagify.value.length; i++) {
+                 // alert(tagify.value[i].value);
+                 takenmails.push(tagify.value[i].value);
+                 // console.log(tagify.value[i].value);
+             }
+             // cc emails
+             for (let i = 0; i < tagify2.value.length; i++) {
+                 //alert(tagify2.value[i].value);
+                 notifymails.push(tagify2.value[i].value);
+                 //console.log(tagify2.value[i].value);
+             }
+         $('#ActionTaken').val(takenmails.join(','));
+         $('#Notify').val(notifymails.join(','));
+         $('#taggeduserform').submit();
+         }
+
+         function openOutlook() {
+             debugger;
+             takenmails = [];
+             notifymails = [];
+
+             // to emails
+             for (let i = 0; i < tagify.value.length; i++) {
+                 // alert(tagify.value[i].value);
+                 takenmails.push(tagify.value[i].value);
+                 // console.log(tagify.value[i].value);
+             }
+             // cc emails
+             for (let i = 0; i < tagify2.value.length; i++) {
+                 //alert(tagify2.value[i].value);
+                 notifymails.push(tagify2.value[i].value);
+                 //console.log(tagify2.value[i].value);
+             }
+
+             if (takenmails.length == 0) {
+                 for (let i = 0; i < tagify2.value.length; i++) {
+                     //alert(tagify2.value[i].value);
+                     takenmails.push(tagify2.value[i].value);
+                     notifymails.pop();
+                     //console.log(tagify2.value[i].value);
+                 }
+             }
+
+
+             var comment = $('#Comment').val();
+             var Path = $('#Path').val();
+             var taggedusers = taggeduserNames;
+
+             //var text = '';
+             //for (var i = 0; i < taggedusers.length; i++) {
+             //    text += 'Tag ' + taggedusers[i] + '\r\n'
+             //}
+
+             var subject = "CRx tagged you :" + " "  + "@ViewBag.AssetName" + " - " + "@ViewBag.AssetIds";
+             //console.log(Path);
+             //var link = '<a href="' + Path + '" target="_blank">' + Path + '</a><br>';
+
+             var emailText = 'Hi' + '\r\n' + '\r\n' + "You've been tagged in CRx. Please see below for relevent information : "
+             + '\r\n' + '\r\n' + 'Comments/Reasons for tag: ' + comment + '\r\n' + '\r\n' + 'Please follow the link below to view your tag' + '\r\n' + '\r\n' +
+             Path + '\r\n' + '\r\n' + 'link will expire for 2 weeks from when it was sent.'
+             emailText = encodeURIComponent(emailText);
+
+             let url = '';
+             if (notifymails.length == 0) {
+                 window.location = 'mailto:' + takenmails.join(';') + '?subject=' + subject + '&body=' + emailText;  //`mailto:${takenmails.join(';')}&subject=${subject}&body=${emailText}`;
+             } else {
+                 window.location = 'mailto:' + takenmails.join(';') + '?cc=' + notifymails.join(';') + '&subject=' + subject + '&body=' + emailText // `mailto:${takenmails.join(';')}&cc=${notifymails.join(';')}&subject=${subject}&body=${emailText}`;
+         }
+
+         }
+
+     var emailPattern = '';
+     var randomStringsArr2 = JSON.parse($("#jsonData").val());
+    // console.log(randomStringsArr2.data);
+     var randomStringsArr = randomStringsArr2.data;
+     //debugger
+
+
+     var input = document.querySelector('#ActionTaken'),
+         input2 = document.querySelector('#Notify'),
+         tagify = new Tagify(input, {
+             pattern: /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+             whitelist: randomStringsArr,
+             callbacks: {
+                 "invalid": onInvalidTag
+             },
+             dropdown: {
+                 position: 'text',
+                 enabled: 1
+             }
+         }),
+         tagify2 = new Tagify(input2, {
+             pattern: /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+             whitelist: randomStringsArr,
+             callbacks: {
+                 "invalid": onInvalidTag
+             },
+             dropdown: {
+                 position: 'text',
+                 enabled: 1
+             }
+         }),
+         button = document.querySelector('#btn1'),
+         button2 = document.querySelector('#btn2');
+
+
+     // "add new tag" action-button
+
+     button.addEventListener("click", onAddButtonClick);
+     button2.addEventListener("click", onAddButtonClick2);
+
+     function onAddButtonClick() {
+         //debugger
+         tagify.addEmptyTag()
+     }
+
+     function onAddButtonClick2() {
+         //debugger
+         tagify2.addEmptyTag()
+     }
+     function onInvalidTag(e) {
+         //debugger
+         console.log("invalid", e.detail)
+     }
+
+</script>
+
+<style>
+    .customLook {
+        --tag-bg: #0052BF;
+        --tag-hover: #CE0078;
+        --tag-text-color: #FFF;
+        --tags-border-color: silver;
+        --tag-text-color--edit: #111;
+        --tag-remove-bg: var(--tag-hover);
+        --tag-pad: .6em 1em;
+        --tag-inset-shadow-size: 1.3em;
+        --tag-remove-btn-bg--hover: black;
+        display: inline-block;
+        min-width: 0;
+        border: none;
+    }
+
+        .customLook .tagify__tag {
+            margin-top: 0;
+        }
+
+            .customLook .tagify__tag > div {
+                border-radius: 25px;
+            }
+
+            /* Do not show the "remove tag" (x) button when only a single tag remains */
+            .customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
+                /*display: none;*/
+            }
+
+        .customLook .tagify__tag__removeBtn {
+            opacity: 0;
+            transform: translateX(-6px) scale(.5);
+            margin-left: -3ch;
+            transition: .12s;
+        }
+
+        .customLook .tagify__tag:hover .tagify__tag__removeBtn {
+            transform: translateX(-6px) scale(.5);
+            opacity: 1;
+            margin-left: -1ch;
+        }
+
+        .customLook + button {
+            color: #0052BF;
+            font: bold 1.4em/1.65 Arial;
+            border: 0;
+            background: none;
+            box-shadow: 0 0 0 2px inset currentColor;
+            border-radius: 50%;
+            width: 1.65em;
+            height: 1.65em;
+            cursor: pointer;
+            outline: none;
+            transition: .1s ease-out;
+            margin: 0 0 0 5px;
+            vertical-align: top;
+        }
+
+            .customLook + button:hover {
+                box-shadow: 0 0 0 5px inset currentColor;
+            }
+
+        .customLook .tagify__input {
+            display: none;
+        }
+
+    .titleplusbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .tagify {
+        --tag-bg: #0052BF !important;
+        --tag-text-color: white !important;
+        --tag-pad: 0.5em 0.9em !important;
+        --tag-hover: #438bea !important;
+        padding: 6px 2px !important;
+        --tag-inset-shadow-size: 3.1em !important;
+        --tag-remove-bg: rgb(0 82 191) !important;
+    }
+
+    .customLook .tagify__tag {
+        margin-top: 0 !important;
+        padding: 2px !important;
+    }
+
+    .tagify__tag {
+        margin: 0 4px !important;
+    }
+
+    .tagify__tag__removeBtn {
+        order: 5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 54px;
+        cursor: pointer;
+        font: 29px/1 Arial;
+        background: var(--tag-remove-btn-bg,none);
+        color: var(--tag-remove-btn-color,#000);
+        width: 40px;
+        height: 40px;
+        margin-right: 7.66667px;
+        overflow: hidden;
+    }
+
+    .draftemail-control .selectBoxs {
+        padding: 0 0 9px 0;
+    }
+
+    .draftemail-control .bootstrap-tagsinput {
+        width: 100%;
+        border-radius: 0px;
+    }
+
+
+    .ullistitem {
+        z-index: 99;
+        position: static;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .selectBoxsfornotify .ullistitemfornotify li {
+        display: inline-block;
+        float: left;
+        width: 33.33%;
+        padding: 4px 10px;
+        position: relative;
+    }
+
+    .ullistitemfornotify {
+        z-index: 99;
+        position: static;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+</style>

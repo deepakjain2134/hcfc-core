@@ -1,0 +1,515 @@
+﻿@model HCF.Web.ViewModels.CeilingPermitViewModel
+@{
+    ViewBag.Title = "Ceiling Permit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    // var isCompleted = false;
+    //  var isDeleted = false;
+    //int workorderno = 0;
+
+    bool IsTaggingEnabled = Model.IsTaggingEnabled;
+    var ceilingpermit = Model.lstCeilingPermit;
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Ceiling Permit
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-4 col-sm-6">
+                        <icraprojectdropdown name="SelProjectId" selectedvalue="0"
+                                             class="form-control" firsttext="-- All Project --"></icraprojectdropdown>
+                        @*@Html.ICRAProjectDropDown("SelProjectId", 0, "-- All Project --", new { @class = "form-control" })*@
+                    </div>
+                    <div class="col-md-8">
+                        @if (IsTaggingEnabled)
+                        {
+
+                            <div class="dash-actvity-box">
+                                <div>
+
+                                    <button type="button" id="tag_users" class="button1">Tag Users</button>
+
+                                </div>
+                                <div class="mytageditembtn">
+                                    <img src="~/dist/Images/Icons//yellow_tag.png" title="Info tag">
+                                    <input type="button" class="button1" value="My tagged items" id="btnMytaggeditem" style="margin:4px !important;" />
+                                </div>
+                            </div>
+
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="capTable" class="table table-bordered table-striped" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    @if (IsTaggingEnabled)
+                                    {
+                                        <th></th>
+                                    }
+                                    <th>Permit #</th>
+                                    <th>Project Name</th>
+                                    <th>Project #</th>
+                                    <th>Work Area</th>
+                                    <th>Scope</th>
+                                    <th>Start Date</th>
+                                    <th>Organization</th>
+                                    <th>Completion Date</th>
+                                    <th>Responsible</th>
+                                    <th>Requested Dept</th>
+                                    <th>Date [of Request]</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                    <th style="display:none"></th>
+                                    <th style="display:none"></th>
+                                    @if (IsTaggingEnabled)
+                                    {
+                                        if (ViewBag.IsExistTagDeficiency == "false")
+                                        {
+                                            <th class="sorting_desc_disabled">
+                                                @Localizer["Details"]
+
+                                            </th>
+
+                                        }
+                                    }
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.IsExistTagDeficiency == "TagExpired")
+                                {
+                                    <p> This tag is Expired </p>
+                                }
+                                else if (ViewBag.IsExistTagDeficiency == "TagNOTExists")
+                                {
+                                    <p> This tag is not Exists</p>
+                                }
+                                else
+                                {
+                                    foreach (var item in ceilingpermit.Where(x => x.IsActive).OrderByDescending(x => x.StartDate))
+                                    {
+                                        <tr id="@item.PermitNo">
+                                            @if (IsTaggingEnabled)
+                                            {
+                                                <td>
+                                                    <input type="checkbox" id="tPermitId" value="@item.PermitNo" />
+                                                    <input type="hidden">
+                                                    <span></span>
+                                                </td>
+                                            }
+                                            <td> @Html.DisplayFor(modelItem => item.PermitNo)</td>
+                                            <td> @((item.Project != null) ? item.Project.ProjectName : "")</td>
+                                            <td>
+                                                @((item.Project != null) ? item.Project.ProjectNumber : "")
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.WorkArea)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Scope)
+                                            </td>
+                                            <td data-sort="@item.StartDate.DateSort()">
+                                                @item.StartDate.CastLocaleDate()<span></span>
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.RequestedDept)
+                                            </td>
+                                            <td width="100px" data-sort="@item.CompletionDate.DateSort()">
+                                                @item.CompletionDate.CastLocaleDate()
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Responsible)
+                                            </td>
+
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.RequestedDept)
+                                            </td>
+
+                                            @if (item.TPermitWorkFlowDetails != null && item.TPermitWorkFlowDetails.Count > 0)
+                                            {
+                                                <td data-sort="@item.TPermitWorkFlowDetails.Where(x=>x.Sequence==1).FirstOrDefault().LabelSignDate.DateSort()">
+                                                    @item.TPermitWorkFlowDetails.Where(x => x.Sequence == 1).FirstOrDefault().LabelSignDate.CastLocaleDate()
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td data-sort="">
+                                                </td>
+
+                                            }
+
+                                            <td>
+                                                @*<input type="hidden" value="@item.Status" />*@
+                                                @{
+                                                    HCF.BDO.Enums.ApprovalStatus enums = (HCF.BDO.Enums.ApprovalStatus)item.Status;
+                                                }
+                                                <p>@enums.GetDescription()</p>
+                                            </td>
+                                            <td style="display:flex;" class="mopmoredot">
+                                                <a href="@Url.RouteUrl("updateceilingpermit", new { ceilingPermitId = item.CeilingPermitId })"
+                                                   @*href="@Url.Action("AddCeilingPermit", "Permit", new { ceilingPermitId = item.CeilingPermitId})"*@>
+                                                    <span>
+                                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="" />
+                                                    </span>
+                                                </a>
+                                                <a data-id="@item.CeilingPermitId" class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "deletepermit" : "deletepermit hide")">
+                                                    <span><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" title="Delete Permit" alt="3d_add_button" /></span>
+                                                </a>
+
+
+                                                <div class="dropdown icratable-drop icondpwnload">
+                                                    <button class="dropdown-toggle" type="button" data-toggle="dropdown">
+                                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                        <span>
+                                                            <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                                        </span>
+                                                    </button>
+                                                    <ul class="dropdown-menu ctmenu">
+
+                                                        <li data-action="icrapermit">
+                                                            <a href="@Url.Action("CeilingPermit", "Pdf", new { ceilingPermitId = item.CeilingPermitId, IsAttachmentIncluded = false })">
+                                                                <span>
+                                                                    Export permit as PDF
+                                                                </span>
+                                                            </a>
+
+                                                        </li>
+
+                                                        <li data-action="icrapermit">
+                                                            <a href="@Url.Action("DownloadCeilingPermitAttachments", "Permit", new { ceilingPermitId = item.CeilingPermitId })">
+                                                                <span>
+                                                                    Export permit as PDF w/ attachments
+                                                                </span>
+                                                            </a>
+
+                                                        </li>
+
+
+                                                    </ul>
+
+                                                </div>
+                                            </td>
+
+                                            <td style="display:none">@item.Status</td>
+                                            <td style="display:none">@item.ProjectId</td>
+                                            @if (IsTaggingEnabled)
+                                            {
+                                                if (ViewBag.IsExistTagDeficiency == "false")
+                                                {
+                                                    <td>
+                                                        <div class="mytagedactions">
+
+
+                                                            @if (item.TaggedMaster.Count > 0 && item.TaggedMaster.Any(x => x.ActiontakenEmail.Contains((HCF.Web.Base.UserSession.CurrentUser.Email))))
+                                                            {
+                                                                <p style="display:none">Tagged</p>
+                                                                <img src="~/dist/Images/Icons/yellow_tag.png" onclick="infoTag('@item.PermitNo')" title="Action Tag"> }
+                                                            else if (item.TaggedMaster.Count > 0 && item.TaggedMaster.Any(x => x.NotifyEmail.Contains((HCF.Web.Base.UserSession.CurrentUser.Email))))
+                                                            {
+                                                                <p style="display:none">Tagged</p>
+                                                                <img src="~/dist/Images/Icons/black_tag.png" onclick="infoTag('@item.PermitNo')" title="Tagged as FYI"> }
+                                                            @*else
+                                                                {
+                                                                    <img src="~/dist/Images/Icons/white_tag.png" onclick="infoTag('@item.PermitNo')" title="Information Tag">
+                                                                }*@
+                                                        </div>
+                                                    </td>
+                                                }
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="OpenDraftEmailPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="DraftEmailPopup">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script src="@Url.Content("~/dist/js/jQuery.tagify.min.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/dist/css/tagify.css")" rel="stylesheet">
+    <script>
+    var selprojectId = $("#SelProjectId");
+    var dataTables = $('#capTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [],
+        "pageLength": 20,
+        "bPaginate": $('#capTable tbody tr').length > 20,
+        "bInfo": false,
+        //"order": [[3, "desc"]],
+        "oSearch": { "bSmart": false },
+        "language": {
+            "emptyTable": "No data available in table",
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search.."
+        },
+         initComplete: function () {
+             $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("addceilingpermit", "Permit"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Ceiling Permit" alt="3d_add_button"></a></div >');
+        },
+        dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive tableHeight'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                orientation: 'portrait',
+                //pageSize:'LEGAL',
+                title: 'Ceiling Access Permit [CAP] Report',
+                exportOptions: {
+                    columns: [ 1, 2, 3, 4, 5, 6,7,8,9,10]
+                },
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                customize: function (doc) {
+                    //genereateRpeort(doc)
+                    //Remove the title created by datatTables
+                    doc.content.splice(0, 1);
+                    //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                    var now = new Date();
+                    var jsDate = setDateFormat(now);
+                    //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                    // Logo converted to base64
+                    //var logo = $("#logoimgbase64").val();
+                    debugger;
+                    var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                    //console.log(logo);
+                    // The above call should work, but not when called from codepen.io
+                    // So we use a online converter and paste the string in.
+                    // Done on http://codebeautify.org/image-to-base64-converter
+                    // It's a LONG string scroll down to see the rest of the code !!!
+                    //var logo = '';
+                    // A documentation reference can be found at
+                    // https://github.com/bpampuch/pdfmake#getting-started
+                    // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                    // or one number for equal spread
+                    // It's important to create enough space at the top for a header !!!
+                    doc.pageMargins = [20, 60, 20, 30];
+                    // Set the font size fot the entire document
+                    doc.defaultStyle.fontSize = 8;
+                    // Set the fontsize for the table header
+                    doc.styles.tableHeader.fontSize = 7;
+                    // Create a header object with 3 columns
+                    // Left side: Logo
+                    // Middle: brandname
+                    // Right side: A document title
+                    doc['header'] = (function () {
+                        return {
+                            columns: [
+                                { image: logo, width: 40 },
+                                {
+                                    alignment: 'left',
+                                    italics: true,
+                                    text:('@HCF.Web.Base.UserSession.CurrentOrg'!=null ?getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'):""), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                    fontSize: 14,
+                                    margin: [0, 6, 0, 0],
+                                    width: 200,
+                                },
+                                {
+                                    alignment: 'middle',
+                                    fontSize: 14,
+                                    text: 'Ceiling Access Permit [CAP] Report',
+                                    margin: [0, 6, 0, 0]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Create a footer object with 2 columns
+                    // Left side: report creation date
+                    // Right side: current page and total pages
+                    doc['footer'] = (function (page, pages) {
+                        return {
+                            columns: [
+                                {
+                                    alignment: 'left',
+                                    text: ['Created on: ', { text: jsDate.toString() }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated from: ', { text: 'CRx' }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: ['Generated by: ', { text: ('@HCF.Web.Base.UserSession.CurrentUser' != null ? '@HCF.Web.Base.UserSession.CurrentUser.Name' : "") }]
+                                },
+                                {
+                                    alignment: 'right',
+                                    text: [{ text: page.toString() }, ' of ', { text: pages.toString() }]
+                                }
+                            ],
+                            margin: 20
+                        }
+                    });
+                    // Change dataTable layout (Table styling)
+                    // To use predefined layouts uncomment the line below and comment the custom lines below
+                    // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                    var objLayout = {};
+                    objLayout['hLineWidth'] = function (i) { return .5; };
+                    objLayout['vLineWidth'] = function (i) { return .5; };
+                    objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                    objLayout['paddingLeft'] = function (i) { return 4; };
+                    objLayout['paddingRight'] = function (i) { return 4; };
+                    doc.content[0].layout = objLayout;
+                }
+            },
+            {
+                extend: 'excel',
+                title: 'Ceiling Access Permit [CAP] Report',
+                messageBottom: function () {
+                    return $("#dvgeneratedby").text();
+                },
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6,7,8,9],
+                    orthogonal: 'export'
+                }
+            }
+        ]
+    });
+
+    $(document).ready(function () {
+        var projectId = parseInt(getParameterByName('ProjectId'));
+        var status = getParameterByName('Status');
+        debugger
+        if (status != undefined) {
+            filterRecordsbyStatus(status);
+        }
+        if (projectId != undefined && projectId > 0) {
+            selprojectId.val(projectId);
+            filterRecords(projectId);
+        }
+    });
+    selprojectId.change(function () {
+        var projectId = selprojectId.val();
+        filterRecords(projectId);
+    })
+    function filterRecords(projectId) {
+        if (projectId > 0) {
+            //alert("Call " + projectId);
+            dataTables.column(-1).search("^" + projectId + "$", true, true, false).draw();
+        } else {
+            dataTables.columns(-1).search("").columns(-2).search("").draw();
+        }
+    }
+    function filterRecordsbyStatus(status) {
+        if (status != undefined) {
+            dataTables.column(-1).search("^" + status + "$", true, true, false).draw();
+        }
+    }
+    $(document).on('click', 'a.deletepermit', function (e) {
+        debugger;
+        e.preventDefault();
+        var Id = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to delete this permit?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Permit_Delete + "?id=" + Id + "&permittype=1",
+                    success: function (data) {
+                        swal("Deleted!", "Your permit has been deleted.", "success");
+                        location.reload();
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+
+
+    $("#tag_users").click(function () {
+           // debugger
+            var valueArray = [];
+
+                $('input:checkbox[id^="tPermitId"]').each(function () {
+                    var $this = $(this);
+                    if ($this.is(":checked")) {
+                        valueArray.push($(this).val());
+                    }
+                });
+
+        if (valueArray.length != 0) {
+            callTaggedUsers(valueArray)
+        }
+        else {
+            AlertWarningMsg("You must first select one or more permit prior to using the tag feature.");
+        }
+
+    });
+
+
+    function callTaggedUsers(valueArray) {
+            //debugger
+            var url = "@Url.Action("DraftEmailPopup", "Permit")";
+        $.get(url + '?PermitNo=' + valueArray + '&Tagtype=3&PermitType=1', function (data) {
+                $('#DraftEmailPopup').html(data);
+                $('#DraftEmailPopup').fadeIn('fast');
+               $('#OpenDraftEmailPopup').show();
+                $('#OpenDraftEmailPopup').modal('show');
+            });
+        }
+
+    $("#btnMytaggeditem").on('click', function () {
+        $('#myTable2 tbody tr').show();
+        debugger
+        if ($(this).hasClass("active")) {
+            dataTables.columns(16).search("").draw();
+            $(this).removeClass("active");
+        } else {
+            var val = "Tagged";
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            dataTables.columns(16).search(val).draw();
+        }
+    });
+
+    </script>
+    <style>
+        .pdfceiling {
+            margin-top: -23px;
+        }
+
+        .col-sm-6 .dataTables_paginate.paging_simple_numbers {
+            position: absolute;
+            right: 260px;
+            top: 4px;
+        }
+
+
+        .add_button_comman {
+            position: absolute;
+            right: 22px;
+            top: 42px;
+        }
+    </style>
+}
+
+
+

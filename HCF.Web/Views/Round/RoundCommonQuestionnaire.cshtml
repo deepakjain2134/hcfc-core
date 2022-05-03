@@ -1,0 +1,225 @@
+﻿@model List<HCF.BDO.RoundCategory>
+@{
+    ViewBag.Title = "RoundCommonQuestionnaire";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Round Questionnaire
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+
+                    <div class="box box-primary col-lg-12">
+                        <div class="box-header vender_page">
+                            <a href="@Url.Action("AddRoundsCommQuestonaries", "Round", new { roundCatId = ViewBag.CatId ?? 0, roundquesid = 0 })"
+                               class="pull-right modal-link quest-addbtn">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Rounds Questionnaire" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="roundCommQues" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none"></th>
+                                        <th>Round Name</th>
+                                        <th>Question</th>
+                                        <th>Short Description</th>
+                                        <th style="width:80px;">Risk Type</th>
+                                        <th> Code </th>
+                                        <th> Active </th>
+                                        <th> Edit </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var roundItems in Model)
+                                    {
+                                        foreach (var item in roundItems.RoundItems)
+                                        {
+                                            <tr>
+                                                <td style="display:none">
+                                                    @roundItems.RoundCatId
+                                                </td>
+                                                <td>
+                                                    @roundItems.CategoryName
+                                                </td>
+                                                <td>
+                                                    @item.RoundStep
+                                                </td>
+                                                <td>
+                                                    @item.ShortDescription
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        HCF.BDO.Enums.RiskScore enums = (HCF.BDO.Enums.RiskScore)item.RiskType;
+
+                                                    }
+                                                    <p>@enums.GetDescription()</p>
+                                                </td>
+                                                <td>
+                                                    @item.RiskStepCode
+                                                </td>
+                                                <td class="text-center">
+                                                    @Html.DisplayFor(modelItem => item.IsActive, new { @class = "chkroundQues", @rel = item.RouQuesId, @CatId = roundItems.RoundCatId })<span></span>
+                                                </td>
+                                                <td>
+                                                    <a title="Edit Round Question" href="@Url.Action("AddRoundsCommQuestonaries", "Round", new { roundCatId = item.RoundCatId , roundquesid = item.RouQuesId})" class="pull-right modal-link">
+                                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" alt="3d_add_button" />
+                                                    </a>
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+
+         var roundCatId = '@ViewBag.CatId';
+
+
+        var dTable = $('#roundCommQues').DataTable({
+            searching: true,
+            pageLength: 500,
+            lengthChange: false,
+            bPaginate: $('#roundCommQues tbody tr').length > 500,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "Blftip",
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'Round Questionnaire Report',
+                    exportOptions: {
+                        columns: [2, 3]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name'), @*text: '@HCF.Web.Base.UserSession.CurrentOrg.Name',*@
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'Round Questionnaire Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name' }]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Round Questionnaire Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [2, 3],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+        });
+
+
+        if (roundCatId > 0) {
+            dTable.column(0).search("^" + roundCatId + "$", true, true, false).draw();
+        }
+
+      
+    });
+
+
+
+
+</script>
+<style>
+    .dataTables_filter {
+        margin-right: 55px;
+    }
+
+    .quest-addbtn {
+        position: absolute;
+        right: 17px;
+        z-index: 999;
+        top: 11px;
+    }
+</style>

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "HCF.Module.News",
+    "isBundledWithHost": true,
+    "version": "1.0.0"
+  },
+  {
+    "id": "HCF.Module.Core",
+    "isBundledWithHost": true,
+    "version": "1.0.0"
+  },
+  {
+    "id": "HCF.Module.CadViewer",
+    "isBundledWithHost": true,
+    "version": "1.0.0"
+  },
+  {
+    "id": "HCF.Module.ModuleTraining",
+    "isBundledWithHost": true,
+    "version": "1.0.0"
+  },
+  {
+    "id": "HCF.Module.ExternalAuth",
+    "isBundledWithHost": true,
+    "version": "1.0.0"
+  }
+]

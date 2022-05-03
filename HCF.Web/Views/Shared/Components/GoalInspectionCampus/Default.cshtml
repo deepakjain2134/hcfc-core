@@ -1,0 +1,54 @@
+﻿@model HCF.Web.ViewModels.Goal.InspectionCampusViewModel
+@{  var Campus = new List<HCF.BDO.Buildings>();
+    @if (Model.Campus.Count > 0)
+    {
+         Campus = Model.Campus.Where(x => x.IsInspectionDone == false).ToList();
+    }
+    else
+    {
+         Campus = new List<HCF.BDO.Buildings>();
+    }
+     
+    }
+<div>
+    @if (Model.Campus.Count > 0 && Model.Campus.FirstOrDefault().SiteId > 0)
+    {
+        <h4>Campus</h4>
+        if (Model.ShowAll)
+        {
+            for (int i = 0; i < Model.Campus.Count; i++)
+            {
+
+                <div class="ep-campusList">
+                    @Html.CheckBox("Campus[" + @i + "].SiteId", Model.Campus[i].IsInspectionDone == true ? true : true, new { id = "Campus[" + @i + "].SiteId", value = Model.Campus[i].SiteId, @class = Model.ShowAll?"disabled": "disabled" })<span></span>@Model.Campus[i].SiteName
+                </div>
+            }
+        }
+        else
+        {
+            @*if (Campus.Count > 0)
+            {
+                for (int i = 0; i < Campus.Count; i++)
+                {
+
+                    <div class="ep-campusList">
+                        @Html.CheckBox("Campus[" + @i + "].SiteId", Campus[i].IsInspectionDone == true ? true : false, new { id = "Campus[" + @i + "].SiteId", value = Campus[i].SiteId, @class = "" })<span></span>@Campus[i].SiteName
+                    </div>
+                }
+            }
+            else
+            {*@
+                for (int i = 0; i < Model.Campus.Count; i++)
+                {
+
+                    <div class="ep-campusList">
+                        @Html.CheckBox("Campus[" + @i + "].SiteId", Model.Campus[i].IsInspectionDone == true ? true : true, new { id = "Campus[" + @i + "].SiteId", value = Model.Campus[i].SiteId, @class = "disabled" })<span></span>@Model.Campus[i].SiteName
+                    </div>
+                }
+    //    }
+
+
+    }
+
+    }
+</div>

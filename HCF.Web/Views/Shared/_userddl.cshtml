@@ -1,0 +1,127 @@
+﻿@model List<HCF.BDO.UserProfile>
+
+@{
+    Layout = null;
+}
+@{ var checkListClass = !string.IsNullOrEmpty(ViewBag.type) && ViewBag.type.ToLower() == "single" ? "chkUserSigleSelect" : "chkUserMultiSelect"; }
+<div class="selectList" id="ullistitem">
+    <label>--Select Users--</label>
+    <ul class="ullistitem">
+        @foreach (var user in Model)
+        {
+
+            <li class="@checkListClass">
+                <input type="checkbox" value="@user.UserId" data-text="@user.Name" /><span></span> @string.Format("{0}({1})", user.Name, user.Email)
+            </li>
+        }
+    </ul>
+</div>
+<input type="hidden" name="UncheckUsers" id="UncheckUsers" />
+<script>
+    $(document).ready(function () {
+        $(".ullistitem").hide();
+        $('.chkUserSigleSelect input[type="checkbox"]').change(function () {
+            var isChecked = $(this).is(':checked')
+            var thisVal = "0"
+            if (isChecked) {
+                thisVal = $(this).val()
+            }
+
+            $('.chkUserSigleSelect input[type="checkbox"]').prop('checked', false)
+            $(this).prop('checked', isChecked)
+            $('.chkUserSigleSelect').parent().parent().children('label').text(selectLabel($('.chkUserSigleSelect')))
+            $('#UserId').val(thisVal);
+            $('#txtUserName').val(thisVal);
+        })
+
+        $('.chkUserMultiSelect input[type="checkbox"]').change(function () {
+            var val = getCheckedValue('chkUserMultiSelect')
+            console.log(selectLabel($('.chkUserMultiSelect')))
+            $('.chkUserMultiSelect').parent().parent().children('label').text(selectLabel($('.chkUserMultiSelect')));
+            if ($(this).prop("checked") == false) {
+                $("#UncheckUsers").val($(this).val());
+            }
+            else {
+                $("#UncheckUsers").val("");
+            }
+            $("#Userddl").trigger('change');
+
+        })
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+    });
+
+    function getCheckedValue(className) {
+        var checkedVallst = [];
+        debugger;
+        $('.' + className + ' input[type="checkbox"]:checked').each((i, data) => {
+            var checkedVals = { Name: $(data).attr('data-text'), UserId: $(data).val() };
+            checkedVallst.push(checkedVals);
+        })
+        return checkedVallst
+    }
+
+    var selectLabel = (input) => {
+        var chkCount = $(input).find('input[type="checkbox"]:checked').length
+        var txt = '--Select Users--'
+        if (chkCount == 0) {
+            return txt;
+        }
+        if (chkCount < 2) {
+            console.log($(input).find('input[type="checkbox"]:checked').data('text'))
+            txt = $(input).find('input[type="checkbox"]:checked').data('text')
+        }
+        else {
+            txt = chkCount + ' Users Selected'
+        }
+        return txt;
+    }
+</script>
+<style>
+    .selectList li, .selectList ul {
+        list-style-type: none;
+        text-decoration: none;
+    }
+
+    .selectList {
+        width: 100%;
+        display: inline-block;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .ullistitem {
+        display: none;
+        z-index: 99;
+        position: absolute;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .ddlproject {
+        width: 0;
+        border-color: transparent;
+    }
+</style>

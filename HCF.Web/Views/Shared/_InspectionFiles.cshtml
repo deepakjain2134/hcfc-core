@@ -1,0 +1,57 @@
+﻿@model HCF.BDO.TInspectionActivity
+
+@if (Model.ActivityType != 3 && Model.InspectionEPDocs != null && Model.InspectionEPDocs.UploadDocTypeId != (int)HCF.BDO.Enums.UploadDocTypes.MiscDocuments)
+{
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="90%">
+                <div class="tabelcommentBox">
+                    <b>Comments: </b>&nbsp; @Html.TextBoxFor(m => Model.Comment, Model.Comment, new { @class = "form-control disabled" })
+                </div>
+            </td>
+            <td width="10%">
+                @if (Model.TInspectionFiles != null && Model.TInspectionFiles.Count > 0)
+                {
+
+                    for (char c = 'C'; c <= 'D'; c++)
+                    {
+                        var inspectionFIles = Model.TInspectionFiles.Where(x => x.FileType == Convert.ToString(c)).FirstOrDefault();
+                        if (inspectionFIles != null)
+                        {
+                            if (c == 'C')
+                            {
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = inspectionFIles.FilePath, title = "Image Preview" })" class="modal-link">
+                                    <img class="@(inspectionFIles.FilePath != string.Empty ? "img_prev_upload" : "img_prev")"
+                                         src="@commonModelFactory.FilePath(inspectionFIles.FilePath)" style="float: right; margin-right: 5px;">
+                                </a>
+                            }
+                            else if (c == 'D')
+                            {
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = inspectionFIles.FilePath, title = "Preview" })" class="modal-link">
+                                    <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" alt="" style="float:right; margin-right:5px;" />
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            if (c == 'C')
+                            {
+                                <img src="@Url.Content("~/dist/img/camera_icon.png")" class="disable" alt="" style="float:right; margin-right:5px;" />
+                            }
+                            else if (c == 'D')
+                            {
+                                <img src="@Url.Content("~/dist/img/upload_icon.png")" class="disable" alt="" style="float:right; margin-right:5px;" />
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    @*<img src="@Url.Content("~/dist/img/message_icon.png")" alt="" class="commentIcon disable" style="float: right;" />*@
+                    <img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float:right; margin-right:5px;" class="commentIcon disable" />
+                    <img src="@Url.Content("~/dist/img/upload_icon.png")" alt="" style="float:right; margin-right:5px;" class="commentIcon disable" />
+                }
+            </td>
+        </tr>
+    </table>
+}

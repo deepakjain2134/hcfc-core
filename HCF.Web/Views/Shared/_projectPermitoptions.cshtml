@@ -1,0 +1,36 @@
+﻿@model HCF.BDO.TIcraProject
+@using HCF.Utility
+@using HCF.Web.Base
+
+@inject IHCFSession session
+@if (Model != null)
+{
+    @if (Model.mode != "View")
+    {
+        <ul class="dropdown-menu ctmenu" projectId="@Model.ProjectId">
+            <li class="@(commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))?"":"hide")"><a href="@Url.Action("InspectionIcra", "ICRA", new { ProjectId = Model.ProjectId })" class="@(Model.ICRACount > 0 ? "" : "disable")">View ICRA Permit (@Model.ICRACount)</a></li>
+            <li class="@(commonModelFactory.IsMenuExist("PCRA", Convert.ToString(session.ClientNo))?"":"hide")"><a href="@Url.Action("GetAllTPCRA", "PCRA", new { ProjectId = Model.ProjectId })" class="@(Model.PCRACount > 0 ? "" : "disable")">View PCRA Permit (@Model.PCRACount)</a></li>
+            <li><a href="@Url.Action("FSBPermit", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.FSBPCount > 0 ? "" : "disable")">View Fire System Bypass Permit [FSBP] (@Model.FSBPCount)</a></li>
+            <li><a href="@Url.Action("MethodofProcedure", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.MOPCount > 0 ? "" : "disable")">View Method of Procedure Permit [MOP] (@Model.MOPCount)</a></li>
+            <li><a href="@Url.Action("GetAllHotWorkPermit", "HotWorkPermit", new { ProjectId = Model.ProjectId })" class="@(Model.HWPCount > 0 ? "" : "disable")">View Hot work Permit [HWP] (@Model.HWPCount)</a></li>
+            <li><a href="@Url.Action("LifeSafetyDevicesForms", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.LSDCount > 0 ? "" : "disable")">View LSDA/R Permit (@Model.LSDCount)</a></li>
+            <li><a href="@Url.Action("PaperPermit", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.TPaperPermitCount > 0 ? "" : "disable")">View Paper Permit (@Model.TPaperPermitCount)</a></li>
+            <li><a href="@Url.Action("GetAllTCRA", "PCRA", new { ProjectId = Model.ProjectId })" class="@(Model.CRACount > 0 ? "" : "disable")">View CRA Permit (@Model.CRACount)</a></li>
+            <li><a href="@Url.Action("Index", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.CPCount > 0 ? "" : "disable")">View Ceiling Permit (@Model.CPCount)</a></li>
+        </ul>
+    }
+    else
+    {
+        <ul class="dropdown-menu ctmenu" projectId="@Model.ProjectId">
+            <li class="@(commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))?"":"hide")"><a href="@Url.Action("InspectionIcra", "ICRA", new { ProjectId = Model.ProjectId })" class="@(Model.ICRACount > 0 ? "" : "disable")">View ICRA Permit (@Model.ICRACount)</a></li>
+            <li class="@(commonModelFactory.IsMenuExist("PCRA", Convert.ToString(session.ClientNo))?"":"hide")"><a href="@Url.Action("GetAllTPCRA", "PCRA", new { ProjectId = Model.ProjectId })" class="@(Model.PCRACount > 0 ? "" : "disable")">View PCRA Permit (@Model.PCRACount)</a></li>
+            <li><a href="@Url.Action("FSBPermit", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.FSBPCount > 0 ? "" : "disable")">View Fire System Bypass Permit [FSBP] (@Model.FSBPCount)</a></li>
+            <li><a href="@Url.Action("MethodofProcedure", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.MOPCount > 0 ? "" : "disable")">View Method of Procedure Permit [MOP] (@Model.MOPCount)</a></li>
+            <li><a href="@Url.Action("GetAllHotWorkPermit", "HotWorkPermit", new { ProjectId = Model.ProjectId })" class="@(Model.HWPCount > 0 ? "" : "disable")">View Hot work Permit [HWP] (@Model.HWPCount)</a></li>
+            <li><a href="@Url.Action("LifeSafetyDevicesForms", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.LSDCount > 0 ? "" : "disable")">View LSDA/R Permit (@Model.LSDCount)</a></li>
+            <li><a href="@Url.Action("PaperPermit", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.TPaperPermitCount > 0 ? "" : "disable")">View Paper Permit (@Model.TPaperPermitCount)</a></li>
+            <li><a href="@Url.Action("GetAllTCRA", "PCRA", new { ProjectId = Model.ProjectId })" class="@(Model.CRACount > 0 ? "" : "disable")">View CRA Permit (@Model.CRACount)</a></li>
+            <li><a href="@Url.Action("Index", "Permit", new { ProjectId = Model.ProjectId })" class="@(Model.CPCount > 0 ? "" : "disable")">View Ceiling Permit (@Model.CPCount)</a></li>
+        </ul>
+    }
+}

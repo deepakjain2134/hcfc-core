@@ -1,0 +1,67 @@
+﻿@model HCF.BDO.Binders
+
+<div class="slider">
+    <div class="tabbable tabs-left">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab4" data-info="tab4" class="tbs" data-toggle="tab">EPs</a></li>
+            <li class="active hide"><a href="#tab3" data-info="tab3" class="tbs" data-toggle="tab">Sub Binders</a></li>
+        </ul>
+        <div class="tab-content ">
+            <div class="tab-pane" id="tab3">
+                
+            </div>
+            <div class="tab-pane active" id="tab4">
+                <ul class="binder_ep">
+                    @foreach (var ep in Model.StandardEps)
+                    {
+                        <li>
+                            @ep.StandardEP
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var tableName = '@($"table{Model.BinderId}")';
+    var @($"tableMaster{Model.BinderId}");
+    if ($.fn.dataTable.isDataTable('@($"#table{Model.BinderId}")')) {
+        @($"tableMaster{Model.BinderId}") = $('@($"#table{Model.BinderId}")').DataTable();
+    } else {
+        @($"tableMaster{Model.BinderId}") = $('@($"#table{Model.BinderId}")').DataTable({
+            "lengthChange": false,
+            "aaSorting": [],
+            searching: false,
+            "bPaginate": $('#table1 tbody tr').length > 10,
+            "bInfo": false
+
+        });
+    }
+
+
+    $('@($"#table{Model.BinderId} tbody")').on('click',
+        'td.details-control',
+        function() {
+            var tr = $(this).closest('tr');
+            var tableMaster = @($"tableMaster{Model.BinderId}");
+            var row = tableMaster.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function() {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            } else {
+                var binderId = $(this).attr("rel");
+                $.get("Repository/SubBinders?binderId=" + binderId,
+                    function(data) {
+                        row.child(data, 'no-padding').show();
+                        tr.addClass('shown');
+                    });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+
+</script>

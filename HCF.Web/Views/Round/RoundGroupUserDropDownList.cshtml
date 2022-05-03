@@ -1,0 +1,25 @@
+﻿@model HCF.Web.ViewModels.Common.CustomSelectPicker
+@*@{
+    if (!string.IsNullOrEmpty(Model.DefaultText))
+    {
+        Model.Items.Add(new SelectListItem(Model.DefaultText, Model.DefaultValue));
+    }
+}*@
+
+<select class="form-control" id="ddlUsers" name="@Model.Name">  
+    <option selected=selected value="@Model.DefaultValue">@Model.DefaultText</option>
+    @foreach (var item in Model.Items.OrderBy(x => x.Text))
+    {
+        <option value="@item.Value">@item.Text</option>
+    }
+</select>
+
+
+
+<script>
+
+    var control=$("#ddlUsers");
+    var userId='@HCF.Web.Base.UserSession.CurrentUser.UserId';
+   control.val(userId);
+
+</script>

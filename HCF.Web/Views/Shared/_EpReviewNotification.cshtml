@@ -1,0 +1,153 @@
+﻿
+@model HCF.BDO.EPSteps
+@{
+    
+    //pectionDocs(Model.SingleOrDefault().InspectionId).ToList(); ;
+ }
+
+<html>
+@if (Model.Type != "InspectByFloor")
+{
+    <div class="epreview-box">
+        <div class="epreview-toprow">
+            <p><b>Review of @($"{Model.StandardEP}") is ready to be completed.</b></p>
+            <p>The date of this review will be set in CRx as <b>@($"{ DateTime.Now.ToFormatDate()}")</b>.</p>
+        </div>
+        <div class="epreview-bottomrow">
+            <p>
+                This EP's next review date is <b> @($"{ Model.Inspection.DueDate.ToFormatDate()}")</b>
+                @if (Model.Inspection.RecentActivityType == 1)
+                {
+                    <span class="eprView">(Based On EP Review)</span>
+                }
+                @if (Model.Inspection.RecentActivityType == 2)
+                {
+                    <span class="eprView">(based on asset inspection date)</span>
+                }
+                @if (Model.Inspection.RecentActivityType == 3)
+                {
+                    <span class="eprView">(Based On Doc Review)</span>
+                }
+                @if (Model.Inspection.RecentActivityType == -1)
+                {
+                    <span class="eprView">(Based on Custom Scheduled Date)</span>
+                }
+
+            </p>
+            <p>
+                CRx has calculated your next review date based on
+                @if (Model.Type == "EpInspection")
+                {
+                    <span>today's completion of EP checkpoints</span>
+                }
+                @if (Model.Type == "DocUplaod")
+                {
+                    <span> the document review date </span>
+                }
+                @if (Model.Type == "AssetsInspection")
+                {
+                    <span>  all assets connected to this EP were inspected </span>
+                }
+                @if (Model.Type == "scheduledDate")
+                {
+                    <span>  this EP's scheduled date </span>
+                }
+
+                @{
+                    HCF.BDO.Enums.Frequency frequencyValue = (HCF.BDO.Enums.Frequency)Model.FrequencyId;
+                }
+
+                and this EP's <b> @($"{frequencyValue.GetDescription()}".ToLower())</b> frequency.
+            </p>
+            @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+            {
+                <p>If you would like to set a custom scheduled date for your next review, <a class="button1" onclick="return customfrequencylink()" data-toggle="modal" data-target="#CustomFrequencyMoal" id="customfrequencylink"> <b>Click Here.</b></a></p>
+            }
+            else
+            {
+                <p>If you would like to set a custom scheduled date for your next review,please contact your system administrator</p>
+            }
+            @*<div class="epreview-btn">
+                    <a href="#">Finalize</a>
+                    <a href="#">Go Back</a>
+                </div>*@
+        </div>
+    </div>
+}
+else
+{
+    <div class="epreview-box">
+        <div class="epreview-toprow">
+            <p><b>Review of @($"{Model.StandardEP}") is ready to be completed.</b></p>
+            <p>The date of this review will be set in CRx as <b>@($"{ Model.Inspection.StartDate.ToFormatDate()}")</b>.</p>
+        </div>
+        <div class="epreview-bottomrow">
+            
+            <p>
+                CRx has calculated your next review date based on the earliest inspection report review date from "Upload Inspection" <span>@($"{ Model.Inspection.DueDate.ToFormatDate()}")</span> and this EP's frequency. 
+               
+            </p>
+            @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+            {
+                <p>If you would like to set a custom scheduled date for your next review,<a class="button1" onclick="return customfrequencylink()" data-toggle="modal" data-target="#CustomFrequencyMoal" id="customfrequencylink"> <b>click here.</b></a></p>
+            }
+            else
+            {
+                <p>If you would like to set a custom scheduled date for your next review,please contact your system  administrator</p>
+            }
+           
+        </div>
+    </div>
+}
+</html>
+
+<style>
+    .epreview-toprow .complete {
+        color:#fff !important;
+    }
+    .epreview-toprow p {
+        font-size: 16px;
+    }
+    .sweet-alert .epreview-bottomrow p {
+        color: #000000 !important;
+        padding-bottom: 15px;
+        line-height: 24px;
+    }
+    .epreview-toprow p {
+        line-height: 26px;
+    }
+    .sweet-alert button {
+        margin: 5px 5px 0 5px !important;
+    }
+    .sweet-alert h2 {
+        display: none;
+    }
+   
+    .sa-button-container {
+        border-top: none;
+        text-align: center;
+        padding-bottom: 15px;
+    }
+    .epreview-box {
+        
+        border-bottom: none;
+    }
+    .sweet-alert.showSweetAlert {
+        padding: 0;
+    }
+    .epreview-toprow {
+        background-color: #fff6a8;
+        padding: 18px;
+        color: #000;
+    }
+   
+    .epreview-bottomrow {
+        padding: 18px 15px;
+    }
+    .sa-icon.sa-info {
+        display: none !important;
+    }
+    .sweet-alert.showSweetAlert.visible {
+        width: 540px;
+    }
+</style>

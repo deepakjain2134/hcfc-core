@@ -1,0 +1,88 @@
+﻿@model HCF.Web.ViewModels.Common.CustomSelectPicker
+@{ var id = !string.IsNullOrEmpty(Model.ID) ? Model.ID : Model.Name;
+    var Isoptgroup = false;
+    if (Model.Items.Any(x => x.Group != null && !string.IsNullOrEmpty(x.Group.Name)))
+    {
+        Isoptgroup = true;
+    }
+}
+
+@if (Model.IsMultiple)
+{
+    @*<select asp-for="@Model.Name"
+                id="@Model.Name"
+                name="@Model.Name"
+                class="@Model.ClassName"
+                multiple="multiple"
+                data-live-search="true"
+                data-selected-text-format="count"
+                asp-items="@(new SelectList(Model.Items, "Value", "Text"))">
+        </select>*@
+    <select  asp-for="@Model.SelectedIds"
+            id="@id"
+            name="@Model.Name"
+            class="@Model.ClassName"
+            multiple="multiple"
+            data-live-search="true"
+            data_selected_text_format="count > 1" ,
+            asp-items="@Model.Items"
+            >
+    </select>
+}
+else if (Isoptgroup)
+{
+    <select @{ foreach (var item in Model.Attributes) { <text> @string.Format("{0}={1}", item.Key, item.Value) </text>  } }
+            name="@Model.Name"
+            class="@Model.ClassName"
+            id="@id"
+            data-live-search="true">
+        @foreach (var item in Model.Items.GroupBy(x => x.Group?.Name))
+        {
+            if (!string.IsNullOrEmpty(item.Key))
+            {
+                <optgroup label="@item.Key">
+                    @foreach (var data in Model.Items.Where(x => x.Group?.Name == item.Key))
+                    {
+                        if (data.Selected)
+                        {
+                            <option selected="selected" value="@data.Value">@data.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@data.Value">@data.Text</option>
+                        }
+                    }
+                </optgroup>
+            }
+            else
+            {
+                @foreach (var data in Model.Items.Where(x => x.Group?.Name == item.Key))
+                {
+                    <option value="@data.Value">@data.Text</option>
+                }
+            }
+        }
+    </select>
+}
+else
+{
+    <select @{ foreach (var item in Model.Attributes) { <text> @string.Format("{0}={1}", item.Key, item.Value) </text>  } }
+            name="@Model.Name"
+            class="@Model.ClassName"
+            id="@id"
+            @(Model.IsRequired?"required":string.Empty)
+            data-live-search="true">
+
+        @foreach (var data in Model.Items)
+        {
+            if (data.Selected)
+            {
+                <option selected="selected" value="@data.Value">@data.Text</option>
+            }
+            else
+            {
+                <option value="@data.Value">@data.Text</option>
+            }
+        }
+    </select>
+}

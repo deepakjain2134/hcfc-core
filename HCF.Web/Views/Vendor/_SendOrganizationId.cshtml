@@ -1,0 +1,279 @@
+﻿@model List<HCF.BDO.UserProfile>
+@{
+    var allUser = Model.ToList();
+}
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <b>SEND EMAIL</b>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <form id="post-form">
+            <div class="row" style="margin:1em;">
+                <div class="col-sm-12 col-lg-1">
+                    <label class="customLook">To :  </label>
+                    <button type="button" id="btn1">+</button>
+                </div>
+                <div class="col-sm-12 col-lg-11">
+                    <div class="draftemail-control actionTaken">
+
+                        <input class='customLook' id="ReceiverEmail" name="ReceiverEmail" value='' required="required" />
+                        <button type="button" class="getInfo hidden">Get Tagged Info</button>
+                    </div>
+                    @*@Html.TextBox("ReceiverEmail", "", new { @class = "draftemail-control form-control", @required = "required" })*@
+                </div>
+            </div>
+            <div class="row" style="margin:1em;">
+                <div class="col-sm-12 col-lg-1">
+                    Subject
+                </div>
+                <div class="col-sm-12 col-lg-11">
+                    @Html.TextBox("Subject", "", new { @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            <div class="row" style="margin:1em;">
+                <div class="col-sm-12 col-lg-1">
+                    Description
+                </div>
+                <div class="col-sm-12 col-lg-11">
+                    <div id="Description" name="Description" style="height:auto;border:1px solid #d2d6de;padding:7px;" contenteditable="true" required="required">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="submit" name="submitButton" id="submitButton" value="Send" class="button1" />
+                <input type="button" name="" value="Cancel" data-dismiss="modal" class="button1" />
+            </div>
+        </form>
+    </div>
+    <input type="hidden" id="jsonData" value="@Newtonsoft.Json.JsonConvert.SerializeObject(new {data = allUser.Select(x=>x.UserName)})" />
+</div>
+<script>
+
+    var invitationId = '@Guid.NewGuid()';
+    var vendorId = '@ViewBag.VendorId';
+    var url = '@AppSetting.WebUrlPath' + "create/user/" + invitationId;
+
+    $(document).ready(function () {
+        //debugger;
+
+        var data = "<p>Hello,</p><br/><p> A user from" + ' @HCF.Web.Base.UserSession.CurrentOrg.Name ' + "invited you to create a Vendor User Account within their CRx system.</p><p>Organization ID: TYPE YOUR ID HERE</p><p>Please go to <a href=" + url + ">" + url + "</a> and click Vendor Invitation, Use the Organization ID and your work email address to fill out the fields and create your first Vendor User in CRx.</p>"
+        $("#Description").html(data);
+    });
+
+    $("#submitButton").click(function () {
+        debugger;
+        var formValid = document.forms["post-form"].checkValidity();
+        takenmails = [];
+        var subject = $("#Subject").val();
+        // to emails
+        for (let i = 0; i < tagify.value.length; i++) {
+            takenmails.push(tagify.value[i].value);
+        }
+        if (takenmails.length == 0) {
+            swalalert("Please Enter Email")
+            return false;
+        }
+        if (subject == "") {
+            swalalert("Please Enter Subject")
+            return false;
+        }
+
+        if (formValid) {
+            var ReceiverEmailvalue = takenmails.join(',');//$("#ReceiverEmail").val();
+            var Subjectvalue = $("#Subject").val();
+            var Descriptionvalue = document.getElementById('Description').innerHTML;
+            if (ReceiverEmailvalue != null && ReceiverEmailvalue != "" && Subjectvalue != null && Subjectvalue != "" && Descriptionvalue != null && Descriptionvalue != "") {
+                $.ajax({
+                    url: CRxUrls.Vendor_SendOrganizationId,
+                    type: "POST",
+                    data: JSON.stringify({
+                        ReceiverEmail: ReceiverEmailvalue,
+                        Subject: Subjectvalue,
+                        Description: Descriptionvalue.toString(),
+                        invitationId: invitationId,
+                        vendorId: vendorId
+                    }),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    cache: false,
+                    success: function successFunc(data) {
+                        debugger
+                        swalalert("Email Sent Successfully.");
+                        $("#ReceiverEmail").val("");
+                        $("#Subject").val("");
+                    },
+                    error: function errorFunc(e) {
+                    }
+                });
+            }
+            else {
+                swalalert("All fields are required.");
+            }
+        }
+
+
+
+    })
+
+
+
+    var emailPattern = '';
+    var randomStringsArr2 = JSON.parse($("#jsonData").val());
+    console.log(randomStringsArr2.data);
+    var randomStringsArr = randomStringsArr2.data;
+    debugger
+
+
+    var input = document.querySelector('#ReceiverEmail'),
+        tagify = new Tagify(input, {
+            pattern: /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            whitelist: randomStringsArr,
+            callbacks: {
+                "invalid": onInvalidTag
+            },
+            dropdown: {
+                position: 'text',
+                enabled: 1
+            }
+        }),
+
+        button = document.querySelector('#btn1');
+
+
+    // "add new tag" action-button
+
+    button.addEventListener("click", onAddButtonClick);
+
+    function onAddButtonClick() {
+        debugger
+        tagify.addEmptyTag()
+    }
+
+
+    function onInvalidTag(e) {
+        debugger
+        console.log("invalid", e.detail)
+    }
+</script>
+
+
+<style>
+    .draftemail-control .selectBoxs {
+        padding: 0 0 9px 0;
+    }
+
+    .draftemail-control .bootstrap-tagsinput {
+        width: 100%;
+        border-radius: 0px;
+    }
+
+    .customLook {
+        --tag-bg: #0052BF;
+        --tag-hover: #CE0078;
+        --tag-text-color: #FFF;
+        --tags-border-color: silver;
+        --tag-text-color--edit: #111;
+        --tag-remove-bg: var(--tag-hover);
+        --tag-pad: .6em 1em;
+        --tag-inset-shadow-size: 1.3em;
+        --tag-remove-btn-bg--hover: black;
+        display: inline-block;
+        min-width: 0;
+        border: none;
+    }
+
+        .customLook .tagify__tag {
+            margin-top: 0;
+        }
+
+            .customLook .tagify__tag > div {
+                border-radius: 25px;
+            }
+
+            /* Do not show the "remove tag" (x) button when only a single tag remains */
+            .customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
+                /*display: none;*/
+            }
+
+        .customLook .tagify__tag__removeBtn {
+            opacity: 0;
+            transform: translateX(-6px) scale(.5);
+            margin-left: -3ch;
+            transition: .12s;
+        }
+
+        .customLook .tagify__tag:hover .tagify__tag__removeBtn {
+            transform: translateX(-6px) scale(.5);
+            opacity: 1;
+            margin-left: -1ch;
+        }
+
+        .customLook + button {
+            color: #0052BF;
+            font: bold 1.4em/1.65 Arial;
+            border: 0;
+            background: none;
+            box-shadow: 0 0 0 2px inset currentColor;
+            border-radius: 50%;
+            width: 1.65em;
+            height: 1.65em;
+            cursor: pointer;
+            outline: none;
+            transition: .1s ease-out;
+            margin: 0 0 0 5px;
+            vertical-align: top;
+        }
+
+            .customLook + button:hover {
+                box-shadow: 0 0 0 5px inset currentColor;
+            }
+
+        .customLook .tagify__input {
+            display: none;
+        }
+
+    .titleplusbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .tagify {
+        --tag-bg: #0052BF !important;
+        --tag-text-color: white !important;
+        --tag-pad: 0.5em 0.9em !important;
+        --tag-hover: #438bea !important;
+        padding: 6px 2px !important;
+        --tag-inset-shadow-size: 3.1em !important;
+        --tag-remove-bg: rgb(0 82 191) !important;
+    }
+
+    .customLook .tagify__tag {
+        margin-top: 0 !important;
+        padding: 2px !important;
+    }
+
+    .tagify__tag {
+        margin: 0 4px !important;
+    }
+
+    .tagify__tag__removeBtn {
+        order: 5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 54px;
+        cursor: pointer;
+        font: 29px/1 Arial;
+        background: var(--tag-remove-btn-bg,none);
+        color: var(--tag-remove-btn-color,#000);
+        width: 40px;
+        height: 40px;
+        margin-right: 7.66667px;
+        overflow: hidden;
+    }
+</style>

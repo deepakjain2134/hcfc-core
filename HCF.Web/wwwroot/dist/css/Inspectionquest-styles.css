@@ -1,0 +1,97 @@
+
+.dc-tree {
+    font: 16px 'Roboto',Verdana, sans-serif;
+    position: relative;
+    text-align: center;
+    background-color: #fff;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 5px;
+    width: 588px;
+    margin: 40px auto 111px;
+    padding-bottom: 20px;
+    -moz-box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    -webkit-box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+}
+.inspmessageicon img {
+    margin-bottom: 15px;
+    max-width: 62px;
+}
+.dc-tree * { box-sizing: border-box; }
+.inspbackbtn,
+.inspbackbtn:hover {
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 0;
+    padding: 12px 4px;
+    font-size: 16px;
+    text-shadow: none;
+    min-width: 244px;
+    display: inline-block;
+    height: 43px;
+    text-decoration:none;
+    background-image: linear-gradient(45deg, #3c8dbc, #387598);
+}
+.dctree-card {
+    text-align: center;
+    padding: 20px;
+    /*position: absolute;*/
+    margin: 0 auto;
+    /* background-color: #f2f2f2;*/
+    display: none;
+}
+.dctree-message {
+    padding: 10px 24px;
+    margin-bottom: 24px;
+    font-size: 18px;
+    line-height: 29px;
+}
+ [class^="dctree-answer"] {
+ padding: 14px;
+ text-align: center;
+ margin: 10px 20px;
+ box-shadow: 3px 3px 5px 2px #BDBDBD;
+ text-shadow: 1px 1px 2px black;
+}
+.dctree-controls.col-md-12 {
+    padding: 30px 36px 0;
+}
+.red {
+    background-color: red;
+    color: white;
+    cursor: pointer;
+}
+
+.green {
+    background-color: green;
+    color: white;
+    cursor: pointer;
+}
+
+.blue {
+    /* background-color: #0000ff;*/
+    color: white;
+    cursor: pointer;
+    background-color: rgb(221, 107, 85);
+    box-shadow: rgba(221, 107, 85, 0.8) 0px 0px 2px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px inset;
+    border-radius: 4px;
+    margin: 0;
+    padding: 12px 4px;
+    font-size: 16px;
+    text-shadow: none;
+}
+
+.orange {
+    /* background-color: #ffa500;*/
+    color: white;
+    cursor: pointer;
+    background-color: gray;
+    box-shadow: rgb(128 128 128) 0px 0px 2px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px inset;
+    border-radius: 4px;
+    margin: 0;
+    padding: 12px 4px;
+    font-size: 16px;
+    text-shadow: none;
+}

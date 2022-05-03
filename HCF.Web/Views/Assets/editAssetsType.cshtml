@@ -1,0 +1,78 @@
+﻿@model HCF.BDO.AssetType
+
+@{
+    ViewBag.Title =Localizer["UpdateAssetType"];
+}
+<
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            @((Model != null && Model.TypeId > 0) ? Localizer["UpdateAssetType"] : Localizer["TitleAssetsType"])
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.TypeId)
+                       
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.Name)
+                                    </div>
+
+                                    <div class="form-group">
+                                        @*@Html.HiddenFor(model => model.AssetTypeCode)*@
+                                        @Html.LabelFor(model => model.AssetTypeCode)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(model => model.AssetTypeCode, new { @class = "form-control disabled", required = "required" })
+                                        @Html.ValidationMessageFor(model => model.AssetTypeCode)
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-1">
+                                                @Html.LabelFor(model => model.IsActive)
+                                            </div>
+                                            <div class="col-md-1">
+                                                @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-control" })<span>&nbsp;</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 assetstypebtn">
+                                    <button type="submit" class="btn comm-button">@Localizer["Save"] </button>
+                                    @Html.ActionLink("Cancel", "assetstype", new { @class = "btn comm-Cancelbutton" })
+                                </div>
+                            </div>
+                       
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        var typeId = '@((Model !=null)? Model.TypeId : 0)';
+        if (typeId > 0 ) { 
+            $('#AssetTypeCode').attr("readonly", "readonly");
+            $('#AssetTypeCode').attr("title", "Asset Type Code can't be changed");
+
+        } else {
+            $('#AssetTypeCode').removeAttr("readonly");
+            $('#AssetTypeCode').removeAttr("title");
+        }
+    });
+</script>
+

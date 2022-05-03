@@ -1,0 +1,55 @@
+﻿@model HCF.BDO.Assets
+@{
+    ViewBag.Title = Localizer["TitleAssets"];
+}
+
+    <section class="content-header">
+        <h1>
+            @Localizer["TitleAssets"]
+        </h1>
+    </section>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                      
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.AssetTypeId)
+                                        @Html.DropDownListFor(model => model.AssetTypeId, new SelectList(ViewBag.AssetsTypes, "TypeId", "Name"),
+                                        "Select Type",
+                                      new { @class = "form-control" })
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.AssetCode)
+                                        @Html.TextBoxFor(model => model.AssetCode, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.AssetCode)
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Name)
+                                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Name)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button_Div">
+                                <input type="submit" value='@Localizer["Add"]' class="btn comm-button" />
+                                @Html.ActionLink("Cancel", "Assets", "", new { @class = "btn comm-Cancelbutton" })
+                            </div>
+                       
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+

@@ -1,0 +1,302 @@
+﻿@{
+    ViewBag.Title = "Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Upload Inspection
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-sm-4 col-left">
+                <div class="box box-primary finalizeleft_view" id="Assets_list">
+                    @await Component.InvokeAsync("AssetsAsset")
+                </div>
+            </div>
+            <div class="col-md-9 col-sm-8">
+                <div class="box box-primary">
+                    <div class="row tablelist-topform">
+                        <div class="col-md-4 form-group">
+                            <label>Buildings</label>
+                            @*@Html.BuildingDropDownList("drpBuildings", 0, "Select Building", new {
+            @class = "form-control selectyear select_group", required = "required" })*@
+                            <buildingdropdownList firsttext="Select Building"
+                                                  required="required"
+                                                  class="form-control selectyear select_group"
+                                                  selectedvalue="0"
+                                                  name="drpBuildings">
+                            </buildingdropdownList>
+
+                        </div>
+                        <div class="col-md-4 form-group" id="floorLoad">
+                            
+                            @*@Html.Action("FLoorDDL", "Common", new
+             {
+            buildingId = 0,
+                 selectedValue = 0,
+            firstValue = "0",
+                 firstText = "All"
+             })*@
+                            @await Component.InvokeAsync("CommonFLoorDDL", new
+                       {
+                           buildingId = 0,
+                           selectedValue = 0,
+                           firstValue = "0",
+                           firstText = "All"
+                       })
+
+                        </div>
+                        <div class="col-lg-4 form-group" id="routefltr">
+                            <label>Route</label>
+                            <select id="ddlroutefltr" class="form-control"></select>
+                        </div>
+
+
+                        <div class="buildingFlex" id="dateBox">
+                            <div class="col-md-4 form-group">
+                                @*Inspection Date: (Inspection Date is the review date from the inspection report being uploaded)<br>*@
+                                <input type="text" name="inspectiondate" class="datepicker form-control inspdate" id="inspectiondate" readonly="readonly" />
+                            </div>
+                            <div class="col-md-8 form-group">
+                                <a data-toggle="modal" id="btnuploadfile" class="documentImg inspmodal-btn" data-target="#modal-container">
+                                    @*<img src="@Url.Content("~/dist/img/add_documents_icon.png")" />*@
+                                    @*<sup id="attchFileCount"></sup>*@
+                                    Add Document
+                                </a>
+
+                                <a id="inspectionimg" alt="" data-toggle="modal" data-target="#insCommentModal"
+                                   class="commentImg inspmodal-btn">
+                                    @*<img src="@Url.Content("~/dist/img/add_comment_icon.png")" />*@
+                                    Add Comment
+                                </a>
+                            </div>
+                            <div class="col-md-12">
+                                <label id="lblInspectionComment"></label>
+                            </div>
+                            <div class="col-md-12">
+                                <img class="img_prev" id="imagePreview_0" alt="" />
+                                <label id="lblfilemsg" style="float:right;display:none">One file selected</label>
+                            </div>
+                            <div class="col-md-12">
+                                <div id="file-upload-list" class="inspectattached">
+                                    <div id="file-lists">
+                                        <label id="lbldocmsg" style="display:none">Documents currently attached:</label>
+                                        <ul class="col-lg-12 attachfileitems"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <input type="hidden" id="inspectionComment" />
+                                <input type="hidden" name="fileContent" id="fileContent" />
+                                <input type="hidden" name="fileName" id="fileName" />
+                                <input type="hidden" name="attachFiles" value="" id="attachFiles" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="assets_view">
+                                </div>
+                            </div>
+                        </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="insCommentModal" role="dialog">
+    <div class="modal-dialog" style="max-width: 60%;">
+        
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Comment</h4>
+            </div>
+            <div class="modal-body">
+                <textarea name="text" cols="40" rows="5" class="form-control" id="insCommenttxt"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-button" data-dismiss="modal" id="insSaveComment">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Assets/Inspection.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<script>
+    var attachmentid = undefined;
+    var Inspid = 0;
+
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You want to remove this File",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, remove it",
+            closeOnConfirm: true
+        },
+            function () {
+                swal("Deleted!", "Your file has been removed.", "success");
+                $("#lidv_" + TFileId).remove();
+                deleteattachfile(TFileId);
+            });
+    });
+
+
+    $(document).ready(function () {
+
+        var assetid = @ViewBag.Assetsid;
+        if (assetid != "" || assetid>0) {
+            $('#cb2' + '@ViewBag.Assetsid').closest(".list").find("a.assetcat").trigger("click");
+            $('#cb2' + '@ViewBag.Assetsid').trigger("click");
+            $('#cb2' + '@ViewBag.Assetsid').prop("checked", true);
+
+            if (getParameterByName('inspectionid') != undefined && getParameterByName('inspectionid') != null && parseInt(getParameterByName('inspectionid')) > 0) {
+                debugger
+                Inspid = getParameterByName('inspectionid');
+                $("#inspectiondate").val(localStorage.getItem('InspDate'));
+                $("#inspectiondate").addClass("disable");
+            } else {
+
+                $(".inspdate").datepicker("setDate", new Date());
+
+                localStorage.removeItem('InspDate');
+                $("#inspectiondate").removeClass("disable");
+            }
+            if (getParameterByName('Isupload') != undefined || getParameterByName('Isupload') != null || getParameterByName('Isupload') > 0 ) {
+
+                debugger
+            //    drpBuildings.val(localStorage.getItem('drpBuildings'));
+            //    $('#floors').val(localStorage.getItem('floors'));
+            //    $('#ddlroutefltr').val(localStorage.getItem('ddlroutefltr'));
+
+               
+                if (getParameterByName('Isupload') > 0) {
+                    attachmentid = parseInt(localStorage.getItem('attachmentid').split('_')[0]);
+                    debugger
+                    BindUploadFile();
+                }
+
+               
+            //    drpBuildings.trigger("change");
+
+
+            }
+            
+           
+
+             
+            }        
+
+
+        $(document).on('click', '.delete', function (e) {
+            e.preventDefault();
+
+            var ctrName = $(this);
+            var activityId = ctrName.attr("activityId");
+
+            swal({
+                html: true,
+                title: "Delete Document",
+                text: 'Are you sure to delete this file?',
+                type: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                          //  url: '/Goal/RemoveEpDoc' + "?activityId=" + activityId,
+                           url: '@Url.Action("RemoveEpDoc", "Goal")' ,
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { activityId: activityId,  __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+                            success: function (data) {
+                                ctrName.closest("tr").remove();
+                                $('div[activityid="' + activityId + '"]').remove();
+                                $("#lbldocmsg").hide();
+                                swalalert("File has been successfully deleted.");
+                                location.reload();
+
+                            }
+                        });
+                    }
+                });
+        });
+    });
+    function BindUploadFile() {
+    // debugger;
+        var epId = localStorage.getItem('epId');// attachmentid;
+        var inspectionid = Inspid;
+        if (epId != undefined) {
+
+
+          $.ajax({
+              url: CRxUrls.Assets_GetFileDetailsById + "?epId=" + epId + "&inspectionid=" + inspectionid ,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+
+                if (data.result != null && data.result.length>0) {
+                    var filelst = "";
+                    $("#lbldocmsg").show();
+                    //filelst += '<ul class="col-lg-12 attachfileitems">';
+                    for (var i = 0; i < data.result.length; i++) {
+                        var filePath = data.result[i].filePath;
+                        // filelst += '<div class=""><div class="epdocol2 gray" style="display: inline-flex;"><span class="epdocol1"><a href="/Common/ImagePreview?imgSrc=' + data.result[0].Path +'&title=Preview" class="modal-link" title="View"><img src="/dist/Images/Icons/detail_icon.png" class="epdoc-responsive" /></a></span><span class="epfileBox">' + data.result[0].DocumentName + '</span><span>Doc. Review Date:&nbsp;</span>' + data.result[0].Text_DtEffectiveDate + '&nbsp;|&nbsp;<span>Uploaded By: &nbsp;</span>' + data.result[0].UserProfile["FullName"] + '&nbsp;<span>on</span>&nbsp;' + data.result[0].Text_CreatedDate + '</div><div class="epdocol3">&nbsp;</div></div >'
+                        filelst += '<div id="UploadDocFile" class=' + data.result[i].ActivityId + '><div class="epdocol2 gray" style="display: inline-flex;"><span class="epdocol1"><a href="/Common/ImagePreview?imgSrc=' + data.result[i].Path + '&title=Preview" class="modal-link" title="View"><img src="/dist/Images/Icons/detail_icon.png" class="epdoc-responsive" /></a></span><span class="epfileBox">' + data.result[i].DocumentName + '</span><span>Uploaded By: &nbsp;</span>' + data.result[i].UserProfile["FullName"] + '&nbsp;<a href="#" activityId=' + data.result[i].ActivityId + ' title="Delete" class="delete" style="position:inherit;"><img src="/dist/Images/Icons/delete.png" alt="Delete"></a></div><div class="epdocol3">&nbsp;</div></div >'
+                        $("#attachFiles").val(data.result[i].FileId);
+                    }
+                    //filelst += '</ul>';
+                    if ($("#file-upload-list").find("#file-lists").find("ul").length > 0 ||
+                        typeof $("#file-upload-list").find("#file-lists").find("ul") !== 'undefined') {
+                        $("#file-upload-list").find("#file-lists").find("ul").append(filelst);
+                    } else {
+                        $("#file-upload-list").find("#file-lists").find("ul").html(
+                            '<div id="file-lists"><ul class="col-lg-12 attachfileitems">' + filelst + '</ul></div>');
+                    }
+                }
+                else {
+                    $("#lbldocmsg").hide();
+                    $("#attachFiles").val("");
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+    }
+    }
+
+</script>
+

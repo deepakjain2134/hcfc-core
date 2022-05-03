@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewBag.Title = "Import Excel";
+}
+
+<h2>Import Excel</h2>
+
+@using (Html.BeginForm("ImportExcel", "Common", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+   
+        <table id="export" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Upload File
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="file" id="FileUpload1" name="file" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <input type="submit" value=' @Localizer["Upload"] ' class="btn btn-primary" />
+   
+}

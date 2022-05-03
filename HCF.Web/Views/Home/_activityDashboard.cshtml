@@ -1,0 +1,339 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+    var RecordCounts = new HCF.BDO.UserRecordsCount();
+    if (ViewBag.RecordCounts != null)
+    {
+        RecordCounts = (HCF.BDO.UserRecordsCount)ViewBag.RecordCounts;
+    };
+}
+
+@foreach (var item in Model)
+{
+    <tr id="ep_@item.EPDetailId" substatus="@item.Inspection.SubStatus">
+        <td style="display:none">
+            @item.Inspection.Status
+        </td>
+        <td style="display:none">@item.Standard.CategoryId</td>
+        <td>
+            <div class="activity-firstCol">
+
+                <label class="processType-Sprite @commonModelFactory.GetInspectionStatus(item.Inspection.SubStatus)"></label>
+
+                <a href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId })">
+                    <p>
+                        @item.StandardEp
+                        <sup>
+                            @if (item.Priority == 1)
+                            {
+                                <img class="flam-icons" src="@Url.Content("~/dist/Images/Icons/flam_small.png")" alt="" />
+                            }
+                        </sup>
+
+                    </p>
+                    @if (item.LastUpdatedDate != null)
+                    {
+                        <p>
+                            Revised
+                        </p>
+                    }
+
+                    @if (item.IsUpComingEp && @item.EffectiveDate.Value.ToFormatDate() == DateTime.Now.ToFormatDate())
+                    {
+                        <p>
+                            (@item.EffectiveDate.Value.ToFormatDate()) <span>UpComing</span>
+                        </p>
+                    }
+                    else if (item.IsNewEp && item.EffectiveDate != null)
+                    {
+                        <p>
+                            (@item.EffectiveDate.Value.ToFormatDate()) <span>New</span>
+                        </p>
+                    }
+
+                </a>
+            </div>
+        </td>
+        <td>
+            @if (item.CopDetails.Count > 0)
+            {
+                foreach (var cop in item.CopDetails)
+                {
+                    <a href="javascript:void(0);"
+                       tabindex="0" data-trigger="focus"
+                       class="descriptions" rel='popover'
+                       data-placement='right'
+                       data-original-title='@cop.RequirementName'
+                       data-content='@cop.CoPRequirement'>@cop.RequirementName</a>
+
+                }
+            }
+        </td>
+        <td>
+            <ep-risk-score risk-score="@item.Scores.Name">
+            </ep-risk-score>
+        </td>
+        <td>
+
+            @if (item.Binders.Count > 0)
+            {
+                foreach (var binder in item.Binders.GroupBy(x => x.BinderId, (key, g) => g.OrderBy(e => e.BinderName).First()))
+                {
+                    <a href="@Url.RouteUrl("getepdocbybinder", new { id = binder.BinderId })">
+                        <span>@($"{binder.BinderName} ")</span>
+                    </a>
+                }
+            }
+        </td>
+        <td>
+            @if (item.Assets.Count > 0)
+            {
+                foreach (var asset in item.Assets)
+                {
+                    if (!asset.IsRouteInsp)
+                    {
+                        <a href="@Url.Action("InsAssets", "Assets", new { assetId = asset.AssetId })">
+                            <span>@asset.Name</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.RouteUrl("routeInspection")">
+                            <span>@asset.Name</span>
+                        </a>
+                    }
+                }
+            }
+        </td>
+        <td style="text-align:left;">
+            @await Html.PartialAsync("_EpDescription", item.Description,
+                                 new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                               {{ "minLength", "100" }, { "standardEp", @item.StandardEp }}
+                                )
+
+        </td>
+        <td>
+            @if (item.Inspection.DueDate.HasValue && item.Inspection.DueDate != default(DateTime) && item.InitialInspDate == null)
+            {
+                if (item.EpTransStatus == "C")
+                {
+                    <span class="tooltiplock" style="clear: both; display: block; padding: 5px;">
+                        @item.Inspection.DueDate.Value.ToClientTime().ToFormatDate()
+                        <strong class="tooltipTitlelock">Next Inspection Date - Compliant</strong>
+                    </span>
+                }
+                else if (item.EpTransStatus == "I")
+                {
+                    <span class="inProgress tooltiplock" style="clear: both; display: block; width: 100%;  padding: 5px;">
+                        @($"{item.Inspection.DueDate.Value.ToFormatDate()}")
+                        <strong class="tooltipTitlelock">In Progress</strong>
+                    </span>
+                }
+                else if (item.EpTransStatus == "P")
+                {
+                    <span class="tooltiplock" style="clear: both; display: block; width: 65%;">
+                        @item.Inspection.DueDate.Value.ToFormatDate()
+                        <strong class="tooltipTitlelock">Next Inspection Date pending</strong>
+                    </span>
+                }
+                else if (item.EpTransStatus == "G" && (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || commonModelFactory.IsSystemAdminUser()))
+                {
+                    if (item.Inspection.Status != 0)
+                    {
+                        <span class="dueDate tooltiplock">
+                            @item.Inspection.DueDate.Value.ToFormatDate()
+                            <strong class="tooltipTitlelock">Grace Date pending</strong>
+                        </span>
+                        <br />
+                        if (item?.Inspection?.GraceDate.Value != null)
+                        {
+                            <small class="dueDate" title="@((item.Inspection.GraceDate.Value - DateTime.Now.Date).Days) Days Left">
+                                (Grace)  @item.Inspection.GraceDate.Value.ToString("MMM", System.Globalization.CultureInfo.InvariantCulture) /@item.Inspection.GraceDate.Value.Year
+                            </small>
+                        }
+
+                        @*if (DateTime.Now.Date <= item.Inspection.GraceDate)
+                            {
+                                <span class="dueDate" title="Due Date pending" style="background: yellow;;text-align: center;padding: 5px;color: white;">
+                                    @if (item.Inspection.GraceDate != null)
+                                    {
+                                        @item.Inspection.GraceDate.Value.ToClientTime().ToFormatDate()
+                                    }
+                                </span>
+                            }*@
+                    }
+                }
+
+                else if (item.EpTransStatus == "D" || item.EpTransStatus == "G")
+                {
+                    <span class="dueDate tooltiplock">
+                        @item.Inspection.DueDate.Value.ToFormatDate()
+                        <strong class="tooltipTitlelock">Due date Passed</strong>
+                    </span>
+                }
+                else
+                {
+                    <span class="dueDate tooltiplock" style="width: 100%;  padding: 5px;">
+                        @if (DateTime.Now.Date >= item.Inspection.DueDate)
+                        {
+                            @item.Inspection.DueDate.Value.ToFormatDate();
+                        }
+                        <strong class="tooltipTitlelock">Due date Passed -Common</strong>
+                    </span>
+                }
+
+            }
+            else if (!item.IsInspectionDateFixed)
+            {
+                <span class="dueDate tooltiplock" style="width: 100%;  padding: 5px;">
+                    <a href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId })" style="color: #333;">
+                        Start Review
+                    </a>
+                    <strong class="tooltipTitlelock">Not inspected yet</strong>
+                </span>
+            }
+            else
+            {
+                if (item.IsInspectionDateFixed)
+                {
+                    <span class="tooltiplock">
+
+                        <strong class="tooltipTitlelock">Custom Scheduled Date</strong>
+                        @CommonUtility.GetScheduleFixedDate(item.EPFrequency.FirstOrDefault().FrequencyId, Convert.ToDateTime(item.InitialInspDate), 0).ToFormatDate()
+                        <i class="fa fa-lock"></i>
+                    </span>
+                }
+            }
+        </td>
+        <td class="activityUser">
+            <a href="@Url.Action("EpUserView", "Common", new { epDetailId = item.EPDetailId, standardEP = item.StandardEp })"
+               class="modal-link">
+                @{
+                    var users = item.EPUsers.Where(x => x.IsCRxUser == false).ToList();
+
+                    const int showCounts = 3;
+                    var totalCount = users.Count;
+                    var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+                    if (totalCount > showCounts)
+                    {
+                        <span>@($"{usersText} +  {totalCount - showCounts}")</span>
+                    }
+                    else
+                    {
+                        <span>
+                            @usersText
+                        </span>
+                    }
+                }
+            </a>
+        </td>
+        <td>
+
+            @item.GetFrequencyName()
+            <sup style="font-size: 100%;">
+
+                @if (item.IsCustomFrequency)
+                {
+                    <i class="fa fa-clock-o"></i>
+                }
+            </sup>
+        </td>
+        <td>
+            <a href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId })">
+                <span>
+                    <img src="@commonModelFactory.ReturnImagePath(Convert.ToInt32(item.DocStatus), item.IsDocRequired)"
+                         title="@commonModelFactory.ReturnImageTooltip(Convert.ToInt32(item.DocStatus), item.IsDocRequired)"
+                         alt="" />
+                </span>
+            </a>
+        </td>
+    </tr>
+}
+
+<script>
+
+    var isShowMoreRecords = '@ViewBag.isShowMoreRecords';
+
+    $(document).ready(function () {
+        debugger
+        var monthNames = ["Jan", "Feb", "Mar","Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct","Nov", "Dec"];
+
+
+            var userDataCount = {
+                TotalEps: '@RecordCounts.TotalEps',
+                TotalEcEps: '@RecordCounts.TotalEcEps',
+                TotalLsEps: '@RecordCounts.TotalLsEps',
+                TotalEmEps: '@RecordCounts.TotalEmEps',
+                TotalDueEps: '@RecordCounts.TotalDueEps',
+                TotalFailedEps: '@RecordCounts.TotalFailedEps',
+                TotalInProgressEps: '@RecordCounts.TotalInProgressEps',
+                TotalCompletedEps: '@RecordCounts.TotalCompletedEps'
+            };
+
+
+        //var catId = parseInt($("input[name='dashEPCat']:checked").val());
+        //debugger;
+        //if (catId === 0) {
+        //    $("#txtEpEcCount").html(`(${userDataCount.TotalEcEps})`);
+        //    $("#txtEpLsCount").html(`(${userDataCount.TotalLsEps})`);
+        //    $("#txtEpEmCount").html(`(${userDataCount.TotalEmEps})`);
+        //    $("#txtEpAllCount").html(`(${userDataCount.TotalEps})`);
+        //}
+
+        $("#txtEpEcCount").html(`(${userDataCount.TotalEcEps})`);
+        $("#txtEpLsCount").html(`(${userDataCount.TotalLsEps})`);
+        $("#txtEpEmCount").html(`(${userDataCount.TotalEmEps})`);
+        $("#txtEpAllCount").html(`(${userDataCount.TotalEps})`);
+
+        $("#btn_Inprogress").val(`In-Progress (${userDataCount.TotalInProgressEps})`);
+        $("#btn_pastdue").val(`Past Due (${userDataCount.TotalFailedEps})`);
+        $("#btn_Completed").val(`Completed (${userDataCount.TotalCompletedEps})`);
+
+
+        $('.datespan').each(function () {
+                try {
+                    var datetime = $(this).attr("datetime");
+                    var localDate = new Date(datetime + " UTC");
+                    var monthIndex = localDate.getMonth();
+                    var month = monthNames[monthIndex];
+                    var localDatestring = month + " " + localDate.getDate() + ", " + localDate.getFullYear();
+                $(this).html(localDatestring);
+                }
+                catch (ex) {
+                    console.warn("Error converting date time", ex);
+                }
+            });
+
+
+        //$('.descriptions').popover({
+        //    trigger: 'focus'
+        //});
+
+        $("#btn_all").addClass("active");
+
+        @*function changeButtontext() {
+            if ('@ViewBag.isShowMoreRecords' == 'False') {
+                $("#btnloadMore").html("NO MORE RECORDS").addClass('disable');
+            }
+        }*@
+    });
+
+
+
+    $(".descriptions").popover({ trigger: "manual", html: true, animation: false })
+        .on("mouseenter", function () {
+            var _this = this;
+            $(this).popover("show");
+            $(".popover").on("mouseleave", function () {
+                $(_this).popover('hide');
+            });
+        }).on("mouseleave", function () {
+            var _this = this;
+            setTimeout(function () {
+                if (!$(".popover:hover").length) {
+                    $(_this).popover("hide");
+                }
+            }, 50);
+        });
+</script>

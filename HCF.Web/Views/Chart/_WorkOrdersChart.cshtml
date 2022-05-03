@@ -1,0 +1,48 @@
+﻿<div id="wocontainer" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<input type="hidden" id="woChart" value="@ViewBag.WorkOrderChart" />
+<script>
+
+    var chartvalue = JSON.parse($("#woChart").val());
+    Highcharts.chart('wocontainer', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Work Orders'
+        },
+        xAxis: {
+            categories: chartvalue.ChartX.categories,
+            crosshair: true
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Total Work Orders (#)'
+            },
+            stackLabels: {
+                enabled: true,
+                style: {
+                    fontWeight: 'bold',
+                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },       
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        series: getSeries(chartvalue.AssetSeries)
+    });
+
+</script>

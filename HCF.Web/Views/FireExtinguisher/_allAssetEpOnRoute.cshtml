@@ -1,0 +1,54 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    var first = true;
+}
+
+
+@*<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Frequency</th>
+            <th>Asset</th>
+        </tr>
+    </thead>
+    <tbody>*@
+@if (Model != null && Model.Count > 0)
+{
+    <ul class="route_ep_assets_frequency" data-toggle="buttons">
+        @foreach (var item in Model)
+        {
+            if (item.EPFrequency != null && item.EPFrequency.FirstOrDefault() != null)
+            {
+                <li>
+                    <label class="btn">
+                        <input type="radio" data-epid="@item.EPDetailId" data-assetId="@(item?.Assets?.FirstOrDefault()?.AssetId == null?item.EPFrequency.FirstOrDefault().UdFrequency.AssetId:item.Assets.FirstOrDefault().AssetId)" class="@(first ? "active'" : string.Empty)"
+                               @(first ? "checked='checked'" : string.Empty)
+                               name="drpAssetInspTypes" value="@item.EPFrequency.FirstOrDefault().Frequency.FrequencyId" />
+                        <i class="fa fa-circle-o fa-2x"></i>
+                        <i class="fa fa-dot-circle-o fa-2x"></i>
+
+                        @Html.Raw(string.Format("{0}<br/>{1}<br>{2}", item.EPFrequency.FirstOrDefault().Frequency.DisplayName, item.StandardEp, item?.Assets?.FirstOrDefault()?.Name))
+
+                    </label>
+                </li>
+
+                @*<tr>
+                        <td>
+                            <input type="radio" data-epid="@item.EPDetailId" data-assetId="@item?.Assets?.FirstOrDefault()?.AssetId" class="@(first ? "active'" : string.Empty)"
+                                   @(first ? "checked='checked'" : string.Empty)
+                                   name="drpAssetInspTypes" value="@item.EPFrequency.FirstOrDefault().Frequency.FrequencyId" />
+                        </td>
+                        <td>@(item.EPFrequency.FirstOrDefault().Frequency.DisplayName + {"<br>"} +item.StandardEp)</td>
+                        <td>@</td>
+
+                    </tr>*@
+
+                first = false;
+            }
+        }
+    </ul>
+}
+
+@*</tbody>
+    </table>*@

@@ -1,0 +1,110 @@
+﻿@model List<HCF.BDO.RoundCategory>
+@{
+    Layout = null;
+}
+<table id="questtbl" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none"></th>
+            <th></th>
+            <th>Round Name</th>
+            <th>Questions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var roundItems in Model)
+        {
+            foreach (var item in roundItems.RoundItems.Where(x=>x.IsOneTimeStep==false))
+            {
+                <tr>
+                    <td style="display:none">
+                        @roundItems.RoundCatId
+                    </td>
+                    <td>
+                       <input type="checkbox"
+                       class="checkBoxRoqueId"
+                       value="@item.RouQuesId"
+                       onchange="AddQuestionToCustomRounds(this,'@item.RouQuesId', '@item.RoundCatId')" /><span></span>
+                    </td>
+                    <td>
+                        @roundItems.CategoryName
+                    </td>
+                    <td>
+                        @item.RoundStep
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<script>
+
+
+
+
+    var dTable = $('#questtbl').DataTable({
+        searching: true,
+        pageLength: 20,
+        lengthChange: false,
+        bPaginate: $('#questtbl tbody tr').length > 20,
+        bInfo: false,
+        aaSorting: [],
+        language: {
+            emptyTable: "No data available in table",
+            search: "_INPUT_", //To remove Search Label
+            searchPlaceholder: "Search..."
+        },
+
+        aoColumnDefs: [
+            {
+                orderSequence: ["desc", "asc"],
+                aTargets: ['_all']
+            }
+        ],
+        //dom: "<'row'<'col-sm-12'p f>>" +
+        //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+        //    "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+        dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",
+
+    });
+
+
+
+    function AddQuestionToCustomRounds(cntrl, RoundQuestionnaireId, QuestionnaireRountCatId) {
+        //debugger;
+        $(cntrl).prop("checked",false);
+        var alertmsg = "Round question added.";
+        var roundCatId = $('#ddlRoundCat').val();
+        if(QuestionnaireRountCatId===roundCatId)
+        {
+            AlertWarningMsg("Please change round category.");
+            return false
+        }
+
+        if (roundCatId > 0) {
+            var status = false;           
+            var roundCatId = $('select#ddlRoundCat option:selected').val();
+            $.ajax({
+                url: CRxUrls.Round_AddQuestionToCustomRound +
+                    '?roundQuestionnaireId=' +
+                    RoundQuestionnaireId +
+                    "&roundCatId=" +
+                    roundCatId +
+                    "&status=" +
+                    status,
+                success: function(data) {
+                    console.log(data)
+                    if (data.status) {
+                        AlertSuccessMsg(data.message);
+                    }else
+                    {
+                        AlertWarningMsg(data.message);
+                    }
+                }
+            });
+        } else {
+            AlertWarningMsg("Please first select round category.");
+        }
+    }
+</script>

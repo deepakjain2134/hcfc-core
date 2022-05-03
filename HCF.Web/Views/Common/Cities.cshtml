@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Cities";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1> Cities </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                      
+
+                     
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="satesbox-select">
+                                        <label title="Get City By The State">State</label>
+                                        <statedropdownlist firsttext="All States"
+                                                           required="required"
+                                                           class="form-control"
+                                                           selectedvalue="0"
+                                                           name="State">
+                                        </statedropdownlist>
+                                        @*@Html.StateDropDownList("State", 0, 
+                                            "All States", new { @class = "form-control", required = "required", @onchange = "loadStates()" })*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="loadpartialstate">
+
+                            </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add City</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="loadpartialcity">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        loadStates();
+    });
+
+    $("#State").change(function () {
+        loadStates();
+    });
+
+    function loadStates() {
+        debugger;
+        let stateId = $('#State').val();
+        let state = $("#State option:selected").text();
+
+        var url = CRxUrls.Common_CityList;
+        $.get(url + "?stateId=" + stateId + "&state=" + state, function (data) {
+            $("#loadpartialstate").html('');
+            $('#loadpartialstate').html(data);
+            $('#loadpartialstate').fadeIn('fast');
+        });
+    }
+    function AddCity(CityId) {
+        debugger;
+        var url = CRxUrls.Common_AddCity;
+        $.get(url + "?CityId=" + CityId, function (data) {
+            $("#loadpartialcity").html('');
+            $('#loadpartialcity').html(data);
+            $('#loadpartialcity').fadeIn('fast');
+        });
+    }
+   
+</script>
+

@@ -1,0 +1,30 @@
+﻿@*@model IEnumerable<HCF.BDO.EPDetails>
+
+    @{
+        ViewBag.Title = "General";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+        <section class="content-header">
+            <h1>
+                General Settings
+            </h1>
+        </section>
+        <div class="container-fluid">
+
+            <div class="row">
+
+                <div class="col-lg-3 asset_list_view">
+                <div class="box box-primary">
+                    @Html.Partial("_MoreConfig")
+                </div>
+                </div>
+                <div class="col-lg-9 col-xs-12" id="Setting_Content">
+                    <div class="box box-primary">
+                        @Html.Partial("_EpAssignment", Model);
+                    </div>
+
+                </div>
+            </div>
+        </div>*@
+

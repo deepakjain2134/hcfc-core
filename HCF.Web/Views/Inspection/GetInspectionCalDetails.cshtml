@@ -1,0 +1,84 @@
+﻿@model List<HCF.BDO.Inspection>
+<input type="hidden" id="timespan" value="@ViewBag.timespan" />
+<table width="100%" id="myTable" class="table table-border">
+    <thead>
+        <tr>
+            <th style="min-width: 150px;">
+                Standard,EP
+            </th>
+            <th>
+                Risk
+            </th>
+            <th>
+                Due Date
+            </th>
+            <th>
+                Inspected
+            </th>
+            <th title="@Localizer["Users"]">
+                <img alt="@Localizer["Users"]"
+                     src="@Url.Content("~/dist/Images/Icons/dashboard_user_icon.png")"
+                     title="@Localizer["Users"]">
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderBy(x => x.DueDate).ThenByDescending(x => x.Status))
+        {
+            <tr>
+                <td>
+                    <span class="processType-Sprite @commonModelFactory.GetInspectionStatus(item.SubStatus)"></span>
+                    <a href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId})" tabindex="0" data-trigger="hover" class="descriptions" rel='popover' data-placement='right' data-original-title='@item.EPDetails.StandardEp' data-content='@item.EPDetails.Description'>
+                        <span> @item.EPDetails.StandardEp</span>
+                    </a>
+                </td>
+                <td>
+                    <ep-risk-score risk-score="@item.EPDetails.Scores.Name">
+                    </ep-risk-score>
+                 
+                </td>
+                <td>
+                    @if (item.DueDate.HasValue && item.Status != 2)
+                    {
+                        <span>@item.DueDate.Value.ToClientTime().ToFormatDate()</span>
+                    }
+                </td>
+                <td>
+                    @item.LastUpdatedDate.ToClientTime().ToFormatDate()
+                </td>
+                <td>
+                    <a href="@Url.Action("EpUserView", "Common", new { epDetailId = item.EPDetailId, standardEP = item.EPDetails.StandardEp })"
+                       class="modal-link">
+                        @{
+                            var users = commonModelFactory.RemoveCRxUsers(item.EPDetails.EPUsers);
+                            if (users.Count > 0)
+                            {
+                                if (users.Count > 1)
+                                {
+                                    <span>@($"{users[0].FullName}{" + "}{item.EPDetails.EPUsers.Count - 1}{" More"}")</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @users.FirstOrDefault().FullName
+                                    </span>
+                                }
+                            }
+                        }
+                    </a>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        $('.descriptions').popover({
+            trigger: 'hover'
+        });
+        localStorage.setItem("timespan", $("#timespan").val());
+    });
+
+</script>

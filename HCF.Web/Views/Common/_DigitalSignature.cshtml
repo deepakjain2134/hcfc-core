@@ -1,0 +1,542 @@
+﻿@model HCF.Web.ViewModels.DigitalSignatureViewModel
+
+@{
+    var signs = Model.signs;
+    var model = Model.stringarray;
+}
+
+<link rel="stylesheet" href="@Url.Content("~/dist/css/sign-stylesheet.css")">
+<div class="modal-dialog" style="max-width:768px;">
+    <div class="modal-content">
+        <div class="modal-header">
+            @*<input name="cancelButton" type="button" class="comm-Cancelbutton SignCancel" value="Cancel" />*@
+            <button type="button" class="close SignCancel" name="cancelButton">&times;</button>
+            <h4 class="modal-title">Sign:</h4>
+        </div>
+        <div class="modal-body" style="padding:15px;">
+            <div class="signature-tabs">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#newsign" aria-controls="newsign" role="tab" data-toggle="tab">New Sign</a></li>
+                    <li role="presentation"><a href="#mysign" aria-controls="mysign" role="tab" data-toggle="tab">My Sign</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="newsign">
+                        <div class="newsign">
+                            <div id="signature">
+                            </div>
+                            <div class="img_file_upload">
+                                <img src="" class="new-image" width="30px" height="50px" tempname="model[0]" filecontent="model[1]" style="display:none" alt="" />
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 signature"><input type="text" title="Signature must be 30 character only" class="form-control" id="someTextBox" placeholder="Type your name" autocomplete="off" maxlength="30"></div>
+                                <div class="col-md-12">
+                                    <div class="signaturebtnBox">
+                                        <div>
+                                            <input type="checkbox" id="chkwithoutsaving" /><span></span>
+                                            <span id="spanoverriding"><label>Inactive:</label> Will save signature without overwriting my signature</span>
+                                        </div>
+                                        <div>
+                                            <label> Style:</label>
+                                            <select id="fontFaily" class="form-control" style="display: inline-block;">
+                                                <option value="alluraregular">Allura</option>
+                                                <option value="black_jackregular">Black Jack</option>
+                                                <option value="christopherhandregular">Christopher Hand</option>
+                                                <option value="little_daysregular">Little Days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="img-out"></div>
+                            <div class="col-lg-12" style="visibility:hidden">
+                                <div id="target">
+                                </div>
+                            </div>
+                            <div class="signaturebtnBox">
+                                <p>Currently we have hand signature only on tablet version not web.</p>
+                                <div class="text-right button_Div">
+                                    <input style="display:none;" name="submitbtn" type="button" class="comm-button" value="Sign w/o saving" id="signwithoutsaving" />
+                                    <input name="submitbtn" type="button" class="comm-button" value="Save Signature" id="submitButton" />
+                                    <input name="cancelButton" type="button" class="comm-Cancelbutton SignCancel" value="Cancel" />
+                                </div>
+                            </div>
+                            @*<div>
+                                    Currently we have hand signature only on tablet version not web.
+                                </div>*@
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="mysign">
+                        <div class="mysigns">
+                            @if (signs != null)
+                            {
+                                <a class="existing-sign active" id="@signs.DigSignatureId" title="@signs.Signee">
+                                    <img src="@commonModelFactory.FilePath(signs.FilePath)" class="sign2name" />
+                                </a>
+                                <div class="text-right button_Div">
+                                    <input name="submitbtn" type="button" class="comm-button" value="Use Signature" id="submitCurrentButton" />
+                                    <input name="cancelButton" type="button" class="comm-Cancelbutton SignCancel" value="Cancel" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="hdnsignusername" value="@HCF.Web.Base.UserSession.CurrentUser.Name" />
+            <input type="hidden" id="hdnsignuserId" value="@HCF.Web.Base.UserSession.CurrentUser.UserId" />
+            @*<input type="hidden" id="hdnlocaltime" value="" />*@
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var digitalSign = {};
+
+      @if (model.Count > 0)
+      {
+        @:var fileNameCtr = '@Model.stringarray[0]';
+        @:var fileContent = '@Model.stringarray[1]';
+        @:var txtName = '@Model.stringarray[2]';
+        @:var imgPreviewClassName= '@Model.stringarray[3]';
+    }
+
+    $(document).ready(function () {
+        var txtName = $("input[name='" + fileNameCtr + "'][type=hidden]").val();
+        if (txtName != undefined) {
+           // debugger;
+            txtName = txtName.split(".")[0];
+            $("#someTextBox").val(txtName);
+            $('#target').html(txtName);
+        }
+
+
+        $(".SignCancel").click(function () {
+            $('#signAndSave').modal('hide');
+        });
+
+        drawSign();
+        $('#someTextBox').keyup(function () {
+            $('#target').html($(this).val());
+            drawSign();
+        });
+    });
+
+    $('#target').css("font-family", "alluraregular");
+
+    $(".signature").css("font-family", "alluraregular");
+
+    $("#fontFaily").change(function () {
+        var style = $(this).val();
+        $('#target').css("font-family", style);
+        $(".signature").css("font-family", style);
+    });
+
+    function drawSign() {
+        $('#target').each(function () {
+            var txt = $(this).html();
+            var img = '<img src="http://i.imgur.com/DWwRx9M.png" alt="' + txt + '" />'
+            var html = txt.replace(/\*/g, img);
+            //console.log(html);
+            $(this).html(html);
+        });
+    }
+
+    var tempScrollTop = $(window).scrollTop();
+
+    function saveSign(digitalSignatures) {
+        debugger
+        //if (fileNameCtr.split(".")[0] != undefined) {
+
+        //}
+
+            $.ajax({
+            url: "@Url.Action("SaveDigitalSign","Common")",
+            type: "POST",
+            dataType: "JSON",
+            data: { digitalSignature: digitalSignatures },
+            success: function (data) {
+                console.log(data);
+                closePopup(data.Result.DigSignatureId);
+            }
+        });
+
+
+    }
+
+
+
+    function closePopup(digSignatureId) {
+        debugger;
+        if (typeof (saveSignDone) != "undefined") {
+            if (Object.keys(digitalSign).length === 0) {
+                GetsavedSign(digSignatureId)
+            } else {
+                saveSignDone(digitalSign);
+            }
+            //$('#signAndSave').modal('hide');
+        }
+        else if (typeof (addFireDrillSignImage) != "undefined") {
+            setSignId(digSignatureId);
+            addFireDrillSignImage();
+            addCritiqueFireDrillSignImage();
+            addEducationFireDrillSignImage();
+        }
+        else {
+            setSignId(digSignatureId);
+        }
+    }
+
+    function GetsavedSign(digSignatureId) {
+        debugger;
+        var postData = { digSignatureId: digSignatureId };
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("GetDigitalSignture", "Common")",
+            data: postData,
+            success: function (data) {
+                debugger
+                GetSignDone(imgSrc, data)
+            }
+        });
+    }
+
+    function setSignId(digSignatureId) {
+        try {
+            var split = fileNameCtr.split(".");
+            var commonCtr = split.slice(0, split.length - 1).join(".");
+            var signIdControl = commonCtr.concat(".", "DigSignatureId");
+            $("input[name='" + signIdControl + "'][type=hidden]").val(digSignatureId);
+            if (window.location.href.indexOf("AddCRA") > -1 || window.location.href.indexOf("addtcra") > -1 || window.location.href.indexOf("AddPCRA") > -1 || window.location.href.indexOf("addtpcra") > -1 || window.location.href.indexOf("inspection/icra/add") > -1 || window.location.href.indexOf("INSPECTION/ICRA/ADD") > -1 || window.location.href.indexOf("icra/addinspectionicra") > -1 || window.location.href.indexOf("ICRA/ADDINSPECTIONICRA") > -1 || window.location.href.indexOf("CEILING/PERMIT") > -1 || window.location.href.indexOf("ceiling/permit") > -1 || window.location.href.indexOf("asset-device-change") > -1 || window.location.href.indexOf("ASSET-DEVICE-CHANGE") > -1 ) {
+                $("input[name='" + signIdControl + "'][type=hidden]").val(digSignatureId);
+                $("input[id='" + signIdControl + "'][type=hidden]").val(digSignatureId);
+                console.log(commonCtr);
+                var splitText = fileNameCtr.split("DSPermitSignature_");
+                if (splitText.length > 1) {
+                    var sequencesplit = splitText[1].split(".");
+                    if (sequencesplit.length > 0) {
+                        var sequence = sequencesplit[0].split(".");
+                        setControlAfterSign(sequence[0]);
+                    }
+                }
+            }
+
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function formatFullTimeAMPM() {
+        debugger;
+        var currentdate = new Date();
+
+        var hours = currentdate.getHours()
+        var minutes = currentdate.getMinutes()
+
+        if (minutes < 10)
+            minutes = "0" + minutes;
+
+        var suffix = "AM";
+        if (hours >= 12) {
+            suffix = "PM";
+            hours = hours - 12;
+        }
+        if (hours == 0) {
+            hours = 12;
+        }
+
+        var datetime =
+            (currentdate.getMonth() + 1) + "/" +
+            currentdate.getDate() + "/"
+            + currentdate.getFullYear() + " "
+            + currentdate.getHours() + ":"
+            + currentdate.getMinutes() + ":"
+            + currentdate.getSeconds();
+        return datetime + " " + suffix;
+    }
+    function formatTimeAMPM() {
+        debugger;
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        var currentdate = new Date();
+        var hours = currentdate.getHours()
+        var minutes = currentdate.getMinutes()
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+
+        //minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = hours.zeroPad() + ':' + minutes.zeroPad() + ' ' + ampm;
+
+        //datetime =
+        //    (currentdate.getMonth() + 1) + "/" +
+        //    currentdate.getDate() + "/"
+        //    + currentdate.getFullYear() + " "
+        //    + strTime;
+
+        datetime =
+            (months[currentdate.getMonth()]) + " " +
+            currentdate.getDate() + ", "
+            + currentdate.getFullYear() + " "
+            + strTime;
+
+
+        return datetime;
+    }
+    Number.prototype.zeroPad = function (length) {
+        length = length || 2; // defaults to 2 if no parameter is passed
+        return (new Array(length).join('0') + this).slice(length * -1);
+    };
+    var imgSrc;
+    $("#submitCurrentButton").click(function () {
+        debugger;
+        var signId = $(".existing-sign.active").attr("id");
+        imgSrc = $(".existing-sign.active").find("img").attr("src");
+        var signee = $(".existing-sign.active").attr("title");
+
+        if (signId) {
+            //setSignId(signId);
+            if (imgPreviewClassName != undefined && imgPreviewClassName != "") {
+                $("a." + imgPreviewClassName).find("img").attr("src", imgSrc);
+                $("a." + imgPreviewClassName).find("img").show();
+                $("a." + imgPreviewClassName).find(".imgSignName").html(signee);
+                $("#hdn_" + imgPreviewClassName).val(signee);
+                $("#hdn" + imgPreviewClassName).val("1");
+                //$("a." + imgPreviewClassName).find(".signaturebyName").html(signee);
+                $("a." + imgPreviewClassName).find(".signaturebyName").html($("#hdnsignusername").val());
+                $("a." + imgPreviewClassName).find(".signaturelocaltime").html("(" + formatTimeAMPM() + ")");
+                $("#hdn_" + imgPreviewClassName + "_LocalSignDateTime").val(formatFullTimeAMPM());
+                $("#hdn_" + imgPreviewClassName + "_CreatedBy").val($("#hdnsignuserId").val());
+                if (typeof $("#hdnLocalSignDateTime").val() !== "undefined") {
+                    $("#hdnLocalSignDateTime").val("(" + formatTimeAMPM() + ")");
+                }
+                if (typeof $("#hdnSignDoneBy").val() !== "undefined") {
+                    $("#hdnSignDoneBy").val($("#hdnsignusername").val());
+                }
+            } else {
+                $("a.img" + fileNameCtr.split(".")[0]).find("img").attr("src", imgSrc);
+                $("a.img" + fileNameCtr.split(".")[0]).find("img").show();
+                $("a.img" + fileNameCtr.split(".")[0]).find(".imgSignName").html(signee);
+                $("#hdn_" + fileNameCtr.split(".")[0]).val(signee);
+                $("#hdn" + fileNameCtr.split(".")[0]).val("1");
+                $("a.img" + fileNameCtr.split(".")[0]).find(".signaturebyName").html($("#hdnsignusername").val());
+                $("a.img" + fileNameCtr.split(".")[0]).find(".signaturelocaltime").html("("+formatTimeAMPM()+")");
+                $("#hdn_" + fileNameCtr.split(".")[0] + "_LocalSignDateTime").val(formatFullTimeAMPM());
+                $("#hdn_" + fileNameCtr.split(".")[0] + "_CreatedBy").val($("#hdnsignuserId").val());
+            }
+
+            closePopup(signId);
+            $('#signAndSave').modal('hide');
+        }
+    });
+
+
+    $("#chkwithoutsaving").change(function () {
+        debugger;
+        if ($(this).prop("checked")) {
+            $("#spanoverriding").html("Active: Will overwrite my signature after clicking “Save Signature” ");
+        }
+        else {
+            $("#spanoverriding").html("Inactive: Will save signature without overwriting my signature ");
+        }
+    })
+    $("#signwithoutsaving").click(function () {
+        var value = $(this).val();
+        signfunctionalaity(0);
+
+    });
+    $("#submitButton").click(function () {
+        var value = $(this).val();
+        if ($("#chkwithoutsaving").prop("checked")) {
+            signfunctionalaity(1);
+        }
+        else {
+            signfunctionalaity(0);
+        }
+
+    });
+
+    function signfunctionalaity(IsSign) {
+        debugger;
+        html2canvas($('#target'), {
+            onrendered: function (canvas) {
+                var myImage = canvas.toDataURL('image/png');
+                // var dataulr = canvas.toDataURL();
+                var txtvalue = $("#someTextBox").val().trim();
+                var fileName = txtvalue.replace(" ", "") + ".png";
+                digitalSign.FileName = fileName;
+                digitalSign.FileContent = myImage.split(",")[1];
+                digitalSign.Signee = $("#someTextBox").val().trim().replace(" ", "");
+                digitalSign.Image = myImage;
+                var currentdate = new Date();
+                var datetime =
+                    (currentdate.getMonth() + 1) + "/" +
+                    currentdate.getDate() + "/"
+                    + currentdate.getFullYear() + " "
+                    + currentdate.getHours() + ":"
+                    + currentdate.getMinutes() + ":"
+                    + currentdate.getSeconds();
+
+
+                var hours = currentdate.getHours()
+                var minutes = currentdate.getMinutes()
+
+                if (minutes < 10)
+                    minutes = "0" + minutes;
+
+                var suffix = "AM";
+                if (hours >= 12) {
+                    suffix = "PM";
+                    hours = hours - 12;
+                }
+                if (hours == 0) {
+                    hours = 12;
+                }
+
+                $("#hdnlocaltime").val(datetime + " " + suffix);
+                if (txtvalue != null && txtvalue != "") {
+                    if (fileNameCtr.indexOf("DSPermitSignature") >= 0 || fileContent.indexOf("DSPermitSignature") >= 0) {
+
+                        $("input[id='" + fileNameCtr + "'][type=hidden]").val(digitalSign.FileName);
+                        $("input[id='" + fileContent + "'][type=hidden]").val(digitalSign.FileContent);
+                    }
+
+                    $("input[name='" + fileNameCtr + "'][type=hidden]").val(digitalSign.FileName);
+                    $("input[name='" + fileContent + "'][type=hidden]").val(digitalSign.FileContent);
+
+
+                        debugger; //comment start
+                        if (imgPreviewClassName != undefined && imgPreviewClassName != "") {
+                            $("a." + imgPreviewClassName).find("img").attr("src", digitalSign.Image);
+                            $("a." + imgPreviewClassName).find("img").show();
+                            $("a." + imgPreviewClassName).find(".imgSignName").html(digitalSign.Signee);
+                            $("#hdn_" + imgPreviewClassName).val(digitalSign.Signee);
+                            $("#hdn" + imgPreviewClassName).val("1");
+                            $("a." + imgPreviewClassName).find(".signaturebyName").html($("#hdnsignusername").val());
+                            $("a." + imgPreviewClassName).find(".signaturelocaltime").html("(" + formatTimeAMPM() + ")");
+                            $("#hdn_" + imgPreviewClassName + "_LocalSignDateTime").val(formatFullTimeAMPM());
+                            $("#hdn_" + imgPreviewClassName + "_CreatedBy").val($("#hdnsignuserId").val());
+                            if (typeof $("#hdnLocalSignDateTime").val() !== "undefined") {
+                                $("#hdnLocalSignDateTime").val("(" + formatTimeAMPM() + ")");
+                            }
+                            if (typeof $("#hdnSignDoneBy").val() !== "undefined") {
+                                $("#hdnSignDoneBy").val($("#hdnsignusername").val());
+                            }
+
+                        } else {
+                            $("a.img" + fileNameCtr.split(".")[0]).find("img").attr("src", digitalSign.Image);
+                            $("a.img" + fileNameCtr.split(".")[0]).find("img").show();
+                            $("a.img" + fileNameCtr.split(".")[0]).find(".imgSignName").html(digitalSign.Signee);
+                            $("#hdn_" + fileNameCtr.split(".")[0]).val(digitalSign.Signee);
+                            $("#hdn" + fileNameCtr.split(".")[0]).val("1");
+                            $("a.img" + fileNameCtr.split(".")[0]).find(".signaturebyName").html($("#hdnsignusername").val());
+                            $("a.img" + fileNameCtr.split(".")[0]).find(".signaturelocaltime").html("(" + formatTimeAMPM() + ")");
+                            $("#hdn_" + fileNameCtr.split(".")[0] + "_LocalSignDateTime").val(formatFullTimeAMPM());
+                            $("#hdn_" + fileNameCtr.split(".")[0] + "_CreatedBy").val($("#hdnsignuserId").val());
+                        }
+
+                    //comment end
+
+
+
+                    var IsOverride = false;
+
+                    if (IsSign == 1) {
+                        IsOverride = true;
+                    }
+
+
+
+                    //setSignId();
+                    //var digitalSignatures = [];
+                    var digitalSignature = {
+                        FileContent: digitalSign.FileContent,
+                        FileName: fileName,
+                        Signee: digitalSign.Signee,
+                       /* TConstId: tconstId,*/
+                        IsSignOverride: IsOverride,
+                        LocalSignDateTime: datetime
+                    };
+                    //if (IsSign == 1) {
+                    saveSign(digitalSignature);
+                   // }
+                    //if (typeof (saveSignDone) != "undefined") {
+                    //    saveSignDone(digitalSign);
+                    //    //$('#signAndSave').modal('hide');
+                    //}
+                    $('#signAndSave').modal('hide');
+                }
+                else {
+                    AlertWarningMsg("Signature can not be blank please make a signature first!", "Message");
+                }
+                $(window).scrollTop(tempScrollTop);
+            }
+        });
+    }
+</script>
+
+
+<style>
+    .signature input::placeholder {
+        font-size: 50px;
+    }
+
+    .signature-tabs a {
+        color: #555;
+        display: block;
+    }
+
+    .modal-content {
+        box-shadow: 0px 0px 10px #010101 !important;
+    }
+
+    .img_file_upload {
+        display: inline-block;
+        float: none;
+    }
+
+    .img_prev_upload {
+        margin: 0 auto;
+        display: list-item;
+        margin-top: -24px;
+        float: none;
+        width: 200px;
+        height: auto;
+    }
+
+    .signature {
+        margin-bottom: 5px;
+    }
+
+        .signature input[type="text"] {
+            font-size: 50px;
+            border: 1px solid rgb(238, 238, 238);
+            padding: 26px 60px;
+            height: 114px;
+            text-align: center;
+            color: #000;
+            background: url("/dist/Images/Icons/Sign_icon.png") no-repeat 0 0;
+        }
+
+    #target {
+        width: auto;
+        clear: both;
+        height: auto;
+        font-size: 50px;
+        padding: 0px;
+        line-height: 37px;
+        display: inline-block;
+        height: 60px;
+        padding: 0 10px;
+        margin-top: -114px;
+        white-space: nowrap;
+    }
+
+    /*img {
+        padding-right: 10px;
+    }*/
+</style>

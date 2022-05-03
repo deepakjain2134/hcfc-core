@@ -1,0 +1,90 @@
+﻿@model HCF.BDO.Steps
+@*@using (Ajax.BeginForm("SaveSteps", "Goal", new AjaxOptions { OnSuccess = "OnSuccess" }))
+    {*@
+
+<form asp-controller="Goal" asp-action="SaveSteps"
+      data-ajax-success="OnSuccess"
+      data-ajax="true" data-ajax-method="POST">
+    @Html.AntiForgeryToken()
+    
+        <h4>Goal: @((Model.MainGoal != null) ? Model.MainGoal.Goal : "Steps")</h4>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="row form-group">
+            @Html.HiddenFor(x => x.MainGoalId)
+            @Html.HiddenFor(x => x.StepsId)
+        </div>
+        <div class="row form-group">
+            <label id="lblstep" class="control-label col-md-2">Step</label>
+            @*@Html.LabelFor(model => model.Step, htmlAttributes: new { @class = "control-label col-md-2" })*@
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Step, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Step, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="row form-group divhide">
+            <label class="control-label col-md-2" for="StepType">Step Type</label>
+            <div class="col-md-10">
+                <select name="StepType" id="StepType" required="required" class="form-control">
+                    <option value="1">
+                        Compliant/NonCompliant/NA
+                    </option>
+                    <option value="2">
+                        Numerical
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <label class="control-label col-md-2" for="Status">Status</label><div class="col-md-10">
+                <input type="hidden" value="@Model.IsActive" id="stepsIsActive" name="IsActive" />
+                <div class="btn-group btn-group-toggle crxtoggle-btn" data-toggle="buttons">
+                    <label class="btn toggleGreenbtn active">
+                        <input type="radio" name="stepsOptions" class="stepsOptions" id="option1" checked value="1"> Active
+                    </label>
+                    <label class="btn toggleRedbtn">
+                        <input type="radio" name="stepsOptions" class="stepsOptions" id="option2" value="0"> Inactive
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <div class="text-right button_Div">
+                    <input type="submit" value="Save" class="comm-button" />
+                    <input type="button" value="Cancel" class="comm-Cancelbutton" id="btnStepsCancel" />
+                </div>
+            </div>
+        </div>
+    
+</form>
+<script>
+
+    $(document).ready(function () {
+        debugger;
+        if (window.location.href.indexOf("configurefloorassets") > -1) {
+            $(".divhide").hide();
+            $("#lblstep").html("ATS Name");
+        }
+
+        $("#stepsIsActive").val(true);
+        if (parseInt('@Model.StepsId') > 0) {
+            $('input[name=stepsOptions]').removeAttr('checked').parent().removeClass('active');
+            if ('@Model.IsActive' == 'True') {
+                $("input[name=stepsOptions][value=" + '1' + "]").attr('checked', 'checked').parent().addClass('active');
+            } else {
+                $("input[name=stepsOptions][value=" + '0' + "]").attr('checked', 'checked').parent().addClass('active');;
+            }
+        }
+    });
+
+
+    $(".stepsOptions").change(function () {       
+        if ($(this).val() == "1") {
+            $("#stepsIsActive").val(true);
+        } else {
+            $("#stepsIsActive").val(false);
+        }
+    });
+</script>
+

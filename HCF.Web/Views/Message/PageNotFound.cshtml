@@ -1,0 +1,38 @@
+﻿@{
+    ViewBag.Title = "Page Not Found";
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Message
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h1>Page Not Found</h1>
+                        <p>
+                            The page you requested could not be found, either contact your admin or try again. Use your browsers <br />
+                            <b>Back</b> button to navigate to the page you have previously come from
+                        </p>
+                        <br />
+                        @if (UserSession.CurrentUser.UserId > 0)
+                        {
+                            <p>OR</p>
+                            <p>
+                                You do not have permission to access the requested resource due to security restrictions.
+                                In order to gain access, please speak to your system administrator.
+                            </p>
+                            <br />
+                            <a href="@Url.RouteUrl("dashboard")" class="btn btn-large btn-info"><i class="icon-home icon-white"></i> Take Me Home</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

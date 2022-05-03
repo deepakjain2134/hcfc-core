@@ -1,0 +1,60 @@
+﻿@page "/file/{fileId:int}/details"
+
+<h3>File Details</h3>
+
+File Id:
+<div>
+    @fileId
+</div>
+
+@using HCF.Module.Survey.Model;
+
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <EditForm Model="@fileCommentModel" OnValidSubmit="@saveUserDetails">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            Comment: <InputTextArea id="code" @bind-Value="fileCommentModel.Comment" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit</button>
+    </EditForm>
+</div>
+
+<div>
+    @foreach (var fileComment in comments)
+    {
+        <div>
+            <p>Comment Goes Here: @fileComment.Comment</p>
+            <p>Date: @fileComment.CommentDateTime</p>          
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int? fileId { get; set; }
+
+    private List<FileCommentModel> comments = new List<FileCommentModel>();
+
+    private FileCommentModel fileCommentModel = new FileCommentModel();
+
+    private async Task saveUserDetails()
+    {
+        NavigationManager.NavigateTo("/files");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+
+            FileCommentModel comment = new FileCommentModel();
+            comment.Comment = "test " + i + 1;
+            comments.Add(comment);
+        }
+    }
+
+}

@@ -1,0 +1,731 @@
+﻿@model List<HCF.BDO.TInspectionActivity>
+<div class="dash-tabMenu">
+    <div class="deficiens-btn12">
+        <div class="dash-actvity-box">
+            <div class="">
+                @if (ViewBag.IsExistTagDeficiency == "false")
+                {
+                    <button type="button" id="tag_users" class="button1">Tag Users</button> 
+                }
+            </div>
+            <div class="mytageditembtn">
+                <img src="~/dist/Images/Icons//yellow_tag.png" title="Info tag">
+                <input type="button" class="button1" value="My tagged items" id="btnMytaggeditem" style="margin:4px !important;" />
+            </div>
+        </div>
+    </div>
+
+    <div class="deficiens-btn12">
+        <div class="dash-actvity-box">
+            <div style="margin-right: 3px;">
+                <div class="search_options">
+                    <deficiencydtatusdropdown name="ddlStatusdrp"
+                                              selectedvalue="1"
+                                              firsttext="Select"
+                                              class="form-control ddlbox">
+                    </deficiencydtatusdropdown>
+                </div>
+            </div>
+            <div>
+                <input type="submit" name="button" class=" btn_Deficient" id="btn_deficient" value="Deficient" />
+                <input type="submit" name="button" class=" riskAssessment" id="btn_riskAssessment" value="Deficient with risk " />
+                <input type="submit" name="button" class=" showall active" id="btn_showall" value="Show All " />
+            </div>
+            <div style="margin-left: 3px;">
+                <input type="hidden" id="IsGuestUser" value="@ViewBag.IsGuestUser" />
+                <input type="hidden" id="MyTaggedActivityId" value="@ViewBag.actIdFrmDshb" />
+                <input type="hidden" id="isdeficiencyassets" value="@ViewBag.TaggedID" />
+                @if (ViewBag.IsExistTagDeficiency == "false")
+                {
+                    <button type="button" id="createWo" class="button1">Create W/O</button>
+                }
+                <button type="button" id="btn_deficiencies" class="button1">Close Deficiencies</button>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.IsExistTagDeficiency == "TagExpired")
+{
+    <p> This tag is Expired </p> }
+else if (ViewBag.IsExistTagDeficiency == "TagNOTExists")
+{
+    <p> This tag is not Exists</p> }
+else
+{
+    <table id="myTable2" class="table table-bordered table-striped dataTable no-footer comman_checkbox" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th style="display:none">SubStatus</th>
+                <th class="sorting_desc_disabled" style="width:15px;">
+                </th>
+                <th class="sorting_desc_disabled">
+                    Type
+                </th>
+                <th></th>
+                <th>
+                    @Localizer["Asset"]
+                </th>
+                <th> @Localizer["Location"] </th>
+                <th> @Localizer["NearBy"] </th>
+                <th> @Localizer["AssetNo"] </th>
+                <th> @Localizer["LastInspectionDate"] </th>
+                <th>Inspector</th>
+
+                <th> @Localizer["WorkOrder"] </th>
+
+                <th>Close</th>
+                <th>ILSM #</th>
+                @if (ViewBag.IsExistTagDeficiency == "false")
+                {
+                    <th class="sorting_desc_disabled"> @Localizer["Details"] </th>
+                    <th class="sorting_desc_disabled"> @Localizer["History"] </th>
+                }
+
+                <th style="display:none"></th>
+                <th style="display:none">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model.OrderByDescending(x => x.SubStatus).ThenByDescending(x => x.ActivityInspectionDate.Value).ToList())
+            {
+                if (item.TFloorAssets != null)
+                {
+                    var img = (item.SubStatus == "RA") ? "RA.png" : "DE.png";
+                    var WOList = item.TInspectionDetail.SelectMany(foo => foo.InspectionSteps.Where(x => x.Status == 0 && x.IssueId.HasValue))
+                                                 .GroupBy(u => u.IssueId)
+                                                 .Select(grp => grp.ToList())
+                                                 .ToList();
+                    var isCompleted = false;
+                    var isDeleted = false;
+                    int workorderno = 0;
+                    if (WOList.Count != 0)
+                    {
+                        foreach (var items in WOList)
+                        {
+                            foreach (var lists in items)
+                            {
+                                var list = lists.WorkOrders.Where(x => x.CRxCode == "CMPLT" || x.CRxCode == "CANCL" || x.CRxCode == "CLOSE" || x.CRxCode == "").ToList();  // items.Select(x => x.WorkOrders).Where(x => x.FirstOrDefault().StatusCode != "CMPLT").ToList();
+                                if (list.Count != 0)
+                                {
+                                    isCompleted = true;
+                                    workorderno = lists.WorkOrders.Select(x => x.IssueId).FirstOrDefault();
+                                    isDeleted = lists.WorkOrders.Any(x => x.IsDeleted == true);
+                                }
+                                else   
+                                {
+                                    workorderno = lists.WorkOrders.Select(x => x.IssueId).FirstOrDefault();
+                                    isCompleted = false;
+                                }
+
+                            }
+                        }
+                    }
+
+                    <tr id="@item.ActivityId">
+                        <td style="display:none">
+                            @item.SubStatus
+                        </td>
+                        <td style="padding:14px;" class="details-control" rel='@item.ActivityId'></td>
+                        <td>
+                            <img src="@Url.Content("~/dist/Images/Icons/" + img)" class="deficiencyIcons" title="@item.SubStatus" alt="" />
+                        </td>
+                        <td class="@(item.IsWorkOrder == 2 || item.IsWorkOrder == 0 ? "woFloorAssets" : "woFloorAssets")">
+                            <input type="checkbox" id="tActivityId" class="@(item.IsWorkOrder == 2 || item.IsWorkOrder == 0 ? "woFloorAssets" : "woFloorAssets disable")" value="@item.ActivityId" assettype="@item.TFloorAssets.AssetId" assetname="@item.TFloorAssets.Assets.Name" assetNo="@item.TFloorAssets.AssetNo" />
+                            <input type="hidden">
+                            <span></span>
+                        </td>
+                        <td>
+                            @item.TFloorAssets.Assets.Name
+                        </td>
+                        <td>
+                            @commonModelFactory.GetFloorAssetShortLocation(item.TFloorAssets)
+                        </td>
+                        <td>
+                            @item.TFloorAssets.NearBy.CastToNA()
+                        </td>
+                        <td>@item.TFloorAssets.AssetNo </td>
+                        <td data-sort="@item.ActivityInspectionDate.Value.Ticks">
+                            @if (item.ActivityInspectionDate.HasValue)
+                            {
+                                @item.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime();
+                            }
+                        </td>
+                        <td>
+                            @item.UserProfile.FullName
+
+                        </td>
+
+                        <td class="cwo defici-workOrder">
+                            @{ var groupedWOList = item.TInspectionDetail.SelectMany(foo => foo.InspectionSteps.Where(x => x.Status == 0 && x.IssueId.HasValue))
+                                                                           .GroupBy(u => u.IssueId)
+                                                                           .Select(grp => grp.ToList())
+                                                                           .ToList();
+
+                                if (groupedWOList.Count == 0)
+                                {
+                                    <a onclick="RedirecttoWorkOrder('@item.ActivityId','FailSteps')">
+                                        <span>Create W/O</span>
+                                    </a> }
+                                else
+                                {
+                                    var count = groupedWOList.Count();
+                                    int wocount = 1;
+                                    <ul style="list-style:none;">
+                                        @foreach (var wo in groupedWOList)
+                                        {
+                                            if (isDeleted == true || wo.FirstOrDefault().DeficiencyCode == HCF.BDO.Enums.WODeficiencyCode.ACD.ToString())
+                                            {
+                                                <li>
+                                                    <a onclick="TaggedDeficiency('@item.ActivityId', true)">
+                                                        <span> Closed without work order</span>
+                                                    </a>
+
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li>
+                                                    <a onclick="RedirecttoWorkOrder('@wo.FirstOrDefault().IssueId','UpdateWorkOrder')">
+                                                        @wo.FirstOrDefault().WorkOrders[0].WorkOrderNumber
+                                                    </a>
+                                                    @if (count != wocount)
+                                                    {
+                                                        <span>,</span>}
+                                                    @{wocount++;}
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                    <span id="removetext">
+                                        @if (item.IsWorkOrder == 2 || item.IsWorkOrder == 0)
+                                        {
+                                            <a onclick="RedirecttoWorkOrder('@item.ActivityId','FailSteps')">
+                                                <span>Create W/O</span>
+                                            </a>
+                                        }
+                                    </span>
+                                }
+                            }
+
+                        </td>
+
+                        <td class="closedefici">
+                            @{ if (isCompleted == false || item.IsWorkOrder == 2 || item.IsWorkOrder == 0)
+                                {
+                                    if (item.TInspectionDetail.Count == 0)
+                                    {
+                                        <a class="disable" @*title="Can Not Inspect Future or already done round"*@>Close Deficiency</a> }
+                                    else
+                                    {
+                                        <a id="@item.ActivityId" onclick="DeficiencyClose(this)">
+                                            <span>Close Deficiency</span>
+                                        </a> }
+
+                                }
+                                else
+                                {
+                                    <span>Closed</span> @*<a onclick="RedirecttoWorkOrder('@workorderno','UpdateWorkOrder')">
+                                            <span>Closed</span>
+                                        </a>*@ } }
+                        </td>
+                        <td class="IncidentNo">
+
+                            @if (item.Ilsm.TIlsmId > 0)
+                            {
+                                <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = item.Ilsm.TIlsmId })">
+                                    <span>@item.Ilsm.IncidentId</span>
+                                </a> }
+                            else
+                            {
+                                if (item.MaxDrTime > 0)
+                                {
+                                    <div class="timer" time="@item.ActivityInspectionDate.Value.AddHours(item.MaxDrTime)">
+                                    </div>}
+                            }
+
+                        </td>
+                        @if (ViewBag.IsExistTagDeficiency == "false")
+                        {
+                            <td>
+                                <div class="mytagedactions">
+                                    @if (item.InspectionId.HasValue && item.InspectionId > 0)
+                                    {
+                                        <img class="hover_sign" onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = item.ActivityId })'"
+                                             src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" /> }
+                                    else
+                                    {
+                                        <img class="details"
+                                             onclick="location.href = '@Url.Action("ActivityHistoryDetails", "FireExtinguisher", new { activityId = item.ActivityId, area = "RoundInsp" })'"
+                                             src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />}
+
+
+                                    @if (item.TaggedMaster.Count > 0 && item.TaggedMaster.Any(x => x.ActiontakenEmail.Contains((HCF.Web.Base.UserSession.CurrentUser.Email))))
+                                    {
+                                        <p style="display:none">Tagged</p>
+                                        <img src="~/dist/Images/Icons/yellow_tag.png" onclick="infoTag('@item.ActivityId')" title="Action Tag"> }
+                                    else if (item.TaggedMaster.Count > 0 && item.TaggedMaster.Any(x => x.NotifyEmail.Contains((HCF.Web.Base.UserSession.CurrentUser.Email))))
+                                    {
+                                        <p style="display:none">Tagged</p>
+                                        <img src="~/dist/Images/Icons/black_tag.png" onclick="infoTag('@item.ActivityId')" title="Tagged as FYI"> }
+                                    else
+                                    {
+                                        foreach (var wo in groupedWOList)
+                                        {
+                                            if (isDeleted == true || wo.FirstOrDefault().DeficiencyCode == HCF.BDO.Enums.WODeficiencyCode.ACD.ToString())
+                                            {
+                                                <img src="~/dist/Images/Icons/white_tag.png" onclick="infoTag('@item.ActivityId')" title="Information Tag">}
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        }
+
+                        @if (ViewBag.IsExistTagDeficiency == "false")
+                        {
+                            <td>
+                                @if (item.InspectionId.HasValue && item.InspectionId > 0)
+                                {
+                                    <img class="hover_sign"
+                                         onclick="location.href ='@Url.Action("history", "Assets", new { floorAssetId = item.FloorAssetId, epId = item.EPDetailId })'"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" /> }
+                                else
+                                {
+                                    <img class="hover_sign"
+                                         onclick="location.href ='@Url.Action("ActivityHistory", "FireExtinguisher", new { area = "RoundInsp", floorAssetId = item.FloorAssetId })'"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" />}
+                            </td>
+                        }
+
+
+                        <td style="display:none;">
+                            @item.TFloorAssets.Source
+                        </td>
+                        <td style="display:none;">
+                            @*@if (item.IsDeficiency == false && item.SubStatus == "RA")*@
+                            @if (isCompleted == false || item.IsWorkOrder == 2 || item.IsWorkOrder == 0)
+                            {
+                                <span>1</span> }
+                            else
+                            {
+                                <span>2</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>}
+
+<div class="modal fade" id="OpenDraftEmailPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="DraftEmailPopup">
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="OpenTaggedDeficiencies" role="dialog">
+    <div class="modal-dialog">
+        <div id="TaggedDeficiencies">
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var assettable;
+    jQuery(document).ready(function ($) {
+        assettable = $('#myTable2').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#myTable2 tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            },
+
+            //dom: "<'row'<'col-sm-3'l><'col-sm-9'><'col-sm-12 deficienciesshorting'p f>>" +
+            //    "<'row'<'col-sm-12'<'table-res'tr>>>" +
+            //    "<'row'<'col-sm-5'i><'col-sm-7 text-right'p>>",
+
+            dom: "<'row'<'col-sm-2'l><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        });
+
+        debugger;
+        var ActivityIdFrmDashBoard = $('#MyTaggedActivityId').val();
+        var IsExistTagDeficiency = '@ViewBag.IsExistTagDeficiency';
+        var isGuestUser = $('#IsGuestUser').val()
+        if ((IsExistTagDeficiency == 'true' || IsExistTagDeficiency == 'TagNOTExists' )&& isGuestUser !="") {
+            $(".breadcrumb-arrow").remove($("<li>").hasClass('backbtn'))
+            $('.chkpassword').hide()
+            $('.liprofile').hide()
+        }
+
+        $("#ddlStatusdrp").on('change', function () {
+            //debugger;
+            var val = $(this).val();
+            if (val != "") {
+               // debugger
+                assettable.column(16).search("^" + val + "$", true, true, false).draw();
+            } else {
+                assettable.columns(16).search("").draw();
+            }
+        });
+
+        $(".timer").each(function () {
+            $(this).empty();
+            var control = $(this);
+           // console.log($(this).attr('time'));
+            var starttime =new Date('@System.DateTime.UtcNow');
+            var date1 = new Date($(this).attr('time'));
+            $(this).dsCountDown({
+                startDate: starttime,
+                endDate: date1,
+                theme: 'flat',
+                onFinish:function() {
+                    control.hide();
+                }
+            });
+        });
+
+        $("#ddlStatusdrp").trigger("change");
+
+        $('input[type=radio][name=assetsource]').change(function () {
+            console.log(this.value);
+            assettable.columns(11).search(this.value).draw();
+           // var unique = assettable.column(2).data().unique();
+        });
+        Array.prototype.Remove = function () {
+            var what, a = arguments, L = a.length, ax;
+            while (L && this.length) {
+                what = a[--L];
+                while ((ax = this.indexOf(what)) !== -1) {
+                    this.splice(ax, 1);
+                }
+            }
+            return this;
+        };
+
+        var failAssetslist = [];
+        var assetName = [];
+        var assetIds = [];
+        $(body).on("change", "input[type=checkbox][class=woFloorAssets]", function (event) {
+            // $("input[type=checkbox][class=woFloorAssets]").change(function () {
+            //debugger;
+            var ischecked = $(this).is(':checked');
+            var value = $(this).val();
+            var assetType = $(this).attr("assettype");
+            var assetname = $(this).attr("assetname");
+            var assetNo = $(this).attr("assetNo");
+            if (ischecked) {
+                assetName.push(assetname);
+                assetIds.push(assetNo);
+                failAssetslist.push({ 'assetType': assetType, 'activityId': value });
+                var uniqueNames = GetuniqueTypes();
+                if (uniqueNames.length > 1) {
+                    $(this).attr('checked', false);
+                    AlertWarningMsg('Only one asset type can be selected and added to a single work order being created.');
+                    failAssetslist = $.grep(failAssetslist, function (e) {
+                        return e.assetType != assetType;
+                    });
+                    return false;
+                }
+            }
+            else {
+                assetName.Remove(assetname);
+                assetIds.Remove(assetNo);
+                failAssetslist = $.grep(failAssetslist, function (e) {
+                    return e.activityId != value;
+                });
+            }
+        });
+
+        function GetuniqueTypes() {
+            //debugger;
+            var uniqueNames = [];
+            for (i = 0; i < failAssetslist.length; i++) {
+                if (uniqueNames.indexOf(failAssetslist[i].assetType) === -1) {
+                    uniqueNames.push(failAssetslist[i].assetType);
+                }
+            }
+            return uniqueNames;
+        }
+
+
+        $("#tag_users").click(function () {
+            //debugger
+            var valueArray = [];
+            if (failAssetslist.length == 0) {
+                AlertWarningMsg("You must first select one or more deficiencies prior to using the tag feature.");
+            } else {
+                $('input:checkbox[id^="tActivityId"]').each(function () {
+                    var $this = $(this);
+                    if ($this.is(":checked")) {
+                        valueArray.push($(this).val());
+                    }
+                });
+
+                if (valueArray.length != 0) {
+                    callTaggedUsers(valueArray, assetName, assetIds)
+                }
+            }
+        });
+
+
+        function callTaggedUsers(valueArray, assetName, assetIds) {
+           // debugger
+            failAssetslist = [];
+            var url = "@Url.Action("DraftEmailPopup", "Home")";
+            $.get(url + '?ActivityIds=' + valueArray + '&AssetName=' + assetName + '&assetIds=' + assetIds, function (data) {
+                if (data != null) {
+                    //debugger
+                    assetName.splice(0, assetName.length)
+                    assetIds.splice(0, assetIds.length)
+                    $('#DraftEmailPopup').html(data);
+                    $('#DraftEmailPopup').fadeIn('fast');
+                    $('#OpenDraftEmailPopup').show();
+                    $('#OpenDraftEmailPopup').modal('show');
+                }
+            });
+        }
+
+        $("#createWo").click(function () {
+            if (failAssetslist.length == 0) {
+                AlertWarningMsg($.Constants.Select_Atleast_One_Asset_To_Create_WO);
+            } else {
+                RedirecttoWorkOrder(failAssetslist.map(function (elem) {
+                    return elem.activityId;
+                }).join(","), 'FailSteps');
+
+            }
+        });
+
+        //debugger;
+        var index = localStorage.getItem("defPageIndex");
+        index = index != null ? index : 1;
+        // filters DE/RA/ShowAll
+        $('#btn_deficient').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(0).search("DE").draw();
+            //assettable.columns(0).search("RE").draw();
+            //assettable.columns(0).search("OP").draw();
+            var unique = assettable.column(2).data().unique();
+        });
+
+        $('#btn_riskAssessment').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(0).search("RA").draw();
+            var unique = assettable.column(2).data().unique();
+        });
+
+        $('#btn_showall').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(13).search("").draw();
+            assettable.columns(0).search("").draw();
+            if (assettable.column(2).data()) {
+               assettable.column(2).data().unique();
+            }
+        });
+
+
+        $("#btnMytaggeditem").on('click', function () {
+            $('#myTable2 tbody tr').show();
+            debugger
+            if ($(this).hasClass("active")) {
+                assettable.columns(13).search("").draw();
+                $(this).removeClass("active");
+            } else {
+                var val = "Tagged";
+                $(".button1").removeClass("active");
+                $(this).addClass("active");
+                assettable.columns(13).search(val).draw();
+            }
+        });
+
+        //debugger;
+        var mode = getParameterByName('mode');
+        if (mode != undefined && mode != null) {
+            if (mode.toLocaleLowerCase() == "ra") {
+                $('#btn_riskAssessment').click();
+            } else if (mode.toLocaleLowerCase() == "de") {
+                $('#btn_deficient').click();
+            } else {
+                $('#btn_showall').click();
+            }
+        }
+        else {
+            $('#btn_showall').click();
+        }
+            @*@if (Convert.ToString(ViewContext.RouteData.Values["mode"]) == "ra")
+            {
+                @:$('#btn_riskAssessment').click();
+            }
+            else if (Convert.ToString(ViewContext.RouteData.Values["mode"]) == "de")
+            {
+                @:$('#btn_deficient').click();
+            }
+            else
+            {
+                @:$('#btn_showall').click();
+            }*@
+
+
+
+        $('#myTable2 tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var activityId = $(this).attr("rel");
+                var url = CRxUrls.Home_FailSteps;                
+                $.ajax({
+                    url: url + "?activityId=" + activityId,
+                    type: "GET",
+                    global: false,
+                    success: function (employees) {
+                        row.child(employees, 'no-padding').show();
+                         tr.addClass('shown');
+                    }
+
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+
+
+        var isdeficiencyassets = $('#isdeficiencyassets').val();
+        if (isdeficiencyassets != "" && isdeficiencyassets != "0" ) {
+            //debugger
+            $("#ddlStatusdrp").val("");
+            assettable.columns(16).search("").draw();
+        }
+
+        if (ActivityIdFrmDashBoard != "") {
+            $('#myTable2 tbody tr').hide();
+            $('#myTable2 tbody').find('tr[id="' + ActivityIdFrmDashBoard + '"]').show()
+        }
+
+    });
+
+
+    function RedirecttoWorkOrder(Id, PageName) {
+        $("input:checkbox").prop('checked', false);
+        //debugger;
+        var urlAction = "";
+        //var assettable = $('#myTable2').DataTable();
+        var info = assettable.page.info();
+        var pageIndex = info.page;
+        localStorage.setItem("defPageIndex", pageIndex);
+        localStorage.setItem("tabName", "defeciencytab");
+        //debugger;
+        if (PageName == "FailSteps") {
+            urlAction = CRxUrls.WorkOrder_WorkOrderFailSteps;
+            window.location.href = urlAction + "?activityId=" + Id;
+        } else {
+            urlAction = CRxUrls.WorkOrder_UpdateWorkOrder;
+            window.location.href = urlAction + "?issueId=" + Id;
+        }
+    }
+
+
+    function DeficiencyClose($this) {
+        debugger;
+        var isTagged = '@ViewBag.IsExistTagDeficiency';
+        var urlAction = '';
+        var activityId = $($this).attr('id');
+        var columntext = $($this).closest('td').prev('td').text();
+        var removetext = $($this).closest('td').prev('td').find('span#removetext').text();
+        var assignWO = columntext.replace(removetext, '');
+        if ($.trim(assignWO) != "Create W/O") {
+            AlertInfoMsg("For this deficiencies work order number " + $.trim(assignWO.replace(/\s/g, '')) + " is already created, you need to close the work order to close the deficiencies");
+        } else {
+            if (isTagged != 'true') {
+                urlAction = "@Url.Action("DeficiencyCloseWO", "WorkOrder")";
+                window.location.href = urlAction + "?activityId=" + activityId;
+            } else {
+                urlAction = "@Url.Action("CloseTaggedDeficiency", "WorkOrder")";
+                $.ajax({
+                    url: urlAction + '?activityId=' + activityId + '&isClosed=' + false,
+                    type: "GET",
+                    dataType: "HTML",
+                    global: false,
+                    success: function (data) {
+                        $('#TaggedDeficiencies').html(data);
+                        $('#TaggedDeficiencies').fadeIn('fast');
+                        $('#OpenTaggedDeficiencies').modal('show');
+                    }
+
+
+                });
+            }
+        }
+    }
+
+    $('#btn_deficiencies').on('click', function () {
+       // debugger
+
+        var isTagged = '@ViewBag.IsExistTagDeficiency';
+
+        var valueArray = [];
+        $('input:checkbox[id^="tActivityId"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+              valueArray.push($(this).val());
+            }
+        });
+        if (valueArray.length != 0) {
+            for (var i = 0; i < valueArray.length; i++) {
+                var text = $('#' + valueArray[i]).find('td.defici-workOrder').text();
+                if ($.trim(text) != "Create W/O") {
+                   AlertInfoMsg("There are already work order created for some selected deficiencies, you need to close the work order to close the deficiencies");
+                    return false;
+                }
+            }
+            if (isTagged != 'true') {
+                MultipleDeficiencyClose(valueArray);
+            } else {
+                TaggedDeficiency(valueArray,false);
+            }
+        } else {
+            AlertWarningMsg('Select at least one asset to close deficiences');
+        }
+    });
+
+    function MultipleDeficiencyClose(valueArray) {
+        urlAction = "@Url.Action("DeficiencyCloseWO", "WorkOrder")";
+        window.location.href = urlAction + "?activityId=" + valueArray;
+    }
+
+
+    function TaggedDeficiency(valueArray, isClosed) {
+        debugger
+        urlAction = "@Url.Action("CloseTaggedDeficiency", "WorkOrder")";
+        $.ajax({
+            url: urlAction + '?activityId=' + valueArray + '&isClosed=' + isClosed,
+            type: "GET",
+            dataType: "HTML",
+            global: false,
+            success: function (data) {
+                $('#TaggedDeficiencies').html(data);
+                $('#TaggedDeficiencies').fadeIn('fast');
+                $('#OpenTaggedDeficiencies').modal('show');
+            }
+        });
+    }
+
+</script>

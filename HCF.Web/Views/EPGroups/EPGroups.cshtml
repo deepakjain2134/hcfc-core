@@ -1,0 +1,129 @@
+﻿@model IEnumerable<HCF.BDO.EPGroups>
+@{
+    ViewBag.Title = "GetEPGroupsList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Groups
+        </h1>
+    </section>
+        }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href='@(Url.Action("AddEPGroup", "EPGroups"))' class="pull-right">
+                                <img src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" title="Add EPGroup" alt="3d_add_button" />
+                            </a>
+                        </div>
+
+                        <table id="myTable1" class="table table-hover table-expandable table-striped">
+                            <thead style="display:none;">
+                                <tr>
+                                    <th> </th>
+                                    <th> </th>
+                                    <th> </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderBy(x => x.EPGroupName))
+                                {
+                                    <tr id='@($"tr_{item.EPGroupId}")'>
+                                        <td class="details-control" rel='@item.EPGroupId'></td>
+                                        <td>
+                                            @item.EPGroupName
+                                            <input type="hidden" id="epgroupname_@item.EPGroupId" value="@item.EPGroupName" />
+                                        </td>
+                                        <td id="epcount_@item.EPGroupId">@($"{item.StandardEps.Count}")</td>
+                                        <td>@Html.DisplayFor(modelItem => item.IsActive)<span></span></td>
+                                        <td>
+                                            @Html.ActionLink("Edit", "AddEPGroup", new { epgroupId = item.EPGroupId }, new { @class = "button1" })
+                                            <a data-toggle="modal"
+                                               data-target="#addEPsModel"
+                                               class="addEPs button1 assignepsbtns"
+                                               title="Assign EPs"
+                                               id="@item.EPGroupId" href="javascript:void(0);">Assign EPs</a>
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addEPsModel" role="dialog">
+    <div class="modal-dialog model_big" id="modelContent">
+    </div>
+</div>
+
+<script>
+    $('body').on('click', '.addEPs', function () {
+        debugger;
+        var eplurl = CRxUrls.EPGroups_EPsAssign;
+        var epgroupId = $(this).attr("id")
+        var epgroupname = $('#epgroupname_' + epgroupId ).val();
+        $.ajax({
+            url: eplurl + "?epgroupId=" + epgroupId + '&epgroupname=' + epgroupname,
+            method: "GET",
+            success: function (data) {
+                $('#modelContent').html($(data));
+            }
+        })
+    });
+
+    
+    var assettable = $('#myTable1').DataTable({
+        "searching": false,
+        "lengthChange": false,
+        "pageLength": 10,
+        "bPaginate": $('#myTable1 tbody tr').length > 5,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+    });
+
+    $('#myTable1 tbody').on('click', 'td.details-control', function () {
+        debugger;
+        var tr = $(this).closest('tr');
+        var row = assettable.row(tr);
+        if (row.child.isShown()) {
+            $('div.slider', row.child()).slideUp(function () {
+                row.child.hide();
+                tr.removeClass('shown');
+            });
+        } else {
+            var epgroupId = $(this).attr("rel");
+            var Url = CRxUrls.EPGroups_GetEPGroups;
+            debugger;
+            $.get(Url + "?epgroupId=" + epgroupId, function (data) {
+                row.child(data, 'no-padding').show();
+                tr.addClass('shown');
+            });
+            $('div.slider', row.child()).slideDown();
+        }
+    });
+
+</script>
+<style>
+    #myTable1_wrapper .dataTables_paginate {
+        float: right;
+    }
+</style>

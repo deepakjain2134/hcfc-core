@@ -1,0 +1,57 @@
+﻿@model HCF.BDO.SearchFilter
+<table id="searchresultTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Localizer["StandardEP"]
+            </th>
+            <th>
+                @Localizer["Score"]
+            </th>
+            <th>
+                @Localizer["Description"]
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.EPDetails)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StandardEp)
+                </td>
+                <td>
+                    <ep-risk-score risk-score="@item.Scores.Name">
+                    </ep-risk-score>                  
+                </td>
+                <td style="text-align:left;">
+                    @await Html.PartialAsync("_EpDescription", item.Description,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "minLength", "100" }, { "standardEp", @item.StandardEp }}
+                              )
+
+                    @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.StandardEp } })*@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    var datatable = $('#searchresultTable').dataTable({
+        "searching": false,
+        "pageLength": 20,
+        "lengthChange": false,
+        "bPaginate": $('#searchresultTable tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+
+    });
+</script>

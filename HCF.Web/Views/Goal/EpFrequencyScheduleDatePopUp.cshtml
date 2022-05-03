@@ -1,0 +1,188 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+    var standards = Model.Select(x => x.Standard).Distinct();
+}
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Schedule Date Assignment</h4>
+</div>
+<div class="modal-body">
+    <div style="height:350px;overflow-y:scroll">
+
+        <div id="standardep_tree">
+            <ul>
+                @foreach (var std in standards.GroupBy(x => new { x.StDescID, x.TJCStandard }).ToList())
+                {
+                    <li epid="0" frequencyid="0">
+                        @std.Key.TJCStandard
+                        <ul>
+                            @foreach (var ep in Model.Where(x => x.StDescID == std.Key.StDescID).ToList().OrderBy(x => x.EPNumber))
+                            {
+                                <li epid="@ep.EPDetailId"
+                                    frequencyid="@ep.EPFrequency.FirstOrDefault().FrequencyId">
+                                    @ep.EPNumber
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    @if (Model.Any())
+    {
+        <div class="row">
+           
+                <div class="col-md-12 text-left">
+                    <input type="checkbox" name="chkSelectAllEps" id="chkSelectAllEps"><span></span><label>&nbsp; Select All EPs</label>
+
+                </div>
+                <br />
+                <div class="col-md-4">
+                    <input type="text" name="scheduleDate" id="scheduleDate" class="form-control datepicker" placeholder="Select a date" />
+                </div>
+            
+        </div>
+        <button type="button" class="popupCommon-btn comm-button" id="saveScheduleDates">Apply changes</button>
+    }
+    <button type="button" class="popupCommon-btn comm-Cancelbutton" data-dismiss="modal" id="CancelUserAccountMethod">Cancel</button>
+</div>
+
+
+
+<script>
+    $(function () {
+        $("#scheduleDate").datepicker();
+        $('#chkSelectAllEps').change(function () {
+            if ($('#chkSelectAllEps').is(":checked")) {
+                $("#standardep_tree").jstree().check_all(true);
+            }
+            else {
+                $("#standardep_tree").jstree().uncheck_all(true);
+            }
+        });
+
+        $('#standardep_tree').jstree({
+            "checkbox": {
+                "keep_selected_style": false
+            },
+            "plugins": ["checkbox"]
+        }).on("check_node.jstree uncheck_node.jstree", function (e, data) {
+            if (e.type == "uncheck_node") {
+                $("#chkSelectAllEps").prop("checked", false);
+            }
+            else if (e.type == "check_node") {
+                if ($(this).jstree().get_json('#', { flat: true }).length === $(this).jstree().get_checked(true).length)
+                    $("#chkSelectAllEps").prop("checked", true);
+            }
+        });
+
+
+        $('#saveScheduleDates').click(function () {
+            debugger;
+            var scheduleDates = $("#scheduleDate").val();
+            if (scheduleDates.length == 0) {
+                AlertWarningMsg('Select Date');
+                return false;
+            }
+            debugger;
+            var checked_ids = [];
+            var checked_fids = [];
+            var selectedNodes = $('#standardep_tree').jstree().get_selected(true);
+            $.each(selectedNodes, function (index, selectedNode) {
+                console.log(selectedNode);
+               // var epId = $("#" + selectedNode).attr("epid");
+                var epId = selectedNodes[index]["li_attr"].epid;
+               // var frequencyid = $("#" + selectedNode).attr("frequencyid");
+                var frequencyid = selectedNodes[index]["li_attr"].frequencyid;
+                if (epId != undefined && parseInt(epId)>0)
+                    checked_ids.push(epId);
+                if (frequencyid != undefined && parseInt(frequencyid) > 0)
+                    checked_fids.push(frequencyid);
+            });
+            if (checked_ids.length == 0 || scheduleDates.length == 0 || checked_fids.length == 0) {
+                AlertWarningMsg('Select atleast one EP');
+                return false;
+            }
+            if ($('#chkSelectAllEps').is(":checked")) {
+                warningMsg(checked_ids, checked_fids, scheduleDates);
+            } else {
+                saveEpInspection(scheduleDates, checked_ids, checked_fids);
+            }
+        });
+
+        function warningMsg(checked_ids, checked_fids, scheduleDates) {
+            swal({
+                html: true,
+                title: "Are you sure?",
+                text: "You have selected to assign a date for All EPs. Would you like to continue?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Continue",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: true
+            },
+                function (isConfirm) {
+                    if (isConfirm) {
+                        swal({
+                            html: true,
+                            title: "Are you sure?",
+                            text: "The date chosen will be applied to selected Standards and EPs. This cannot be undone.",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Apply",
+                            cancelButtonText: "Cancel",
+                            closeOnConfirm: true,
+                            closeOnCancel: true
+                        },
+                            function (isConfirm) {
+                                if (isConfirm) {
+                                    saveEpInspection(scheduleDates, checked_ids, checked_fids);
+                                } else {
+                                    return false;
+                                }
+                            });
+                    } else
+                        return false;
+                });
+        }
+
+        function saveEpInspection(datetime, epIds,frequnctIds) {
+            $.ajax({
+                url: '@Url.Action("UpdateInspStartDate", "Goal")',
+                type: "POST",
+                contentType: 'application/x-www-form-urlencoded',
+                data: {
+                    __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                    epdetailIds: epIds,
+                    inspectiondate: datetime,
+                    frequncyIds: frequnctIds
+                      },
+                dataType: 'json',
+                success: function (result) {
+                    if (result.Result) {
+                        $('#modal-container').modal('hide');
+                                AlertSuccessMsg("Inspection date updated successfully.!");
+                                window.location.reload(true);
+                            }
+                        }
+             });
+        }
+    });
+</script>
+
+<style>
+    .ui-widget.ui-widget-content {
+        z-index: 99999 !important;
+    }
+    .modal-dialog {
+        max-width: 50%;
+    }
+    
+</style>

@@ -1,0 +1,170 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    ViewBag.Title = "ArchivedEPsReport";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Archived EPs Report
+        </h1>
+    </section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @await Html.PartialAsync("_epChapters")
+                <table id="c_myTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th> @Localizer["StandardEP"] </th>
+                            <th> @Localizer["Score"] </th>
+                            <th> @Localizer["Binder"] </th>
+                            <th> @Localizer["Asset"] </th>
+                            <th> @Localizer["Description"] </th>
+                            <th>Last Inspection Date</th>
+                            <th>EP Archived Date</th>
+                            <th>History</th>
+                            <th class="hidden">cat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var epDetails in Model)
+                        {
+                            <tr>
+                                <td>@epDetails.EPNumber</td>
+                                <td>
+                                    <ep-risk-score risk-score="@epDetails.Scores.Name">
+                                    </ep-risk-score>
+                                    
+                                </td>
+                                <td>
+
+                                    @if (epDetails.Binders.Count > 0)
+                                    {
+                                        //<span>@string.Format(",", epDetails.Binders.ToList().Select(e => e.BinderName))</span>
+                                        foreach (var binder in epDetails.Binders.GroupBy(x => x.BinderId, (key, g) => g.OrderBy(e => e.BinderName).First()))
+                                        {
+
+                                            <span>@($"{binder.BinderName} ")</span>
+
+                                        }
+
+                                    }
+                                </td>
+                                <td>
+                                    @if (epDetails.Assets.Count > 0)
+                                    {
+                                        foreach (var asset in epDetails.Assets)
+                                        {
+                                            if (!asset.IsRouteInsp)
+                                            {
+                                                <a href="@Url.Action("InsAssets", "Assets", new { assetId = asset.AssetId })">
+                                                    <span>@asset.Name</span>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.RouteUrl("routeInspection")">
+                                                    <span>@asset.Name</span>
+                                                </a>
+                                            }
+                                        }
+                                    }
+
+                                </td>
+                                <td>
+                                    @*@await Html.PartialAsync("_EpDescription", @epDetails.Description,
+        new ViewDataDictionary { { "standardEp", @epDetails.EPNumber } })*@
+
+
+                                    @await Html.PartialAsync("_EpDescription", @epDetails.Description,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "standardEp", @epDetails.EPNumber }}
+                              )
+
+                                </td>
+                                <td>
+                                    @if (epDetails.Inspection != null && epDetails?.Inspection?.InspectionId > 0)
+                                    {
+                                        <span>
+                                            @epDetails.Inspection.LastUpdatedDate.ToClientTime().ToFormatDate()
+                                        </span>
+                                    }
+
+                                </td>
+                                <td>@epDetails.LastUpdatedDate.ToFormatDate()</td>
+                                <td>
+
+                                    @if (epDetails.Inspection != null && epDetails?.Inspection?.InspectionId > 0)
+                                    {
+                                        <img class="hover_sign" onclick="location.href ='@Url.Action("EpInspectionsHistory", "Goal", new { epId = epDetails.EPDetailId , IsNonTrack =1 })'"
+                                             src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" />
+                                    }
+
+                                </td>
+                                <td class="hidden">
+                                    @epDetails.Standard.CategoryId
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        var dtable = $('#c_myTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [[7, 'desc']],
+            "pageLength": 20,
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            }
+        });
+
+
+
+        $("input[name=EPCat]:radio").change(function () {
+            // debugger;
+            var filter = this.value;
+            if (filter == "0") {
+                dtable.columns(8).search("").draw();
+
+            }
+            else {
+                dtable.columns(8).search(filter).draw();
+            };
+
+
+        });
+        $(".ePDescriptions").shorten({
+            moreText: 'read more',
+            showChars: 190,
+            lessText: 'read less'
+        });
+    </script>
+    
+}
+<style>
+    div#c_myTable_filter {
+        text-align: right;
+    }
+    .btn-group.btn-group-vertical.right_setting {
+        padding-top: 2px;
+        /* text-align: right; */
+        float: right;
+    }
+</style>

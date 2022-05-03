@@ -1,0 +1,17 @@
+﻿CREATE TABLE [dbo].[Vendors](
+	[VendorOrgId] [uniqueidentifier] NOT NULL,
+	[VendorId] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](150) NULL,
+	[Address] [nvarchar](450) NULL,
+	[RegistrationNo] [nvarchar](50) NULL,
+	[IsActive] [bit] NOT NULL,
+	[Email] [nvarchar](50) NULL,
+	[PhoneNo] [nvarchar](20) NULL,
+	[CellNo] [nvarchar](20) NULL,
+	[ContactDetails] [text] NULL,
+	[MessageToContractor] [nvarchar](max) NULL,
+	[CreatedBy] [int] NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[BuildingIds] [varchar](max) NULL,
+	[ClientNo] [varchar](50) NULL,
+);

@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Views\**" />
+    <Content Remove="Views\**" />
+    <EmbeddedResource Remove="Views\**" />
+    <None Remove="Views\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Remove="wwwroot\app\js\jstree\default\40px.png" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_1.svg" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_2.svg" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_3.svg" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_4.svg" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_5.svg" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_red_1.pdf" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_red_2.pdf" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_red_3.pdf" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_red_4.pdf" />
+    <Content Remove="wwwroot\converters\files\pdf\custom_CADViewer JS-AutoXchange - Generating Automated Hotspots\CADViewer JS-AutoXchange - Generating Automated Hotspots_red_5.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\HCF.BAL\HCF.BAL.csproj" />
+  </ItemGroup>  
+</Project>

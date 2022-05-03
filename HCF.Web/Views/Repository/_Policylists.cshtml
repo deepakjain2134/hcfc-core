@@ -1,0 +1,248 @@
+﻿@model IEnumerable<HCF.BDO.FilesRepository>
+
+<table id="policyTable" class="table table-bordered table-striped no-footer" width="100%">
+    <thead>
+        <tr>
+            <th style="display:none;">
+            </th>
+            <th style="display:none;">
+            </th>
+            <th style="display:none;"></th>
+            <th width="10%">Document Type </th>
+            <th>File Queue</th>           
+            <th>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var attachment in Model.Where(x => x.DocTypeId.HasValue && (x.DocTypeId ==-1 || x.DocTypeId ==106)).OrderByDescending(x => x.CreatedDate))
+        {
+            <tr id='@attachment.Id' draggable="true">
+                <td style="display:none;">
+                    @attachment.DocumentId
+                </td>
+                <td style="display:none;">
+                    @attachment.DocTypeId
+                </td>
+                <td style="display:none;">
+                    @attachment.DocumentId
+                </td>
+                <td width="10%">
+                    @if (attachment.DocTypeId == 106)
+                    {
+                        <img src="@Url.Content("~/dist/Images/Icons/policy_doc_icon.png")" alt="Policy" title="Policy" /><label>&nbsp;&nbsp; Policy</label>
+                    }
+                    else if (attachment.DocTypeId == 107)
+                    {
+                        <img src="@Url.Content("~/dist/Images/Icons/report_doc_icon.png")" alt="Report" title="Report" /><label>&nbsp;&nbsp; Report</label>
+                    }
+                    else if (attachment.DocTypeId == -1)
+                    {
+                        <img src="@Url.Content("~/dist/Images/Icons/sample_doc_icon.png")" alt="Sample Doc" title="Sample Doc" /><label>&nbsp;&nbsp; Sample Doc</label>
+                    }
+                </td>
+                <td id='@attachment.Id' draggable="true">
+                    <a target="_blank" href="@commonModelFactory.FilePath(attachment.FilePath)" draggable="false"> @attachment.FileName.Split('.')[0]</a>
+                </td>   
+                @*<td>
+                    @string.Format("{0} ({1})","Attached Policy #", attachment.AttachPolicyCount)                
+                </td>*@
+                <td class="align-center">
+                    <a href="" data-id="@attachment.DocumentId" class="delete">
+                        <img alt="" src="@Url.Content(HCF.Web.Models.ImagePathModel.DeleteIcon)" />
+                    </a>
+                </td>
+                <td width="12%">
+                    <input id="@($"attachment{attachment.DocumentId}")"
+                           fileid="@attachment.DocumentId"
+                           filename="@attachment.FileName"
+                           fileType="@attachment.DocTypeId"
+                           filePath="@commonModelFactory.FilePath(attachment.FilePath)"
+                           documentId="@attachment.DocumentId"
+                           type="button" value='Attach' class="btnSelectFile button1" name="submitType" />
+                    <input type="button" value='Remove' class="btnRemoveFile hide button1" />
+                </td>                
+            </tr>
+        }
+    </tbody>
+</table>
+<input type="hidden" name="selFileId" id="selFileId" value="@ViewBag.FileId" />
+<input type="hidden" name="selDocTypeId" id="selDocTypeId" value="@ViewBag.DocTypeId" />
+<input type="hidden" name="tempFileName" id="tempFileName" value="@ViewBag.TempDocFileName" />
+<script>
+    var fileTable = $('#policyTable').DataTable({
+        "searching": true,
+        "lengthChange": false,
+        "bPaginate": $('#policyTable tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        "aoColumnDefs": [{
+            'bSortable': false,
+            'aTargets': [-1, -2] /* 1st one, start by the right */
+        }],
+        dom:
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+       
+    });
+
+
+    $(document).on('click', 'a.delete', function (e) {
+        e.preventDefault();
+        var documentid = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this document!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Document_DeleteDocumentMaster + "?documentId=" + documentid,
+                    success: function (data) {
+                        swal("Deleted!", "Your document has been deleted.", "success");
+                        var urls = '@Url.Action("GetPolicylists", "Repository")';
+                        $.get(urls, function (data) {
+                            $('#loadpartial').empty();
+                            $('#loadpartial').html(data);
+                            $('#loadpartial').fadeIn('fast');
+                            filterpolicy();                            
+                        });
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+            });
+    });
+
+
+    $(document).ready(function () {
+        var fileId = $("#selFileId").val();
+        var docytypeId = $("#selDocTypeId").val();
+       
+        debugger;
+        if (docytypeId != "") {
+            $("input[name=doctypefilter][value=" + docytypeId + "]").prop('checked', true);
+            filterpolicy();
+        }
+        if (fileId > 0) {
+           // debugger;            
+            try {
+                $("#attachment" + fileId).click();
+                $(".btnRemoveFile").addClass("disabled");
+                $("#collapseOne").collapse("true");
+            } catch{
+            }
+        } else {
+            filterpolicy();
+        }
+    });
+
+    $("#policyTable").on("click", ".btnRemoveFile", function () {
+        fileObject = { fileId: 0, filePath: "", fileTye: 0, filename: "", documentId: "" };
+        fileTable.columns(0).search("").columns(2).search("").draw();
+        $(this).addClass("hide");
+        $(this).closest("tr").find(".btnSelectFile").removeClass("hide");
+        clearDetails();
+    });
+
+    $("#policyTable").on("click", ".btnSelectFile", function () {
+        var fileId = $(this).attr("fileid");
+        var tempFileName = $("#tempFileName").val();
+        var filename = $(this).attr("filename");
+        if (tempFileName.length > 0)
+            filename = tempFileName;       
+        var fileType = $(this).attr("fileType");
+        var filePath = $(this).attr("filePath");
+        var documentId = $(this).attr("documentId");
+        //console.log(fileId);
+        fileObject.fileId = fileId;
+        fileObject.fileType = fileType;
+        fileObject.filename = filename;
+        fileObject.filePath = filePath;
+        fileObject.documentId = documentId;
+        console.log(fileObject);
+        // fileView.collapse("hide");
+        policyView.collapse("show");
+        console.log($(this).parent("tr"));
+        $("#fileDetails tr").append($(this).parent("tr"));
+        if (fileId > 0) {
+            fileTable.columns(0).search(fileId).draw();
+        } else {
+            fileTable.columns(2).search(documentId).draw();
+        }
+        $(this).closest("tr").find(".btnRemoveFile").removeClass("hide");
+        $(this).addClass("hide");
+        openDetailsView();
+    });
+
+
+       function UploadBrowsefile(file) {
+        var fileExtensionas = ['pdf', 'xlsx', 'xls', 'doc', 'docx', 'csv'];
+        if (file.files.length > 0) {
+            file = file.files[0];
+            var fileName = file.name;
+            if (fileName != null) {
+                var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                if ($.inArray(fileExtension, fileExtensionas) == -1) {
+                    infoAlert("Only formats are allowed : " + fileExtensionas.join(', '));
+                } else {
+                    var fileNamewithoutext = fileName.substr(0, fileName.lastIndexOf('.'));
+                    $("#fileName").val(fileNamewithoutext);
+                    $("#lblfileName").html(fileName);
+                    $("#lbldocName").html(fileName);
+                    $("#fileext").val(fileExtension);
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        var array = reader.result.split(",");
+                        $("#FileContent").val(array[1]);
+                        var _documentMaster = {
+                            DocTypeId: $("input[name='doctypefilter']:checked").val(),
+                            FileName: fileName,
+                            FileContent: array[1]
+                        };
+                        //debugger;
+                        $.ajax({
+                            url: CRxUrls.documents_savedocumentmasters,
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { documentMaster: _documentMaster },
+                            success: function (data) {
+                                //debugger;
+                                var documentId = data.documentId;
+                                if (documentId > 0) {
+                                    //console.log(documentId);
+                                    var url = '@Url.Action("GetPolicylists", "Repository")';
+                                    $.get(url, function (data) {
+                                        $('#loadpartial').empty();
+                                        $('#loadpartial').html(data);
+                                        $('#loadpartial').fadeIn('fast');                                      
+                                        //alert();
+                                        filterpolicy();
+                                        $("#attachment" + documentId).click();
+                                       
+                                    });
+                                }
+                            }
+                        });
+                    };
+                    reader.onerror = function (error) {
+                        //console.log('Error: ', error);
+                        $("#FileContent").val("");
+                    };
+                }
+            }
+        }
+    }
+
+</script>

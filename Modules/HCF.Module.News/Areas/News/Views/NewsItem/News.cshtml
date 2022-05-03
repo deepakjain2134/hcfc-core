@@ -1,0 +1,121 @@
+﻿@model IEnumerable<HCF.BDO.News>
+@{
+    ViewBag.Title = "News";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            News
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a asp-controller="NewsItem" asp-action="AddNews" asp-route-newsId="" class="pull-right">
+                                <img id="addNewBtn" src="/dist/Images/Icons/3d_add_button.png" title="Add News" />
+                            </a>
+                            <table id="newsTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Title)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Published)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.StartDate)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.EndDate)
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        @Html.HiddenFor(modelItem => item.Id)
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Title)
+                                            </td>
+                                            <td>
+                                                @(item.Published ? "Yes" : "No")
+                                            </td>
+                                            <td width="100px">
+                                                @item.StartDate.ToFormatDate()
+                                            </td>
+                                            <td width="100px">
+                                                @item.EndDate.ToFormatDate()
+                                            </td>
+                                            <td>
+                                                <a asp-controller="NewsItem"
+                                                   asp-action="AddNews"
+                                                   asp-area="News"
+                                                   asp-route-newsId="@item.Id"
+                                                   class="button1">Edit</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var table = $('#newsTable').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [],
+        "bPaginate": $('#newsTable tbody tr').length > 20,
+        "bInfo": false,
+        "searching": true,
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+        ,
+
+    });
+
+</script>
+
+<style>
+    #newsTable_paginate {
+        top: -32px;
+        right: 70px;
+    }
+
+    td.whitespace {
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    div#newsTable_filter {
+        margin-right: 46px;
+    }
+
+    .add_button_comman {
+        position: absolute;
+        right: 10px;
+        top: 18px;
+    }
+</style>

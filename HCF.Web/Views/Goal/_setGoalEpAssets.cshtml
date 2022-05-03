@@ -1,0 +1,41 @@
+﻿@model HCF.BDO.Assets
+
+<table id="myTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>@Localizer["StandardEP"]</th>
+            <th>@Localizer["Description"]</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ep in Model.EPdetails)
+        {
+            <tr>
+                <td>
+                    @ep.Standard.TJCStandard, @ep.EPNumber
+                </td>
+                <td>
+                    @ep.Description.Substring(0, Math.Min(ep.Description.Length, 100))
+                    @if (ep.Description.Length > 100)
+                    {
+                        <a href="javascript:void(0);"
+                           tabindex="0" data-trigger="focus"
+                           class="descriptions" rel='popover'
+                           data-placement='right'
+                           data-original-title='@commonModelFactory.GetEpStandard(ep)'
+                           data-content='@ep.Description'>...See More</a>
+                    }
+                </td>
+                <td>
+                    <a
+                       href="@Url.Action("DeleteAssetEp", "Assets",new { epId = ep.EPDetailId, assetId = Model.AssetId })"
+                       class="remove-ep pull-right">
+                        Remove EP
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

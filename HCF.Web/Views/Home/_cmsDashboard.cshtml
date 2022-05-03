@@ -1,0 +1,189 @@
+﻿@model IEnumerable<HCF.BDO.CopDetails>
+@if (Model.Count() > 0)
+{
+    foreach (var item in Model.GroupBy(m => m.CopDetailsId).Select(g => g.First()))
+    {
+        <tr>
+            <td>@item.RequirementName</td>
+            <td style="text-align:left;">
+                @item.CoPRequirement.Substring(0, Math.Min(item.CoPRequirement.Length, 100))
+                @if (item.CoPRequirement.Length > 100)
+                {
+                    <a href="javascript:void(0);"
+                       tabindex="0" data-trigger="focus"
+                       class="descriptions" rel='popover'
+                       data-placement='top'
+                       data-original-title='@item.RequirementName'
+                       data-content='@item.CoPRequirement'>@($"{"...See More"}")</a>
+                }
+            </td>
+            @*<td>@item.CopStdesc.CopName</td>
+                <td>@item.CopStdesc.CopTitle</td>*@
+            <td>@item.CopStdesc.TagCode</td>
+            <td>
+                <table class="table table-bordered table-striped">
+                    @foreach (var eps in item.EPdetails)
+                    {
+                        <tr>
+                            <td style="width:30%;">
+                                <a href="@Url.Action("EpInspections", "Goal", new { epId = eps.EPDetailId, pagename = "cms" })">
+                                    <span>
+                                        @eps.StandardEp
+                                    </span>
+                                </a>
+                            </td>
+                            <td style="width:20%;">
+                                @if (eps.Inspection.DueDate.HasValue && eps.Inspection.DueDate != default(DateTime) && eps.InitialInspDate == null)
+                                {
+                                    if (eps.EpTransStatus == "C")
+                                    {
+                                        <span class="" title="Next Inspection Date - Compliant" style="clear: both; display: block;">
+                                            @eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate()
+                                        </span>
+                                    }
+                                    else if (eps.EpTransStatus == "I")
+                                    {
+                                        <span class="inProgress" title="In Progress" style="clear: both; display: block; width: 100%;">
+                                            @($"{eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate()}")
+                                        </span>
+                                    }
+                                    else if (eps.EpTransStatus == "P")
+                                    {
+                                        <span class="" title="Next Inspection Date pending" style="clear: both; display: block; width: 65%;">
+                                            @eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate()
+                                        </span>
+                                    }
+                                    else if (eps.EpTransStatus == "G" && (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser || commonModelFactory.IsSystemAdminUser()))
+                                    {
+                                        if (eps.Inspection.Status != 0)
+                                        {
+                                            <span class="dueDate" title="Grace Date pending">
+                                                @eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate()
+                                            </span>
+                                            <br />
+
+                                            @*if (DateTime.Now.Date <= item.Inspection.GraceDate)
+                                                {
+                                                    <span class="dueDate" title="Due Date pending" style="background: yellow;;text-align: center;padding: 5px;color: white;">
+                                                        @if (item.Inspection.GraceDate != null)
+                                                        {
+                                                            @item.Inspection.GraceDate.Value.ToClientTime().ToFormatDate()
+                                                        }
+                                                    </span>
+                                                }*@
+                                        }
+                                    }
+                                    else if (eps.EpTransStatus == "D" || eps.EpTransStatus == "G")
+                                    {
+                                        <span class="dueDate" title="Due date Passed">
+                                            @eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate()
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="dueDate" title="Due date Passed -Common" style="width: 100%; ">
+                                            @if (DateTime.Now.Date >= eps.Inspection.DueDate)
+                                            {
+                                                @eps.Inspection.DueDate.Value.ToClientTime().ToFormatDate();
+                                            }
+
+                                        </span>
+                                    }
+
+                                }
+                                else if (!eps.IsInspectionDateFixed)
+                                {
+                                    <span class="dueDate" title="Not inspected yet" style="width: 100%;">
+                                        <a href="@Url.Action("EpInspections", "Goal", new { epId = eps.EPDetailId })" style="color: white">
+                                            Start Review
+                                        </a>
+                                    </span>
+                                }
+                                else
+                                {
+                                    if (eps.IsInspectionDateFixed)
+                                    {
+                            <span>
+                                <i class="fa fa-lock"></i>
+                                @CommonUtility.GetScheduleFixedDate(eps.FrequencyId, Convert.ToDateTime(eps.InitialInspDate), 0).ToFormatDate()
+                            </span>
+                                    }
+                                }
+                            </td>
+                            <td style="width:20%;">
+                                <a href="@Url.Action("EpUserView", "Common", new { epDetailId = eps.EPDetailId, standardEP = eps.StandardEp })"
+                                   class="modal-link">
+                                    @{
+                                        var users = eps.EPUsers.Where(x => x.IsCRxUser == false).ToList();
+
+                                        var showCounts = 3;
+                                        var totalCount = users.Count;
+                                        var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+                                        if (totalCount > showCounts)
+                                        {
+                                            <span>@($"{usersText} +  {totalCount - showCounts}")</span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                @usersText
+                                            </span>
+                                        }
+                                    }
+                                </a>
+                            </td>
+                            <td style="width:20%;">
+                                @eps.GetFrequencyName()
+                                <sup style="font-size: 100%;">
+
+                                    @if (eps.IsCustomFrequency == true)
+                                    {
+                                        <i class="fa fa-clock-o"></i>
+                                    }
+                                </sup>
+                            </td>
+                            <td style="width:10%;">
+                                <a href="@Url.Action("EpInspections", "Goal", new { epId = eps.EPDetailId })">
+                                    <span>
+                                        <img src="@commonModelFactory.ReturnImagePath(Convert.ToInt32(eps.DocStatus),eps.IsDocRequired)"
+                                             title="@commonModelFactory.ReturnImageTooltip(Convert.ToInt32(eps.DocStatus),eps.IsDocRequired)"
+                                             alt="" />
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="6" class="text-center">No record available</td>
+    </tr>
+}
+<script>
+    //$('.descriptions').popover({
+    //    trigger: 'focus'
+    //});
+
+    var dtable = $('#c_myTable').DataTable({
+        "lengthChange": false,
+        "aaSorting": [],
+        "bPaginate": false,
+        "bInfo": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        'columnDefs': [
+            {
+                targets: -1,
+                searchable: true,
+                orderable: false
+            }],
+        "searching": true
+    });
+
+</script>

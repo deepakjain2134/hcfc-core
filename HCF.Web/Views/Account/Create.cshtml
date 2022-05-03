@@ -1,0 +1,244 @@
+﻿@model HCF.Web.ViewModels.Users.UserAddViewModel
+@{
+    ViewBag.Title = "Create";
+    var vendororg = TempData.Get<HCF.BDO.VendorOrganizations>("VendorOrg");
+    @*("VendorOrg");//  var userOrg = (HCF.BDO.VendorOrganizations)TempData["VendorOrg"];*@
+
+
+    @if (@ViewData["type"].ToString() == "0")
+    {
+
+        Model.Email = vendororg.Vendors.Email;
+    }
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @(Model != null && !Model.Orgkey.HasValue ? "Message" : "Create")
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+                @if (@ViewData["type"] != null && @ViewData["type"].ToString() == "0")
+                {
+
+                    <span>
+                        @string.Format("Hi {0},", @vendororg.Vendors.Name)
+                        <br />
+                        A user from @vendororg.Organization.Name  invited you to create a Vendor User Account within their CRx system.
+                    </span>
+
+
+                    using (Html.BeginForm("Create", "Account", FormMethod.Post, new { id = "Createform" }))
+                    {
+                        if (ViewData.ModelState.Any(x => x.Value.Errors.Any()))
+                        {
+                            <div class="alert alert-error">
+                                <button type="button" class="close" data-dismiss="alert">×</button>
+                                @Html.ValidationSummary(true, " ")
+                            </div>
+                        }
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <input type="hidden" name="hdnEmail" id="hdnEmail" value="@Model.Email" />
+                            <input type="hidden" name="orgName" id="orgName" value="@vendororg.Organization.DbName" />
+                            @*<input type="hidden" name="vendorOrg" id="vendorOrg" value="@userOrg" />*@
+
+                            <div class="col-12" style="margin-left: 1em;margin-bottom: 1em;">
+                                <span style="color:green;" id="spaninstruction">Fill out the required information to create a new vendor user.</span>
+                            </div>
+                            <div class="col-12">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+
+                                        @*@Html.HiddenFor(model => model.vendorOrg)*@
+                                        @Html.HiddenFor(x => x.DrpUserAdditionRoleIds)
+                                        @Html.HiddenFor(x => x.VendorId)
+                                        @Html.HiddenFor(x => x.Orgkey)
+                                        @Html.LabelFor(m => m.FirstName)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control alphaonly", required = "required", autocomplete = "off", maxlength = 50, TabIndex = 1 })
+                                        @Html.ValidationMessageFor(m => m.FirstName)
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label><em class="required-field"> *</em>
+                                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control disabled", maxlength = 50, autocomplete = "off", @type = "email", required = "required", TabIndex = 3 })
+                                        @Html.ValidationMessageFor(m => m.Email)
+                                        <span id="emailspan" style="color:red;"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PhoneNumber)
+                                        @Html.TextBoxFor(m => m.PhoneNumber, new
+                                        {
+                                        @class = "form-control phone",
+                                        pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                        title = "Please enter a valid phone # with area code.",
+                                        maxlength = 15,
+                                        TabIndex = 5
+                                        })
+                                        @Html.ValidationMessageFor(m => m.PhoneNumber)
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.CellNumber)
+                                        @Html.TextBoxFor(m => m.CellNumber, new
+                                        {
+                                        @class = "form-control phone",
+                                        maxlength = 15,
+                                        TabIndex = 6,
+                                        pattern = @"^[(]?\d{3}[)]?[(\s)?.-]\d{3}[\s.-]\d{4}$",
+                                        title = "Please enter a valid cell #."
+                                        })
+                                        @Html.ValidationMessageFor(m => m.CellNumber)
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.LastName)<em class="required-field"> *</em>
+                                        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control alphaonly", autocomplete = "off", required = "required", maxlength = 50, TabIndex = 2 })
+                                        @Html.ValidationMessageFor(m => m.LastName)
+                                    </div>
+
+
+                                    <div class="form-group dvPassword">
+                                        @Html.LabelFor(m => m.Password)<em class="required-field"> *</em>
+                                        <div class="form-group has-feedback">
+                                            @Html.PasswordFor(m => m.Password, new
+                                            {
+                                            @class = "form-control password-strength",
+                                            maxlength = 50,
+                                            autocomplete = "off",
+                                            required = "required",
+                                            minlength = 8,
+                                            TabIndex = 7
+
+
+                                            })
+                                            <span class="hideShowpass" id="hideShow1"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.Password)
+                                    </div>
+
+
+                                    <div class="form-group dvPassword">
+                                        @Html.LabelFor(m => m.ConfirmPassword)<em class="required-field"> *</em>
+                                        <div class="form-group has-feedback">
+                                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control confirm-password-verify", maxlength = 50, autocomplete = "new-password", required = "required", minlength = 6, TabIndex = 8 })
+                                            <span class="hideShowpass" id="hideShow2"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="button_Div">
+                            <input type="submit" value='@ViewBag.SubmitValue' class="comm-button" name="submitType" id="btnSubmit" />
+                            @Html.ActionLink("Cancel", "login", "", new { @class = "comm-Cancelbutton" })
+                        </div>
+
+                    }
+                }
+                else
+                {
+                    <h3>
+                        Invite Invalid
+                    </h3>
+                    <p>
+                        This invite may be expired or you might not have permission to join.
+
+                    </p>
+                    <a href="@Url.RouteUrl("login")"> Back to Login</a>
+
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+
+        $(".breadcrumb-arrow").remove();
+        $(".top_menu").remove();
+        var errorCtr = $("#emailspan");
+
+    $(document).on('click', '.hideShowpass', function () {
+        var $ctr = $(this).closest(".dvPassword").find(".form-control");
+        $(this).find(".fa").toggleClass("fa-eye-slash");
+        if ($ctr.attr('type') === 'password') {
+            $ctr.attr('type', 'text');
+        } else {
+            $ctr.attr('type', 'password');
+        }
+    });
+
+
+
+    $("#btnSubmit").click(function () {
+        errorCtr.empty();
+    });
+
+
+
+        window.onload = function () {
+            var txtPassword = document.getElementById("Password");
+            var txtConfirmPassword = document.getElementById("ConfirmPassword");
+            if (txtPassword != undefined && txtConfirmPassword != undefined) {
+                txtPassword.onchange = ConfirmPassword;
+                txtConfirmPassword.onkeyup = ConfirmPassword;
+            }
+            function ConfirmPassword() {
+                txtConfirmPassword.setCustomValidity("");
+                if (txtPassword.value != txtConfirmPassword.value) {
+                    txtConfirmPassword.setCustomValidity("Passwords do not match.");
+                }
+            }
+        }
+
+
+    $(".alphaonly").on("keypress", function (e) {
+        if (e.which === 32 && !this.value.length)
+            e.preventDefault();
+    });
+
+    $("#Email").focusout(function () {
+        CheckExistingEmail();
+    });
+
+        function CheckExistingEmail() {
+            var txtEmail = document.getElementById("Email");
+            var errorCtr = $("#emailspan");
+            var email = txtEmail.value;
+            var userId = 0;
+            $.ajax({
+                url: CRxUrls.Account_CheckExistingEmail + '?Email=' + email + '&UserId=' + userId,
+                global: false,
+                success: function (data) {
+                    if (data == true) {
+                        txtEmail.setCustomValidity("The e-mail address " + email + " already exists.");
+                        errorCtr.empty();
+                        errorCtr.text("The e-mail address " + email + " already exists.");
+                    }
+                    else {
+                        txtEmail.setCustomValidity("");
+                        errorCtr.empty();
+                    }
+                }
+
+            });
+        }
+        $("#VendorId").val('@Model.VendorId');
+        $("#DrpUserAdditionRoleIds").val('3');
+      // $("#vendorOrg").val('@Model.vendorOrg');
+
+    </script>
+}

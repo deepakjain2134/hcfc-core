@@ -1,0 +1,44 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    var first = true;
+}
+
+<ul class="route_ep_assets_frequency" data-toggle="buttons">
+
+    @foreach (var item in Model)
+    {
+        if (item.EPFrequency != null && item.EPFrequency.FirstOrDefault() != null)
+        {
+            <li>
+                <label class="btn disabled">
+                    <input type="radio" epid="@(item.IsExpired==false ? item.EPDetailId : 0)" class="@(first ? "active'" : string.Empty)"
+                           @(first ? "checked='checked'" : string.Empty)
+                           name="drpInspTypes" value="@item.EPFrequency.FirstOrDefault().Frequency.FrequencyId" />
+                    <i class="fa fa-circle-o fa-2x"></i>
+                    <i class="fa fa-dot-circle-o fa-2x"></i>
+                    <span class="freqtext hide">@item.EPFrequency.FirstOrDefault().Frequency.Days</span>
+                    @Html.Raw(string.Format("{0}<br/>{1}", item.EPFrequency.FirstOrDefault().Frequency.DisplayName, item.IsExpired == false ? item.StandardEp : string.Empty))
+
+                </label>
+            </li>
+            first = false;
+        }
+    }
+</ul>
+
+<script>
+    var elems = $('.route_ep_assets_frequency li').detach().sort(function (a, b) {
+        return ($(a).find(".freqtext").text() < $(b).find(".freqtext").text() ? -1
+            : $(a).find(".freqtext").text() > $(b).find(".freqtext").text() ? 1 : 0);
+    });
+    $('.route_ep_assets_frequency').append(elems);
+
+    var selepdetailId = getParameterByName('epdetailId');
+    debugger;
+    if (selepdetailId != undefined && selepdetailId > 0) {
+        $("input:radio[name=drpInspTypes][epid='" + selepdetailId + "']").prop("checked", true);
+    } else {
+        $("input:radio[name=drpInspTypes]:first").attr('checked', true);
+    }
+
+</script>

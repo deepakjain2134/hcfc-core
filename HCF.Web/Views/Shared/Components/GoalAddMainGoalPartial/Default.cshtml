@@ -1,0 +1,229 @@
+﻿@model List<HCF.BDO.MainGoal>
+@{
+    ViewBag.Title = Localizer["TitleManageEP"];
+    var assets = new List<HCF.BDO.Assets>();
+    var allDocType = new List<HCF.BDO.DocumentType>();
+
+    var ep = new HCF.BDO.EPDetails();
+    var asset = new HCF.BDO.Assets();
+    var emptyMainGoal = new HCF.BDO.MainGoal();
+    if (ViewBag.CurrentEP != null)
+    {
+        ep = ViewBag.CurrentEP;
+        assets = ep.Assets;
+        allDocType = ep.DocumentType;
+    }
+    if (ViewBag.CurrentAssets != null)
+    {
+        asset = ViewBag.CurrentAssets;
+    }
+}
+<div class="col-xs-12">
+    <div class="box box-primary">
+        <div class="modal-header" id="header">
+            <h4 class="modal-title">
+                Goal & Steps
+                <button type="button" class="close" id="btnCancel">&times;</button>
+            </h4>
+        </div>
+        <div class="configurefloorassets-popup">
+            @if (ep != null && ep.EPDetailId > 0)
+            {
+                <div class="tble_shadow">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td height="30" width="15%" valign="top">
+                                    <span title="@Localizer["StandardEP"]">@ep.StandardEp</span><br />
+                                    <ep-risk-score risk-score="@ep.Scores.Name">
+                                    </ep-risk-score>
+                                </td>
+                                <td height="30" width="85%" class="">
+                                    @*@ep.Description*@
+                                    @await Html.PartialAsync("_EpDescription", ep.Description,
+                                    new ViewDataDictionary(
+                                    new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                    new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                    {{ "minLength", "100" }, { "standardEp", @ep.StandardEp }}
+                                   )
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @if (asset != null && asset.AssetId > 0)
+            {
+                <div class="tble_shadow">
+                    <div class="goalSteps-popupRow">
+                        <div class="goalSteps-col1">
+                            <img src="@commonModelFactory.CommonFilePath(asset.IconPath)" height="25" width="25" alt="@asset.Name" />
+                            <label><b>Asset Type:</b></label> @asset.Name
+                        </div>
+                        @if (asset.TFloorAsset != null)
+                        {
+                            <div class="goalSteps-col1">
+                                <label><b>Asset Name:</b></label> @asset.TFloorAsset.Name
+                            </div>
+                        }
+                    </div>
+
+                    <ul class="route_ep_assets_frequency" data-toggle="buttons">
+
+                        @foreach (var item in asset.EPdetails)
+                        {
+                            if (item.EPFrequency != null && item.EPFrequency.FirstOrDefault() != null)
+                            {
+                                <li>
+                                    <label class="btn active">
+                                        @*<input type="checkbox" epid="@item.EPDetailId" class="active"
+                                        checked="checked"
+                                        name="drpInspTypes" value="@item.EPFrequency.FirstOrDefault().Frequency.FrequencyId" />*@
+                                        <span class="freqtext hide">@item.EPFrequency.FirstOrDefault().Frequency.Days</span>
+                                        @Html.Raw(string.Format("{0}<br/>{1}", item.GetFrequencyName(), item.StandardEp))
+
+                                    </label>
+                                </li>
+
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="addGoalBox tble_shadow">
+                <input type="hidden" id="assetId" value="@asset.AssetId" />
+                <input type="hidden" id="ePDetailId" value="@ep.EPDetailId" />
+                <input class="addNewCheckList button3 pull-right" value="Add New Goal" id="addgoal" type="button" />
+            </div>
+
+            <div id="CheckListAddEdit">
+                <div id="addNewChecks" hidden>
+                    @await Html.PartialAsync("_mngGoals", emptyMainGoal)
+                </div>
+                <div id="addStepsView" hidden>
+                    @await Html.PartialAsync("_mngSteps", new HCF.BDO.Steps())
+                </div>
+                <div id="checksListTable">
+                    @await Html.PartialAsync("_CheckLists")
+                </div>
+                <div id="checksPointTable" hidden>
+                    <br />
+                    <input id="checkListID" value="" hidden />
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+
+</div>
+
+<script>
+
+    $("#btnCancel").click(function () {
+        $("#modal-container").modal('toggle');
+        //alert("Call");
+        var url = CRxUrls.Assets_GetTFloorAssetSteps;
+        var assetId = assetCtr.val();
+        var floorAssetId = '@ViewBag.FloorAssetId';
+        $.get(url + "?floorAssetId=" + floorAssetId + "&assetId=" + assetId, function (d) {
+            $('td.no-padding-' + floorAssetId).empty().html(d);
+        });
+    });
+
+
+    var assetCtr = $("#assetId");
+    var ePDetailCtr = $("#ePDetailId");
+
+    var loadGoalData = function (maingoalId, epDetailId) {
+        var assetId = assetCtr.val();
+        var floorAssetId = '@ViewBag.FloorAssetId';
+         $.ajax({
+             url: '@Url.Action("GetMainGoal", "Goal")' + "?maingoalId=" + maingoalId + "&epDetailId=" + epDetailId + "&assetId=" + assetId + "&floorAssetId=" + floorAssetId ,
+            method: "Get",
+            success: function (d) {
+                $('#addNewChecks').empty().html(d);
+                $("#addNewChecks").show();
+            }
+        });
+    };
+
+
+    $("#addgoal").click(function () {
+        loadGoalData(0, '@((ep!=null) ? ep.EPDetailId:0)');
+        $("#addgoal").hide();
+        $("#addNewChecks").show();
+        $("#checksListTable").hide();
+    });
+
+    $(document).on("click", "#cancelMaingoal", function () {
+        $("#addNewChecks").hide();
+        $("#checksListTable").show();
+    });
+
+    $(document).on("click", "#btnStepsCancel", function () {
+        $("#addStepsView").hide();
+        $("#checksListTable").show();
+        $("#addgoal").show();
+    });
+
+    $(document).on("click", ".addSteps", function () {
+        var maingoalId = $(this).attr("mgid");
+        var stid = $(this).attr("stid");
+        loadStepsView(maingoalId, stid);
+
+        $("#addgoal").hide();
+        $("#checksListTable").hide();
+
+    });
+
+    var loadStepsView = function (maingoalId, stepsId) {
+        $.ajax({
+            url: '@Url.Action("MainGoalStep", "Goal")' + "?maingoalId=" + maingoalId + "&stepsId=" + stepsId,
+            method: "Get",
+            success: function (d) {
+                $('#addStepsView').empty().html(d);
+                $("#addStepsView").show();
+            }
+        });
+    }
+
+    function OnSuccess(data) {
+        if (data.Result > 0) {
+            $("#addStepsView").hide();
+            //$("#checksListTable").show();
+            loadGoalListView();
+            $("#addgoal").show();
+            //location.reload();
+        }
+    }
+
+    function OnGoalSaveDone(data) {
+        if (data.Result > 0) {
+            $("#addNewChecks").hide();
+            $("#addgoal").show();
+            loadGoalListView();
+
+        }
+    }
+
+
+    function loadGoalListView() {
+        var epdetailId = '@((ep!=null) ? ep.EPDetailId:0)';
+        var assetId = assetCtr.val();
+        var floorAssetId = '@ViewBag.FloorAssetId';
+        $.ajax({
+            url: '@Url.Action("loadMainGoallist", "Goal")' + "?epdetailid=" + epdetailId + "&assetId=" + assetId + "&floorAssetId=" + floorAssetId,
+            method: "Get",
+            success: function (d) {
+
+                $('#checksListTable').empty().html(d);
+                $("#checksListTable").show();
+
+            }
+        });
+    }
+</script>

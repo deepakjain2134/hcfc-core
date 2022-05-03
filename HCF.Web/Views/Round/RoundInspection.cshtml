@@ -1,0 +1,210 @@
+﻿@model HCF.BDO.TRounds
+@{
+    ViewBag.Title = "Readiness Round Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Readiness Round Inspection
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-xs-3 col-left">
+            <div class="box box-primary col-lg-12 asset_list_view">
+                <div id="loadpartialround">
+                    @await Html.PartialAsync("_RoundDetails", Model)
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-xs-9">
+
+            <div class="box box-primary" id="floor_round_questions">
+                @await Component.InvokeAsync("RoundRoundsQuestonaries", new { floorId = Model.DefaultFloorId, rId = Model.TRoundId })
+            </div>
+        </div>
+    </div>
+</div>
+<div id="myModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">File Preview
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </h5>
+                
+            </div>
+            <div class="modal-body">
+                <img id="previewImage" style="width:100%; height:100%;" />
+                <div class="zoomBtn">
+                    <button id="z_in"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+                    <button id="z_out"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pass {
+        background-color: #54a77b;
+        color: #fff !important;
+    }
+
+    .fail {
+        background-color: #cc6164;
+        color: #fff !important;
+    }
+
+    .inprogress {
+        background-color: blue;
+        color: #fff !important;
+    }
+
+    .modal-dialog,
+    .modal-body {
+        height: 88%;
+    }
+
+    .modal-body {
+        overflow: auto;
+    }
+
+    .modal-content,
+    .iframe-preview {
+        height: 100%;
+    }
+</style>
+@section scripts{
+
+    <script type="text/javascript" src="@Url.Content("~/dist/Scripts/page_scripts/Rounds/round_save_update.js")"></script>
+
+}
+
+<script>
+    var troundId = $("#TRoundId").val();
+    var userId = '@HCF.Web.Base.UserSession.CurrentUser.UserId';
+    var floorId = $("#hdn_floorId").val();
+
+    $("#insp_round_locations .floor").click(function () {
+        var floorId = $(this).attr("floorid");
+        openRoundQuestons(floorId);
+    });
+
+
+    $("#addWo").click(function () {
+        window.location.href = "floor/" + troundId+"/wo";
+    });
+
+    var openRoundQuestons = function (floorId) {
+
+       $.get(CRxUrls.Round_RoundsQuestonaries + '?floorId=' + floorId + "&rId=" + troundId + "&userId=" + userId, function (data) {
+                $('#floor_round_questions').html(data);
+                $('#floor_round_questions').fadeIn('fast');
+                var floorLength = $('.floor').length;
+                if (floorLength == 1) {
+                    $(".nextFloor").hide();
+                }
+        //         $.get(CRxUrls.Round_GetPrtialRoundDetails + '?roundId=' + troundId, function (res) {
+        //    $('#loadpartialround').html('');
+        //    $('#loadpartialround').html(res);
+        //    $('#loadpartialround').fadeIn('fast');
+
+        //});
+            });
+    }
+
+
+    $(document).ready(function () {
+       // debugger;
+        var InspectionStatus = '@Model.Status';
+        var floorLength = $('.floor').length;
+        if (floorLength == 1) {
+            $(".nextFloor").hide();
+        }
+        if (InspectionStatus == 1) {
+            $('.floorRoundtbl').addClass('disabled');
+        }
+        console.log('@(ViewBag.CanEdit)');
+        if ('@(ViewBag.CanEdit)' != 'True') {
+            $('button').addClass("disabled");
+            $('.floorRoundtbl').addClass("disabled");
+            $('.plusicon1').addClass("disabled");
+        }
+
+        $('#z_in').click(function () {
+            $('#previewImage').css({ "width": "+=100px", "height": "+=100px" });
+        });
+
+        $('#z_out').click(function () {
+            $('#previewImage').css({ "width": "-=100px", "height": "-=100px" });
+        });
+        
+
+        
+    });
+
+    function tristate1(control) {
+       // debugger;
+        if (canUpdate())
+            tristate(control, '0', '1');
+    }
+
+    function tristate(control, value1, value2) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value1;
+                break;
+
+        }
+        SetCheckValue(control);
+        console.log("tristate function");
+        saveData(control);
+    }
+
+    function SetCheckValue(control) {
+        var controlId = $(control).attr("tempName");
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+    }
+
+    var getInspectionStatus = function (){
+        var totalSteps = $("input[class='ins_check3_btn']").length;
+        var passCount = $("input[class='ins_check3_btn'][value='1']").length;
+        var failCount = $("input[class='ins_check3_btn'][value='0']").length;
+        return (failCount > 0) ? 0 : 1;
+    }
+
+    function getNextFloor() {
+
+        var floorId = 0;
+        var myArray = [];
+        $('.floor').each(function () {
+            myArray.push($(this).attr("floorid"))
+        });
+        var val = $("#hdn_floorId").val();
+        var index = myArray.indexOf(val);
+        if (index >= 0 && index < myArray.length - 1) {
+            floorId = myArray[index + 1];
+
+        } else {
+            floorId = myArray[0];
+        }
+        return floorId;
+    }
+
+    $('body').on('click', '.nextFloor', function () {
+        var floorId = getNextFloor();
+        openRoundQuestons(floorId);
+    });
+
+</script>

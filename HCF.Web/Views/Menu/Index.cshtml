@@ -1,0 +1,179 @@
+﻿@model List<HCF.BDO.Menus>
+@{
+    ViewBag.Title = "Manage Menus";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Menus
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary col-lg-12">
+                        <div class="add_button_comman pull-right">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" alt="3d_add_button" class="addbutton" title="Add Menu" />
+                        </div>
+                        
+                            <p>To rearrange menu please drag &amp; drop </p>
+                            <ul id="assetsList">
+                                @foreach (var item in Model.Where(x => x.ParentId == 0).OrderBy(x => x.Seq))
+                                {
+                                    <li id='@item.Id'>
+                                        <ul class="list" id="sortable">
+                                            <li id='@item.Id'>
+                                                <div class="menulistitem-panel">
+                                                    <a class="menuItem">@item.Name</a>
+                                                    <div>
+                                                        <span class="fa fa-pencil"></span>
+                                                        <span class="fa fa-plus"></span>
+                                                    </div>
+                                                </div>
+                                                <ul class="sublist" id="@($"ulassets_{item.Id}")">
+                                                    @foreach (var childItem in Model.Where(x => x.ParentId == item.Id).OrderBy(x => x.Seq))
+                                                    {
+                                                        <li id='@childItem.Id'>
+                                                            <div class="menulistitem-panel">
+                                                                <a class="menuItem">@childItem.Name</a>
+                                                                <div>
+                                                                    <span class="fa fa-pencil"></span>
+                                                                    @*<span class="fa fa-plus"></span>*@
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<div class="modal fade" id="EditAssetsPopup" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <style>
+ul.list li ul, ul.subsublist {
+display: none;
+}
+#loadpartial {
+background-color: white;
+}
+
+.button_Div {
+float: right;
+}    
+#assetsList, #assetsList li, #assetsList li ul {
+margin: 0;
+padding: 0;
+list-style: none;
+}
+#assetsList li {
+border: #dadada solid 1px;
+padding: 5px;
+margin-bottom: 5px;
+border-radius: 4px;
+}
+#assetsList li ul li {
+border: none;
+padding: 0;
+margin-bottom: 0;
+}
+#assetsList li ul li ul {
+margin-left: 10px;
+margin-top: 7px;
+}
+#assetsList li ul li ul li {
+border: #eee solid 1px;
+padding: 5px;
+margin-bottom: 5px;
+}
+    </style>
+
+    <script type="text/javascript">
+        
+        $('.list > li a').click(function () {
+            if ($(this).parent().find('li').length) {
+                $(this).parent().find('ul').toggle();    
+            }
+                
+           
+               
+    });
+
+
+    $(".addbutton").click(function(){
+        loadPopUp(0, 2);
+    });
+
+
+    $('body').on('click', '.fa', function () {
+        var menuId = $(this).parent("li").attr("id");
+        var mode = "0";
+        if ($(this).hasClass("fa-plus")) { mode = "1"; }
+        loadPopUp(menuId, mode);
+    });
+
+    function loadPopUp(menuId, mode) {
+        var url = '@Url.Action("ManageMenu", "Menu")';
+        $.get(url + '?menuId=' + menuId + "&mode="+ mode, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#EditAssetsPopup').modal('show');
+        });
+
+    }
+
+    function updateorder(newOrder) {
+        var url = '@Url.Action("UpdateOrders", "Menu")'
+        $.get(url + '?newOrder=' + newOrder, function (data) {
+        });
+    }
+
+    $(function () {
+        $(".sublist").sortable({
+            stop: function () {
+                var orders = $(this).children("li").map(function (i) { return this.id; }).get();
+                updateorder(orders.join(","));
+            }
+        });
+        $(".subsublist").sortable({
+            stop: function () {
+                var orders = $(this).children("li").map(function (i) { return this.id; }).get();
+                updateorder(orders.join(","));
+            }
+        });
+        $("#assetsList").sortable({
+            stop: function () {
+                var orders = $(this).children("li").map(function (i) { return this.id; }).get();
+                updateorder(orders.join(","));
+            }
+        });
+
+    });
+    </script>
+
+}

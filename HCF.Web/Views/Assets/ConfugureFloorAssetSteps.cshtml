@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "ConfigureFloorAssetSteps";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Configure ATS
+            </h1>
+        </section>
+    }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <div class="filter_floor_assets">
+
+                                    @using (Html.BeginForm())
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="floorAssetId" id="floorAssetId" value="@ViewBag.floorAssetId" />
+                                        <div class="row" style="display:none">
+                                            <div class="col-lg-5 col-sm-5">
+                                                <label><strong>Asset Type</strong></label>
+                                                @Html.DropDownList("assetId", new SelectList(ViewBag.Assets, "AssetId", "Name"), "All", new { @class = "form-control ddlboxLive" })
+                                            </div>
+                                        </div>
+
+                                        <input type="button" value="Search" id="btn_Search" class="button1" style="display:none;" />
+
+                                    }
+
+                                </div>
+                                <div class="floorAssets-mainBox">
+                                    <div id="loadpartialfloorAssets"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        let logo = localStorage.getItem('logoimgbase64');
+        localStorage.clear();
+        localStorage.setItem('logoimgbase64', logo);
+        $("#floors").append(
+              $('<option></option>').val("").html("All"));
+        //loadfloorAssets();
+
+        $(document).on("click", '.ddlboxLive,.selectpicker', function () {
+            $(".ddlboxLive").selectpicker('refresh').attr('data-live-search', true).attr('data-size', 5).attr('data-width', 'auto');
+        });
+
+        $(".ddlboxLive").selectpicker('val', 124);
+        $('#assetId').trigger('change');
+        $(".ddlboxLive").addClass("disable");
+
+    });
+
+    $("#btn_Search").click(function () {
+        loadfloorAssets();
+    });
+
+    $("#assetId").change(function () {
+        localStorage.setItem("fliterassetId", $("#assetId").val());
+        $("#floorAssetId").val(0);
+        loadfloorAssets();
+    });
+
+    function loadfloorAssets() {
+        var _floorAssetId = $("#floorAssetId").val();
+        var assetId = "";
+        assetId = localStorage.getItem("fliterassetId");
+
+        var url = '@Url.Action("ConfugureTFloorAssets", "Assets")';
+        $.get(url + '?floorAssetId=' + _floorAssetId  + '&assetId=' + assetId, function (data) {
+            $('#loadpartialfloorAssets').html(data);
+            $('#loadpartialfloorAssets').fadeIn('fast');
+        });
+    }
+
+</script>
+
+@*<style>
+    .dataTables_wrapper .dataTables_filter {
+        float: right;
+        text-align: right;
+    }
+</style>*@

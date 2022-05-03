@@ -1,0 +1,230 @@
+﻿
+@{
+    ViewBag.Title = "Usermenu Configurations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Usermenu Configuration
+            </h1>
+        </section>
+    }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                
+                    <div class="rightcol-setting">
+                        <div class="box box-primary" id="Setting_Content">
+                            <div class="row tablelist-topform">
+                                @*<div class="menu_view ddlView" id="menu">
+                                        @Html.DropDownList("drpMenu", (SelectList)ViewBag.MenuSelectList, "--Select--", new { @class = "form-control ddl_menu" })
+                                    </div>*@
+                                <div class="col-md-4 organization_view ddlView" id="vendor">
+                                    @Html.DropDownList("drpOrganization", (SelectList)ViewBag.OrganizationSelectList, "--Select--", new { @class = "form-control ddl_organization" })
+                                </div>
+                                <div class="col-md-8 select_view">
+                                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                        <label class="btn active">
+                                            @Html.RadioButton("rbMenuOrganization", "module", true)@Html.Label("Module")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn">
+                                            @Html.RadioButton("rbMenuOrganization", "menu")@Html.Label("Menu")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        @*<label class="btn">
+                                                @Html.RadioButton("rbMenuOrganization", "organization")@Html.Label("Organization")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                            </label>*@
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="confi-itembox">
+                                <div class="common_view venConView" id="common_view">
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    //$(".organization_view").hide();
+    $("[name=rbMenuOrganization]").on('change', function () {
+
+        partialview();
+    });
+
+    $('#drpOrganization').change(function () {
+        debugger;
+        partialview();
+    });
+
+
+    function partialview() {
+        var selectedID = $('#drpOrganization').val();
+        var mode = $('input[name="rbMenuOrganization"]:checked').val(); //$("[name=rbMenuOrganization]").val();
+        //$(".organization_view").show();
+        //$("#menu_view").hide();
+        $("#common_view").html('');
+        if (selectedID != "") {
+            $.get(CRxUrls.Usermenu_GetData + '?mode=' + mode + '&id=' + selectedID, function (data) {
+                $('#common_view').html(data);
+                $('#common_view').fadeIn('fast');
+            });
+        } else {
+            $('#common_view').html("");
+        }
+    }
+
+    $(document).ready(function () {
+        debugger;
+        $("#drpOrganization").val('@HCF.Web.Base.UserSession.CurrentOrg.ClientNo');
+        partialview();
+    });
+
+
+    $(document).on("click", ".btnServiceMode", function () {
+        //alert("Call");
+        debugger;
+        var cntrl = $(this);
+        var orgStatus = parseInt(cntrl.attr('orgmodulestatus'));
+        var status = orgStatus == 1 ? 0 : 1;
+        var moduleId = cntrl.attr('moduleId');
+        var organizationId = $("#drpOrganization").val();
+        var orgservicemode = parseInt(cntrl.attr('orgservicemode'));
+        var allowedChanges = [2, 3, 5];
+        debugger;
+        if (orgStatus === 1 && allowedChanges.includes(orgservicemode)) {
+            swal({
+                title: "Are you sure?",
+                text: "You want to get this module permanently",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            },
+                function () {
+                    save(organizationId, moduleId, orgStatus, cntrl);
+                });
+        } else {
+            save(organizationId, moduleId, status, cntrl);
+        }
+    });
+
+    function save(organizationId, moduleId, status, cntrl) {
+        var values = [];
+        $(".btnServiceMode").each(function () {
+            if ($(this).attr('orgmodulestatus') === "1") {
+                values.push($(this).attr('modulecode'));
+            }
+        });
+        debugger;
+        switch (cntrl.attr('modulecode')) {
+            case 'CC':
+                if (status === 1) {
+                    saveModule(organizationId, moduleId, status);
+                } else {
+                    if (values.indexOf("ID") === -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To disable this module first you need to disable Inspection module"); return false; }
+                }
+                break;
+            case 'CP':
+                if (status === 1) {
+                    saveModule(organizationId, moduleId, status);
+                } else {
+                    if (values.indexOf("ID") === -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To disable this module first you need to disable Inspection module"); return false; }
+                }
+                break;
+            case 'RO':
+                if (status === 1) {
+                    if (values.indexOf("DR") !== -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To enable this module first you need to enable drawing module"); return false; }
+                } else {
+                    saveModule(organizationId, moduleId, status);
+                }
+                break;
+            case 'ID':
+                if (status === 1) {
+                    if (values.indexOf("CC") !== -1 || values.indexOf("CP") !== -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To enable this module first you need to enable CRx Core OR CRx Core+ module"); return false; }
+                } else {
+                    saveModule(organizationId, moduleId, status);
+                }
+                break;
+            case 'DR':
+                if (status === 1) {
+                    saveModule(organizationId, moduleId, status);
+                } else {
+                    if (values.indexOf("PR") === -1 && values.indexOf("RO") === -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To disable this module first you need to disable Permit And Round module"); return false; }
+                }
+                break;
+            case 'PR':
+                if (status === 1) {
+                    if (values.indexOf("DR") !== -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To add/annotate drawings to permits, it requires drawings module so first you need to enable drawing module"); return false; }
+                } else {
+                    saveModule(organizationId, moduleId, status);
+                }
+                break;
+            case 'CCC':
+                if (status === 1) {
+                    saveModule(organizationId, moduleId, status);
+                } else {
+                    if (values.indexOf("ID") === -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To disable this module first you need to disable Inspection module"); return false; }
+                }
+                break;
+            case 'CS':
+                if (status === 1) {
+                    saveModule(organizationId, moduleId, status);
+                } else {
+                    if (values.indexOf("ID") === -1) {
+                        saveModule(organizationId, moduleId, status);
+                    } else { swalalert("To disable this module first you need to disable Inspection module"); return false; }
+                }
+                break;
+            default:
+        }
+    }
+
+
+
+    function saveModule(organizationId, moduleId, status) {
+        var serviceMode = 1;
+        var isActive = status == 1 ? true : false;
+        var url = '@Url.Action("UpdateMenuOrganization", "Menu")';
+        $.get(url + '?organizationId=' + organizationId + '&moduleId=' + moduleId + '&IsActive=' + isActive + '&serviceMode=' + serviceMode, function (data) {
+            partialview();
+        });
+    }
+
+</script>
+
+<style>
+    .confi-itembox ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .uname-listitem li {
+        width: 25%;
+    }
+</style>

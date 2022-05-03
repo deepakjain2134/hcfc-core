@@ -1,0 +1,88 @@
+﻿@*@model List<HCF.BDO.IlsmAssets>
+
+@{
+    ViewBag.Title = "IlsmAssets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="inner_main">
+    <section class="content-header">
+        <h1>
+            @Resources.Resource.Asset
+        </h1>
+    </section>
+    <section class="content">
+        @if (Model != null)
+        {
+            <div class="row">
+                <div class="col-lg-3 col-xs-3">
+                    <div class="box box-primary col-lg-12">
+                        <ul class="ilsm_asset">
+
+                            @foreach (var ilsmAsset in Model.Where(x => x.EpDetailId > 0))
+                            {
+                                <li class="details @(ilsmAsset.Status ? "fail" : "status_not_started")" epid='@ilsmAsset.EpDetailId' id="li_@ilsmAsset.EpDetailId">
+
+                                    <label class="@(ilsmAsset.Status ? "status_fail" : "status_pass")">
+                                        @string.Format("{0},{1}", ilsmAsset.EPDetails.Standard.TJCStandard, ilsmAsset.EPDetails.EPNumber)
+                                    </label>
+
+                                </li>
+                            }
+                        </ul>
+                        @foreach (var ilsmAsset in Model.Where(x => x.EpDetailId == 0))
+                        {
+                            <div class="details">
+                                <label>
+                                    @string.Format("{0},{1}", ilsmAsset.EPDetails.Standard.TJCStandard, ilsmAsset.EPDetails.EPNumber)
+                                </label>
+                            </div>
+                            foreach (var activity in ilsmAsset.EPDetails.TInspectionActivity)
+                            {
+                                <div class="floor_list asset_barcode">
+                                    <label class="status_not_started">
+                                        <strong>AssetNo:</strong>  @activity.TFloorAssets.AssetNo <br />
+                                    </label>
+                                    <label>
+                                        <strong>Bar code No:</strong>  @activity.TFloorAssets.AssetNo <br />
+                                    </label>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-9 col-xs-9">
+                    <div class="box box-primary col-lg-12 epBoxSlider">
+                        <div id="loadpartial">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </section>
+</div>
+
+<script>
+
+    $(document).ready(function (e) {
+        var epId = $('ul.ilsm_asset li:first').attr("epId");
+        loadEPstesp(epId);
+    });
+
+    $(".fail").click(function () {
+        var epId = $(this).attr("epId");
+        loadEPstesp(epId);
+    });
+
+    function loadEPstesp(epId) {
+
+        $('#loadpartial').html("Loading...");
+        var UrlAction = '@Url.Action("AssetsSteps", "Goal")';//'/Goal/EPstate',
+        $.get(UrlAction + '?epId=' + epId + '&inspectionId=0&showEp=true', function (data) {
+            $('#loadpartial').html(data);
+            $("li").removeClass("active");
+            $("#li_" + epId).addClass("active");
+        });
+    }
+
+</script>*@

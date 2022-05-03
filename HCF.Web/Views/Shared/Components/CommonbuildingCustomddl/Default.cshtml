@@ -1,0 +1,128 @@
+﻿@model List<HCF.BDO.Buildings>
+@{
+    Layout = null;
+    var buildings = Model;
+}
+@{ var checkListClass = !string.IsNullOrEmpty(ViewBag.type) && ViewBag.type == "single" ? "chkBuildSigleSelect" : "chkBuildMultiSelect"; }
+<div class="selectList" id="ullistitem">
+    <label>--Select Building--</label>
+    <ul class="ullistitem">
+        @foreach (var build in buildings.OrderBy(x => x.SiteCode).ThenBy(x => x.BuildingName))
+        {
+
+            <li class="@checkListClass">
+                <input type="checkbox" value="@build.BuildingId"
+                       data-text="@build.BuildingName" data-sitebuildingname="@string.Format("{0} - {1} [{2}] ", build.SiteCode, build.BuildingName, build.BuildingCode)" /><span></span> @string.Format("{0} - {1} [{2}] ", build.SiteCode, build.BuildingName, build.BuildingCode)
+            </li>
+        }
+    </ul>
+</div>
+<input type="hidden" name="UncheckBuilding" id="UncheckBuilding" />
+<script>
+    $(document).ready(function () {
+        $(".ullistitem").hide();
+        $('.chkBuildSigleSelect input[type="checkbox"]').change(function () {
+            var isChecked = $(this).is(':checked')
+            var thisVal = "0"
+            if (isChecked) {
+                thisVal = $(this).val()
+            }
+
+            $('.chkBuildSigleSelect input[type="checkbox"]').prop('checked', false)
+            $(this).prop('checked', isChecked)
+            $('.chkBuildSigleSelect').parent().parent().children('label').text(selectLabel($('.chkBuildSigleSelect')))
+            $('#BuildingId').val(thisVal);
+            $('#txtbuildingName').val(thisVal);
+        })
+
+        $('.chkBuildMultiSelect input[type="checkbox"]').change(function () {
+            var val = getCheckedValue('chkBuildMultiSelect')
+            console.log(selectLabel($('.chkBuildMultiSelect')))
+            $('.chkBuildMultiSelect').parent().parent().children('label').text(selectLabel($('.chkBuildMultiSelect')));
+            if ($(this).prop("checked") == false) {
+                $("#UncheckBuilding").val($(this).val());
+            }
+            else {
+                $("#UncheckBuilding").val("");
+            }
+            $("#Buildingddl").trigger('change');
+
+        })
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+    });
+
+    function getCheckedValue(className) {
+        var checkedVallst = [];
+        debugger;
+        $('.' + className + ' input[type="checkbox"]:checked').each((i, data) => {
+            var checkedVals = { BuildingName: $(data).attr('data-text'), BuildingId: $(data).val(), SiteBuildingName: $(data).attr('data-sitebuildingname') };
+            checkedVallst.push(checkedVals);
+        })
+        return checkedVallst
+    }
+
+    var selectLabel = (input) => {
+        var chkCount = $(input).find('input[type="checkbox"]:checked').length
+        var txt = '--Select Building--'
+        if (chkCount == 0) {
+            return txt;
+        }
+        if (chkCount < 2) {
+            console.log($(input).find('input[type="checkbox"]:checked').data('text'))
+            txt = $(input).find('input[type="checkbox"]:checked').data('text')
+        }
+        else {
+            txt = chkCount + ' Building Selected'
+        }
+        return txt;
+    }
+</script>
+<style>
+    .selectList li, .selectList ul {
+        list-style-type: none;
+        text-decoration: none;
+    }
+
+    .selectList {
+        width: 70%;
+        display: inline-block;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .ullistitem {
+        display: none;
+        z-index: 99;
+        position: absolute;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .ddlproject {
+        width: 0;
+        border-color: transparent;
+    }
+</style>

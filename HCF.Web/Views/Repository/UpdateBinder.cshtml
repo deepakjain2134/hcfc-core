@@ -1,0 +1,262 @@
+﻿@model HCF.BDO.Binders
+
+@{
+    ViewBag.Title = "Binders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<
+    <section class="content-header">
+        <h1>
+            Binders
+        </h1>
+    </section>
+    <div class="container-fluid">
+        <div class="row">
+            @*<div class="col-lg-3 col-xs-3 col-lg-1-8">
+                    <div class="box box-primary col-lg-12">
+                        @Html.Partial("_MoreConfig")
+                    </div>
+                </div>*@
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary fc-view binder_page">
+                    @if (Model != null)
+                    {
+                        <div class="slider">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                                <div>
+                                    <div class="row list-Contacts">
+                                        <div id="hdn_div">
+                                            <input type="hidden" name="FileName" value="@Model.FileName" />
+                                            <input type="hidden" name="FileContent" />
+                                            <input type="hidden" name="FilePath" value="@Model.FilePath" />
+                                        </div>
+                                        @Html.HiddenFor(model => model.ParentBinderId)
+                                        <div class="col-lg-5">
+                                            <div class="form-group">
+                                                <label>Folder Name</label><em class="required-field"> *</em>
+                                                @Html.TextBoxFor(model => model.BinderName, new { @class = "form-control", required = "required" })
+                                                @Html.ValidationMessageFor(model => model.BinderName)
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Folder Icon</label>
+                                                <div>
+                                                    <input type="file" name="file" accept="image/*" id="file" tempname="FileName" filecontent="FileContent" class="fileUpload" onchange="ImageUpload(this)" />
+                                                </div>
+                                                <div>
+                                                    @if (!String.IsNullOrEmpty(Model.FilePath))
+                                                    {
+                                                        <img id="user_img" class="img" height="50" width="50" style="border:#ccc solid 1px; margin-top:8px;"
+                                                             src="@commonModelFactory.FilePath(Model.FilePath)" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <img id="user_img" class="img" height="50" width="50" style="border:#ccc solid 1px; margin-top:8px;" src="/Images/Floors/default.jpg" />
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <div class="form-group">
+                                                <label>Folder Description</label>
+                                                @Html.TextBoxFor(model => model.Description, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => model.Description)
+                                            </div>
+                                            <div class="form-group comman_checkbox">
+                                                <label>Status</label>
+                                                @Html.EditorFor(model => model.IsActive, new { @class = "form-control" })<span></span>
+                                                @Html.ValidationMessageFor(model => model.IsActive)
+                                            </div>
+                                        </div>
+                                        <div style="clear:both"></div>
+                                        @if (Model.EpBinders.Count > 0)
+                                        {
+                                            <div>
+                                                @for (int i = 0; i < Model.EpBinders.Count; i++)
+                                                {
+                                                    <div class="clone" id="@i">
+                                                        @Html.HiddenFor(m => m.EpBinders[i].EPBinderId)
+                                                        <div class="col-lg-5">
+                                                            <div class="form-group">
+                                                                @Html.DropDownListFor(m => m.EpBinders[i].EpDetails.Standard.StDescID, new SelectList(ViewBag.Standards, "StDescID", "TJCStandard", Model.EpBinders[i].EpDetails.Standard.StDescID),
+                                                                "Select Standard", new { @class = "form-control stdesc", @onchange = "FillEPDetails(this)" })
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-5">
+                                                            <div class="form-group">
+                                                                @Html.HiddenFor(x => x.EpBinders[i].IsActive)
+                                                                @*@Html.DropDownListFor(m => m.EpBinders[i].EPDetailId, new SelectList(HCF.BAL.EpRepository.GetEpDetailsforBinders(Model.EpBinders[i].EpDetails.Standard.StDescID.Value, Model.EpBinders[i].EPBinderId), "EPDetailId", "EPNumber", Model.EpBinders[i].EPDetailId),
+                                                                "Select EP", new { @class = "form-control ep" })*@
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-2" style="padding: 10px 85px 0 0;">
+                                                            <input type="button" class="remove-button" name="remove" value="@Model.EpBinders[i].EPBinderId" />
+                                                            @if (i < Model.EpBinders.Count - 1)
+                                                            {
+                                                                <input type="button" class="add-button" name="add" value="Add" id="btn_@i" style="display:none" />
+                                                            }
+                                                            else
+                                                            { <input type="button" class="add-button" name="add" value="@i" id="btn_@i" />}
+
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            var i = 0;
+                                            <div>
+                                                <div class="clone" id="@i">
+                                                    <div class="col-lg-5">
+                                                        <div class="form-group">
+                                                            @Html.DropDownList("EpBinders[0].EpDetails.Standard.StDescID", new SelectList(ViewBag.Standards, "StDescID", "TJCStandard", null),
+                                                             "Select Standard", new { @class = "form-control stdesc", @onchange = "FillEPDetails(this)" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        <div class="form-group">
+                                                            @Html.DropDownList("EpBinders[0].EPDetailId", Enumerable.Empty<SelectListItem>(), "Select EP", new { @class = "form-control ep" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-2" style="padding: 10px 85px 0 0;">
+                                                        <input type="button" class="remove-button" name="remove" value="0" />
+                                                        <input type="button" class="add-button" name="add" value="@i" id="btn_@i" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </div>
+                                    <div>
+                                        <input type="submit" value="Update" class="button1" />
+                                        @Html.ActionLink("Cancel ", "Binders", "Repository", new { @class = "button1" })
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="error">Record does not exist with this id!</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    $(document).on('click', '.add-button', function () {
+        count = parseInt($('.clone:last').attr('id'))
+        var newID = count + 1;
+        var template = $(this).parent("div").parent("div").clone().attr("id", newID);
+        template.find('select').val(null);
+        $.each(template.find('select'), function () {
+            if ($(this).hasClass("stdesc")) {
+                var name = $(this).attr('name');
+                name = "EpBinders[" + newID + "].EpDetails.Standard.StDescID";
+                $(this).attr('name', name);
+                var id = $(this).attr('id');
+                id = "EpBinders_" + newID + "__EpDetails_Standard_StDescID";
+                $(this).attr('id', id);
+            } else if ($(this).hasClass("ep")) {
+                $(this).empty();
+                var name = $(this).attr('name');
+                name = "EpBinders[" + newID + "].EPDetailId";
+                $(this).attr('name', name);
+                var id = $(this).attr('id');
+                id = "EpBinders_" + newID + "__EPDetailId";
+                $(this).attr('id', id);
+            }
+        });
+        template.find('input[type=button]').val(0);
+        $.each(template.find('input[type=button]'), function () {
+            if ($(this).hasClass("add-button")) {
+                var id = $(this).attr('id');
+                id = "btn_" + newID;
+                $(this).attr('id', id);
+            }
+        });
+        $('.clone:last').after(template);
+        $(this).hide();
+    });
+
+    $(document).on('click', '.remove-button', function () {
+        var ePBinderId = $(this).val(); ///$(this).attr('id');
+        var Id = $(this).parent("div").parent("div").attr('id');
+        var numItems = $('.clone').length
+        if (numItems > 1) {
+            if (ePBinderId > 0) {
+                $("#" + Id).remove();
+                //$("#btn_" + sId).show();
+                $('.add-button').hide();  //Parveen Kumar
+                $('.add-button:last').show() ////Parveen Kumar
+
+                //var data = { EPBinderId: ePBinderId };
+                @*$.ajax({
+                    url: '@Url.Action("DeleteEPBinders", "Repository")', //"../Repository/DeleteEPBinders",
+                    method: "POST",
+                    data: data,
+                    success: function (d) {
+                        sId = parseInt(Id);
+                        sId = sId - 1;
+                        $("#" + Id).remove();
+                        //$("#btn_" + sId).show();
+                        $('.add-button').hide();  //Parveen Kumar
+                        $('.add-button:last').show() ////Parveen Kumar
+                    }
+                })*@
+            } else {
+                sId = parseInt(Id);
+                sId = sId - 1;
+
+                $("#" + Id).remove();
+
+                //$("#btn_" + sId).show();
+                $('.add-button').hide();  //Parveen Kumar
+                $('.add-button:last').show() ////Parveen Kumar
+            }
+        } else {
+            return false;
+        }
+    });
+
+    function FillEPDetails(_control) {
+        var no = $(_control).parent("div").parent("div").parent("div").attr('id');
+        var control = "EpBinders_" + no + "__EPDetailId";
+        $("#" + control).html("");
+        $("#" + control).append(
+                        $('<option></option>').val("").html("Select EP"));
+        var StdescId = $('#EpBinders_' + no + '__EpDetails_Standard_StDescID').val();
+        if (StdescId != "") {
+            $.ajax({
+                url: '@Url.Action("FillEPnumber", "Goal")',  //'/Goal/FillEPnumber',
+                type: "GET",
+                dataType: "JSON",
+                data: { stdescId: StdescId,epBinderId :0 },
+                success: function (epNumbers) {
+                    console.log(epNumbers);
+                    $.each(epNumbers, function (i, epNumber) {
+                        $("#" + control).append(
+                            $('<option></option>').val(epNumber.EPDetailId).html(epNumber.EPNumber));
+                    });
+                }
+            });
+        }
+    }
+
+   
+
+    $("#file").change(function () {
+        var file = document.getElementById("file").files[0];
+        var readImg = new FileReader();
+        readImg.readAsDataURL(file);
+        readImg.onload = function (e) {
+            $('.img').attr('src', e.target.result).fadeIn();
+        }
+    });
+
+</script>

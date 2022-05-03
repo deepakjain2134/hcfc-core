@@ -1,0 +1,69 @@
+﻿@{
+                /**/
+
+                ViewBag.Title = " EP Inspection Date";
+}
+@model HCF.BDO.Standard
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Inspection Date
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("EPInspectionDate", "Goal", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                       
+                            <div class="row">
+                                <div class="col-lg-3 col-xs-12">
+                                    <div class="form-group">
+                                        @Html.DropDownList("StDescID", new SelectList(ViewBag.Standards, "StDescID", "TJCStandard", ViewBag.StdescId),
+                                        "All",
+                                     new { @class = "form-control selectyear" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="partialPlaceHolder">
+                                    @if (Model.EPDetails.Count != 0)
+                                    {
+                                        @await Html.PartialAsync("_epdetails", Model);
+                                    }
+                                </div>
+                            </div>
+                           
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script language="javascript">
+    $(document).ready(function () {
+
+        $('.descriptions').popover({
+            trigger: 'focus'
+        });
+
+        var url = '@Url.Action("epdetails", "Goal")';
+        $('#StDescID').change(function () {
+            var id = $(this).val();
+            $('#partialPlaceHolder').html('');
+            if (id != '' || id != null) {
+                $.get(url + '?id=' + id, function (data) {
+                    $('#partialPlaceHolder').html(data);
+                    $('#partialPlaceHolder').fadeIn('fast');
+                });
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,174 @@
+﻿@model HCF.Web.ViewModels.Location.LocationGroupViewModel
+<div class="box box-primary">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="locationgroup">
+                <div class="row tablelist-topform">
+                    <div class="col-lg-12">
+                        <p class="roundBlue">
+                            Buildings can only be grouped if they are connected and do not have a fire separation required by The Joint Commission. Creating Building Groups will apply only to Fire Drills module.
+
+                            Create a Building Group by clicking on the (+) icon. Select your Building Group from the dropdown on the right. Then, select the buildings you would like to add to the selected Building Group by clicking on the building name. You can remove buildings by clicking them again to unhighlight them.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6" id="step2_part1">
+                        <div class="roundsListBox roundlocations">
+                            <div class="roundsheadBox" id="roundsheadBox">
+                                <h4>Buildings</h4>
+                                <div id="groupbuildings" class="groupdetails">
+                                    @await Html.PartialAsync("_getGroupBuildings", Model,
+                                       new ViewDataDictionary(
+                                       new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                       new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 roundpart2" id="step2_part2">
+                        <div class="roundsListBox">
+
+                            <div>
+                                <div class="roundsheadBox roundlocations">
+                                    <div class="addfloor-content">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <a href="#" id="lbllocationgrp">
+                                                    <h4>Building Group</h4>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-8 form-group">
+                                                <a id="addfiredrillgroup" href='@Url.Action("AddLocationGroup","Location")' class="pull-right modal-link">
+                                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Location Group" alt="3d_add_button" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="roundSelects">
+                                            <select class="form-control" id="ddllocationgroup">
+                                                <option value="0">Select Buildings Group</option>
+                                                @foreach (var item in Model.locationGroup.Where(x => x.IsActive))
+                                                {
+                                                    <option value="@item.LocationGroupId">@item.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div id="loadgrouploacation">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="locationgrouplst" style="display:none">
+                @await Html.PartialAsync("_locationGroupLists", Model)
+            </div>
+        </div>
+    </div>
+</div>
+<script>   
+
+    $("#lbllocationgrp").click(function () {
+        $("#locationgroup").hide();
+        $("#locationgrouplst").show();
+    });
+
+    $(document).off('click', '.non-select-groupname').on('click', '.non-select-groupname', function () {
+        debugger;
+        var locationGroupId = $("#ddllocationgroup option:selected").val();
+        if (locationGroupId > 0) {
+            var buildingId = $(this).attr('buildingId');
+            var havingfiredrill = $(this).attr('ishavingfiredrill');
+            var isActive = true;
+            if (havingfiredrill) {
+                swal({
+                    title: "The building you’re grouping already has a fire drill schedule. The schedule will be deleted if you add this building to a Group. However, any Fire Drills for which documentation was marked as completed, the Fire Drill documentation will stay in ‘Fire Drill Report’ in Binders.",
+                    text: "Would you like to proceed??",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes!",
+                    closeOnConfirm: true
+                },
+                    function () {
+                        AddOrRemoveLocations(locationGroupId, buildingId, isActive);
+                    });
+            } else {
+                AddOrRemoveLocations(locationGroupId, buildingId, isActive);
+            }
+            
+        } else {
+            AlertWarningMsg(" Select a location group prior to selecting an building. ");
+        }
+    });
+
+    function AddOrRemoveLocations(locationGroupId, buildingId, isActive) {
+        debugger;
+        var url = '@Url.Action("SaveGroupLocationsDetails", "Location")';
+        $.get(url + '?locationGroupId=' + locationGroupId + '&buildingId=' + buildingId + '&IsActive=' + isActive, function (data) {
+            debugger;
+            if (isActive) {
+                successAlert("Saved Successfully");
+            } else {
+                successAlert("Removed Successfully");
+            }
+            debugger;
+            groupBuildings();
+            GetGroupLocationsDetails();   
+        });
+    }
+
+    $(document).off('change', '#ddllocationgroup').on('change', '#ddllocationgroup', function (event) {
+        GetGroupLocationsDetails();
+    });
+
+    function GetGroupLocationsDetails() {
+        var locationGroupId = $("#ddllocationgroup option:selected").val();
+        $("#loadgrouploacation").html('');
+        var url = '@Url.Action("GetGroupLocationsDetails", "Location")';
+        if (locationGroupId > 0) {
+            $.get(url + '?locationGroupId=' + locationGroupId, function (data) {
+                var str = "";
+                if (data.Result.length > 0) {
+                    for (var i = 0; i < data.Result.length; i++) {
+                        str = str + "<div class='selected-location-group buildinglocationsGroupitems' buildingId='" + data.Result[i].BuildingId + "'><p class='buildinglocationsGroup'>" + data.Result[i].BuildingName + "</p> <span class='buildingClose'>X</span></div>";
+                                            }
+                    $("#loadgrouploacation").append(str);
+                }
+            });
+        }
+    }
+
+    $('body').on('click', '.selected-location-group', function () {
+        var locationGroupId = $("#ddllocationgroup option:selected").val();
+        var buildingId = $(this).attr('buildingId');
+        var isActive = false;
+        swal({
+            title: "Are you sure?",
+            text: "Do you want to remove this building from location group?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                AddOrRemoveLocations(locationGroupId, buildingId, isActive);
+            });
+    });
+
+
+    function groupBuildings() {
+        var url = '@Url.Action("GetGroupBuildings", "Location")';
+        $.get(url, function (data) {
+            $('#groupbuildings').html(data);
+            $('#groupbuildings').fadeIn('fast');
+        });
+    }
+
+</script>

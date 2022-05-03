@@ -1,0 +1,30 @@
+﻿@model HCF.BDO.Inspection
+<div class="slider">
+    <table id="activityTable" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Asset Name</th>
+                <th> @Localizer["AssetNo"] </th>
+                <th>Location</th>
+                <th>Comment</th>
+                <th>Inspection Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var details in Model.TInspectionActivity.Where(x => x.IsSubmit == false && x.ActivityType == 2))
+            {
+                <tr>
+                    <td class="comman_checkbox1">
+                        <input type="checkbox" value="@details.TInsActivityId" id="tInsActivityId" /><span></span>
+                    </td>
+                    <td>@details.TFloorAssets.Name</td>
+                    <td>@details.TFloorAssets.AssetNo</td>
+                    <td>@commonModelFactory.GetFloorAssetLocation(details.TFloorAssets)</td>
+                    <td>@details.Comment</td>
+                    <td>@details.CreatedDate.Value.ToFormatDate()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

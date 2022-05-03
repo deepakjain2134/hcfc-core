@@ -1,0 +1,91 @@
+﻿@model List<HCF.BDO.RouteMaster>
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-striped" id="routes">
+    <thead>
+        <tr>
+            <th>Route Name</th>
+            <th># of assets </th>
+            <th>Stops</th>
+            <th>Inspect</th>
+            <th>Report</th>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var route in Model.Where(x => x.IsActive))
+        {
+            <tr id="@route.RouteId" title="@route.RouteNo" class="route_list">
+                <td title="@route.RouteNo">
+                    <div onclick="GoTOPage(0 ,'@route.RouteId')" style="cursor:pointer;">
+                        @route.RouteNo
+                    </div>
+                </td>
+                <td width="30%">
+                    @foreach (var assets in route.Assets)
+                    {
+                        <div class="@string.Format("assetsCount div_{0}_asset",assets.AssetId)" assetid="@assets.AssetId" title="@assets.Name">@string.Format("{0} ({1})", assets.Name, assets.Count)</div>
+                    }
+                </td>
+                <td width="7%">
+                    <img src="@Url.Content("~/dist/Images/Icons/location_icon.png")" title="Stops Info" alt="Stops" @*class="stops"*@
+                         class="stops @(route.StopCount==0 ? "disable" : "")"
+                         id="@route.RouteId" />
+                    <sup>
+                        @route.StopCount
+                    </sup>
+                </td>
+                <td width="10%">
+                    <img style="cursor:pointer" onclick="GoTOPage(0 ,'@route.RouteId')"
+                         src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")" title="Inspection" alt="" />
+                </td>
+                <td width="10%">
+                    <img style="cursor:pointer" class="reportAssets" routid="@route.RouteId"
+                         src="@Url.Content("~/dist/Images/Icons/history_icon.png")" title="Asset Report" alt="" />
+                </td>
+                <td width="5%">
+                    <a id="@route.RouteId" class="@(route.AssetCounts > 0 ? "routePrintBcode" :"routePrintBcode disabled")">
+                        <img src="@Url.Content("~/dist/Images/Icons/barcode.png")" title="Asset BarCode" alt="Asset BarCode" />
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="stopsinfo" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartialstopsinfo">
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#routes').DataTable({
+        "searching": false,
+        "lengthChange": false,
+        "stateSave": true,
+        "stateDuration": -1,
+        "pageLength": 20,
+        "bPaginate": $('#routes tbody tr').length > 25,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-12 tableactions' <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+        'aoColumnDefs': [{
+            'bSortable': false,
+            'aTargets': [-1, -2, -3]
+        }]
+    });
+
+    $(document).ready(function () {
+        $(".assetsCount").addClass("hide");
+        $('input:checkbox[id^="cb"]:checked').each(function () {
+            $(".div_" + $(this).val() + "_asset").removeClass("hide");
+        });
+    });
+</script>

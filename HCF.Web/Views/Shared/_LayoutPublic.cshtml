@@ -1,0 +1,66 @@
+﻿@{
+    ViewBag.Title = "CRx - HCF Compliance";    
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <link href="~/dist/css/mystyle.css" rel="stylesheet" />
+    <link rel="stylesheet" href="@Url.Content("~/dist/css/bootstrap.min.css")">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="@Url.Content("~/dist/css/AdminLTE.css")">
+    <link rel="stylesheet" href="@Url.Content("~/dist/css/custom.css")">
+    <link rel="stylesheet" href="@Url.Content("~/dist/css/sweetalert.css")">
+    <script src="@Url.Content("~/dist/plugins/jQuery/jquery-2.2.3.min.js")"></script>
+</head>
+<body class="hold-transition public_page">
+    <div class="wrapper">
+        <header class="main-header public_header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href='@(Url.RouteUrl("login"))' class="logo">
+                            <span class="logo-mini"><img src="@Url.Content("~/dist/img/small-Logo.png")" alt="HCF Compliance" title="CRx : Holy Name Medical Center"></span>
+                            <span class="logo-lg"><img src="@Url.Content("~/dist/img/small-Logo.png")" title="HCFCompliance" alt="HCFCompliance" /></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <section>
+            @await Html.PartialAsync("_Message")
+            @RenderBody()
+        </section>
+        <footer class="main-footer">
+            Copyright &copy; @DateTime.Now.Year All rights reserved.
+        </footer>
+        <div class="control-sidebar-bg"></div>
+    </div>
+
+    <script src="@Url.Content("~/dist/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/dist/js/app.min.js")"></script>
+    <link rel="stylesheet" href="@Url.Content("~/dist/plugins/datatables/dataTables.bootstrap.css")">
+    <script src="@Url.Content("~/dist/plugins/datatables/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/dist/js/keen.min.js")"></script>
+    <script src="@Url.Content("~/dist/js/keen.dashboard.js")"></script>
+    <script src="~/bundles/jqueryui.js" type="text/javascript"></script>
+    <script src="~/js/main/CRxJs.js" type="text/javascript"></script>
+    @*@Scripts.Render("~/bundles/jqueryui")
+        @Scripts.Render("~/CRxJs")*@
+    @RenderSection("scripts", false)
+
+
+</body>
+</html>

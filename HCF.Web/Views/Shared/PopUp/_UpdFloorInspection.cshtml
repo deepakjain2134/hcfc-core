@@ -1,0 +1,274 @@
+﻿@model HCF.BDO.WorkOrder
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        Floor Inspection (@($"{Model.Floor.FloorLocation}"))
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        @using (Html.BeginForm("FloorRoundInspection", "Rounds", FormMethod.Post, new { id = "floorInspectionform" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => Model.Xcoordinate)
+            @Html.HiddenFor(m => Model.Ycoordinate)
+            @Html.HiddenFor(m => Model.FloorId)
+            @Html.HiddenFor(m => Model.BuildingCode)
+            @Html.HiddenFor(m => Model.IssueId)
+            @Html.HiddenFor(m => Model.ActivityId)
+
+
+
+            <div class="col-md-12" id="tbl">
+
+                <div class="row form-group">
+                    <input type="hidden" name="UserIds" value="" id="UserIds">
+                </div>
+
+                <div class="row form-group datetimeDiv">
+                    <div class="col-lg-6">
+                        <label>Date:</label>
+                        <span>@Model.CreatedDate.Value.ToClientTime().ToFormatDateTime()</span>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row form-group dvtimetoresolve">
+                            <div class="col-lg-12">
+                                <label>TimeTo Resolve:</label>
+                                @Model.TimetoResolve <span>(hrs)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row form-group ">
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <label>Problem: <em class="required-field"> *</em></label>
+                            </div>
+                            <div class="col-lg-9">
+                                @Html.TextAreaFor(m => Model.Description, new { @class = "form-control", required = "required", maxlength = 150 })
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row form-group datetimeDiv">
+                            <div class="col-lg-4">
+                                <label>@Localizer["WorkOrderNo"]</label>
+                            </div>
+                            <div class="col-lg-8">
+                                @if (Model.WorkOrderId > 0)
+                                {
+                                    <div class="form-group">
+                                        <a href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = Model.IssueId })' class="issueId button1">
+                                            <span> @Model.WorkOrderNumber (@Model.StatusCode)</span>
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+
+                                    <a href='@Url.Action("CreateWO", "WorkOrder", new { issueId = Model.IssueId })' class="issueId button1">
+                                        <span>Create Work Order</span>
+                                    </a>
+
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row dvtimetoresolve form-group">
+                            <div class="col-lg-3">
+                                <label>User:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                @{
+                                    var selectedUserID = 0;
+                                    if (Model.Resources != null && Model.Resources.Count > 0)
+                                    {
+                                        selectedUserID = Model.Resources.FirstOrDefault().UserId;
+                                    }
+                                }
+                                @*@Html.UserDropDownList("UserId", selectedUserID, "Select User", new { @class = "form-control email_drop", required = "required" })*@
+
+                                <userdropdownlist name="UserId" selectedvalue="@selectedUserID" firsttext="Select User" class="form-control email_drop" required="required"></userdropdownlist>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row form-group datetimeDiv">
+                            <div class="col-lg-4">
+                                <label>ILSM</label>
+                            </div>
+                            <div class="col-lg-8">
+                                @if (Model.TilsmId.HasValue && Model.TilsmId.Value > 0 && Model.Ilsm != null)
+                                {
+                                    <div class="form-group">
+                                        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.Ilsm.TIlsmId })" class="button1">
+                                            <span>@Localizer["IncidentNo"] @Model.Ilsm.IncidentId</span>
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+
+                                    <a href="@Url.Action("AddILSM", "ILSM", new { issueId = Model.IssueId })" class="button1">
+                                        <span>Add ILSM</span>
+                                    </a>
+
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+                    <div id="tbl1" class="col-md-12 dvtimetoresolve">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="row form-group">
+                                    <div class="col-lg-3">
+                                        <label>Status:</label>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <input type="hidden" id="previousStatus" value="@Model.StatusCode" />
+                                        @Html.DropDownListFor(m => Model.StatusCode, new SelectList(ViewBag.WOStatus, "Code", "Name"), new { @class = "form-control email_drop" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="row form-group">
+                                    <div class="col-lg-4">
+                                        <label>Completion Comments:</label>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        @Html.TextBoxFor(m => Model.CompletionComments, new { @class = "form-control email_drop" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row dvtimetoresolve form-group fileUpload">
+                            <div class="col-lg-3">
+                                <label>Attached Image:</label>
+                            </div>
+                            <div class="col-lg-9">
+                                @if (Model.WorkOrderFiles.Count > 0)
+                                {
+                                    <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;"
+                                         src="@commonModelFactory.FilePath(Model.WorkOrderFiles[0].FilePath)" />
+                                }
+                                else
+                                {
+                                    <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.FloorDefaultImg)" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            if (Model.WorkOrderNumber == "0")
+            {
+                <div class="col-md-12 text-right button_Div">
+                    <button name="submitButton" class="btn comm-button" id="Submit" type="button">Save</button>
+                    <button name="cancelButton" class="btn comm-Cancelbutton" id="cancelButton" type="button">Cancel</button>
+                </div>
+            }
+            else
+            {
+                <div class="col-md-12 text-right button_Div">
+                    <button name="cancelButton" class="btn comm-Cancelbutton" id="cancelButton" type="button">Cancel</button>
+                </div>
+            }
+        }
+    </div>
+</div>
+<style>
+
+    .gray-disabled {
+        filter: grayscale(100%);
+    }
+</style>
+
+<script src="@Url.Content("~/dist/js/numericInput.min.js")"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $(".cwoDiv").hide();
+
+        if ('@Model.IssueId' > 0) {
+            $("#Description").prop("readonly", true);
+            $("#UserId").prop("disabled", "disabled");
+        }
+
+        @if (Model.StatusCode == "CMPLT" || Model.StatusCode == "CANCL")
+        {
+        @:$("#StatusCode").addClass("disabled"); $("#CompletionComments").addClass("disabled"); $(".fileUpload").hide(); $("#Submit").hide();
+                                                                                }
+
+
+        @if(Model.WorkOrderId == 0 && DateTime.UtcNow >= Model.CreatedDate.Value.AddHours(Model.TimetoResolve))
+        {
+         @:$("#tbl1").hide(); $(".fileUpload").hide();
+                                                                                }
+
+
+        @if (Model.WorkOrderNumber !="0" )
+        {
+          @:$(".dvtimetoresolve").remove(); $("#tbl1").remove();
+
+        }
+
+        @if(Model.IssueId>0)
+        {
+            if (DateTime.UtcNow >= Model.CreatedDate.Value.AddHours(Model.TimetoResolve) && Model.TimetoResolve > 0)
+        {
+            @:$(".button_Div").remove(); $(".cwoDiv").show();
+                                                }
+        }
+    });
+
+    $("#StatusCode").change(function () {
+        var statusCode = $(this).val();
+        var completionCommentsbox = $("#CompletionComments");
+        if (statusCode == "CMPLT") {
+            completionCommentsbox.prop('required', true);
+        } else {
+            completionCommentsbox.prop('required', false);
+        }
+    });
+
+
+    $("#cancelButton").click(function () {
+        $('#floorInspection').modal('hide');
+    });
+
+    $("#Submit").click(function () {
+
+        $("#floorInspectionform").submit();
+
+    });
+
+
+
+</script>

@@ -1,0 +1,353 @@
+﻿@model HCF.BDO.TIcraLog
+@{
+    Layout = null;
+    Layout = "";
+    ViewBag.Title = "Manage ICRA";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    List<HCF.BDO.ConstructionClass> lstConstClass = (List<HCF.BDO.ConstructionClass>)ViewBag.ConstructionClass;
+    List<HCF.BDO.ConstructionType> lstConstType = (List<HCF.BDO.ConstructionType>)ViewBag.ConstructionType;
+    List<HCF.BDO.ConstructionRisk> lstConstRisk = (List<HCF.BDO.ConstructionRisk>)ViewBag.ConstructionRisk;
+    List<HCF.BDO.UserProfile> lstUserProfile = (List<HCF.BDO.UserProfile>)ViewBag.lstUserProfile;
+    bool Iseditable = (bool)ViewBag.IsEditable;
+
+    string classlist = string.Join(",", lstConstClass.Select(x => x.Version));
+}
+
+<div id="Icracommonview">
+    @Html.HiddenFor(m => Model.TicraId)
+    @Html.HiddenFor(m => Model.ConstructionClassId)
+    @Html.HiddenFor(m => Model.ConstructionRiskId)
+    @Html.HiddenFor(m => Model.ConstructionTypeId)
+    @Html.HiddenFor(m => Model.PermitRequestBySignId)
+    @Html.HiddenFor(m => Model.PermitAuthorizedBySignId)
+    @Html.HiddenFor(m => Model.PermitReviewerBySignId)
+    @Html.HiddenFor(m => Model.ActivityLists)
+
+    @for (int i = 0; i < Model.TIcraSteps.Where(x => x.Step.IsActive == true && x.Step.ParentICRAStepId == 0).Count(); i++)
+    {
+        @Html.HiddenFor(m => Model.TIcraSteps[i].ICRAStepId)
+        @Html.HiddenFor(m => Model.TIcraSteps[i].TicraId)
+        @Html.HiddenFor(m => Model.TIcraSteps[i].TIrcaStepId)
+        @Html.HiddenFor(m => Model.TIcraSteps[i].Step.ICRAStepId)
+        var k = i + 1;
+        <div class="icraRowcontent-Box form-group">
+            <div id="dv_step_@Model.TIcraSteps[i].ICRAStepId">
+                <label>
+                    <span class="stepNo">
+                        @($"Step {i + 1}:")
+                        @if (Model.TIcraSteps.Where(x => x.Step.ParentICRAStepId == Model.TIcraSteps[i].ICRAStepId).Count() > 0)
+                        {
+                            <label><em class="text-black">Fill out all applicable questions as they relate to the ICRA permit</em></label>
+                        }
+                    </span>
+                </label>
+                @if (Model.TIcraSteps[i].Step.ICRAStepId == 1)
+                {
+                    <span>
+                        @await Html.PartialAsync("~/Views/ICRA/_TICRAConstructionProject.cshtml", lstConstType)
+                        @*@await Html.PartialAsync("_TICRAConstructionProject", lstConstType)*@
+                        @*@{ Html.RenderAction("TICRAConstructionProject", "ICRA"); }*@
+                    </span>
+                    @Html.TextBoxFor(model => model.TIcraSteps[i].Comment, new { @class = "form-control", @placeholder = $"{Model.TIcraSteps[i].Step.Alias} Comment" })
+                }
+                else if (Model.TIcraSteps[i].Step.ICRAStepId == 2)
+                {
+                    <span>
+                        @await Html.PartialAsync("~/Views/ICRA/_TICRARiskGroups.cshtml", lstConstRisk)
+                        @*@{Html.RenderAction("TICRARiskGroups", "ICRA"); }*@
+                    </span>
+                    @Html.TextBoxFor(model => model.TIcraSteps[i].Comment, new { @class = "form-control", @placeholder = $"{Model.TIcraSteps[i].Step.Alias} Comment" })
+                }
+                else if (Model.TIcraSteps[i].Step.ICRAStepId == 3)
+                {
+                    <span>
+                        @await Html.PartialAsync("~/Views/ICRA/_TICRAICMatrix.cshtml",
+                       new ViewDataDictionary(
+                       new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                       new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                       {{ "Version",Model.Version  },{ "classlist",classlist }}
+                       )
+
+                    </span>
+                    @Html.TextBoxFor(model => model.TIcraSteps[i].Comment, new { @class = "form-control", @placeholder = $"{Model.TIcraSteps[i].Step.Alias} Comment" })
+                }
+                else if (Model.TIcraSteps[i].Step.ICRAStepId == 4)
+                {
+                    <span>
+                        @await Html.PartialAsync("~/Views/ICRA/_TICRAICAreasSurrounding.cshtml", Model)
+                    </span>
+                }
+
+                else
+                {
+                    <div class="icra_child_steps form-group">
+                        <label>
+                            <span class="stepNo">
+                                @($"{Convert.ToChar(65)}:")
+                            </span>
+                            <span>
+                                @Model.TIcraSteps[i].Step.Steps
+                            </span>
+                        </label>
+                        @Html.TextBoxFor(model => model.TIcraSteps[i].Comment, new { @class = "form-control", @placeholder = "Comment" })
+                    </div>
+                }
+                <div id="icra_child_steps">
+                    @for (int j = 0; j < Model.TIcraSteps.Where(x => x.Step.IsActive == true && x.Step.ParentICRAStepId == Model.TIcraSteps[i].ICRAStepId).Count(); j++)
+                    {
+                        @Html.HiddenFor(m => Model.TIcraSteps[k].ICRAStepId)
+                        @Html.HiddenFor(m => Model.TIcraSteps[k].TicraId)
+                        @Html.HiddenFor(m => Model.TIcraSteps[k].TIrcaStepId)
+                        @Html.HiddenFor(m => Model.TIcraSteps[k].Step.ICRAStepId)
+                        <div class="icrachildBox form-group" id="dv_step_@Model.TIcraSteps[k].ICRAStepId">
+                            <label>
+                                <span class="stepNo">
+                                    @($"{Convert.ToChar(j + 66)}:")
+                                </span>
+                                <span>
+                                    @Model.TIcraSteps[k].Step.Steps
+                                </span>
+                            </label>
+                            @Html.TextBoxFor(model => model.TIcraSteps[k].Comment, new { @class = "form-control", @placeholder = "Comment" })
+                        </div>
+                        k++;
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    <div id="permit-div" style="display:none;background-color:white;padding:10px 0px;">
+        <table class="table table-striped comman_checkbox1" id="tblprmitdiv" style="border: none !important;">
+            <tr>
+                <td colspan="3" align="center">
+                    @($"{HCF.Web.Base.UserSession.CurrentOrg.Name} Infection Control Construction Permit")
+                </td>
+            </tr>
+        </table>
+        <table class="table table-bordered table-striped comman_checkbox1">
+            <tr>
+                <td colspan="2">
+                    <table class="table table-bordered table-striped" width="100%" cellpadding="0" cellspacing="0" border="1">
+                        <tr>
+                            <td>YES/NO</td>
+                            <td><div id="permit-const-type">CONSTRUCTION ACTIVITY</div></td>
+                        </tr>
+                        @foreach (var item in lstConstType)
+                        {
+                            <tr class="permitConsTypetr">
+                                <td>
+                                    <span class="permitConsType" typeid="@item.ConstructionTypeId"></span>
+                                </td>
+                                <td>@($"{item.TypeName}: {item.Description}")</td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+                <td>
+                    <table class="table table-bordered table-striped" width="100%" cellpadding="0" cellspacing="0" border="1">
+                        <tr>
+                            <td>YES/NO</td>
+                            <td><div id="permit-risk-group">INFECTION CONTROL RISK GROUP</div> </td>
+                        </tr>
+                        @foreach (var item in lstConstRisk)
+                        {
+                            <tr class="permitConsRisktr">
+                                <td>
+                                    <span class="permitConsRisk" riskid="@item.ConstructionRiskId"></span>
+                                </td>
+
+                                <td>@($"{item.GroupName}: {item.RiskName}")</td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+            @foreach (var item in lstConstClass.Where(x => x.IsActive))
+            {
+                <tr class="@(HCF.Web.Base.UserSession.IsInfectionistRole() ? "constclasstr" :"constclasstr disable")">
+                    <td class="tdconstclass disable">
+                        <input type="checkbox" value="@item.ConstructionClassId"
+                               class="constClasschk" rel="@item.ConstructionClassId"
+                               classname="@item.ClassName" disabled="disabled" /><span></span>
+                        @item.ClassName
+                        @if (item.ConstructionClassId == 3)
+                        {
+                            @Html.TextBox($"Class{item.ConstructionClassId}Date", $"{Model.Class3Date:MM/dd/yyyy}", new { @class = "form-control datepicker", @autocomplete = "off", @placeholder = "Date" })
+                            @Html.TextBox($"Class{item.ConstructionClassId}Initial", $"{Model.Class3Initial}", new { @class = "form-control", maxlength = 150, @placeholder = "Initials" })
+                        }
+                        else if (item.ConstructionClassId == 4)
+                        {
+                            @Html.TextBox($"Class{item.ConstructionClassId}Date", $"{Model.Class4Date:MM/dd/yyyy}", new { @class = "form-control datepicker", @autocomplete = "off", @placeholder = "Date" })
+                            @Html.TextBox($"Class{item.ConstructionClassId}Initial", $"{Model.Class4Initial}", new { @class = "form-control", maxlength = 150, @placeholder = "Initials" })
+                        }
+                    </td>
+                    <td colspan="2">
+                        <ul class="double classactivityUl" classid="@item.ConstructionClassId">
+                            @foreach (var activity in item.ConstructionClassActivity.Where(x => x.IsActive == true))
+                            {
+                                <li class="stripe" activityid="@activity.ConstClassActivityId">
+                                    @activity.Activity
+                                </li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td>
+                    Additional Requirements:
+                </td>
+                <td colspan="2" class="additionL-textarea">
+                    @Html.TextAreaFor(model => model.Comment, new { @class = "form-control", @rows = "3", maxlength = "250", @title = "Max length is upto 250 characters" })
+                </td>
+            </tr>
+
+
+            <tr style="visibility:collapse">
+                <td width="5%"></td>
+                <td width="45%"></td>
+                <td width="50%"></td>
+            </tr>
+            <tr class="exceptions-box">
+                <td colspan="2">
+                    @Html.TextBoxFor(m => Model.Date1, $"{Model.Date1:MMM d, yyyy}", new { @class = "form-control datepicker", @style = "width: 44% !important;float: left;", @autocomplete = "off", @readonly = "readonly", @placeholder = "Date" })
+                    @Html.TextBoxFor(model => model.Initial1, new { @class = "form-control", maxlength = 150, @style = "width: 50% !important;float: right;", @placeholder = "Initials" })
+
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => Model.Date2, $"{Model.Date2:MMM d, yyyy}", new { @class = "form-control datepicker", @style = "width: 44% !important;float: left;", @autocomplete = "off", @readonly = "readonly", @placeholder = "Date" })
+                    @Html.TextBoxFor(model => model.Initial2, new { @class = "form-control", maxlength = 150, @style = "width: 50% !important;float: right;", @placeholder = "Initials" })
+                    <p>Exceptions/Additions to this permit are noted by attached memoranda</p>
+                </td>
+            </tr>
+            <tr>
+
+                <td colspan="4" style="padding: 0 !important;">
+                    <div id="divWorkFlow" class="cra-signatureBox TrICRaPermitRequestBy">
+
+                        @for (int i = 0; i < Model.TPermitWorkFlowDetails.Count; i++)
+                        {
+                            <div class="divpermitworkflow col-md-6" isRequired="@Model.TPermitWorkFlowDetails[i].Required" sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" id="@string.Format("divSequence_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i)" signindex="@i">
+
+                                <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileName" id="@string.Format("DSPermitSignature_{0}_{1}.FileName", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileContent" id="@string.Format("DSPermitSignature_{0}_{1}.FileContent", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.DigSignatureId" id="@string.Format("DSPermitSignature_{0}_{1}.DigSignatureId", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                                <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_LocalSignDateTime", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.LocalSignDateTime" value="@DateTime.Now" />
+                                <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_CreatedBy", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.CreatedBy" value="0" />
+                                <div class="row icraworkflowdiv">
+                                    <div class="col-md-8 div-forworkflow">
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].FormSettingId)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Id)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Sequence)
+                                        @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].LabelSignId)
+                                        <label>@Model.TPermitWorkFlowDetails[i].LabelText:<em style="@((Model.TicraId>0  && Model.TPermitWorkFlowDetails[i].Required) ||  (i==0)?"display:inline-block;":"display:none;")" class="required-field"> *</em></label>
+                                        @if (ViewBag.IsCRA != null && ViewBag.IsCRA == 1)
+                                        {
+                                            <input type="hidden" id="@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].LabelValue" value="@((Model.TPermitWorkFlowDetails[@i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[@i].LabelValue.Value > 0) ? Model.TPermitWorkFlowDetails[@i].LabelValue.Value : -1)" />
+                                        }
+                                        else
+                                        {
+                                            @*<userslist selectedvalue="@((Model.TPermitWorkFlowDetails[@i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[@i].LabelValue.Value > 0) ? Model.TPermitWorkFlowDetails[@i].LabelValue.Value : -1)"
+                                                           class="form-control"
+                                                           isworkflow="true"
+                                                           firsttext="-- Not Assigned --"
+                                                           name="@(string.Format("TPermitWorkFlowDetails[{0}].LabelValue", Convert.ToInt32(i)))"
+                                                           id="@(string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence), Convert.ToString(i)))">
+                                                </userslist>*@
+
+
+                                            <select name="TPermitWorkFlowDetails[@i].LabelValue" class="@(i==0?"form-control disable":"form-control")" id="@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+                                                <option value="">-- Select --</option>
+                                                @foreach (var item in lstUserProfile.OrderBy(x => x.FullName))
+                                                {
+                                                    if (item.UserId == (Model.TPermitWorkFlowDetails[i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[i].LabelValue.Value > 0 ? Model.TPermitWorkFlowDetails[i].LabelValue.Value : -1))
+                                                    {
+
+                                                        <option value="@item.UserId" selected="selected">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.UserId">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                                    }
+                                                }
+                                            </select>
+                                        }
+
+
+                                    </div>
+
+                                    @*<div class="col-md-4">
+                                            <div>&nbsp;</div>
+                                            <div class="crxSignBox">
+                                                @if (Model.TPermitWorkFlowDetails[i].DSPermitSignature != null && Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId > 0)
+                                                {
+                                                    <a class="@string.Format("imgDSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),i)">
+                                                        <img id="DigSignatureId_@Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId"
+                                                             src="@commonModelFactory.FilePath(Model.TPermitWorkFlowDetails[i].DSPermitSignature.FilePath)" signname="contractorsign" class="checksign" sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" signindex="@i" />
+                                                        <p class="signaturebyName">@Model.TPermitWorkFlowDetails[i].DSPermitSignature.SignByUserName</p>
+                                                        <p class="signaturelocaltime">(@Model.TPermitWorkFlowDetails[i].DSPermitSignature.LocalSignDateTime.ToString("MMM d, yyyy hh:mm tt"))</p>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="@string.Format("imgDSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+                                                        <img src="~/dist/Images/Icons/sign.png" id="btnConSign" signname="contractorsign" class="checksign" signindex="@i" sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" />
+                                                        <p class="signaturebyName"></p>
+                                                        <p class="signaturelocaltime"></p>
+                                                    </a>
+                                                }
+
+                                                <input isRequired="@Model.TPermitWorkFlowDetails[i].Required" type="text" value="@(Model.TPermitWorkFlowDetails[i].DSPermitSignature != null && Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId > 0?Model.TPermitWorkFlowDetails[i].DSPermitSignature.FileName:"")" @(i == 0 ? "required" : string.Empty) id=@string.Format("hdn_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i) sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" class="ddlproject assigned hdnRequired" />
+                                            </div>
+                                        </div>*@
+                                    <div class="col-md-4">
+                                        <div class="crxSignBox">
+                                            <div class="div-forworkflow @string.Format("sign_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+
+                                                @await Component.InvokeAsync("ViewDigitalSign", new HCF.Web.ViewModels.DigitalSignatureViewModel()
+                                           {
+                                               signs = Model.TPermitWorkFlowDetails[i].DSPermitSignature,
+                                               MainSignatureClass = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                               //ImgSignatureClass = "approverbysign",
+                                               HiddenFileControl = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                               ApprovalStatus = Model.Status,
+                                               SignIndex = i,
+                                               SignSequence = Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),
+                                               SignatureControlId = ($"{string.Format("TPermitWorkFlowDetails_{0}__LabelSignId", @i)}")
+                                           })
+
+                                            </div>
+
+                                            <input isrequiredctl="@(Model.TPermitWorkFlowDetails[i].Required && Model.TPermitWorkFlowDetails[i].LabelSignId.HasValue && Model.TPermitWorkFlowDetails[i].LabelSignId.Value>0?"1":"0")" isRequired="@Model.TPermitWorkFlowDetails[i].Required" type="text" value="@(Model.TPermitWorkFlowDetails[i].DSPermitSignature != null && Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId > 0?Model.TPermitWorkFlowDetails[i].DSPermitSignature.FileName:"")" @(i == 0 ? "required" : string.Empty) id=@string.Format("hdn_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i) sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" class="ddlproject assigned hdnRequired" />
+                                        </div>
+                                        <div class="btnsigndiv" style="@(Model.TPermitWorkFlowDetails[i].Sequence ==1?"display:none;":"display:block;")">
+                                            @if (Model.TicraId > 0)
+                                            {
+                                                <input type="button" seluser="@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)" name="btnNotifyEmailPermitReq" value="Send Notification Email" class="signicra button1 btnNotifyEmailPermitReq" style="@(Iseditable == true ? "display:block;" : "display:none;")" />
+                                            }
+                                            else
+                                            {
+                                                @Html.CheckBoxFor(m => m.TPermitWorkFlowDetails[i].IsNotifyEmail)
+                                                <span></span>
+                                                <p style="@(Iseditable == true ? "margin: -20px 0 0 20px;display:block;" : "margin: -20px 0 0 20px;display:none;")">Send Notification Email</p>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+
+
+
+                    </div>
+
+                </td>
+            </tr>
+
+
+
+
+        </table>
+    </div>
+</div>

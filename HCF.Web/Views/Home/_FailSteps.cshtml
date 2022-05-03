@@ -1,0 +1,139 @@
+﻿@using HCF.Web.Base
+
+
+@model HCF.BDO.TInspectionActivity
+<div class="slider">
+    <table id="failsteps" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th width="20%">
+                    @Localizer["CheckPoints"]
+
+                </th>
+                <th width="30%">
+                    @Localizer["Comment"]
+
+                </th>
+                <th width="10%">
+                    Due
+                </th>
+                <th width="10%">
+                    @Localizer["WorkOrderNo"]
+
+                </th>
+                <th width="10%">
+                    Created Date
+                </th>
+                <th width="10%">
+                    Completion Date
+                </th>
+                @*<th>
+                        RA Score
+                    </th>*@
+                <th width="10%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var details in Model.TInspectionDetail)
+            {
+                foreach (HCF.BDO.InspectionSteps steps in details.InspectionSteps.Where(x => x.Status == 0).ToList())
+                {
+                    <tr class="@(steps.IsRA ? "rastep" : "step")">
+                        <td>@steps.Steps.Step</td>
+                        <td>@steps.Comments</td>
+                        @if (steps.DRTime > 0)
+                        {
+                            <td>
+
+                                @{
+                                    DateTime inspectionDate = Model.ActivityInspectionDate.Value;
+                                    TimeSpan remainingTime = inspectionDate.AddHours(steps.DRTime.Value) - DateTime.UtcNow;
+
+                                }
+
+                                <div class="timer" time="@inspectionDate.AddHours(steps.DRTime.Value)">
+                                </div>
+
+                            </td>
+                        }
+                        else
+                        {
+                            <td>N/A</td>
+                        }
+
+
+                        <td>
+                            @if (!steps.WorkOrders.Any(x=>x.DeficiencyCode==HCF.BDO.Enums.WODeficiencyCode.ACD.ToString()) &&  steps.IssueId.HasValue)
+                            {
+                                <span>
+                                    <input type="submit" name="button" class="btn button1"
+                                           value="@steps.WorkOrders[0].WorkOrderNumber" 
+                                           onclick="location.href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = steps.IssueId.Value })'" />
+                                </span>
+
+                            }
+                            else
+                            {
+                                <a onclick="RedirecttoWorkOrder('@Model.ActivityId','FailSteps')">
+                                    <span>Create W/O</span>
+                                </a>
+                            }
+                        </td>
+
+                        <td>
+                            @if (!steps.WorkOrders.Any(x=>x.DeficiencyCode==HCF.BDO.Enums.WODeficiencyCode.ACD.ToString()) &&  steps.IssueId.HasValue)
+                            {
+                                <span>
+                                    @steps.WorkOrders[0].CreatedDate.Value.ToFormatDate()
+                                </span>
+
+                            }
+                        </td>
+
+                        <td>
+                            @if (!steps.WorkOrders.Any(x=>x.DeficiencyCode==HCF.BDO.Enums.WODeficiencyCode.ACD.ToString()) &&  steps.IssueId.HasValue)
+                            {
+                                <span>
+                                    @steps.WorkOrders[0].DateCompleted.CastDate()
+                                </span>
+                            }
+                        </td>                     
+                        @if (!string.IsNullOrEmpty(steps.FilePath))
+                        {
+                            <td>
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = steps.FilePath, title = "Image Preview" })" class="modal-link">
+                                    <img class="@(steps.FilePath != string.Empty ? "img_prev_upload" : "img_prev")" id="imagePreview_@steps.StepsId"
+                                         src="@commonModelFactory.FilePath(steps.FilePath)" style="float:right; margin-right:5px;">
+                                </a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td><img src="@Url.Content("~/dist/img/camera_icon.png")" alt="" style="float:right; margin-right:5px;" class="commentIcon disable" /></td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    jQuery(document).ready(function ($) {
+        $(".timer").each(function () {
+            $(this).empty();
+            var control = $(this);
+           // console.log($(this).attr('time'));
+            var starttime = new Date('@System.DateTime.UtcNow');
+            var date1 = new Date($(this).attr('time'));
+            $(this).dsCountDown({
+                startDate: starttime,
+                endDate: date1,
+                theme: 'flat',
+                onFinish:function() {
+                    control.hide();
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,125 @@
+﻿@model List<HCF.BDO.Floor>
+@{
+
+    Layout = null;
+
+}
+@{ var checkListClass = !string.IsNullOrEmpty(ViewBag.type) && ViewBag.type.ToLower() == "single" ? "chkFloorSigleSelect" : "chkFloorMultiSelect"; }
+<div class="selectList" id="ullistitem">
+    <label>--Select Floors--</label>
+    <ul class="ullistitem">
+        @foreach (var floor in Model)
+        {
+
+            <li class="@checkListClass" style="display:none;" buildingid="@floor.BuildingId">
+                <input type="checkbox" value="@floor.FloorId" data-text="@floor.FloorName" data-buildingid="@floor.BuildingId" /><span></span> @string.Format("{0} - {1}", floor.Building.BuildingCode, floor.FloorName)
+            </li>
+        }
+    </ul>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".ullistitem").hide();
+        $('.chkFloorSigleSelect input[type="checkbox"]').change(function () {
+            var isChecked = $(this).is(':checked')
+            var thisVal = "0"
+            if (isChecked) {
+                thisVal = $(this).val()
+            }
+
+            $('.chkFloorSigleSelect input[type="checkbox"]').prop('checked', false)
+            $(this).prop('checked', isChecked)
+            $('.chkFloorSigleSelect').parent().parent().children('label').text(selectLabelFloor($('.chkBuildSigleSelect')))
+            $('#FloorId').val(thisVal);
+            $('#txtFloorName').val(thisVal);
+        })
+
+        $('.chkFloorMultiSelect input[type="checkbox"]').change(function () {
+            var val = getCheckedFloorValue('chkFloorMultiSelect')
+            console.log(selectLabelFloor($('.chkFloorMultiSelect')))
+            $('.chkFloorMultiSelect').parent().parent().children('label').text(selectLabelFloor($('.chkFloorMultiSelect')))
+            $("#Floorddl").trigger('change')
+        })
+
+        $('.selectList').on('mouseenter', function () {
+            //debugger
+            $(this).children('ul').show();
+        })
+
+        $('.selectList').on('mouseleave', function () {
+            //debugger
+            $(this).children('ul').hide();
+        })
+    });
+
+    function getCheckedFloorValue(className) {
+        var checkedVallst = [];
+        debugger;
+        $('.' + className + ' input[type="checkbox"]:checked').each((i, data) => {
+            if ($(`.chkBuildMultiSelect input[type="checkbox"][value="${$(data).attr('data-buildingid')}"]`).prop("checked")) {
+                var checkedVals = { FloorName: $(data).attr('data-text'), FloorId: $(data).val(), BuildingId: $(data).attr('data-buildingid') };
+                checkedVallst.push(checkedVals);
+            }
+
+        })
+        return checkedVallst
+    }
+
+
+    var selectLabelFloor = (input) => {
+        debugger;
+        var chkCount = $(input).find('input[type="checkbox"]:checked').length;
+        var txt = '--Select Floor--'
+        if (chkCount == 0) {
+            return txt;
+        }
+        if (chkCount < 2) {
+            console.log($(input).find('input[type="checkbox"]:checked').data('text'))
+            txt = $(input).find('input[type="checkbox"]:checked').data('text')
+        }
+        else {
+            txt = chkCount + ' Floor Selected'
+        }
+        return txt;
+    }
+</script>
+<style>
+    .selectList li, .selectList ul {
+        list-style-type: none;
+        text-decoration: none;
+    }
+
+    .selectList {
+        width: 70%;
+        display: inline-block;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+
+    .ullistitem {
+        display: none;
+        z-index: 99;
+        position: absolute;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .ddlproject {
+        width: 0;
+        border-color: transparent;
+    }
+</style>

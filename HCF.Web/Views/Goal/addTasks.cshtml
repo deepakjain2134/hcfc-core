@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "addTasks";
+}
+
+@model List<HCF.BDO.MainGoal>
+
+
+
+    <section class="content-header">
+        <h1>
+            @Localizer["TitleAddGoalDetails"]
+            
+        </h1>
+    </section>
+
+   
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    @using (Html.BeginForm("addTasks", "Goal", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                       
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.DropDownList("GoalId", new SelectList(ViewBag.Goals, "goalId", "TJCStandard"),
+                                        "Select Standard",
+                                       new { @class = "form-control", @onchange = "FillEPnumber()" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        @Html.DropDownList("EPDetailId", new SelectList(ViewBag.EPDetails, "EPDetailId", "EPNumber"),
+                                         "Select EPDetailId",
+                                     new { @class = "form-control" })
+
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                <div id="partialPlaceHolder">
+                                    @if (Model.Count != 0)
+                                    {
+
+                                        @await Html.PartialAsync("_stepsToComplete", Model);
+                                    }
+                                </div>
+                            </div>*@
+                           
+                    }
+
+                </div>
+
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+ 
+
+

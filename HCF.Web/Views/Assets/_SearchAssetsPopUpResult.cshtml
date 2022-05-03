@@ -1,0 +1,49 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+@foreach (var item in Model.Where(x => !x.IsDeleted))
+{
+<tr>
+    <td>
+        <span class="deviceType">
+            @item.Assets.Name
+        </span>
+    </td>
+    <td>
+        <span class="assetNo">
+            @item.AssetNo
+        </span>
+    </td>
+    <td>
+        <span class="assetName">
+            @item.Name
+        </span>
+    </td>
+    <td>
+        <span class="assetMake">
+            @item.GetMake()
+        </span>
+    </td>
+    <td>
+        <span class="assetLocation">
+            @item.GetLocation()
+        </span>
+    </td>
+    <td>
+        <span class="serialno">
+            @item.SerialNo
+        </span>
+    </td>
+    <td>
+        <span class="assetNearBy">
+            @item.NearBy
+        </span>
+    </td>
+    <td style="display:none;">
+        <span class="Path">
+            @item.Path
+        </span>
+    </td>
+    <td class="assertlink">
+        <a class="linkAssets" path="@item.Path" ctrid="@ViewBag.AssetsSearchclickCtr" floorAssetId="@item.FloorAssetsId">Add</a>
+    </td>
+</tr>
+}

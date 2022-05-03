@@ -1,0 +1,211 @@
+﻿@model  HCF.BDO.AllPermitReport
+
+
+
+
+
+
+<div class="roundreportsRow">
+    <div class="col-md-12">
+
+        <div class="panel panel-reports">
+            <div class="trgtry">
+
+
+                <div class="round-groupname panel-active">
+                    <p class="buildingGroupBy">Total ICRAs with Status</p>
+                    <div id="roundbuildings" class="round-groupdetails reportsmdetails">
+                        <div class="roundExpand-box">
+                            <div class="col-md-8 reportsm-col-8">
+                                <div class="management_reportrow" id="partialContents">
+                                    <table class="table table-bordered" id="PermitTbl" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>PermitCount</th>
+
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @if (Model.PermitCountDetail.Count > 0)
+                                            {
+                                                foreach (var p in Model.PermitCountDetail)
+                                                {
+                                                    <tr>
+                                                        <th class="PermitCount">@p.PermitCount</th>
+
+                                                        <td class="Status">@p.Status</td>
+                                                    </tr>
+                                                }
+
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <figure class="highcharts-figure">
+                                        <div id="PermitChart"></div>
+
+                                    </figure>
+                                </div>
+                            </div>
+
+                                    <div class="col-md-4">
+                                        <h3 class="permitNumberHeading">
+                                            Number of ICRAs & Projects
+                                        </h3>
+                                        <div class="asset-deficiRow">
+                                            <div class="deficiLeft-col1">
+                                                <h3>
+                                                    @Model.AllPermitCount
+                                                    <span>Total ICRAs</span>
+                                                </h3>
+                                            </div>
+                                            <div class="defici-col1">
+                                                <ul>
+                                                    @if (Model.PermitCountDetail.Count > 0)
+                                                    {
+                                                        foreach (var p in Model.PermitCountDetail)
+                                                        {
+
+                                                            <li>
+                                                                <span>@p.PermitCount</span> @if (p.Status == 1)
+                                                                {
+                                                                    <span>Aprroved</span>
+                                                                }
+                                                                @if (p.Status == 2)
+                                                                {
+                                                                    <span>Requested</span>
+                                                                }
+                                                                @if (p.Status == 5)
+                                                                {
+                                                                    <span>Closed</span>
+                                                                }
+
+
+                                                            </li>
+                                                        }
+
+                                                    }
+
+                                                </ul>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="asset-deficiRow">
+                                            <div class="deficiLeft-col1">
+                                                <h3>
+                                                    @Model.ProjectCount
+                                                    <span>Total Projects</span>
+                                                </h3>
+                                            </div>
+                                        </div>
+
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var selprojectId = $("#SelProjectId");
+    var statusId = $("#statusId");
+    var PermitType = $("#PermitType");
+
+    $(document).ready(function () {
+        $("#statusId").prepend("<option selected='selected' value='-2' >All Status</option>");
+        $(".dataTables_info").parent(".col-sm-5").hide();
+
+        if ('@commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo))' == 'False') {
+            $("#PermitType>option[value=11]").hide();
+        }
+        if ('@commonModelFactory.IsMenuExist("PCRA", Convert.ToString(session.ClientNo))' == 'False') {
+            $("#PermitType>option[value=10]").hide();
+        }
+  
+       
+
+
+    });
+
+
+
+
+</script>
+<style>
+    .asset-deficiRow:last-child {
+        margin-top: 34px;
+    }
+    .formIcons img {
+        width: 25px;
+    }
+
+    .formIcons.active {
+        border-bottom: 2px solid green;
+    }
+
+    table {
+        width: 100% !important;
+    }
+
+    .add_button_comman {
+        position: absolute;
+        right: 10px;
+        top: 31px;
+    }
+
+
+
+    .col-sm-6 .dataTables_paginate.paging_simple_numbers {
+        position: absolute;
+        right: 220px;
+        top: 4px;
+    }
+
+
+    .select2-container .select2-selection--single {
+        height: 34px !important;
+        border: 1px solid #cecece !important;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .report {
+        padding-top: 21px;
+    }
+
+    .green {
+        background-color: #54a77b;
+        color: #fff !important;
+    }
+
+    .red {
+        background-color: #cc6164;
+        color: #fff !important;
+    }
+
+    .yellow {
+        background-color: yellow;
+        color: #fff !important;
+    }
+</style>
+<script src="~/dist/js/select2.min.js" type='text/javascript'></script>
+
+<link href='~/dist/css/select2.min.css' rel='stylesheet' type='text/css'>
+
+

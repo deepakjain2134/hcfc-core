@@ -1,0 +1,70 @@
+﻿@model List<HCF.BDO.UserProfile>
+@{
+    ViewBag.Title = "EPAssignmentsIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Assignments Report
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-4 form-group">
+                        <label>Users: </label>
+                        <select id="userList" class="selectyear selectpicker form-control show-tick" data-live-search="true" data-size="15">
+                            <option value="-1">All Users</option>
+                            <option value="0">EP Not Assigned</option>
+                            @foreach (var user in Model)
+                            {
+                                <option value="@user.UserId">@user.Name (@user.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <br />
+                        <input type="button" id="shareReportToMail" class="btn btn-block button1" value="Email EP Assignment Report" />
+                    </div>
+                    <div class="col-md-4 form-group text-right">
+                        <div>&nbsp;</div>
+                        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn">
+                                @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn active">
+                                @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="epAssignmentsView">
+                            @await Component.InvokeAsync("ReportsEpAssignmentsView")
+                            @*@AsyncLoader.Render("Reports", "EpAssignmentsView", "epAssignmentsView")*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    input#shareReportToMail {
+        max-width: 220px;
+        height: 36px;
+        margin-top: 2px;
+    }
+</style>

@@ -1,0 +1,125 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var groups = Model.Roundgrouplist;
+}
+<div class="row tablelist-topform">
+    <div class="col-md-12">
+        <div>
+            <p class="step6-details">
+                <label>Select the round questionnaires you would like to complete for this round. Then, select the round type you wish to assign to each volunteer(s).</label>
+            </p>
+        </div>
+        <div class="confi-searchBox">
+            <div class="user_view ddluser form-inline" id="user">
+                <label for="user"> Round Name:</label>
+                <select id="drpGroup" name="drpGroup" class="form-control ddlboxLive">
+                    <option value="">Select Round Name</option>
+                    @foreach (var item in groups.Where(x => x.IsActive == 1 && x.RoundType == 2).OrderBy(x => x.Name))
+                    {
+                        <option value="@item.RoundGroupId"> @item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="groupdata" style="margin-top:15px;">
+</div>
+<input type="hidden" id="RoundType" name="RoundType" value="" />
+<input type="hidden" id="RoundGroupId" name="RoundGroupId" value="@ViewBag.RoundGroupId" />
+
+
+@if (ViewBag.Roundtype == 2)
+{
+    <br />
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <input id="btnCancel" onclick='openStep1()' type="button" value='@Localizer["Back"]' class="comm-Cancelbutton" />
+            <input id="btnNext" onclick='openStep3()' type="button" value=' @Localizer["Next"] ' class="comm-button" />
+        </div>
+    </div>
+}
+
+<script>
+
+    $('#drpGroup').change(function () {
+        var selectedID = $(this).val();
+        if (selectedID != "") {
+            loadData(selectedID);
+        } else {
+            $('#groupdata').html("");
+        }
+    });
+
+    function loadData(selectedID) {
+        $.get('/Round/RoundType' + '?id=' + selectedID, function (data) {
+            $('#groupdata').html(data);
+            $('#groupdata').fadeIn('fast');
+        });
+    }
+
+    $(document).ready(function () {
+       // debugger;
+        if (window.location.href.toLowerCase().indexOf("grouproundinsp") != -1) {
+            $("#btnNext").attr("onclick", "openStep2()");
+            $("#btnNext").show();
+            $("#btnCancel").hide();
+        }
+        if ($("#hdn_locationgroupId").val() != null && $("#hdn_locationgroupId").val() != "") {
+            $("#RoundGroupId").val($("#hdn_locationgroupId").val())
+        }
+
+        if ($("#RoundGroupId").val() != null && $("#RoundGroupId").val() != undefined && $("#RoundGroupId").val() != '0') {
+            $("#drpGroup").val($("#RoundGroupId").val());
+
+        }
+        else {
+            $("#drpGroup").prop("selectedIndex", 0).val();
+        }
+
+        $('tbody').scroll(function (e) {
+            $('thead').css("left", -$("tbody").scrollLeft());
+            $('thead th:nth-child(1)').css("left", $("tbody").scrollLeft());
+            $('tbody td:nth-child(1)').css("left", $("tbody").scrollLeft());
+        });
+
+        $('#drpGroup').trigger('change');
+
+    });
+
+   
+
+</script>
+<style type="text/css">
+
+    .round-steptable tbody tr td:first-child,
+    .round-steptable thead tr th:first-child {
+        min-width: 180px;
+        position: sticky;
+        left: -2px;
+        background-color: #fbfbfb;
+        z-index: 99;
+        text-align: left;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+    }
+
+    .round-steptable td {
+        min-width: 56px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .round-steptable th {
+        position: sticky;
+        top: -1px;
+        background-color: #fbfbfb;
+        z-index: 9;
+        vertical-align: bottom !important;
+    }
+</style>

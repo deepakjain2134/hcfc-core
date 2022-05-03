@@ -1,0 +1,59 @@
+﻿@model HCF.BDO.FireSystemType
+@{
+    var sequence = this.ViewData.ContainsKey("sequence") ? this.ViewData["sequence"].ToString() : string.Empty;
+    List<HCF.BDO.Site> sites = this.ViewData.ContainsKey("sites") ? (List<HCF.BDO.Site>)ViewBag.sites : new List<HCF.BDO.Site>(); 
+    var siteval = (!string.IsNullOrEmpty(Model.SiteId) ? Model.SiteId : string.Empty);
+    string[] values = siteval.Split(',');
+
+}
+<tr id="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)">
+
+    <td>
+        <input type="hidden" class="hdndelete" name="FireSystemType[@sequence].IsDelete" value="@Model.IsDelete" />
+        <input type="hidden" class="hdnid" name="FireSystemType[@sequence].ID" value="@Model.ID" />
+        <input type="hidden" id="hdnSites_@sequence" name="FireSystemType[@sequence].SiteId" value="@Model.SiteId" />
+        <input type="text" maxlength="40" name="FireSystemType[@sequence].Name" value="@Model.Name" class="form-control fireSystemtype FireSystemType_@sequence" />
+    </td>
+
+    @foreach (var item in sites.Where(x => x.IsActive && x.Buildings.Where(y => y.IsActive).Any()).OrderBy(x => x.Name))
+    {
+        <td>
+            <input onclick="chkfiresystem(this)" selval="@item.SiteId" class="chkfiresystem" checkrow="@(Convert.ToInt32(sequence))" type="checkbox" /><span></span>
+            <div class='validation chkboxFiresystem' id="chkboxFiresystem_@item.SiteId@sequence" style='color:red;margin-bottom: 20px;display:none'>Enter the fire system</div>
+        </td>
+    }
+
+    <td>
+        <span class="deleteTr" trid="@string.Format("tr_id_{0}", Convert.ToInt32(sequence) + 1)" title="delete">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+        </span>
+    </td>
+</tr>
+<script>
+    $('.fireSystemtype').bind('keyup', function () {
+        debugger;
+        IsEqual = false;
+        var val = $(this).val();
+        var ek = $('.fireSystemtype').map((_, el) => el.value).get();
+        ek.pop(val);
+        $(this).next(".validation").hide();
+        for (var item of ek) {
+            if (item == val) {
+                IsEqual = true;
+                break;
+            }
+            if (item.toLowerCase() == val.toLowerCase()) {
+                IsEqual = true; break;
+            }
+            if (item.toUpperCase() == val.toUpperCase()) {
+                IsEqual = true; break;
+            }
+        }
+        if (IsEqual == true) {
+
+            $(this).after("<div class='validation textFiresystem' style='color:red;margin-bottom: 20px;'>Fire system already exists!</div>");
+            $('.chkboxFiresystem').hide();
+        }
+    });
+
+</script>

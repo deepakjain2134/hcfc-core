@@ -1,0 +1,76 @@
+﻿@model IEnumerable<HCF.BDO.EPSteps>
+<div id="epheader">    
+        <table id="epdocTable" class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th width="5%">
+                        
+                    </th>
+                    <th width="12%">
+                        @Html.DisplayNameFor(model => model.StandardEP)
+                    </th>
+                    <th width="25%">
+                        @Html.DisplayNameFor(model => model.DocName)
+                    </th>
+                    <th width="50%">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id='@item.EPDetailId'>
+                      
+                        <td class="align-center">
+                            @Html.HiddenFor(modelItem => item.DoctypeId)  
+                            <a href="@Url.Action("ForwardDocument", "Common", new { EPdetailId = item.EPDetailId })"
+                               class="btn btn-primary modal-link" title="Forward Sample Document">
+                                <i class="fa fa-mail-forward"></i>
+                            </a>
+                        </td>
+                        <td id='@item.EPDetailId' epnumber="@item.StandardEP" doctypeid="@item.DoctypeId" align="center">
+                            <label class="@commonModelFactory.GetTranStatus(item.EpTransStatus)"></label>
+                            <a class="float-left" draggable="false" href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId})">
+                                <span>@Html.DisplayFor(modelItem => item.StandardEP)</span>
+                            </a>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.DocName))
+                            {
+                                <a style="float: left;padding: 3px;" href="@commonModelFactory.CommonFilePath(item.SampleDocPath)" target="_blank">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentIcon)" alt="">
+                                </a>
+                                <span>@item.DocName </span>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </td>
+                        <td class="align-center epfile-droppable" onclick="openPopup('@item.StandardEP',false,'@item.EPDetailId')" 
+                            epnumber="@item.StandardEP" ondragover="dragOver(event);" ondrop="drop(event);" ondragleave="dragleave(event);"
+                            doctypeid="@item.DoctypeId">
+                            Drop document here or click to upload                            
+                        </td> 
+                    </tr>
+                }
+            </tbody>
+        </table>   
+</div>
+<script type="text/javascript">
+    var datatable = $('#epdocTable').dataTable({
+        "searching": false,
+        "lengthChange": false,
+        "bPaginate": $('#epdocTable tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+    });   
+
+</script>
+

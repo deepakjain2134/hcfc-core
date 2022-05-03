@@ -1,0 +1,62 @@
+﻿@model List<HCF.BDO.TRounds>
+
+@{
+    ViewBag.Title = "Scheduler Page Flow";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Scheduler Page Flow
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="round-PageFlow-row">
+                                <a class="" href="@Url.RouteUrl("roundschedular")"
+                                   data-toggle="popover"
+                                   data-trigger="manual"
+                                   data-content="@string.Empty"
+                                   data-placement="right">
+                                    <div class="round-PageFlowCategory">
+                                        <img src="~/dist/Images/Icons/IndividualRounds.png" class="img-responsive" />
+                                    </div>
+                                    @*@Html.CommonImage(string.Empty, "Group Round", "scheduler-Page-Flow")*@
+                                    <h4>Individual Rounds</h4>
+                                    <p>Schedule a group of volunteers to conduct a specific type of round in a set location.</p>
+                                </a>
+                               
+                            </div>
+                        
+                            <div class="round-PageFlow-row">
+                                
+                                <a class="" href="@Url.RouteUrl("grouproundschedular")"
+                                   data-toggle="popover"
+                                   data-trigger="manual"
+                                   data-content="@string.Empty"
+                                   data-placement="right">
+                                    <div class="round-PageFlowCategory">
+                                        <img src="~/dist/Images/Icons/Grouprounds.png" class="img-responsive" />
+                                    </div>
+                                    @*@Html.CommonImage(string.Empty, "Group Round", "scheduler-Page-Flow")*@
+                                    <h4>Group Rounds </h4>
+                                    <p>Schedule a group of volunteers to conduct multiple round types in one or multiple locations.</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<link rel="stylesheet" href="@Url.Content("~/dist/css/bootstrap.min.css")">
+<link rel="stylesheet" href="@Url.Content("~/dist/css/Inspectionquest-styles.css")">
+<link rel="stylesheet" href="@Url.Content("~/dist/css/jquerysctipttop.css")">
+

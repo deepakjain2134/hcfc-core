@@ -1,0 +1,117 @@
+﻿@model HCF.BDO.Questionnaire
+@{
+    ViewBag.Title = "Add Questionnaire";   
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add Questionnaire
+        </h1>
+    </section>
+        }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+                            
+                        <div class="row">
+                            <input type="hidden" name="QuestionnaireTypeId" id="QuestionnaireTypeId" value="1" />
+                            <input type="hidden" name="QuestHeaderTypeIds" id="QuestHeaderTypeIds" value="@Model.QuestHeaderTypeIds" />
+                            @Html.HiddenFor(m => Model.QuestionnaireId)
+
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.Goal)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(model => model.Goal, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Goal)
+                            </div>
+                            <div class="col-md-6 form-group">
+                                @Html.LabelFor(model => model.Description)
+                                @Html.TextBoxFor(model => model.Description, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Description)
+                            </div>
+
+                            <div class="col-md-6 form-group">
+
+                                <label>Select Headers</label>
+                                @*@Html.QHeaderDropDownList("ddlHeader", 0, "Select", new
+            { @class = "form-control ddlbox", @multiple = "true", @title = "Select Header" })*@
+                                <qheaderdropdownlist multiple="multiple" firsttext="Select" selectedvalue="0"
+                                                     class="form-control ddlbox"
+                                                     name="ddlHeader">
+                                </qheaderdropdownlist>
+                            </div>
+
+
+                            <div class="col-md-6 form-group">
+                                <div>&nbsp;</div>
+
+                                @Html.CheckBoxFor(m => m.IsActive, new { @checked = "checked" })<span></span>
+                                @Html.ValidationMessageFor(m => m.IsActive)
+                                <label>Active</label>
+                            </div>
+
+
+                            <div class="col-md-12 text-right button_Div">
+                                <input type="submit" value='Save' class="comm-button" />
+                                @*@Html.ActionLink("Cancel ", "Index", "Questionnaire", new { @class = "comm-button" })*@
+                                @Html.ActionLink("Cancel", "Index", new { controller = "Questionnaire" }, new { @class = "comm-Cancelbutton" })
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var ddlCtr = $('#ddlHeader');
+    $(document).ready(function () {
+        var selectedGroupId = [];
+        if ($("#QuestHeaderTypeIds").val().length > 0) {
+            selectedGroupId = $("#QuestHeaderTypeIds").val().split(',').map(function (item) {
+                return parseInt(item, 10);
+            });
+        }
+        ddlCtr.selectpicker();
+        ddlCtr.selectpicker('val', selectedGroupId)
+        ddlCtr.selectpicker('refresh');
+    });
+
+    ddlCtr.on('change', function () {
+        var selected = [];
+        $(this).find("option:selected").each(function (key, ctr) {
+            selected.push(parseInt(ctr.value));
+        });
+        $("#QuestHeaderTypeIds").val(selected.toString(","));
+    });
+
+    $(".add-step-button").click(function () {
+        var rows = $('#q_steps tbody tr.steps').length;
+        var url = CRxUrls.questionnaire_editquestionnaireStep; //'@Url.Action("filterrounds", "Rounds")';
+        debugger;
+        $.ajax({
+            url: url + "?rowscount=" + rows,
+            method: "GET",
+            contentType: 'application/json',
+            success: function (data) {
+                $('#q_steps tr:last').after(data);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    });  
+
+   
+</script>

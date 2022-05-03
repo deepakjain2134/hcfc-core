@@ -1,0 +1,149 @@
+﻿@model IEnumerable<HCF.BDO.UserProfile>
+
+
+@{
+    List<HCF.BDO.UserProfile> users = new List<HCF.BDO.UserProfile>();
+
+    users = commonModelFactory.RemoveCRxUsers(Model.ToList());
+    ViewBag.Title = Localizer["TitleUser"].Value;
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Users
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="row vender_page">
+                        @if (HCF.Web.Base.UserSession.IsInRole("users_vendor"))
+                        {
+                            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                
+                            </div>
+                        }
+                    </div>
+                   
+                        <table id="userTable" class="display table table-bordered table-striped comman_checkbox1">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        First Name
+                                    </th>
+                                    <th>
+                                        Last Name
+                                    </th>
+                                    <th title="Email">
+                                        <img src="@Url.Content("~/dist/Images/Icons/internal_user_mail_icon.png")" alt="internal_user_mail_icon" title="Email" />
+                                    </th>
+                                    <th title="Mobile No">
+                                        <img src="@Url.Content("~/dist/Images/Icons/internal_user_phone_icon.png")" alt="internal_user_phone_icon" title="Mobile No" />
+                                    </th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in users.Where(x => !(string.IsNullOrEmpty(x.Email) && x.IsActive)))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FirstName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.LastName)
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                        </td>
+
+                                        <td title="Edit">
+                                            @if (item.IsActive && item.UserId != HCF.Web.Base.UserSession.CurrentUser.UserId)
+                                            {
+                                                <img class="imgChange" 
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.ChangeUser)" 
+                                                     userId="@item.UserId" 
+                                                     title="Edit" alt="Edit" />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                   
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+
+<script>
+    $("[type=radio]").on('change', function () {
+        if ($(this).val() == "vendor") {
+            window.location.href = "vendors";
+        }
+    });
+
+    $(document).ready(function () {
+
+        $(".imgChange").click(function () {
+            var userId = $(this).attr("userId");
+            var url = '@Url.Action("ChangeUser", "User")';
+            $.get(url + '?userId=' + userId, function (data) {
+                console.log(data);
+                if (data.Result) {                   
+                    window.location.href = data.pageUrl;
+                }
+            });
+        });
+
+        $('#userTable').DataTable({
+            "searching": true,
+            "pageLength": 20,
+            "lengthChange": false,
+            "bPaginate": $('#userTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search User..."
+            },
+            'aoColumnDefs': [{
+                'bSortable': false,
+                'aTargets': [-1, -2, -3]
+            }],
+            drawCallback: function () {
+                $('[rel="popover"]').popover();
+            },
+            columnDefs: [
+                { type: 'non-empty-string', targets: 1 },
+                { type: 'non-empty-string', targets: 2 },
+                { type: 'non-empty-string', targets: 3 }
+            ],
+            //dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-12'p f>>" +
+            //    "<'row'<'col-sm-12'tr>>" +
+            //    "<'row'<'col-sm-5'i><'col-sm-7'p>>"
+
+            dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        });
+    });
+
+
+</script>

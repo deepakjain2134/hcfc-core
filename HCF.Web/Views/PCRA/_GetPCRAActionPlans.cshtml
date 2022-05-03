@@ -1,0 +1,276 @@
+﻿@model HCF.BDO.TPCRAQuestion
+<div class="modal-body" style="clear:both;">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+   
+        @{
+            for (int i = 0; i < Model.TPCRAQuestionDetails.Count; i++)
+            {
+                <div class="row tablelist-topform form-group">
+                    <div class="col-md-2" id="@Model.TPCRAQuestionDetails[i].QuestionPCRA.QuesPCRAId">
+                        <input type="hidden" id="DSSign1Signature.FileName" name="DSSign1Signature.FileName" value="" />
+                        <input type="hidden" id="DSSign1Signature.FileContent" name="DSSign1Signature.FileContent" value="" />
+                        <input type="hidden" id="DSSign2Signature.FileContent" name="DSSign2Signature.FileContent" value="" />
+                        <input type="hidden" id="DSSign2Signature.FileName" name="DSSign2Signature.FileName" value="" />
+                        @Html.HiddenFor(m => m.TPCRAQuesId)
+                        @Html.HiddenFor(m => m.ParentTPCRAQuesId)
+                        @Html.HiddenFor(m => m.Sign1SignatureId)
+                        @Html.HiddenFor(m => m.Sign2SignatureId)
+                        @Html.HiddenFor(m => Model.TPCRAQuestionDetails[i].QuesStatus)
+                        <div class="form-group risk_checkbox">
+                            @if (Model.TPCRAQuestionDetails[i].QuesStatus == 1)
+                            {
+                                <div class="form-group">
+                                    <input type="checkbox" id="yes_@i" class="yes quescheck" value="1" checked="checked" onclick="GetQuestionStatusValue(this, 1);" /><span></span><label for="yes_@i" class="checkname">Yes</label>
+                                    <input type="checkbox" id="no_@i" class="no quescheck" value="0" onclick="GetQuestionStatusValue(this, 0);" /><span></span><label for="no_@i" class="checkname">No</label>
+                                </div>
+                            }
+                            else if (Model.TPCRAQuestionDetails[i].QuesStatus == 0)
+                            {
+                                <div class="form-group">
+                                    <input type="checkbox" id="yes_@i" class="yes quescheck" value="0" onclick="GetQuestionStatusValue(this, 0);" /><span></span><label for="yes_@i" class="checkname">Yes</label>
+                                    <input type="checkbox" id="no_@i" class="no quescheck" value="1" checked="checked" onclick="GetQuestionStatusValue(this, 1);" /><span></span><label for="no_@i" class="checkname">No</label>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <input type="checkbox" id="yes_@i" class="yes quescheck" val="1" onclick="GetQuestionStatusValue(this, 1);" /><span></span><label for="yes_@i" class="checkname">Yes</label>
+                                    <input type="checkbox" id="no_@i" class="no quescheck" val="0" onclick="GetQuestionStatusValue(this, 0);" /><span></span><label for="no_@i" class="checkname">No</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-10">
+                        <div class="addtpcra-10">
+                            <div class="pcra-leftcontent">
+                                <div class="picra-row">
+                                    <div class="picra-listitem">
+                                        <label>
+                                            @Html.HiddenFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuesPCRAId)
+                                                                                <span>@(i + 1)</span><span>.</span>
+                                                                            </label>
+                                    </div>
+                                    <div class="picra-listContent">
+
+                                        <label>@Html.DisplayFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.Questions)</label>
+
+                                        @if (Model.TPCRAQuestionDetails[i].QuestionPCRA.IsOption == true)
+                                        {
+                                            <div class="picra-options">
+                                                <div class="row">
+                                                    @for (int j = 0; j < Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs.Select(s => s.Text).Count(); j++)
+                                                    {
+                                                        @Html.HiddenFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].PCRAOptionId)
+                                                        if (Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].IsReadOnly)
+                                                        {
+                                                            <div class="col-md-12">
+                                                                @Html.DisplayFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].Text)
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="col-md-12 comman_checkbox">
+                                                                @Html.HiddenFor(s => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].OptionStatus)
+                                                                @Html.CheckBoxFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].OptionStatus, new { QuesPCRAId = Model.TPCRAQuestionDetails[i].QuestionPCRA.QuesPCRAId, @onchange = "GetOptionsCheckedValue(this);", @tempname = "TPCRAQuestionDetails[" + i + "].QuestionPCRA.QuestionOptionPCRAs[" + j + "].OptionStatus" })<span></span>
+                                                                @Html.DisplayFor(m => Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].Text)
+                                                            </div>
+                                                        }
+                                                        @*if (Model.TPCRAQuestionDetails[i].QuestionPCRA.QuestionOptionPCRAs[j].CanComment == true)
+                                            {
+                                                <div class="col-md-12">
+                                                    @Html.TextBoxFor(m => Model.TPCRAQuestionDetails[i].Comment, null, new { @class = "form-control" })  //There is no comment field in option
+                                                </div>
+                                            }*@
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (Model.TPCRAQuestionDetails[i].QuestionPCRA.CanComment == true)
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    @Html.TextBoxFor(m => Model.TPCRAQuestionDetails[i].Comment, null, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+        }
+
+  
+    <div class="row" id="divpcrasignature" style="display:none;">
+        <div>
+            <div class="col-md-3">
+                <label>Sign1 Name :</label>
+                @Html.HiddenFor(m => m.Sign1Name)
+               
+                @*<userslist name="Sign1Name" selectedvalue="@((Model.Sign1Name.HasValue) ? Model.Sign1Name.Value : 0)" firsttext="-- Select --" class="form-control"></userslist>*@
+             
+            </div>
+            <div class="col-md-3">
+                <label>Sign1 Date :</label>
+                @Html.TextBoxFor(m => m.Sign1Date, Model.Sign1Date.ToFormatDate(), new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+            </div>
+
+            <div class="col-md-3">
+                <label>Sign2 Name :</label>
+                @Html.HiddenFor(m => m.Sign2Name)
+        
+                @*<userslist name="Sign2Name" selectedvalue="@((Model.Sign2Name.HasValue) ? Model.Sign2Name.Value : 0)" firsttext="-- Select --" class="form-control"></userslist>*@
+               
+            </div>
+            <div class="col-md-3">
+                <label>Sign2 Date :</label>
+                @Html.TextBoxFor(m => m.Sign2Date, Model.Sign2Date.ToFormatDate(), new { @class = "form-control datepicker readonly", @autocomplete = "off", @readonly = "readonly" })
+            </div>
+        </div>
+        <div>
+            <div class="col-md-6">
+                @if (Model.DSSign1Signature != null && Model.DSSign1Signature.DigSignatureId > 0)
+                {
+                    <a class="imgDSSign1Signature">
+                        <img id="DigSignatureId_@Model.DSSign1Signature.DigSignatureId"
+                             src="@commonModelFactory.FilePath(Model.DSSign1Signature.FilePath)" class="sign1name" />
+                    </a>
+                }
+                else
+                {
+                    <a class="imgDSSign1Signature">
+                        <img src="~/dist/Images/Icons/sign.png" id="btnSign1Name" class="sign1name" />
+                    </a>
+                }
+            </div>
+            <div class="col-md-6">
+                @if (Model.DSSign2Signature != null && Model.DSSign2Signature.DigSignatureId > 0)
+                {
+                    <a class="imgDSSign2Signature">
+                        <img id="DigSignatureId_@Model.DSSign2Signature.DigSignatureId"
+                             src="@commonModelFactory.FilePath(Model.DSSign2Signature.FilePath)" class="sign2name" />
+                    </a>
+                }
+                else
+                {
+                    <a class="imgDSSign2Signature">
+                        <img src="~/dist/Images/Icons/sign.png" id="btnSign2Name" class="sign2name" />
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="col-md-12">
+        <p>
+            TJC Standard EC 02.06.05 states that space must be managed during demolition, renovation or new construction to reduce risk to those in the organization. This form
+            addresses Element of Performance 2. An ILSM must be completed to comply with Element of Performance 3 (See ILSM for Construction and Renovation Projects Form).
+            An ICRA must be completed to comply with Element of Performance 3 (See Infection Control Risk Assessment and Permit Form).
+        </p>
+    </div>
+
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+
+<script>
+    window.onclick = function (event) {
+        if (!event.target.matches('.ins_check_btn_yes_no')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+    function showstepsOptions(stepsId) {
+        document.getElementById("insp_steps_" + stepsId).classList.toggle("show");
+    }
+
+    $(".dropdown-content a").click(function () {
+
+        var cntrl = $(this);
+        var statusVal = cntrl.attr("val");
+        var controlId = cntrl.parent("div").attr("tempname");
+        $("input[name='" + controlId + "'][type=hidden]").val(statusVal);
+        $("input[tempname='" + controlId + "']").val(statusVal);
+    });
+
+    $(".sign1name").click(function () {
+        loadSignView('DSSign1Signature.FileName', 'DSSign1Signature.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+    $(".sign2name").click(function () {
+        loadSignView('DSSign2Signature.FileName', 'DSSign2Signature.FileContent');
+        $('#signAndSave').modal('show');
+    });
+
+    $('input[type="checkbox"]').css({ 'opacity': '1' });
+
+    function GetQuestionStatusValue(cntrl, selValue) {
+
+        var question = cntrl;
+        var hfQuestionId = question.parentElement.parentElement.previousElementSibling.id;
+        var hfOption = $('#' + hfQuestionId + '[type="hidden"]');
+        hfOption.val(selValue);
+    }
+    //$(document).on('click', '.checkname', function () {
+    //    debugger;
+    //    $(this).prev("span").prev(".quescheck").change();
+    //});
+    $('input[type="checkbox"]').not(".quescheck").change(function () {
+        if ($(this).is(":checked")) {
+            if (typeof $(this).attr('QuesPCRAId') !== 'undefined') {
+                var quesPCRAId = parseInt($(this).attr('QuesPCRAId'));
+                if (quesPCRAId == 11) {
+                    swalalert("CRx will prompt you to create an ILSM when you complete project’s associated ICRA");
+                }
+            }
+        }
+
+
+    });
+
+
+    function GetOptionsCheckedValue(cnrl) {
+
+        var checkedStatus = false;
+        var option = cnrl;
+        checkedStatus = option.checked ? true : false;
+        var optionId = $(option).attr("id");
+        var hfOption = $('#' + optionId + '[type="hidden"]');
+        hfOption.val(checkedStatus);
+
+        var controlId = $(cnrl).attr("tempName");
+        $("input[name='" + controlId + "'][type='hidden']").val(checkedStatus);
+        $("input[tempName='" + controlId + "']").val(checkedStatus);
+    }
+
+    $(".quescheck").change(function () {
+        debugger;
+        if ($(this).hasClass("yes")) {
+            if (this.checked) {
+              //  $(this).next("span").next("#no").prop("checked", false);
+                $(this).next("span").next("label").next(".no").prop("checked", false);
+            }
+        }
+        if ($(this).hasClass("no")) {
+            if (this.checked) {
+                //  yes.checked = false;
+                $(this).prev("label").prev("span").prev(".yes").prop("checked", false);
+            }
+        }
+    });
+</script>

@@ -1,0 +1,127 @@
+﻿@model HCF.BDO.TFloorAssets
+
+
+<div class="row tablelist-topform tble_shadow assetsHistory-Shadowbox">
+    <div class="col-md-4 form-group"><label>Asset Type: </label> @Model.Assets.Name</div>
+    <div class="col-md-4 form-group"><label>Name: </label>@Model.Name</div>
+    <div class="col-md-4 form-group">
+        <label>Next Inspection Due On: </label>
+        @{
+            var activity = Model.TInspectionActivity.FirstOrDefault(x => x.FloorAssetId == Model.FloorAssetsId && x.IsCurrent);
+            if (activity != null)
+            {
+                if (activity.Status == 1 && activity.DueDate.HasValue)
+                {
+                    @activity.DueDate.Value.ToClientTime().ToFormatDate()
+                }
+                else
+                {
+                    <span>N/A</span>
+                }
+            }
+            else
+            {
+                <span>N/A</span>
+            }
+        }
+    </div>
+
+    <div class="col-md-4 form-group"><label> @Localizer["AssetNo"] : </label>@Model.AssetNo</div>
+    <div class="col-md-4 form-group"><label>Location: </label>   @commonModelFactory.GetFloorAssetLocation(Model)</div>
+    <div class="col-md-4 text-right form-group">
+        <input type="button" name="button" class="comm-button" value="Inspect Now" onclick="location.href = '@Url.Action("AssetEps", "Assets", new { epId = 0, floorassetId = Model.FloorAssetsId })'" />
+        <input type="button" name="button" class="comm-bluebutton" value="Work Orders" onclick="location.href = '@Url.Action("Index", "WorkOrder", new { floorAssetId = Model.FloorAssetsId })'" />
+    </div>
+</div>
+
+
+
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="tble_shadow asset_idclass table">
+            <thead>
+                <tr>
+                    <th style="width:100px;">Status</th>
+                    <th>Inspector</th>
+                    <th>Document</th>
+                    <th>Comment</th>
+                    <th style="width:100px;">ILSM Date</th>
+                    <th style="width:70px;">Detail</th>
+                    <th style="width:50px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var inspectionActivity in Model.TInspectionActivity.Where(x => x.Status != 2).OrderByDescending(x => x.ActivityInspectionDate))
+                {
+                    <tr>
+                        <td>@commonModelFactory.GetAssetStatus(inspectionActivity)</td>
+                        <td>@inspectionActivity.UserProfile.FullName<span> on </span>@inspectionActivity.ActivityInspectionDate.Value.ToFormatDate()</td>
+                        <td>
+                            @foreach (var item in inspectionActivity.InspectionDocs)
+                            {
+                                <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.Path, title = "Doc Preview" })" class="modal-link">
+                                    <img src="@commonModelFactory.UploadDocTypeImagePath(item.UploadDocTypeId,item.DocTypeId)" alt="" />
+                                </a>
+                            }
+                        </td>
+                        <td class="comment">
+                            @inspectionActivity.Comment
+                        </td>
+                        <td>
+                            @($"{(inspectionActivity.IlsmDate.HasValue ? inspectionActivity.IlsmDate.Value.ToClientTime().ToFormatDate() : "")}")
+                        </td>
+                        <td>
+                            <img onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = inspectionActivity.ActivityId })'"
+                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" title="Detail" />
+                        </td>
+                        <td>
+                            <div class="assetsHistory-actions">
+                                @*<input type="button" name="button" class="button1 @(inspectionActivity.IsWorkOrder !=1? "disable":"")" value="Work Orders"
+                                    onclick="location.href = '@Url.Action("Index", "WorkOrder", new { floorAssetId = inspectionActivity.FloorAssetId , activityid = inspectionActivity.ActivityId })'" />*@
+                                <a class="@(inspectionActivity.IsWorkOrder !=1? "disable":"")" value="Work Orders"
+                                   onclick="location.href = '@Url.Action("Index", "WorkOrder", new { floorAssetId = inspectionActivity.FloorAssetId , activityid = inspectionActivity.ActivityId })'"><img src="/dist/Images/Icons/work_order1.png" /></a>
+                                <form asp-controller="Pdf" asp-action="CreateTinspectionActivityReports"
+                                      data-ajax-success="OnSuccess"
+                                      data-ajax="true" data-ajax-method="POST">
+                                    @*@using (Ajax.BeginForm("CreateTinspectionActivityReports", "Pdf", new { OnSuccess = "OnSuccess" }))
+                                        {*@
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="activityId" value="@inspectionActivity.ActivityId" />
+                                    <button type="submit" class=""
+                                            id="Generate-insepction-report" value="1" name="submit">
+                                        <img src="/dist/Images/Icons/download_as_pdf.png" />
+                                    </button>
+
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function OnSuccess(data) {
+        if (data.buttonType == 1) {
+            download(data.Result, "report.pdf");
+        } else if (data.buttonType == 2) {
+            Folders(data.tfiles.TFileId);
+        } else if (data.buttonType == 3) {
+            download(data.Result, "report.pdf");
+            Folders(data.tfiles.TFileId);
+        }
+    }
+
+    function download(dataurl, filename) {
+        var a = document.createElement("a");
+        a.href = dataurl; a.target = '_blank';
+        a.download = "report.pdf";
+        a.setAttribute("download", filename);
+        a.click();
+    }
+</script>

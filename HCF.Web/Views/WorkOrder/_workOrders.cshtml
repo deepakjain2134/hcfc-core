@@ -1,0 +1,244 @@
+﻿@model IEnumerable<HCF.BDO.WorkOrder>
+@{
+    ViewBag.Title = "Work Order";
+    Layout = null;
+    // int currentFloorAssetId = ViewBag.WoFloorAssets;
+}
+
+@if (Model.Any(m => m.WorkOrderId > 0 || m.WorkOrderId == -2))
+{
+    foreach (var item in Model.Where(m => m.WorkOrderId > 0 || m.WorkOrderId == -2))
+    {
+        <tr>
+            <td>
+                <span>
+                    <a href="@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })">
+                        <span>@Html.DisplayFor(modelItem => item.WorkOrderNumber)</span>
+                    </a>
+                </span>
+
+            </td>
+            <td>
+                @if (item.DateCreated.HasValue)
+                {
+                    <p>
+                        @item.DateCreated.Value.ToFormatDate()
+                    </p>
+                }
+            </td>
+            <td style="text-align:left;">
+                @if (item.Description.Length > 90)
+                {
+                    @item.Description.Substring(0, Math.Min(item.Description.Length, 50))
+                    <a href="javascript:void(0);"
+                       tabindex="0"
+                       data-trigger="focus"
+                       class="descriptions"
+                       rel="popover"
+                       data-placement='right'
+                       data-original-title='@item.WorkOrderNumber'
+                       data-content='@item.Description'>
+                        @($"{"...See More"}")
+                    </a>
+                }
+                else
+                {
+                    @item.Description
+                }
+            </td>
+            <td>
+                @if (item.FloorAssets.Count > 1)
+                {
+                    <p data-toggle="modal" data-target="#showAssetInfo" class="show_asset_info" title="See Asset Info" id="@item.IssueId" data-floorassets="@string.Join(",", item.FloorAssets.Select(x=> x.FloorAssetsId))"><a href="javascript:void(0);">@string.Format("{0}{1}{2}{3}", item.FloorAssets[0].AssetNo, " + ", item.FloorAssets.Count - 1, " More")</a></p>
+                }
+                else if (item.FloorAssets.Count > 0)
+                {
+                    <p data-toggle="modal" data-target="#showAssetInfo" class="show_asset_info" title="See Asset Info" id="@item.IssueId" data-floorassets="@string.Join(",", item.FloorAssets.Select(x=> x.FloorAssetsId))"><a href="javascript:void(0);">@item.FloorAssets[0].AssetNo</a></p>
+                }
+                else
+                {
+                    <p>N/A</p>
+                }
+            </td>
+            <td>
+                @if (item.FloorAssets.Count > 1)
+                {
+                    if (item.FloorAssets.Select(x => x.Floor).FirstOrDefault().FloorName != null)
+                    {
+                        <p data-toggle="modal"
+                           data-target="#showAssetInfo"
+                           class="show_asset_info"
+                           title="See Asset Info"
+                           id="@item.IssueId"
+                           data-floorassets="@string.Join(",", item.FloorAssets.Select(x => x.FloorAssetsId))">
+                            <a href="javascript:void(0);">@string.Format("{0}{1}{2}", string.Format("{0}", commonModelFactory.GetFloorAssetLocation(item.FloorAssets.FirstOrDefault())), " + ", item.FloorAssets.Count - 1, " More")</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>N/A</p>
+                    }
+                }
+                else if (item.FloorAssets.Count > 0)
+                {
+                    if (item.FloorAssets.Select(x => x.Floor).FirstOrDefault().FloorName != null)
+                    {
+                        <p data-toggle="modal"
+                           data-target="#showAssetInfo"
+                           class="show_asset_info"
+                           title="See Asset Info"
+                           id="@item.IssueId"
+                           data-floorassets="@string.Join(",", item.FloorAssets.Select(x=> x.FloorAssetsId))">
+                            <a href="javascript:void(0);">@string.Format("{0}", commonModelFactory.GetFloorAssetLocation(item.FloorAssets.FirstOrDefault()))</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>N/A</p>
+                    }
+                }
+                else if (!string.IsNullOrEmpty(item.BuildingName))
+                {
+                    <p>@item.BuildingName</p>
+                }
+                else
+                {
+                    <p>N/A</p>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RequesterName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeCode)
+            </td>
+            <td>
+                @if (item.IssueId == 0)
+                {
+                    <input type="submit" name="button" class="btnwoStatus @(item.CRxCode == "CMPLT" || item.CRxCode == "Closed" ? "button_green" : item.CRxCode == "CANCL" ? "btn-Cancelprimary" : "btn button1" ) disable"
+                           value="@item.StatusCode"
+                           onclick="location.href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })'" />
+                }
+                else
+                {
+                    <input type="submit" name="button" class="btnwoStatus @(item.CRxCode == "CMPLT" || item.CRxCode == "Closed" ? "button_green" : item.CRxCode == "CANCL" ? "btn-Cancelprimary" : "btn button1" )"
+                           value="@item.StatusCode"
+                           onclick="location.href='@Url.Action("UpdateWorkOrder", "WorkOrder", new { issueId = item.IssueId })'" />
+                }
+
+                @if (item.IssueId == 0)
+                {
+                    <input type="button" name="button" class="addwo btn btn-primary" woissueId="@item.IssueId" wonumber="@item.WorkOrderNumber"
+                           value="Add Wo" />
+                }
+
+
+            </td>
+        </tr>
+    }
+}
+else
+{
+    if (Convert.ToInt32(TempData.Get<string>("PageIndex")) == 1 && ViewBag.SyncMode != "1")
+    {
+        <tr>
+            <td colspan="8" class="align-center">               
+                No record found
+            </td>
+        </tr>
+    }
+}
+
+<script>
+
+    var WoResultList = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+    var clientname = '@HCF.Web.Base.UserSession.CurrentOrg.DbName'.toLowerCase();
+
+    function getWorkOrdersJson(index) {
+        return new Promise((resolve, reject) => {
+            var sortOrder = 'WorkOrderNumber';
+            var orderbySort = 'ASC';
+            var isScroll = false;
+            var searchby = $("#txtWoSearch").val();
+            if (sortOrder == null) {
+                sortOrder = "";
+            } if (orderbySort == null) {
+                orderbySort = "";
+            }
+            var floorAssetId = 0;
+            var epdetailId = 0;
+            $.get(CRxUrls.WorkOrder_WorkOrders + '?page=' + 1 + "&floorAssetId=" + floorAssetId + "&EPdetailId=" + epdetailId + "&sortOrder=" + sortOrder + "&OrderbySort=" + orderbySort + "&searchparam=" + searchby + "&isScroll=" + isScroll + "&isPopUp=" + false + "&json=" + true, function (data) {
+                resolve(data);
+            });
+        });
+
+    }
+
+    var addSerchedWorkOrder = (wonumber) => {
+        return new Promise((resolve, reject) => {
+            if (clientname === "hcf_atlantic") {
+                const wo = WoResultList.find(obj => {
+                    return obj.WorkOrderNumber === wonumber;
+                });
+                const url = '@Url.Content("~/WorkOrder/Create?floorAssetId=0")';
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(wo),
+                    success: (d) => {
+                        //console.log(d)
+                        resolve('success');
+                    }
+                });
+            }
+        });
+    };
+    //addwo
+
+    $(document).on("click", ".addwo", function () {
+       // var tilsmId ='@ViewBag.WOPopUpId';
+       var issueId = $(this).attr("woissueId");
+       var wonumber = $(this).attr("wonumber");
+       var thisObject = $(this);
+       if (clientname == "hcf_atlantic" && issueId == 0) {
+           addSerchedWorkOrder($(this).attr("wonumber")).then(() => {
+               getWorkOrdersJson(1).then((data) => {
+                   //debugger;
+                   var wo = data.find(obj => {
+                       return obj.WorkOrderNumber === wonumber;
+                   });
+
+                   issueId = wo.IssueId;
+
+                   $(thisObject).hide();
+                   $(thisObject).siblings('.btnwoStatus').removeClass('disable');
+                   $(thisObject).siblings('.btnwoStatus').attr('onclick',
+                       "location.href='/WorkOrder/UpdateWorkOrder?issueId=" + issueId + "'");
+
+               });
+           });
+       }
+    });
+
+    $(document).ready(function() {
+
+     
+
+        @if (TempData.Get<string>("lastIndex") != null) {
+            @:$("#totalPage_hdn").val('@(TempData.Get<string>("lastIndex"))');$("#pageIndex_hdn").val('@(TempData.Get<string>("PageIndex"))');
+        }
+        const mode = '@ViewBag.SyncMode';
+        if (mode === "1") {
+            const count = '@ViewBag.NewWorkOrders';
+            if (count > 0) {
+            $("#newResult").html(count + " new work orders found");
+            } else
+            {
+                $("#newResult").html("Sync completed. no new wo found");
+            }
+            $("#newResult").addClass("alert-success").addClass("alert");
+            $("#newResult").find(".close").removeClass("hide");
+        }
+    });
+</script>

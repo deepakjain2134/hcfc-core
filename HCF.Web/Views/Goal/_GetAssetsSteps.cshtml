@@ -1,0 +1,131 @@
+﻿@model List<HCF.BDO.MainGoal>
+@using System.Linq;
+
+<div class="slider">
+
+    @{
+
+        List<HCF.BDO.MainGoal> IlsmGoals = (List<HCF.BDO.MainGoal>)ViewBag.MainGoals;
+    }
+
+    @using (Html.BeginForm("UpdateIlsmScore", "Goal", FormMethod.Post))
+    {
+        if (Model.Any())
+        {
+            <input type="submit" value=' @Localizer["Save"] ' class="button1" style="float:right"  />
+        }
+
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        <table id="dataTable" class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th class="align-left">@Localizer["Step"]</th>
+                    <th>@Localizer["Score"] </th>
+                    <th>Ilsm Steps</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td colspan="3">
+                            @Html.HiddenFor(x => Model[i].MainGoalId)
+                            @Model[i].Goal
+                        </td>
+                    </tr>
+                    for (int j = 0; j < Model[i].Steps.Count; j++)
+                    {
+                        <tr>
+                            <td style="width: 50%">
+                                @Html.HiddenFor(x => Model[i].Steps[j].StepsId)
+                                @Model[i].Steps[j].Step
+                            </td>
+                            <td style="width:25%; text-align:center;">
+                                @Html.DropDownListFor(m => Model[i].Steps[j].RAScore,
+                              Enumerable.Range(1, 10).Select(m => new SelectListItem { Text = m.ToString(), Value = m.ToString(), Selected = (m.ToString() == Model[i].Steps[j].RAScore.ToString()) }),
+                                 "0", new { @class = "form-control scoreddl" })
+                               
+                            </td>
+                            <td>
+                                @{
+                       // int selectId = 0;
+                        List<int> selectedList = new List<int>();
+                        if (Model[i].Steps[j].IsIlsmLink)
+                        {
+
+                            for (int k = 0; k < Model[i].Steps[j].IlsmStepsMapping.Count; k++)
+                            {
+                                selectedList.Add(Model[i].Steps[j].IlsmStepsMapping[k].ILsmStepsId);
+                            }
+                        }
+                                }
+
+                                <select class="ddlIlsmSteps form-control" id="[@i].Steps[@j].IlsmStepsMapping[0].ILsmStepsId" name="[@i].Steps[@j].IlsmStepsMapping[0].ILsmStepsId">
+                                    <option value="">Select</option>
+                                    @foreach (var parent in IlsmGoals)
+                                    {
+                                    <optgroup label="@parent.Goal">
+                                        @foreach (var child in parent.Steps)
+                                        {
+                                            //string selectedValue = "";
+                                            //if (selectedList.IndexOf(child.StepsId) != -1)
+                                            //{
+                                            //    selectedValue = "selected='selected'";
+                                            //}
+                                            if (child.TrigEpCount > 0)
+                                            {
+                                                <option value="@child.StepsId">@($"{child.Step}") </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@child.StepsId">@($"{child.Step}") </option>
+                                                @*<option value="" disabled>@string.Format("{0}", child.Step) </option>*@
+                                            }
+                                        }
+                                    </optgroup>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".scoreddl").change(function () {
+            var ddlCOntrol = $(this).closest("tr").find("select.ddlIlsmSteps");
+            if ($(this).val().length == 0) {
+                // disable ilsm steps ddl
+                ddlCOntrol.prop("disabled", true);
+                ddlCOntrol.prop('required', false);
+                ddlCOntrol.val("");
+                // reset   ilsm steps ddl value
+            } else {
+                ddlCOntrol.prop('required', true);
+                ddlCOntrol.prop("disabled", false);
+                // enable ddl box
+            }
+        });
+
+        $(".scoreddl").each(function (index) {
+            var ddlCOntrol = $(this).closest("tr").find("select.ddlIlsmSteps");
+            if ($(this).val().length == 0) {
+                // disable ilsm steps ddl
+                ddlCOntrol.prop("disabled", true);
+                ddlCOntrol.prop('required', false);
+                ddlCOntrol.val("");
+                // reset   ilsm steps ddl value
+            } else {
+                ddlCOntrol.prop('required', true);
+                ddlCOntrol.prop("disabled", false);
+                // enable ddl box
+            }
+        });
+
+    });
+</script>

@@ -1,0 +1,61 @@
+﻿<div style="padding: 15px;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: none; border-collapse: collapse; color: #333; font-family: arial; font-size: 12px; line-height: 26px;">
+        <tbody>
+            <tr>
+                <td colspan="2" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;">
+                    Hi,
+                </td>
+            </tr>
+            <tr><td style="color: #333; font-family: arial; font-size: 14px; padding: 5px;">{Errortext}</td></tr>
+        </tbody>
+    </table>
+    <h4 style="color: #333; font-family: arial; font-size: 14px; padding: 5px;">Asset(s) Details:</h4>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:#ccc solid 1px; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <td width="204" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;border:#ccc solid 1px;"><strong>Asset Name</strong></td>
+                <td width="297" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;border:#ccc solid 1px;"><strong>Asset #</strong></td>
+                <td width="330" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;border:#ccc solid 1px;"><strong>Inspector Name</strong></td>
+                <td width="333" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;border:#ccc solid 1px;"><strong>Inspection Date</strong></td>
+                <td width="333" style="color: #333; font-family: arial; font-size: 14px; padding: 5px;border:#ccc solid 1px;"><strong>Comment</strong></td>
+            </tr>
+        </thead>
+        <tbody>
+            {assetsinfo}
+        </tbody>
+    </table><br />
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:#ccc solid 1px; border-collapse:collapse;">
+        <tr>
+            <!--<td style="color: #333; font-family: arial; font-size: 12px; padding: 5px; width: 125px;"><strong>Date: </strong>Feb 28, 2018</td>-->
+
+            <td width="189" valign="top" style="color: #333; font-family: arial; font-size: 12px; padding:5px; width: 140px;border:#ccc solid 1px;">{standardName}</td>
+
+            <!--<td style="color: #333; font-family: arial; font-size: 12px; padding: 5px; width: 140px;"><strong>EP #: </strong>EP05</td>-->
+            <!--<td style="color: #333; font-family: arial; font-size: 12px; padding: 5px; width: 145px;"><strong>Inspector Name: </strong>Ilan Nachmany</td>-->
+
+            <td width="931" style="color: #333; font-family: arial; font-size: 12px; padding: 5px;border:#ccc solid 1px;">
+                {EpDescription}
+            </td>
+        </tr>
+    </table>
+    <h4 style="color: #333; font-family: arial; font-size: 14px; padding: 5px;">Based on issues, following ILSMs are recommended:</h4>    
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border:#ccc solid 1px; border-collapse:collapse;">
+        {TriggerEPs}
+    </table>
+    <div style="color: #333; font-family: arial; font-size: 14px; padding: 5px;">
+        <a href="https://crxweb.com/">Go to CRx to review</a>
+    </div>
+    <br>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody>
+            <tr>
+                <td>
+                    <hr style="border: 1px dotted #C0C0C0; border-left-width: 0px; border-right-width: 0px; border-top-width: 0px;" />
+                    <p style="color: #333; font-family: arial; font-size: 9px; padding: 5px;">
+                        This is informational message from CRxWeb.com. Please do not reply to this message, Mail sent to this address is not monitored.
+                    </p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

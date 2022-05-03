@@ -1,0 +1,68 @@
+﻿@model List<HCF.BDO.UserLoginCodes>
+
+@{
+
+    ViewBag.Title = "Login Codes";
+}
+
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        Login Codes
+    </h1>
+</section>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-primary">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="allusers-Box">
+                            <input type="checkbox" id="showall" class="comman_checkbox" value="False" /><span></span>All
+                            <input type="checkbox" id="showActive" class="comman_checkbox" checked="checked" value="" /><span></span>Active
+                            <input type="checkbox" id="showExpired" class="comman_checkbox" value="True" /><span></span>Expired
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <table id="masterTable" class="display table table-bordered table-striped comman_checkbox1">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Code
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Code)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.IsUsed)<span></span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+</script>
+}

@@ -1,0 +1,95 @@
+﻿@model HCF.BDO.Organization
+@{
+    ViewBag.Title = "Permit Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Permit Setting
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="Setting_Content">
+                        <div class="row">
+
+                            @using (Html.BeginForm("PermitSettings", "Permit", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(model => model.OrganizationId)
+                                <div class="dl-horizontal general_setting">
+                                    <div class="col-md-12">
+                                        <div class="shownotifi-row">
+                                            <div id="demo">
+                                                <div class="form-group">
+                                                    <h4 class="notice-heading">Notice Text</h4>
+                                                    @*<label class="dNoticeText">@Model.NoticeText</label>*@
+                                                    <div class="tnoticetext">
+                                                        @Html.TextAreaFor(x => x.NoticeText, new { @class = "form-control NoticeText", placeholder = "Enter Notice Text" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-right button_Div">
+                                        <input type="button" value="Edit" class="comm-button" id="upda" />
+                                        <input type="submit" value="Save" class="comm-button" id="sav" />
+                                        @*@Html.ActionLink("Cancel ", "PermitSettings", "Permit", new { @class = "comm-button can" })*@
+                                        @Html.ActionLink("Cancel", "PermitSettings", new { controller = "Permit" }, new { @class = "comm-Cancelbutton" })
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+    @*<script src="https://cdn.ckeditor.com/4.8.0/standard-all/ckeditor.js"></script>*@
+    @*<script src="~/dist/Scripts/ckeditor/ckeditor.js"></script>*@
+
+    <script>
+
+
+    var hospitalTypeId = '@Model.HospitalTypeId';
+    $("#HospitalTypeId").val(hospitalTypeId);
+
+    $('.img').click(function () { $('#file').trigger('click'); });
+
+
+    $(document).ready(function () {
+
+        CKEDITOR.replace('NoticeText');
+
+        $('.tnoticetext').addClass("disable");
+        $('#sav').hide();
+        $('.comm-Cancelbutton').hide();
+    });
+
+    $('#upda').click(function () {
+
+        $('.dNoticeText').hide();
+        $('.tnoticetext').removeClass("disable");
+        $('#sav').show();
+        $('.comm-Cancelbutton').show();
+        $('#upda').hide();
+        debugger;
+    });
+
+
+
+    </script>
+}

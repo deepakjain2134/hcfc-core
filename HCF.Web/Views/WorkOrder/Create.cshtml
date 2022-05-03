@@ -1,0 +1,370 @@
+﻿@model HCF.BDO.WorkOrder
+@{
+    ViewBag.Title = "createworkorder";
+    List<HCF.BDO.TFloorAssets> tfloorAssets = new List<HCF.BDO.TFloorAssets>();
+    HCF.BDO.EPDetails epdetails = new HCF.BDO.EPDetails();
+    if (TempData["TfloorAssets"] != null)
+    {
+        tfloorAssets = TempData.Get<List<HCF.BDO.TFloorAssets>>("TfloorAssets"); //(List<HCF.BDO.TFloorAssets>)TempData["TfloorAssets"];
+    }
+    if (TempData["epdetails"] != null)
+    {
+        epdetails = TempData.Get<HCF.BDO.EPDetails>("epdetails"); //(HCF.BDO.EPDetails)TempData["epdetails"];
+    }
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            @Localizer["CreateWorkOrder"]
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-primary">
+                @if (epdetails.EPDetailId > 0)
+                {
+                    <div class="tble_shadow">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="asset_table">
+                            @*<tr>
+                                    <th align="left" colspan="3"><strong> @Resources.Resource.StandardEP :</strong> @epdetails.Standard.TJCStandard , @epdetails.EPNumber</th>
+                                </tr>*@
+                            @foreach (HCF.BDO.TFloorAssets tFloorAsset in tfloorAssets)
+                            {
+                                if (tFloorAsset != null)
+                                {
+                                    <tr>
+                                        <th align="left"><strong>Asset :</strong> @tFloorAsset.Assets.Name</th>
+                                        <th align="left">
+                                            <strong> @Localizer["AssetNo"] :</strong> @tFloorAsset.AssetNo
+                                        </th>
+                                        <th><strong> @Localizer["Location"] :</strong> @($"{ tFloorAsset.Floor.Building.BuildingName},{tFloorAsset.Floor.FloorName}")</th>
+                                    </tr>
+                                }
+                            }
+                        </table>
+                    </div>
+                }
+                @using (Html.BeginForm("Create", "WorkOrder", FormMethod.Post, new { id = "workOrderform" }))
+                {
+
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <input type="hidden" name="RedirectToPage" value="@ViewBag.RedirectToPage" />
+                    <div class="row">
+
+
+
+
+                        <div class="col-md-12 form-group">
+                            @Html.HiddenFor(m => Model.ActivityType)
+                            @Html.HiddenFor(m => Model.TilsmId)
+                            @Html.HiddenFor(m => Model.ActivityId)
+                            @Html.HiddenFor(m => Model.EpDetailId)
+                            @Html.HiddenFor(m => Model.DeficiencyCode)
+                            @Html.HiddenFor(m => Model.IssueId)
+                            @Html.HiddenFor(m => Model.ActivityId)
+                            @Html.HiddenFor(m => Model.FloorId)
+                            @Html.HiddenFor(m => Model.ParentIssueId)
+                            @Html.HiddenFor(m => Model.Xcoordinate)
+                            @Html.HiddenFor(m => Model.ZoomLevel)
+                            @Html.HiddenFor(m => Model.Ycoordinate)
+                            @Html.HiddenFor(m => Model.IsDeficiency)
+                            @Html.HiddenFor(m => Model.SourceWoId)
+                            <input id="SegmentID" name="SegmentID" type="hidden" value="@HCF.Web.Base.UserSession.CurrentOrg.SegmentId">
+                            @*<input id="floorAssetId" name="floorAssetId" type="hidden" value="@tfloorAssets.FloorAssetsId">*@
+                            @Html.LabelFor(model => model.Description)<em class="required-field"> *</em>
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", required = "required", maxlength = 500, @rows = "3", @cols = "10" })
+                            @Html.ValidationMessageFor(model => model.Description)
+
+                            @if (HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower() == "HCF_Atlantic".ToLower())
+                            {
+                                <input name="TemplateName" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.TemplateName" hidden />
+                                <input name="Mode" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.Mode" hidden />
+                                <input name="Group" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.Group" hidden />
+                                <input name="CategoryId" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.CategoryId" hidden />
+                                <input name="CategoryName" value="@HCF.Utility.ServiceDeskConstantFields.HCF_Altantic.CategoryName" hidden />
+                            }
+
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.PriorityCode)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.PriorityCode, (SelectList)ViewBag.Priority, "-- Select Priority --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.PriorityCode)
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.StatusCode)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.StatusCode, (SelectList)ViewBag.Status, new { @class = "form-control", required = "required", @onchange = "ChangeSubStatus()" })
+                            @Html.ValidationMessageFor(model => model.StatusCode)
+                        </div>
+
+                        @if (ViewBag.IsWOSubStatusEnabled)
+                        {
+                            <div class="col-md-4 form-group">
+                                @Html.LabelFor(model => model.SubStatusCode)<em class="required-field"> *</em>
+                                @Html.DropDownListFor(model => model.SubStatusCode, Enumerable.Empty<SelectListItem>(), new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.SubStatusCode)
+                            </div>
+                        }
+
+
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.SiteName)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.SiteCode, (SelectList)ViewBag.SiteViewBag, "-- Select Site --", new { @class = "form-control", required = "required", @onchange = "ChangeSite()" })
+                            @Html.ValidationMessageFor(model => model.SiteCode)
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.BuildingName)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.BuildingCode, (SelectList)ViewBag.Buildings, "-- Select Building --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.BuildingCode)
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.TypeCode)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.TypeCode, (SelectList)ViewBag.Type, "-- Select --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.TypeCode)
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.AccountCode)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.AccountCode, (SelectList)ViewBag.AccountCode, "-- Select --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.AccountCode)
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.SkillCode)<em class="required-field"> *</em>
+                            @Html.DropDownListFor(model => model.SkillCode, (SelectList)ViewBag.SkillCode, "-- Select --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(model => model.SkillCode)
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.TargetDate)
+                            @Html.TextBoxFor(x => Model.TargetDate, $"{Model.TargetDate:MMM d, yyyy}", new { @class = "futuredatepicker form-control readonly", @autocomplete = "off" })
+                            @Html.ValidationMessageFor(model => model.TargetDate)
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Assignment</label>
+                            <input type="hidden" id="Userddl" />
+                            <input type="hidden" name="lstResourcesDetails" id="lstResourcesDetails" />
+                            @await Component.InvokeAsync("CommonuserCustomddl", new { type = "MULTI" })
+                            @*@Html.Action("userCustomddl", "Common", new { type = "MULTI" })*@
+                            @*@Html.DropDownListFor(model => model.Resources[0].UserId, (SelectList)ViewBag.Resources, "-- Not Assigned --", new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Resources[0].UserId)*@
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.RequesterPhone)<em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.RequesterPhone, new { @class = "form-control phone", required = "required", maxlength = 15, @onkeypress = "ValidateNumber(event);" })
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.RequesterName)<em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.RequesterName, new { @class = "form-control", required = "required", maxlength = 50 })
+                        </div>
+                        <div class="col-md-4 form-group">
+                            @Html.LabelFor(model => model.RequesterEmail)<em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.RequesterEmail, new { @class = "form-control", required = "required", @type = "email", maxlength = 150 })
+                        </div>
+                        <div class="col-md-8 form-group">
+                            @Html.LabelFor(model => model.RequesterComments)@*<em class="required-field"> *</em>*@
+                            @Html.TextAreaFor(model => model.RequesterComments, new { @class = "form-control", maxlength = 500, @rows = "4", @cols = "10" })
+                        </div>
+
+
+
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="submit" value='Save' class="comm-button" id="Submit" />
+                            <a href='@HCF.Web.Base.UISession.GetBackPage("workorder_CreateWorkOrder")' class="comm-Cancelbutton">Cancel</a>
+                        </div>
+
+
+                    </div>
+                    <input type="hidden" id="floorbuildingCode" value="@Model.BuildingCode" />
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        debugger;
+        var preDesc = "";
+        if ('@HCF.Web.Base.UserSession.CurrentOrg.DbName.ToLower()' == "HCF_Atlantic".toLowerCase()) {
+            if ('@Model.IsIlsm'.toLowerCase() == 'true') {
+                preDesc = "ILSM: "
+            }
+            else {
+                preDesc = "MAINT: "
+            }
+            if ($('#Description').val().includes('MAINT:') || $('#Description').val().includes('ILSM:')) {
+                var desc = $('#Description').val();
+                $('#Description').val(desc)
+            }
+            else {
+                var desc = preDesc + $('#Description').val();
+                $('#Description').val(desc)
+            }
+        }
+
+        var Accountdefaultval = "8060";
+        var SkillDefaultval = "GM";
+        if ($('#AccountCode option[value=' + Accountdefaultval + ']').length > 0) {
+            $("#AccountCode").val("8060");
+        } else {
+            $("#AccountCode").val("");
+        }
+        if ($('#SkillCode option[value=' + SkillDefaultval + ']').length > 0) {
+            $("#SkillCode").val("GM");
+        } else {
+            $("#SkillCode").val("");
+        }
+        //debugger;
+        if ('@Model.TypeCode' == '')
+        {
+            var typedefaultval = "RQ";
+            if ($('#TypeCode option[value=' + typedefaultval + ']').length > 0) {
+                $("#TypeCode").val(typedefaultval);
+            } else {
+                $("#TypeCode").val("");
+            }
+        }
+        if ('@Model.PriorityCode' == '')
+        {
+            var prioritydefaultval = "2";
+            if ($('#PriorityCode option[value=' + prioritydefaultval + ']').length > 0) {
+                $("#PriorityCode").val(prioritydefaultval);
+            } else {
+                $("#PriorityCode").val("");
+            }
+        }
+        ChangeSubStatus();
+        if ('@Model.SiteCode' == '') {
+            $("#SiteCode").val("");
+        } else {
+            $("#SiteCode").val('@Model.SiteCode');
+        }
+        ChangeSite();
+
+        //debugger
+        var IsExistTagDeficiency = '@session.IsExistTagDeficiency';
+        var isGuestUser = '@session.IsGuestUser'
+        if (IsExistTagDeficiency == 'True' && isGuestUser =="True") {
+            $(".breadcrumb-arrow").remove($("<li>").hasClass('backbtn'))
+            $('.chkpassword').hide()
+            $('.liprofile').hide()
+        }
+    });
+
+    $('#SiteCode').change(function () {
+        $('#SiteName').val($("#SiteCode :selected").text());
+
+    })
+
+    function ChangeSite() {
+        debugger;
+        var control = $("#BuildingCode");
+        var controlval = $("#floorbuildingCode").val();
+        control.empty();
+        control.append(
+                        $('<option></option>').val("").html("Select Building"));
+        var siteCode = $('#SiteCode').val();
+        var urlAction = '@Url.Action("GetBuildingsBySite", "Common")';
+        if (siteCode != "") {
+            $.ajax({
+                url: urlAction,
+                type: "GET",
+                dataType: "JSON",
+                global:false,
+                data: { siteCode: siteCode },
+                success: function (result) {
+                    $.each(result, function (i, substatus) {
+                        control.append($('<option></option>').val(substatus.BuildingCode).html(substatus.BuildingName));
+                    });
+                    if (controlval != "") {
+                        control.val(controlval);
+                    }
+                }
+            });
+        }
+    }
+
+
+    function ChangeSubStatus() {
+        debugger;
+
+        var isSubStatus = '@ViewBag.IsWOSubStatusEnabled';
+        console.log(isSubStatus);
+        if (isSubStatus.toLowerCase() === "true") {
+            var statusCode = $('#StatusCode').val();
+            if (statusCode == "ACTIV" || statusCode == "Open") {
+
+                $("#SubStatusCode").empty();
+                var urlAction = '@Url.Action("GetSubStatus", "WorkOrder")';
+                if (statusCode != "") {
+                    if (statusCode == "CMPLT") {
+                        $("#DateCompleted").removeAttr("disabled");
+                    } else {
+                        $("#DateCompleted").attr("disabled", "disabled");
+                    }
+                    $.ajax({
+                        url: urlAction,
+                        type: "GET",
+                        dataType: "JSON",
+                        global: false,
+                        data: { statusCode: statusCode },
+                        success: function(results) {
+                            $.each(results,
+                                function(i, substatus) {
+                                    $("#SubStatusCode").append(
+                                        $('<option></option>').val(substatus.Code).html(substatus.Description));
+
+                                });
+                            $("#SubStatusCode").val("READY");
+                        }
+                    });
+                }
+            } else {
+                AlertWarningMsg("Status code should be ACTIVE while creating a new work order!");
+                $("#StatusCode").val("ACTIV");
+            }
+        }
+    }
+
+    // Resources multi dropdown
+    $("#Submit").on('click', function () {
+        debugger
+        var requesterphonenum = $("#RequesterPhone").val();
+        if (requesterphonenum.length != 14) {
+            swalalert("Please Enter 10 Digit Requester Phone!");
+            return false;
+        } else {
+            return true;
+        }
+    });
+
+
+    //var userddl = $("#Userddl");
+    //userddl.change(function () {
+    //    woAssignmentUserDetails();
+    //});
+
+    $('body').on('change', '#ddlMultiUser', function () {
+        debugger;
+        var value = $(this).val();
+        var resourcesdetails = [];
+        for (var i = 0; i < value.length; i++) {
+            var resourcesdetail = { UserId: value[i] };
+            resourcesdetails.push(resourcesdetail);
+        }
+        //debugger;
+        $("#lstResourcesDetails").val(JSON.stringify(resourcesdetails));
+    });
+</script>
+<style>
+    .common-formBox #bs-select-1 {
+        max-height: 200px !important;
+    }
+</style>

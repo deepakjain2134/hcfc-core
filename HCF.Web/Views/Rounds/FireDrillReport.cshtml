@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Fire Drill Report";
+    Layout = null;
+    var buildingTypes = ViewBag.BuildingType != null ? (List<HCF.BDO.BuildingType>)ViewBag.BuildingType : new List<HCF.BDO.BuildingType>();
+}
+<div class="ilsmbindersrach">
+    <div class="firedrill-heading">
+        <div class="binder-RightHeading">
+            <h3>Fire Drill Report</h3>
+        </div>
+    </div>
+</div>
+<div class="fireDrillReoprtform row">
+    <input type="hidden" id="timeformat" name="timeformat" value="1" />
+    <div class="col-md-8">
+        <div class="row">
+            <div class="form-group col-md-3 col-left">
+                <sitedropdownlist name="SiteCode" firsttext="All Campus" class="form-control"></sitedropdownlist>
+            </div>
+            <div class="form-group col-md-3 col-left">
+                @Html.DropDownList("buildingTypes", new SelectList(buildingTypes, "BuildingTypeId", "Name"), new { @class = "form-control" })
+            </div>
+            <div class="form-group col-md-3 col-left">
+                @Html.DropDownList("BuildingId", new SelectList(""), "All Building", new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+            </div>
+            <div class="form-group col-md-3">
+                <button class="comm-button" id="btnrunreport">Run Report</button>
+            </div>
+        </div>
+    </div>
+    <div id="dvextrafilter" style="display:none" class="col-md-4">
+        <div class="row text-right">
+            <div class="form-group col-md-6 col-left">
+                <quarterdropdownlist name="QuarterNo" class="form-control" firsttext="All" firstvalue="-1"></quarterdropdownlist>
+            </div> 
+            <div class="form-group col-md-6">
+                @*<label>Year :</label>*@
+                @Html.DropDownList("Yearbtn", Enumerable.Range(DateTime.Now.Year - 2, 3).Select(x => new SelectListItem { Text = x.ToString() }).OrderByDescending(x => x.Text), new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+<div id="loadpartial"></div>
+
+<script>
+
+    $(function () {
+        getBuildings();
+    });
+
+    function getBuildings() {
+        var buildtypeId = $("#buildingTypes").val();
+        $("#BuildingId").empty();
+        $("#BuildingId").append(
+            $('<option buildtypeid =' + buildtypeId + '></option>').val("-1").html("All"));
+        var floorOptions = {};
+        floorOptions.url = '@Url.Action("GetBuildingBySite", "Organization", new { area = "" })';//"/Organization/GetFloorByBuilding";
+        floorOptions.type = "POST";
+        floorOptions.data = { sitecode: $("#SiteCode").val() };
+        floorOptions.datatype = "json";
+       /* floorOptions.contentType = "application/json";*/
+        floorOptions.success = function (buildlst) {
+            //console.log(buildlst);
+            for (var i = 0; i < buildlst.length; i++) {
+                $("#BuildingId").append(
+                    $('<option></option>').val(buildlst[i].BuildingId).html(buildlst[i].BuildingName).attr("buildtypeId", buildlst[i].BuildingTypeId));
+            }
+            $('#BuildingId').selectpicker('refresh');
+            $('#BuildingId option[buildtypeid!="' + buildtypeId + '"]').remove();
+            $("#BuildingId").trigger("change");
+        };
+
+        floorOptions.error = function () { AlertWarningMsg("Error in Getting Buildings!!", ""); };
+        $.ajax(floorOptions);
+    }
+
+    var buildingIndex = 0;
+    $(document).on("change", "#BuildingId", function () {
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (buildingIndex == 0) {
+            var lastAllSelected = false;
+            buildingIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+    });
+
+    $("#buildingTypes").change(function () {
+        getBuildings();
+    });
+
+    $("#SiteCode").change(function () {
+        getBuildings();
+    });
+
+    $("#btnrunreport").click(function () {
+        getExerciseFiles();
+    })
+
+    function getExerciseFiles() {
+        $(".loadingModal").show();
+        var _buildingIds = $("#BuildingId").val() != null ? $("#BuildingId").val() : 0;
+        var _quarterno = $("#QuarterNo").val();
+        url = CRxUrls.rounds_getFireDrillReportData + '?buildingIds=' + _buildingIds + "&quarterno=" + _quarterno;
+        $.ajax({
+            url: url,
+            cache: true,
+            type: 'GET',
+            success: function (data) {
+                $("#loadpartial").html("");
+                $("#loadpartial").html(data);
+            }
+        });
+    }
+</script>
+

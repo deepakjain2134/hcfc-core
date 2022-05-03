@@ -1,0 +1,136 @@
+[
+  {
+    "outputFileName": "wwwroot/bundles/js/_jsscripts.js",
+    "inputFiles": [
+      "wwwroot/dist/Scripts/html2canvas.js",
+      "wwwroot/dist/Scripts/bootstrap-select.min.js",
+      "wwwroot/dist/Scripts/prism.min.js",
+      "wwwroot/dist/Scripts/buttons.print.min.js",
+      "wwwroot/dist/Scripts/buttons.html5.min.js",
+      "wwwroot/dist/Scripts/vfs_fonts.js",
+      "wwwroot/dist/Scripts/pdfmake.min.js",
+      "wwwroot/dist/Scripts/dataTables.buttons.min.js",
+      "wwwroot/dist/Scripts/dataTables/jquery.dataTables.min.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/js/login/login.js",
+    "inputFiles": [
+      "wwwroot/dist/plugins/jQuery/jquery-2.2.3.min.js",
+      "wwwroot/dist/js/bootstrap.min.js",
+      "wwwroot/dist/Scripts/pgwbrowser.js",
+      "wwwroot/dist/Scripts/fingerprint.js",
+      "wwwroot/dist/js/crx.js-pinlogin.js",
+      "wwwroot/dist/Scripts/page_scripts/login.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/js/main/custom.js",
+    "inputFiles": [
+      "wwwroot/dist/plugins/jQuery/jquery-2.2.3.min.js",
+      "wwwroot/dist/Scripts/sweetalert.min.js",
+      "wwwroot/dist/Scripts/jquery-ui.js",
+      "wwwroot/dist/js/bootstrap.min.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/custom.js",
+    "inputFiles": [
+      "wwwroot/dist/plugins/jQuery/jquery-2.2.3.min.js",
+      "wwwroot/dist/Scripts/sweetalert.min.js",
+      "wwwroot/dist/Scripts/jquery-ui.js",
+      "wwwroot/dist/js/bootstrap.min.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/jsplugins.js",
+    "inputFiles": [
+      "wwwroot/dist/js/dscountdown.min.js",
+      "wwwroot/dist/plugins/jQueryUI/DragDropTouch.js",
+      "wwwroot/dist/Scripts/jquery.mask.min.js",
+      "wwwroot/dist/Scripts/jquery.alphanum.js",
+      "wwwroot/dist/js/jquery.bootpag.min.js",
+      "wwwroot/dist/js/numericInput.min.js",
+      "wwwroot/dist/js/jquery.mCustomScrollbar.concat.min.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/jqueryui.js",
+    "inputFiles": [
+      "wwwroot/dist/js/dirrty.js",
+      "wwwroot/dist/js/main.js",
+      "wwwroot/dist/js/Constants.js",
+      "wwwroot/dist/Scripts/jquery.shorten.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/main.js",
+    "inputFiles": [
+      "wwwroot/dist/Scripts/bootstrap-tagsinput.js",
+      "wwwroot/dist/Scripts/jquery-listnav.js",
+      "wwwroot/dist/Scripts/jquery-clockpicker.js",
+      "wwwroot/dist/js/SwalAlerts.js",
+      "wwwroot/dist/Scripts/bootstrap-contextmenu.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/css/main.css",
+    "inputFiles": [
+      "wwwroot/dist/css/bootstrap.min.css",
+      "wwwroot/dist/css/font-awesome.min.css",
+      "wwwroot/dist/css/ionicons.min.css",
+      "wwwroot/dist/css/AdminLTE.min.css",
+      "wwwroot/dist/css/mystyle.css",
+      "wwwroot/dist/css/crx-mediaquery.css",
+      "wwwroot/dist/css/jquery-ui.css",
+      "wwwroot/dist/css/breadcrumb.css",
+      "wwwroot/dist/css/sweetalert.css",
+      "wwwroot/dist/css/jquery.pinlogin.css",
+      "wwwroot/dist/css/jquery.mCustomScrollbar.min.css",
+      "wwwroot/dist/css/jquery.transfer.css",
+      "wwwroot/dist/css/help-style.css",      
+      "wwwroot/dist/plugins/datepicker/datepicker3.css",
+      "wwwroot/dist/plugins/daterangepicker/daterangepicker.css",
+      "wwwroot/dist/css/dscountdown.css",
+      "wwwroot/dist/css/bootstrap-tagsinput.css",
+      "wwwroot/dist/css/bootstrap-select.min.css",
+      "wwwroot/dist/css/listnav.css",
+      "wwwroot/dist/Scripts/dropzone/basic.css",
+      "wwwroot/dist/Scripts/dropzone/dropzone.css",
+      "wwwroot/dist/css/clock-picker/jquery-clockpicker.min.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/js/main/CRxJs.js",
+    "inputFiles": [
+      "wwwroot/dist/Scripts/jquery-cookie-plugin.js",
+      "wwwroot/dist/js/crx.js.jquery.transfer.js",
+      "wwwroot/dist/js/crx.js-alerts.js",
+      "wwwroot/dist/js/crx.js-common.js",
+      "wwwroot/dist/js/crx.js-customvalidator.js",
+      "wwwroot/dist/js/crx.js-fileupload.js",
+      "wwwroot/dist/js/crx.js-grouploop.js",
+      "wwwroot/dist/js/crx.js-password.js",
+      "wwwroot/dist/js/crx.js-pinlogin.js",
+      "wwwroot/dist/js/crx.js-window.async.js",
+      "wwwroot/dist/Scripts/page_scripts/help-how-to.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/js/main/layout.js",
+    "inputFiles": [
+      "wwwroot/dist/Scripts/moment.js",
+      "wwwroot/dist/Scripts/datetime-moment.js",
+      "wwwroot/dist/Scripts/dropzone/dropzone.js"
+      //"wwwroot/dist/Scripts/ckeditor/ckeditor.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/bundles/css/login/login.css",
+    "inputFiles": [
+      "wwwroot/dist/css/bootstrap.min.css",
+      "wwwroot/dist/css/font-awesome.min.css",
+      "wwwroot/dist/css/login.css"
+    ]
+  }
+]

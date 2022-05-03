@@ -1,0 +1,225 @@
+﻿@model HCF.BDO.QuarterMaster
+@{
+    HCF.BDO.FireDrillTypes drillTypes = new HCF.BDO.FireDrillTypes();
+
+    var i = this.ViewData.ContainsKey("i") ? Convert.ToInt32(this.ViewData["i"].ToString()) : 0;  //BuildingIndex
+    var kk = this.ViewData.ContainsKey("kk") ? Convert.ToInt32(this.ViewData["kk"].ToString()) : 0; // ShiftIndex
+    var m = this.ViewData.ContainsKey("m") ? Convert.ToInt32(this.ViewData["m"].ToString()) : 0; //FireDrillIndex
+                                                                                                 //var kkk = this.ViewData.ContainsKey("kkk") ? Convert.ToInt32(this.ViewData["kkk"].ToString()) : 0; // Quarter
+    var ll = this.ViewData.ContainsKey("texerciseCount") ? Convert.ToInt32(this.ViewData["texerciseCount"].ToString()) : 0;
+    if (this.ViewData["drillType"] != null)
+    {
+        drillTypes = (HCF.BDO.FireDrillTypes)this.ViewData["drillType"];
+    }
+    var timeformat = this.ViewData.ContainsKey("timeformat") ? Convert.ToInt32(this.ViewData["timeformat"].ToString()) : 1;
+    var firedrilllocationId = Model.Buildings[i].BuildingId > 0 ? Model.Buildings[i].BuildingId : Model.Buildings[i].LocationGroupId;
+}
+@{
+    <tr buildid="@firedrilllocationId" shiftId="@Model.Buildings[i].Shifts[kk].ShiftId" id="@drillTypes.FireDrillType" class="@($"building{firedrilllocationId}_type{Model.Buildings[i].Shifts[kk].FireDrillTypes[m].Id}_shift{Model.Buildings[i].Shifts[kk].ShiftId} drillrow") @($"building{firedrilllocationId}_shift{Model.Buildings[i].Shifts[kk].ShiftId}")">
+        @if (m == 0 && (!drillTypes.IsAdded))
+        {
+            if (Model.Buildings[i].Shifts[kk].StartTime != null && @Model.Buildings[i].Shifts[kk].EndTime != null)
+            {
+                <td style="width:200px;" rowspan="@Model.Buildings[i].Shifts[kk].FireDrillTypes.Count">
+                    <span class="vertical-modeNo">
+                        @Model.Buildings[i].Shifts[kk].Name <br /> (@Model.Buildings[i].Shifts[kk].StartTime.ConvertToString() - @Model.Buildings[i].Shifts[kk].EndTime.ConvertToString())
+                    </span>
+                </td>
+            }
+            else
+            {
+                <td rowspan="@Model.Buildings[i].Shifts[kk].FireDrillTypes.Count">
+                    @Model.Buildings[i].Shifts[kk].Name
+                </td>
+            }
+        }
+        @if (drillTypes.IsActive)
+        {
+            <td>
+                @drillTypes.FireDrillType
+                @if (!drillTypes.IsAdded)
+                {
+                    @*@Model.Buildings[i].FireDrillTypes[m].FireDrillType*@
+                    <span class="addNewDrill" data-type="@drillTypes.Id" data-buildingNo="@i" data-shiftNo="@kk"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                }
+                else
+                {
+                    <span class="removeNewDrill" data-type="@drillTypes.Id" data-buildingNo="@i" data-shiftNo="@kk" rel="@drillTypes.FireDrillType"><i class="fa fa-times" aria-hidden="true"></i></span>
+                }
+            </td>
+            for (var kkk = 1; kkk < 5; kkk++)
+            {
+                <td>
+                    @for (var k = 0; k < Model.Buildings[i].Shifts[kk].Exercises.Count(x => string.Equals(x.Name, drillTypes.FireDrillType, StringComparison.CurrentCultureIgnoreCase) && x.QuarterNo == kkk); k++)
+                    {
+                        <div class="dvdrills" quarterno="@kkk">
+                            @*@await Html.PartialAsync("_EditFireDrillShift",
+                                Model.Buildings[i].Shifts[kk].Exercises.FirstOrDefault(x => string.Equals(x.Name, drillTypes.FireDrillType, StringComparison.CurrentCultureIgnoreCase) && x.QuarterNo == kkk),
+                                new ViewDataDictionary { { "year", Model.Year }, { "quarterNo", kkk }, { "startTime", Model.Buildings[i].Shifts[kk].StartTime },
+                                    { "endTime", Model.Buildings[i].Shifts[kk].EndTime }, { "i", i }, { "j", kk }, { "texerciseCount", ll },
+                                    { "buildingno", @ViewBag.buildingNo }, { "timeformat", timeformat } }
+                                )*@
+
+                            @await Html.PartialAsync("_EditFireDrillShift", Model.Buildings[i].Shifts[kk].Exercises.FirstOrDefault(x => string.Equals(x.Name, drillTypes.FireDrillType, StringComparison.CurrentCultureIgnoreCase) && x.QuarterNo == kkk),
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               {{ "year", Model.Year }, { "quarterNo", kkk }, { "startTime", Model.Buildings[i].Shifts[kk].StartTime },
+                { "endTime", Model.Buildings[i].Shifts[kk].EndTime }, { "i", i }, { "j", kk }, { "texerciseCount", ll },
+                { "buildingno", @ViewBag.buildingNo }, { "timeformat", timeformat }}
+                              )
+                        </div>
+                        ll++;
+                    }
+                </td>
+            }
+        }
+    </tr>
+}
+<script type="text/javascript">
+
+    $(".timepicker").each(function () {
+
+        $(this).empty();
+        var control = $(this);
+        var endTime = $(this).attr('endtime');
+        var startTime = $(this).attr('starttime');
+        $(this).clockpicker({
+            autoclose: false,
+            twelvehour: true,
+            donetext: "Done",
+            'default': 'now',
+            afterDone: function () {
+
+                var time = control.val();
+                var time1 = time.split(" ")[0];
+                var previoustime = time1.split(":")[1];
+                var time2 = time1.split(":")[1];
+                if (endTime != undefined && startTime != undefined) {
+                    var startchangeTime = tConvert(startTime.replace(":00", ""));
+                    var endchangeTime = tConvert(endTime.replace(":00", ""));
+
+                    if (time == endchangeTime) {
+
+                        if (time.split(':')[1].split(' ')[0] == "00") {
+                            var hr = time.split(':')[0];
+                            var _time = parseInt(time.split(':')[0]) - 1
+                            if (_time.toString().length == 1) { _time = "0" + _time }
+                            time = time.replace(hr, _time)
+                            time = time.replace("00", "45")
+                        } else if (time.split(':')[1].split(' ')[0] == "15") {
+                            time = time.replace("15", "00")
+                        } else if (time.split(':')[1].split(' ')[0] == "30") {
+                            time = time.replace("30", "15")
+                        } else {
+                            time = time.replace("45", "30")
+                        }
+                    } else {
+                        if (time2 >= "01" && time2 <= "14") {
+                            time2 = "15"
+                        } else if (time2 >= "16" && time2 <= "29") {
+                            time2 = "30"
+                        } else if (time2 >= "31" && time2 <= "44") {
+                            time2 = "45"
+                        } else if (time2 >= "46" && time2 <= "59") {
+                            time2 = "45"
+                        } else {
+                        }
+                    }
+                    time = time.replace(previoustime, time2);
+                    control.val(time);
+                    var currentTime = getTwentyFourHourTime(time);
+
+                    console.log(time)
+                    var status = validateTime(startTime, endTime, currentTime);
+                    //console.log(status);
+
+                    if (status == false) {
+                        control.val("");
+                        swalalert('please select time between ' + startchangeTime + ' and ' + endchangeTime);
+                    }
+
+                } else {
+                    if (time2 >= "01" && time2 <= "14") {
+                        time2 = "15"
+                    } else if (time2 >= "16" && time2 <= "29") {
+                        time2 = "30"
+                    } else if (time2 >= "31" && time2 <= "44") {
+                        time2 = "45"
+                    } else if (time2 >= "46" && time2 <= "59") {
+                        time2 = "45"
+                    } else {
+                    }
+                    time = time.replace(previoustime, time2);
+                    control.val(time);
+                }
+            }
+        });
+    });
+
+    function tConvert(time) {
+        // Check correct time format and split into components
+        //debugger;
+        time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+        if (time.length > 1) { // If time format correct
+            time = time.slice(1);  // Remove full string match value
+            time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+            time[0] = +time[0] % 12 || 12; // Adjust hours
+            if (time[0].toString().length == 1) { time[0] = "0" + time[0] }
+        }
+        return time.join(''); // return adjusted time or original string
+    }
+
+    function getTwentyFourHourTime(amPmString) {
+        //var d = new Date("1/1/2020 " + amPmString);
+
+        var d;
+        var date = new Date();
+        var month = date.getMonth();
+        if (month == 0) {
+            month = parseInt(month) + 1;
+            d = new Date(month + "/" + new Date().getDate() + "/" + new Date().getFullYear() + " " + amPmString);
+        } else {
+            d = new Date(new Date().getMonth() + "/" + new Date().getDate() + "/" + new Date().getFullYear() + " " + amPmString);
+        }
+        return d;
+    }
+
+    var validateTime = function (startTime, endTime, currentDate) {
+        //debugger;
+        startDate = new Date(currentDate.getTime());
+        startDate.setHours(startTime.split(":")[0]);
+        startDate.setMinutes(startTime.split(":")[1]);
+        startDate.setSeconds(startTime.split(":")[2]);
+
+        //console.log(startDate);
+
+        endDate = new Date(currentDate.getTime());
+        endDate.setHours(endTime.split(":")[0]);
+        endDate.setMinutes(endTime.split(":")[1]);
+        endDate.setSeconds(endTime.split(":")[2]);
+        // console.log(endDate);
+        // //debugger;
+        var dateDiff = diff_minutes(endDate, startDate);
+        var dateDiff2 = diff_minutes(endDate, currentDate);
+        if (dateDiff < 0) {
+            endDate.setDate(endDate.getDate() + 1);
+            if (dateDiff2 > 0) {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        valid = startDate <= currentDate && endDate >= currentDate;
+        return valid;
+    }
+
+    function diff_minutes(dt2, dt1) {
+        //debugger;
+        var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+        // console.log(diff);
+        diff /= 60;
+        return diff;
+
+    }
+
+</script>

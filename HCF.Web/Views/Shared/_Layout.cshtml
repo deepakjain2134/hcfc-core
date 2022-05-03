@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>@string.Format("{0} - {1}", "CRx for Compliance", ViewBag.Title)</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900,900i">
+    <link href="~/bundles/css/main.css" rel="stylesheet" asp-append-version="true" />
+    @await Html.PartialAsync("_jsscripts")
+    <script src="~/dist/js/crx.js-passwordPopup.js" type="text/javascript"></script>
+</head>
+<body class="hold-transition skin-purple">
+    <div class="wrapper">
+        <header class="main-header">
+            <div class="container-fluid" id="headermenu">
+                @await Component.InvokeAsync("CommonHeaderMenu")
+            </div>
+        </header>
+        <div class="contentArea-box" id="body">
+            <div class="container-fluid">
+                <div class="row" style="position:relative;">
+                    <div class="col-md-4 col-xs-4">
+                        @await RenderSectionAsync("pageHeader", required: false)
+                    </div>
+                    <div class="col-md-8 col-xs-8" style="overflow:hidden;">
+                        <ol class="breadcrumb" style="text-align: right">
+                            @await Html.PartialAsync("_breadcrumb")
+                        </ol>
+                    </div>
+                    <div class="marquee-Col12">
+                        @await RenderSectionAsync("marquee", required: false)
+                    </div>
+                    <div class="col-md-12">
+                        <div id="pageMessages">
+                            @await Html.PartialAsync("_Message")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="renderbody-box comman_checkbox1 comman_checkbox">
+                @RenderBody()
+            </section>
+        </div>
+
+        @await Component.InvokeAsync("CommonFooterPartialView")
+        @await Html.PartialAsync("_helpView")
+        <div class="control-sidebar-bg"></div>
+    </div>
+    <div class="loadingModal"></div>
+    <div id="modal-container1" class="modal fade fileupload" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content" id="common-modal1">
+            </div>
+        </div>
+    </div>
+    <div id="modal-container" class="modal fade fileupload" tabindex="" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content" id="common-modal">
+            </div>
+        </div>
+    </div>
+    <script src="~/bundles/js/main/CRxJs.js" type="text/javascript" asp-append-version="true"></script>
+    <script src="~/bundles/js/main/layout.js" type="text/javascript" asp-append-version="true"></script>   
+    <script src="@Url.Content("~/dist/js/crx.js-urls.js")" asp-append-version="true" type="text/javascript"></script>   
+    @RenderSection("scripts", false)
+    @RenderSection("validationscripts", required: false)
+
+    <environment names="Development">
+        <mini-profiler position="@RenderPosition.BottomRight"
+                       max-traces="5"
+                       show-trivial="false"
+                       color-scheme="ColorScheme.Auto"
+                       show-time-with-children="true"
+                       nonce="45"
+                       decimal-places="2" />
+    </environment>
+</body>
+</html>

@@ -1,0 +1,15 @@
+﻿namespace HCF.Module.Survey.Model
+{
+    public class User
+    {
+        public User()
+        {
+            Id = 0;
+        }
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Username { get; set; }
+        public string Token { get; set; }
+    }
+}

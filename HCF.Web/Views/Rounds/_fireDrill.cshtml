@@ -1,0 +1,1015 @@
+﻿@model HCF.BDO.QuarterMaster
+@{
+    Layout = null;
+    bool isPlanFireDrillsForMe = (bool)ViewBag.PlanFireDrillsForMe;
+    bool Tdrill = @ViewBag.TDril != null ? @ViewBag.TDril : false;
+    int timeformat = @ViewBag.timeFormat != null ? @ViewBag.timeFormat : 1; // 1 means 12 hours format and 0 Means 24 hours format
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="fire-btnBox">
+            <div class="firebtn">
+                @using (Html.BeginForm("PrintFiredrillMatrix", "Pdf", FormMethod.Post, new { id = "firedrillsquest" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="buildingIds" name="buildingIds" value="@ViewBag.buildingIds" />
+                    <input type="hidden" id="locationGroupIds" name="locationGroupIds" value="@ViewBag.locationGroupIds" />
+                    <input type="hidden" id="mode" name="mode" value="@ViewBag.mode" />
+                    <input type="hidden" id="year" name="year" value="@Model.Year" />
+                    <input type="hidden" id="printtimeformat" name="printtimeformat" value="@timeformat" />
+                    <input type="submit" value='Print Fire Drill Matrix' class="comm-bluebutton" id="btnprintfiredrillmatrix" />
+                }
+            </div>
+            <div class="planfiredrill firebtn" id="div_planfiredrillforme">
+                <input type="button" value='Plan Fire Drills For Me' class="comm-bluebutton" id="planfiredrillforme" />
+            </div>
+            <div class="firebtn">
+                <a href="@Url.Action("EPBinders", "Repository" , new { pagename = "firedrillreport"})"
+                   class="comm-bluebutton" id="btngotofiredrillbinder">
+                    Go To Fire Drill Reports Binder
+                </a>
+            </div>
+            @*<div class="chkTodayDrill">
+                    <input type="checkbox" id="todayDrills" class="todayDrills" /><span></span> Show Today's Drills
+                </div>*@
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="firedril-tabs">
+            <div class="outerDivFull">
+                <span>12 Hrs</span>
+                <div class="switchToggle">
+                    <input type="checkbox" id="switch" checked="@(ViewBag.timeFormat == 1 ? false : true)">
+                    <label for="switch">Toggle</label>
+                </div>
+                <span>24 Hrs</span>
+            </div>
+            <div class="chkTodayDrill">
+                <input type="checkbox" id="todayDrills" class="todayDrills" /><span></span> Show Today's Drills
+            </div>
+        </div>
+
+
+
+
+        @*<div class="outerDivFull">
+                <span>12 Hrs</span>
+                <div class="switchToggle">
+                    <input type="checkbox" id="switch" checked="@(ViewBag.timeFormat == 1 ? false : true)">
+                    <label for="switch">Toggle</label>
+                </div>
+                <span>24 Hrs</span>
+            </div>*@
+
+
+        @using (Html.BeginForm("FireDrill", "Rounds", new { PageName = "Exercise", id = "frmExe" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" id="mode" name="mode" value="0" />
+            <a class="edCancel comm-button comm-Cancelbutton update_bt cancel">Cancel</a>
+            if (HCF.Web.Base.UserSession.HasRoles("add_firedrill_schedule,edit_fire_drill"))
+            {
+                <button type="submit" name="submitButton" value="-1" class='editDrills update_bt comm-button edit'>Edit Schedule</button>
+            }
+            @*<button type="submit" name="" value="" class='update_bt' style="visibility: hidden;">Not used</button>*@
+            <div class="row">
+                <div class="col-md-12">
+
+
+                    @if (HCF.Web.Base.UserSession.HasPermission("view_fire_drill"))
+                    {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped no-footer fire_drill_table" id="fire_drill_table">
+                            <tr>
+                                <th colspan="2"></th>
+                                @for (var kk = 1; kk < 5; kk++)
+                                {
+                                    HCF.BDO.Enums.QuarterNo enums = (HCF.BDO.Enums.QuarterNo)kk;
+                                    <th> @string.Format("Quarter {0} ({1})", kk, enums.GetDescription())</th>
+                                }
+                            </tr>
+                            @for (var i = 0; i < Model.Buildings.Count; i++)
+                            {
+                                <tr>
+                                    <th>@Model.Buildings[i].BuildingName</th>
+                                </tr>
+                                for (var kk = 0; kk < Model.Buildings[i].Shifts.Count; kk++)
+                                {
+                                    for (int m = 0; m < Model.Buildings[i].Shifts[kk].FireDrillTypes.Count; m++)
+                                    {
+                                        var texerciseCount = (m * 4);
+
+                                        @*@await Html.PartialAsync("_yearlyFiredrill",
+                        Model, new ViewDataDictionary { { "i", i }, { "kk", kk }, { "m", m },
+                            { "texerciseCount", texerciseCount },
+                            { "drillType", Model.Buildings[i].Shifts[kk].FireDrillTypes[m] },
+                            { "timeformat", timeformat } })*@
+
+                                        @await Html.PartialAsync("_yearlyFiredrill", Model,
+                               new ViewDataDictionary(
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                               new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                               { { "i", i }, { "kk", kk }, { "m", m },
+                                           { "texerciseCount", texerciseCount },
+                                           { "drillType", Model.Buildings[i].Shifts[kk].FireDrillTypes[m] },
+                                           { "timeformat", timeformat }}
+                              )
+
+
+                                    }
+                                }
+                            }
+                        </table>
+                    </div>
+                        
+                    }
+                    else
+                    {
+                        <h1 style="text-align: center;padding-top: 20px;">
+                            You don't have access to view the Fire Drill.
+                            <br />
+                            Please contact your system administrator.
+                        </h1>
+                    }
+
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<div class="container">
+    <div class="modal fade" id="Firedrillquestionnaire" role="dialog" style="display:none">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span class="modelTitle">FIRE DRILL DOCUMENTATION</span>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </h4>
+                </div>
+                <div>
+                    <div id="loadpartialquestionnaire">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var _year = $("#Year").val();
+    var buildingCounts = '@Model.Buildings.Count';
+
+    $(document).ready(function () {
+        $(".edCancel").hide();
+        $(".loadingModal").hide();
+    });
+
+    var todaydrilval = '@Tdrill'.toLowerCase(); //$('#todaydril').val();
+    if (todaydrilval != "false") {
+        $('#todayDrills').val(true);
+        $('#todayDrills').attr('checked', true);
+    } else {
+        $('#todayDrills').val(false);
+        $('#todayDrills').attr('checked', false);
+    }
+
+    $("#todayDrills").on('change', function () {
+
+        var val = $(this).is(":checked");
+        if (val == true) {
+            $('#todayDrills').val(true);
+            $('#todayDrills').attr('checked', true);
+        } else {
+            $('#todayDrills').val(false);
+            $('#todayDrills').attr('checked', false);
+        }
+        getExerciseData($('#todayDrills').val());
+    });
+
+    $("#switch").change(function () {
+
+        if ($(this).prop("checked") == true) {
+            //alert(0);
+            $("#timeformat").val(0);
+            $("#printtimeformat").val(0);
+        } else {
+            $("#timeformat").val(1);
+            $("#printtimeformat").val(1);
+            //alert(1);
+        }
+        getExerciseData(_todaydrill);
+    });
+
+    $('.date').each(function (i, obj) {
+        var datePicker = $(this).closest("tr").find(".timepicker");
+        if ($(this).val().length) {
+            datePicker.attr('required', true);
+        } else {
+            datePicker.attr('required', false);
+        }
+    });
+
+    $(".editDrills").click(function () {
+        $(".addNewDrill").show();
+        $(".removeNewDrill").show();
+        $(this).toggleClass('updateDrills');
+        if ($(this).hasClass("updateDrills")) {
+            $(".editMode").show();
+            $(".readonly").hide();
+            $(".edCancel").show();
+            $(this).text(function (i, v) {
+                return v === 'Edit Schedule' ? 'Save' : 'Edit Schedule';
+            })
+            return false;
+        } else {
+            var form = document.getElementById("frmExe");
+            form.submit();
+        }
+    });
+
+    $(".edCancel").click(function () {
+        $(".editMode").hide();
+        $(".edCancel").hide();
+        $(".readonly").show();
+        $(".editDrills").text("Edit Schedule");
+        $(".editDrills").removeClass("updateDrills");
+        $(".removeNewDrill").hide();
+        $(".addNewDrill").hide();
+    });
+
+    var quarterJosn = [];
+    quarterJosn.push({ "quarter": 1, "startDate": "1", "endDate": 31, "startMonth": 0, "endMonth": 2 }); // jan feb march
+    quarterJosn.push({ "quarter": 2, "startDate": "1", "endDate": 30, "startMonth": 3, "endMonth": 5 }); // april may june
+    quarterJosn.push({ "quarter": 3, "startDate": "1", "endDate": 30, "startMonth": 6, "endMonth": 8 }); // july Aug sep
+    quarterJosn.push({ "quarter": 4, "startDate": "1", "endDate": 31, "startMonth": 9, "endMonth": 11 }); // oct nov December
+
+    initializeDatePicker();
+
+    function initializeDatePicker() {
+        $('.date').each(function () {
+            var quarter = parseInt($(this).closest('tr').attr('quarterno'));
+            var year = $("#Year").val();
+            var resultQuarter = $.grep(quarterJosn, function (n, i) {
+                return n.quarter === quarter;
+            });
+            if (resultQuarter.length > 0) {
+
+                var mindate = new Date(year, resultQuarter[0].startMonth, 1);
+                var maxdate = new Date(year, resultQuarter[0].endMonth, resultQuarter[0].endDate);
+                $(this).datepicker({
+                    changeYear: false,
+                    minDate: mindate,
+                    maxDate: maxdate,
+                    dateFormat: 'M d, yy'
+                });
+            }
+        });
+    }
+
+    var input = $('.timepicker');
+    input.clockpicker({
+        autoclose: false,
+        twelvehour: true,
+        donetext: "Done",
+        afterDone: function () {
+        }
+    });
+
+    function Openpoup(cntrl, i, j, ii, quarterNo, iseditable) {
+        debugger
+        var currentqrt = '@Convert.ToInt32((DateTime.Now.Month + 2) / 3)';
+        if (_year > '@DateTime.Now.Year') {
+            swalalert('You cannot document a future fire drill, please select the correct year.');
+            return false;
+        }
+        else if (_year == '@DateTime.Now.Year' && quarterNo > currentqrt) {
+            swalalert('You cannot document a future fire drill, please select the correct quarter.');
+            return false;
+        }
+        else {
+            $('.loader-circle').show();
+            if (iseditable) {
+                var res = checkDatetime(cntrl, 2);
+                if (!res) {
+                    return false;
+                }
+            }
+            var selectedcntrlId = $(cntrl).attr('buildingshift');  //'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].TExerciseId';
+            var tExercise = GetTExercisevalue(i, j, ii);
+            loadQuestionnaire(tExercise, quarterNo, iseditable, selectedcntrlId);
+        }
+    }
+
+    function GetTExercisevalue(i, j, ii) {
+
+        var tExercises = [];
+        debugger;
+        var tExerciseId = $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].TExerciseId'][type=hidden]`).val();
+        var date = $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Date'][type=text]`).val();
+        var startTime = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].StartTime' + "'][type=text]").val();
+        var announced = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].Announced' + "'][type=hidden]").val();
+        var status = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].Status' + "'][type=hidden]").val();
+        var drillType = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].DrillType' + "'][type=hidden]").val();
+        var buildingId = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].BuildingId' + "'][type=hidden]").val();
+        var locationGroupId = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].LocationGroupId' + "'][type=hidden]").val();
+        var shiftId = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].ShiftId' + "'][type=hidden]").val();
+        var location = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].NearBy' + "'][type=text]").val();
+        var name = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].Name' + "'][type=hidden]").val();
+        var isadditional = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].IsAdditional' + "'][type=hidden]").val();
+        var IsAudible = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].IsAudible' + "'][type=hidden]").val();
+        var dateTimespan = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].DateTimeSpan' + "'][type=hidden]").val();
+        var quarterNo = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].QuarterNo' + "'][type=hidden]").val();
+        var year = $("input[name='" + 'Buildings[' + i + '].Shifts[' + j + '].Exercises[' + ii + '].Year' + "'][type=hidden]").val();
+
+        tExercises = {
+            TExerciseId: parseInt(tExerciseId),
+            Date: date,
+            StartTime: startTime,
+            Announced: announced,
+            Status: status,
+            //QuarterId: quarterId,
+            DrillType: drillType,
+            BuildingId: buildingId,
+            LocationGroupId: locationGroupId,
+            ShiftId: shiftId,
+            NearBy: location,
+            Name: name,
+            Year: year,
+            QuarterNo: quarterNo,
+            IsAdditional: isadditional,
+            IsAudible: IsAudible,
+            DateTimeSpan: dateTimespan
+        }
+        return tExercises;
+    }
+
+    function loadQuestionnaire(texercise, quarterNo, iseditable, selectedcntrlId) {
+
+        $("body").addClass("loading");
+        $('#loadpartialquestionnaire').empty();
+        var year = $("#Year").val();
+        var buildingtypeId = $("#buildingTypes").val();
+
+        $.ajax({
+            url: CRxUrls.rounds_gettexercisequestionnaires + "?quarterNo=" + quarterNo + "&year=" + year + "&buildingtypeId=" + buildingtypeId + "&iseditable=" + iseditable,
+            type: "POST",
+            data: { tExercise: texercise, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+            dataType: "html",
+            global: true,
+            success: function (data) {
+                $('#Firedrillquestionnaire').modal('show');
+                $('#loadpartialquestionnaire').html(data);
+                $('#loadpartialquestionnaire').fadeIn('fast');
+                $("body").removeClass("loading");
+                $('.loader-circle').hide();
+                if (iseditable) {
+                    $("#btnExercisequesSavedone").show();
+                    $("#btnExercisequesSaveIncomplete").show();
+                    $("#uploaddiv").show();
+                    $("#divsignature .firedrillfilediv:last").show();
+                    $("#divsignature span:last").show();
+                    $("#Critiquedivsignature .Critiquefiredrillfilediv:last").show();
+                    $("#Critiquedivsignature span:last").show();
+                    $("#Educationdivsignature .firedrillfilediv:last").show();
+                    $("#Educationdivsignature span:last").show();
+                    $("#hdnselcntrlId").val(selectedcntrlId);
+                }
+                else {
+                    $("#btnExercisequesSavedone").hide();
+                    $("#btnExercisequesSaveIncomplete").hide();
+                    $("#uploaddiv").hide();
+                    $(".deleteMeetingClose").hide();
+                    $("#divsignature .firedrillfilediv:last").hide();
+                    $("#divsignature span:last").hide();
+                    $("#Critiquedivsignature .Critiquefiredrillfilediv:last").hide();
+                    $("#Critiquedivsignature span:last").hide();
+                    $("#Educationdivsignature .Educationfiredrillfilediv:last").hide();
+                    $("#Educationdivsignature span:last").hide();
+                }
+
+                var texerciseId = texercise.TExerciseId;
+                if (texerciseId == null) {
+                    texerciseId = 0;
+                }
+                loadtexerciseFiles(texerciseId);
+            }
+        });
+    }
+
+    function loadtexerciseFiles(texerciseId) {
+
+        var url = CRxUrls.rounds_loadtexercise;
+        $.get(url + '?exerciseId=' + texerciseId, function (data) {
+            $('#loadchildpartial').html(data);
+            $('#loadchildpartial').fadeIn('fast');
+        });
+    }
+
+    $(".delete_fileFrill").click(function () {
+        var delCtr = $(this);
+        swal({
+            title: "Message",
+            type: 'info',
+            text: "Are you sure you want to delete Fire Drill",
+            confirmButtonColor: "#DD6B55",
+            showCancelButton: true,
+            confirmButtonText: "OK",
+            closeOnConfirm: true
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $(".loadingModal").show();
+                    var texerciseId = delCtr.attr("id");                    //
+                    var buildingshift = delCtr.attr("buildingshift");
+                    var array = buildingshift.split('_');
+                    var i = array[0];
+                    var j = array[1];
+                    var ii = array[2];
+                    if (texerciseId > 0) {
+                        $.ajax({
+                            url: CRxUrls.rounds_removeexercse + "?tExerciseId=" + texerciseId,
+                            type: "GET",
+                            dataType: "JSON",
+                            success: function (data) {
+                                if (data.Result) {
+                                    $("#hdnIsEdit").val("1");
+                                    ClearInputFields(i, j, ii);
+                                    deleteRow("viewfiredrill_" + texerciseId);
+                                    $(".loadingModal").hide();
+                                    getExerciseData($('#todayDrills').val());
+                                }
+                            }
+                        });
+                    } else {
+                        ClearInputFields(i, j, ii);
+                        $(".loadingModal").hide();
+                    }
+                }
+            });
+    });
+
+    function ClearInputFields(i, j, ii) {
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].TExerciseId'][type=hidden]`).val(0);
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Date'][type=text]`).val("");
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].StartTime'][type=text]`).val("");
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Announced'][type=hidden]`).val(0);
+        $(`input[tempname='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Announced'][type=checkbox]`).prop('checked', false);
+        $(`input[tempname='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Status'][type=button]`).val(0);
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].Status'][type=hidden]`).val(0);
+        $(`input[name='Buildings[${i}].Shifts[${j}].Exercises[${ii}].NearBy'][type=text]`).val("");
+    }
+
+    function deleteRow(rowId) {
+        var row = document.getElementById(rowId);
+        if (row != null) {
+            row.parentNode.removeChild(row);
+        }
+    }
+
+    $(".addNewDrill").click(function () {
+        debugger
+        var ctr = $(this);
+        var buildingId = $(this).closest("tr").attr("buildid");
+        var shiftId = $(this).closest("tr").attr("shiftId");
+        var buildingNo = $(this).data("buildingno");
+        var _shiftNo = $(this).data("shiftno");
+        var type = $(this).data("type");
+        var no = $(`.building${buildingId}_type${type}_shift${shiftId}`).length;
+        var shiftRowCount = $(`.building${buildingId}_shift${shiftId}`).length;
+        var lastdrillname = $(`.building${buildingId}_type${type}_shift${shiftId}`).last().attr("id");
+        var name = 'Normal';
+        if (type === 0) {
+            name = name + " " + no;
+        } else {
+            name = "ILSM " + no;
+        }
+        var fname = name.split(' ')[0];
+        no = name.split(' ')[1];
+
+        var lastdrill_fname = lastdrillname.split(' ')[0];
+        var lastdrillno = lastdrillname.split(' ')[1];
+
+        if (lastdrillname == name) {
+            no = parseInt(no) + 1;
+            name = fname + " " + no;
+        }
+        if (parseInt(lastdrillno) > parseInt(no)) {
+            no = parseInt(lastdrillno) + 1;
+            name = fname + " " + no;
+        }
+
+        var currentCtr = $(this).closest(`tr.building${buildingId}_type${type}_shift${shiftId}`);
+        var rowSpan = ctr.closest("table").find(`tr.building${buildingId}_type0_shift${shiftId}`).find("td[rowspan]").attr("rowspan");
+        var mode = $('.update_bt').text();
+        var _buildingIds = $("#BuildingId").val() != null ? $("#BuildingId").val() : 0;
+        var _locationGroupIds = $("#LocationGroupId").val() != null ? $("#LocationGroupId").val() : 0;
+        var drillmode = $('input[name="groupbyfilter"]:checked').val(); // 0 by buildings && 1 by locationGroups
+        if (mode != "CancelEdit Schedule") {
+            $(".addNewDrill").addClass('disabled');
+            $.ajax({
+                url: CRxUrls.rounds_addNewDrill + '?buildingIds=' + _buildingIds + "&locationGroupIds=" + _locationGroupIds + "&mode=" + drillmode + '&firedrilllocationId=' + buildingId + '&type=' + type + '&year=' + _year + '&shiftId=' + shiftId + '&shiftNo=' + _shiftNo + '&name=' + name + '&buildingNo=' + buildingNo + '&texerciseCount=' + shiftRowCount,
+                //data: { buildingId: buildingId, type: type, year: _year, shiftId: shiftId, shiftNo: _shiftNo, name: name, buildingNo: buildingNo, texerciseCount: shiftRowCount, buildingIds: _buildingIds },
+                type: 'GET',
+                success: function (data) {
+                    $(`tr.building${buildingId}_type${type}_shift${shiftId}`).last().after(data);
+                    ctr.closest("table").find(`tr.building${buildingId}_type0_shift${shiftId}`).find("td[rowspan]")
+                        .attr('rowspan', Number(rowSpan) + 1);
+
+                    $(".editMode").show();
+                    initializeDatePicker();
+                    var input = $('.timepicker');
+                    input.clockpicker({
+                        autoclose: false,
+                        twelvehour: true,
+                        donetext: "Done",
+                        afterDone: function () {
+                        }
+                    });
+                    $(".addNewDrill").removeClass('disabled');
+                }
+            });
+        }
+    });
+
+    $('#fire_drill_table tbody').on('click', '.removeNewDrill', function (e) {
+    /*$(".removeNewDrill").click(function () {*/
+        var ctr = $(this);
+        var buildingId = $(this).closest("tr").attr("buildid");
+        var _shiftId = $(this).closest("tr").attr("shiftId");
+        var drilltype = $(this).attr("rel");
+        var type = $(this).data("type");
+        $.ajax({
+            url: CRxUrls.rounds_deleteRowDrill,
+            data: { buildingId: buildingId, year: _year, shiftId: _shiftId, name: drilltype },
+            type: 'GET',
+            success: function (data) {
+                if (data) {
+                    swalalert('Firedrill deleted successfully!');
+                    getExerciseData($('#todayDrills').val());
+                }
+            }
+        });
+    });
+
+    const convertStringToBoolean = (value) => value ? String(value).toLowerCase() === 'true' : false;
+    var isPlanFireDrillsForMe = '@isPlanFireDrillsForMe';
+    const isEnablePlanFireDrillsForMe = convertStringToBoolean(isPlanFireDrillsForMe);
+    if (!isEnablePlanFireDrillsForMe) {
+
+        $("#div_planfiredrillforme").addClass("disable");
+    }
+
+
+    $('#planfiredrillforme').on('click', function () {
+        if (isEnablePlanFireDrillsForMe) {
+            $('#loaderspin').addClass("loader-circle");
+            var _buildingIds = $("#BuildingId").val() != null ? $("#BuildingId").val() : 0;
+            var _locationGroupIds = $("#LocationGroupId").val() != null ? $("#LocationGroupId").val() : 0;
+            var drillmode = $('input[name="groupbyfilter"]:checked').val(); // 0 by buildings && 1 by locationGroups
+            $.get(CRxUrls.rounds_planFireDrill + '?buildingIds=' + _buildingIds + "&locationGroupIds=" + _locationGroupIds + "&mode=" + drillmode + '&year=' + _year, function (data) {
+                if (data.success === "") {
+                    swalalert('Your future fire drills have been planned successfully.');
+                    getExerciseData($('#todayDrills').val());
+                }
+                if (data.success === 'Error') {
+                    swalalert('Add fire drill first manually!');
+                }
+                $('#loaderspin').removeClass("loader-circle");
+            });
+            return false;
+        } else {
+            return false;
+        }
+    });
+
+    if (buildingCounts > 0) {
+        $(".editDrills").show();
+    } else {
+        $(".editDrills").hide();
+    }
+
+    function tristate1(control) {
+        debugger
+        var res = checkDatetime(control, 1);
+        if (res) {
+            tristate(control, '0', '1');
+        }
+    }
+
+    function checkDatetime(control, val) {
+
+        const row = $(control).closest('tr');
+        const td = row.find('td:first, td:nth-child(2), td:nth-child(4)');
+        const date = td.find("input:not([type='hidden'])")[0].value;
+        const time = td.find("input:not([type='hidden'])")[1].value;
+        const status = td.find("input:not([type='hidden'])")[2].value;
+        if (date === "") {
+            swalalert("Please select date.");
+            return false;
+        }
+        if (status === "1") {
+            if (time === "") {
+                swalalert("Please select time.");
+                return false;
+            }
+        }
+        if (time === "") {
+            swalalert("Please select time.");
+            return false;
+        }
+        if (val === 1) {
+            let currentDate = new Date();
+            const year = currentDate.getFullYear();
+            currentDate = currentDate.toISOString().slice(0, 10);
+            let dateToCompare = new Date(date + ' ' + convertTo24Hour(time.toLowerCase()));
+            dateToCompare = dateToCompare.toISOString().slice(0, 10);
+            let compareDate = dateToCompare.toString("dd-MM-yy");
+            compareDate = compareDate.replace('2001', year)
+            if (compareDate > currentDate) {
+                AlertWarningMsg("Future fire drill can not be done.", "Message");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function tristate(control, value1, value2) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value1;
+                break;
+        }
+        SetCheckValue(control);
+    }
+
+    function SetCheckValue(control) {
+        var controlId = $(control).attr("tempName");
+        $(`input[name='${controlId}'][type=hidden]`).val(control.value);
+    }
+
+    $('.AnnouncedChk').change(function () {
+        const controlId = $(this).attr("tempname");
+        if ($(this).is(":checked")) {
+            $(`input[name='${controlId}'][type=hidden]`).val(true);
+            $(`input[tempname='${controlId}'][type=checkbox]`).val(true);
+        } else {
+            $(`input[name='${controlId}'][type=hidden]`).val(false);
+            $(`input[tempname='${controlId}'][type=checkbox]`).val(false);
+        }
+    });
+
+    function convertTo24Hour(time) {
+        var hours = parseInt(time.substr(0, 2));
+        if (time.indexOf('am') !== -1 && hours === 12) {
+            time = time.replace('12', '0');
+        }
+        if (time.indexOf('pm') != -1 && hours < 12) {
+            time = time.replace(hours, (hours + 12));
+        }
+        return time.replace(/(am|pm)/, '');
+    }
+
+</script>
+<style>
+    .chkTodayDrill {
+        display: inline-flex;
+        float: left;
+        padding-top: 8px;
+        padding-left: 15px;
+    }
+
+    .ui-tabs .ui-tabs-panel {
+        overflow: hidden;
+    }
+
+    .modal-backdrop {
+        z-index: 9 !important;
+    }
+
+    .main-header {
+        z-index: 9 !important;
+    }
+
+    .modal {
+        z-index: 999 !important;
+    }
+
+    .ui-widget.ui-widget-content {
+        z-index: 99999 !important;
+    }
+
+    .date {
+        width: 100%;
+        float: left;
+        padding: 4px;
+        margin-right: 4px;
+    }
+
+
+    .timepicker {
+        width: 100%;
+        float: left;
+        padding: 4px;
+        margin-left: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .uploadEx_file {
+        border-radius: 8px;
+        padding: 12px 6px 4px 8px;
+        font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+        color: #7f7f7f;
+        margin-top: 2px;
+        background: url("../dist/Images/Icons/dashboard_doc_icon.png") 10px center no-repeat;
+        width: 50px;
+    }
+
+    .btn_Upload {
+        background: url(/dist/Images/Icons/uploadNew.png) !important;
+        width: 105px !important;
+        border: none;
+        height: 35px;
+        display: inline-block;
+        background-size: 105px 35px !important;
+        padding-top: 0px;
+        image-rendering: pixelated;
+        cursor: pointer;
+    }
+
+        .btn_Upload:hover {
+            background: url(/dist/Images/Icons/uploadNew-hover.png) !important;
+        }
+
+    .uploadEx_file input[type="button"] {
+        -webkit-appearance: none;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        width: 50px;
+    }
+
+    .uploadEx_file input[type="file"] {
+        -webkit-appearance: none;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        width: 30px;
+    }
+
+    .uploadques_file {
+        border-radius: 8px;
+        padding: 4px 6px 4px 8px;
+        font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+        color: #7f7f7f;
+        margin-top: 2px;
+        background: url("dist/Images/Icons/tick_questionnaires.png") 10px center no-repeat;
+        width: 50px;
+    }
+
+        .uploadques_file input[type="button"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 50px;
+        }
+
+        .uploadques_file input[type="file"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 30px;
+        }
+
+    .uploaddocs_file {
+        border-radius: 8px;
+        padding: 4px 6px 4px 8px;
+        font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+        color: #7f7f7f;
+        margin-top: 2px;
+        background: url("/Images/Icons/tick_doc.png") 10px center no-repeat;
+        width: 50px;
+    }
+
+        .uploaddocs_file input[type="button"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 50px;
+        }
+
+        .uploaddocs_file input[type="file"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 30px;
+        }
+
+    .uploadquesdocs_file {
+        border-radius: 8px;
+        padding: 4px 6px 4px 8px;
+        font: normal 14px Myriad Pro, Verdana, Geneva, sans-serif;
+        color: #7f7f7f;
+        margin-top: 2px;
+        background: url("dist/Images/Icons/tick_doc_questionnaires.png") 10px center no-repeat;
+        width: 50px;
+    }
+
+        .uploadquesdocs_file input[type="button"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 50px;
+        }
+
+        .uploadquesdocs_file input[type="file"] {
+            -webkit-appearance: none;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 30px;
+        }
+
+    #Firedrillquestionnaire {
+        overflow: scroll;
+    }
+
+    .hide_sign {
+        pointer-events: none;
+    }
+
+    .loader-circle {
+        /*display: none;*/
+        position: fixed;
+        z-index: 9999999999999;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background: url(/dist/Images/loader.gif), radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 20%, rgba(255,255,255,0) 153%);
+    }
+
+    #signAndSave .modal-dialog {
+        /*height: 70%;*/
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 15%;
+    }
+
+    .switchToggle input[type=checkbox] {
+        height: 0;
+        width: 0;
+        visibility: hidden;
+        position: absolute;
+    }
+
+    .switchToggle label {
+        cursor: pointer;
+        text-indent: -9999px;
+        width: 50px;
+        max-width: 50px;
+        height: 22px;
+        background: #8dbc3f;
+        display: block;
+        border-radius: 100px;
+        position: relative;
+    }
+
+        .switchToggle label:after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 90px;
+            transition: 0.3s;
+        }
+
+    .switchToggle input:checked + label, .switchToggle input:checked + input + label {
+        background: #38779c;
+    }
+
+    .switchToggle input + label:before, .switchToggle input + input + label:before {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 35px;
+        width: 18px;
+        height: 18px;
+        border-radius: 90px;
+        transition: 0.3s;
+        text-indent: 0;
+        color: #fff;
+    }
+
+    .switchToggle input:checked + label:before, .switchToggle input:checked + input + label:before {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 10px;
+        width: 26px;
+        height: 26px;
+        border-radius: 90px;
+        transition: 0.3s;
+        text-indent: 0;
+        color: #fff;
+    }
+
+    .switchToggle input:checked + label:after, .switchToggle input:checked + input + label:after {
+        left: calc(100% - 2px);
+        transform: translateX(-100%);
+    }
+
+    .switchToggle label:active:after {
+        width: 60px;
+    }
+
+    .toggle-switchArea {
+        margin: 10px 0 10px 0;
+    }
+
+    .outerDivFull {
+        display: flex;
+        margin-bottom: -16px;
+        padding-bottom: 4px;
+    }
+
+    .switchToggle {
+        margin: 0 6px;
+    }
+
+    .outerDivFull span {
+        font-weight: 600;
+        font-size: 13px;
+        padding-top: 3px;
+    }
+
+    .date {
+        border: #ccc solid 1px;
+    }
+
+    .firedrill-minwidth .datepicker, .firedrill-minwidth .hasDatepicker {
+        background-image: none;
+    }
+
+
+
+    .firedril-tabs {
+        display: flex;
+        align-items: center;
+    }
+
+    .dash_btnfilter .button1 {
+        min-height: 32px;
+    }
+</style>
+<style>
+    .firedrilldocstatus {
+        border: 1px solid #38769a;
+        border-radius: 20px;
+        padding: 6px 15px 6px 26px;
+        font-size: 12px;
+        font-weight: 600;
+        background-repeat: no-repeat !important;
+        background-position: 5px !important;
+        background-size: 16px !important;
+    }
+
+        .firedrilldocstatus[value="0"] {
+            background: url(/dist/Images/Icons/past_due_status_icon.png);
+            border: #ed1c24 solid 1px;
+        }
+
+        .firedrilldocstatus[value="-1"] {
+            background: url(/dist/Images/Icons/due_within_status_icon.png);
+            border: #fadd64 solid 1px;
+        }
+
+        .firedrilldocstatus[value="1"] {
+            background: url(/dist/Images/Icons/CompletedEp.png);
+            border: #008000 solid 1px;
+        }
+
+        .firedrilldocstatus[value="2"] {
+            background: url(/dist/Images/Icons/inprogress_icon.png);
+            border: #33479e solid 1px;
+        }
+</style>

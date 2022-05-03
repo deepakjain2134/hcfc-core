@@ -1,0 +1,77 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+<table id="myTableFE" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TagNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeviceNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Assets.Name)
+            </th>
+            <th>Make</th>
+            <th>Result</th>
+            <th>
+                Status
+            </th>
+            <th>
+                Inspector
+            </th>
+            <th>@Localizer["InspectionDateTime"]  </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+        {
+        <tr class="assetsPopUp" id="@item.FloorAssetsId">
+            <td>
+                @Html.DisplayFor(modelItem => item.SerialNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DeviceNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Assets.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Make.ManufactureName)
+            </td>
+            @if (item.TInspectionActivity.Count > 0)
+            {
+                var currentActivity = item.TInspectionActivity.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                <td>@currentActivity.InspResult.ResultName</td>
+                <td>@currentActivity.InspStatus.StatusName</td>
+                <td>
+                    @currentActivity.UserProfile.FullName
+                </td>
+                <td>
+                    @currentActivity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime()
+                </td>
+            }
+            else
+            {
+
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            }
+        </tr>
+        }
+    </tbody>
+</table>
+<script>
+    var datatable = $('#myTableFE').DataTable({
+        //"searching": false,
+        "lengthChange": false,
+        "pageLength": 20,
+        "bPaginate": $('#myTableFE tbody tr').length > 20,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            "emptyTable": "No data available in table"
+        }
+    });
+</script>

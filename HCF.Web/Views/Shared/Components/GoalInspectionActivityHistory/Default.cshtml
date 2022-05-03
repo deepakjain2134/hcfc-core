@@ -1,0 +1,418 @@
+﻿@model HCF.Web.ViewModels.InspectionActivityHistoryViewModel
+
+<div class="ep_heading">
+    @if (ViewBag.EPDetailId > 0)
+    {
+        <span>@Model.EPDetails.StandardEp</span>
+    }
+</div>
+<div class="document-sublist" style="padding-top:2px;">
+    <ul class="ulassets" id="tree3">
+        <div class="inspection-reportsBox">
+            @foreach (var files in Model.activity.Where(y => y.ActivityType == 3).OrderBy(x => x.DtEffectiveDate))
+            {
+                if (files.InspectionEPDocs != null)
+                {
+                    <li style="overflow:hidden;padding-bottom: 15px;">
+                        <a href='@Url.Action("ActivityHistory", "assets", new { activityId = files.ActivityId })'>
+                            <img src="@commonModelFactory.UploadDocTypeImagePath(files.InspectionEPDocs.UploadDocTypeId,files.InspectionEPDocs.DocTypeId)" alt="" />
+                            <div class="divleft">
+                                <h5>
+                                    <span class="doc-fileurl" title="@files.InspectionEPDocs.DocumentName">@files.InspectionEPDocs.DocumentName</span>
+                                    <span class="doc-fileName">@files.InspectionEPDocs.DocumentType.Name</span>
+                                    <span>
+                                        <strong>Review Date:</strong> @(files.DtEffectiveDate != null ? files.DtEffectiveDate.Value.ToFormatDate() : files.CreatedDate.Value.ToFormatDate())
+                                    </span>
+                                </h5>
+                                <h4 class="file-uploadby"><span>Uploaded By: </span>@files.UserProfile.FullName</h4>
+                            </div>
+                        </a>
+                    </li>
+                }
+            }
+
+        </div>
+
+        @{
+            var floors = (from p in Model.activity.Where(x => x.ActivityType == 2 && (x.TFloorAssets != null && x.TFloorAssets.IsDeleted == false))
+                          select new
+                          {
+                              floorId = (p.TFloorAssets.FloorId.HasValue) ? p.TFloorAssets.Floor.FloorId : 0,
+                              floorName = (p.TFloorAssets.FloorId.HasValue) ? p.TFloorAssets.Floor.FloorName : "",
+                              buildingName = (p.TFloorAssets.FloorId.HasValue) ? p.TFloorAssets.Floor.Building.BuildingName : "",
+                              buildingId = (p.TFloorAssets.FloorId.HasValue) ? p.TFloorAssets.Floor.Building.BuildingId : 0,
+                              floorAssetId = p.TFloorAssets.FloorAssetsId,
+                              inspectionGroupId = p.TFloorAssets.InspectionGroupId,
+                              deviceNo = p.TFloorAssets.DeviceNo,
+                              status = p.Status,
+                              assetNo = p.TFloorAssets.AssetNo,
+                              date = p.ActivityInspectionDate,
+                              name = p.TFloorAssets.Name,
+                              ActivityId = p.ActivityId
+
+                          }).ToList().OrderBy(x => x.buildingName);
+
+
+            var consolidatedChildren = from c in floors
+                                       group c by new
+                                       {
+                                           c.buildingId,
+                                           c.buildingName
+                                       }
+                                           into gcs
+                                       select new
+                                       {
+                                           buildingId = gcs.Key.buildingId,
+                                           buildingName = gcs.Key.buildingName,
+                                           floor = gcs.ToList(),
+                                       };
+        }
+
+        @if (consolidatedChildren.Any())
+        {
+            foreach (var buildings in consolidatedChildren.OrderByDescending(x => x.buildingName))
+            {
+                <li id="@($"buildingId{buildings.buildingId}")" class="buiildingLi">
+                    @if (buildings.buildingId > 0)
+                    {
+                        <h4 class="titleBuilding">
+                            @buildings.buildingName
+                        </h4>
+                    }
+                    else
+                    {
+                        <h4 class="titleBuilding">
+                            Assets Without Floor Plan
+                        </h4>
+                    }
+                    <ul class="inner-level-sidebar">
+                        @foreach (var floor in buildings.floor.Select(m => new { m.floorId, m.floorName }).Distinct())
+                        {
+                            <li id="@($"floor{floor.floorId}")" class="floorLi">
+                                <h4 class="titleFloor">@($"{(!string.IsNullOrEmpty(floor.floorName) ? floor.floorName : "Assets")}")</h4>
+                                <ul class="list-boxul">
+                                    @foreach (var floorassets in floors.Where(m => m.floorId == floor.floorId && m.buildingId == buildings.buildingId))
+                                    {
+                                        <li class="assetLi" status="@commonModelFactory.GetAssetsTranStatus(Convert.ToInt32(floorassets.status),DateTime.Now)">
+                                            <div class="asset_list @(ViewBag.FloorAssetId == floorassets.floorAssetId && Convert.ToInt32(floorassets.inspectionGroupId) > 0 ? " active" : Convert.ToInt32(floorassets.inspectionGroupId) > 0 ? "" : "asset_list_disable")" id="@floorassets.floorAssetId"
+                                                 inspectiongroupid="@floorassets.inspectionGroupId">
+                                                <div class="ephistory-left">
+                                                    <div class="@commonModelFactory.GetAssetsTranStatus(Convert.ToInt32(floorassets.status),DateTime.Now)"></div>
+                                                    <div class="assetsTitle" title="@Localizer["AssetNo"]">
+                                                        @*  @Html.Encode(floorassets.name)&nbsp;,*@
+                                                        @(!string.IsNullOrEmpty(floorassets.name) ? Html.Encode(floorassets.name) + " ," : "")
+                                                        <a href='@Url.Action("ActivityHistory", "Assets", new { activityId = floorassets.ActivityId })' title="@Localizer["AssetNo"]">
+                                                            <span>@Html.Encode(floorassets.assetNo)</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="dateDiv" title="InspectionDate" style="padding-left:25px;">
+                                                    @if (floorassets.date.HasValue && floorassets.status == 1)
+                                                    {
+                                                        @floorassets.date.Value.ToClientTime().ToFormatDate()
+                                                    }
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+<style>
+   
+
+    .document-sublist i.indicator {
+        color: #333;
+        padding: 8px 0 8px 4px;
+    }
+
+    h4.file-uploadby {
+        padding: 8px;
+    }
+
+    .document-sublist .inner-level-sidebar i.indicator {
+        color: #6b6b6b;
+        padding: 8px 0 8px 4px;
+        font-size: 12px;
+    }
+
+    .document-sublist i.indicator.fa-chevron-right {
+        padding: 9px 0 9px 4px;
+    }
+
+    .file-uploadby {
+        font-size: 12px !important;
+        color: #333;
+        font-weight: bold !important;
+        background-color: #f1f1f1;
+        display: block;
+        padding: 4px 4px 2px 2px;
+        border-top: 1px solid #ccc;
+        margin-top: 6px !important;
+    }
+
+    .document-sublist .list-boxul {
+        padding-bottom: 12px;
+    }
+
+    .document-sublist {
+        overflow: auto;
+        height: 85%;
+        padding: 12px 0;
+    }
+
+        .document-sublist .titleBuilding {
+            background: #e1e1e1;
+            text-transform: capitalize;
+            box-shadow: 0px 3px 4px #ccc;
+            font-weight: 700;
+            font-size: 14px;
+            color: #333;
+            padding: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 8px;
+        }
+
+    .asset-list-head {
+        font-size: 13px;
+        color: #333;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+        .asset-list-head a {
+            color: #3c8dbc;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #ececec;
+        }
+
+
+   
+
+    .assetLegends {
+        display: block;
+        overflow: hidden;
+        clear: both;
+        padding: 6px 0;
+    }
+
+        .assetLegends label {
+            height: 15px;
+        }
+
+   
+
+    ul.ulassets h4 {
+        cursor: pointer;
+    }
+
+    .assetsInspection ul {
+        padding-top: 2px;
+    }
+
+    .ulassets li {
+        clear: both;
+        width: 100%;
+    }
+
+    .indicator {
+        float: left;
+    }
+
+    .tree, .tree ul {
+        margin: 0;
+        padding: 0;
+        list-style: none
+    }
+
+        .tree ul {
+            /*margin-left: 1em;*/
+            position: relative
+        }
+
+            .tree ul:before {
+                /*content: "";*/
+                display: block;
+                width: 0;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                border-left: 1px solid
+            }
+
+        .tree li {
+            margin: 0;
+            /*padding: 0 1em;*/
+            line-height: 2em;
+            color: #369;
+            font-weight: 700;
+            position: relative
+        }
+
+        .tree ul li:before {
+            /*content: "";*/
+            display: block;
+            width: 10px;
+            height: 0;
+            border-top: 1px solid;
+            margin-top: -1px;
+            position: absolute;
+            top: 1em;
+            left: 0
+        }
+
+        .tree ul li:last-child:before {
+            background: #fff;
+            height: auto;
+            top: 1em;
+            bottom: 0
+        }
+
+    .indicator {
+        margin-right: 5px;
+    }
+
+    .tree li a {
+        text-decoration: none;
+        color: #369;
+    }
+
+    .tree li button, .tree li button:active, .tree li button:focus {
+        text-decoration: none;
+        color: #369;
+        border: none;
+        background: transparent;
+        margin: 0px 0px 0px 0px;
+        padding: 0px 0px 0px 0px;
+        outline: 0;
+    }
+</style>
+
+<script>
+    $(".legdev").click(function () {
+        if ($(this).hasClass("activelegend")) {
+            $(this).removeClass("activelegend");
+            $(this).find("span").hide();
+            $("li.buiildingLi").removeClass("hide")
+            $("li.floorLi").removeClass("hide");
+            $("li.assetLi").removeClass("hide");
+        } else {
+            $(".legdev span").hide();
+            $(this).find("span").show();
+            $(".legdev").removeClass("activelegend");
+            $(this).addClass("activelegend");
+            var status = $(this).find("label").attr("class");
+
+            $("li.buiildingLi").addClass("hide")
+            $("li.floorLi").addClass("hide");
+            $("li.assetLi").addClass("hide");
+            $("li.buiildingLi").each(function (index) {
+                // debugger;
+                var currentBuilding = $(this);
+                currentBuilding.find("li.floorLi").each(function () {
+                    var currentFloor = $(this);
+                    var count = $(this).find("li.assetLi[status=" + status + "]").length;
+                    if (count > 0) {
+                        currentFloor.removeClass("hide");
+                    }
+                    currentFloor.find("li.assetLi[status=" + status + "]").removeClass("hide");
+                });
+                var countFloor = $(this).find("li.floorLi").length;
+                var countFloorHide = $(this).find("li.floorLi.hide").length;
+                if (countFloor != countFloorHide) {
+                    currentBuilding.removeClass("hide");
+                }
+            });
+
+            if ($("li.buiildingLi.hide").length == $("li.buiildingLi").length) {
+                swalalert("No assets found");
+            }
+        }
+
+    });
+
+
+    var activeFloorId = '@ViewBag.FloorId';
+    var activebuildingId = '@ViewBag.BuildingID';
+
+    $.fn.extend({
+        treed: function (o) {
+
+            var openedClass = 'fa-minus';
+            var closedClass = 'fa-plus';
+
+            if (typeof o != 'undefined') {
+                if (typeof o.openedClass != 'undefined') {
+                    openedClass = o.openedClass;
+                }
+                if (typeof o.closedClass != 'undefined') {
+                    closedClass = o.closedClass;
+                }
+            };
+
+            var tree = $(this);
+            tree.addClass("tree");
+            tree.find('li').has("ul").each(function () {
+                var branch = $(this);
+                if ("floor" + activeFloorId == $(this).attr("id")) {
+                    $(this).addClass("activetree");                 }
+                if ("buildingId" + activebuildingId == $(this).attr("id")) {
+                    $(this).addClass("activetree");
+                }
+                branch.prepend("<i class='indicator fa " + closedClass + "'></i>");
+                branch.addClass('branch');
+                branch.on('click', function (e) {
+                    if (this == e.target) {
+                        var icon = $(this).children('i:first');
+                        icon.toggleClass(openedClass + " " + closedClass);
+                        $(this).children().children().toggle();
+                    }
+                })
+                branch.children().children().toggle();
+            });
+
+            $(".activetree").children("ul").children("li").toggle();
+            $(".activetree").children('i:first').toggleClass(openedClass + " " + closedClass);;
+
+
+            $(".activetree").each(function () {
+                $(this).children('i:first').toggleClass(openedClass + " " + closedClass);;
+            });
+
+            tree.find('.branch .indicator').each(function () {
+                $(this).on('click', function () {
+                    $(this).closest('li').click();
+                });
+            });
+
+            tree.find('.branch>h4').each(function () {
+                $(this).on('click', function (e) {
+                    $(this).closest('li').click();
+                    e.preventDefault();
+                });
+            });
+
+            tree.find('.branch>button').each(function () {
+                $(this).on('click', function (e) {
+                    $(this).closest('li').click();
+                    e.preventDefault();
+                });
+            });
+        }
+    });
+    $('#tree3').treed({
+            openedClass: 'fa-chevron-down',
+            closedClass: 'fa-chevron-right'
+    });
+
+</script>

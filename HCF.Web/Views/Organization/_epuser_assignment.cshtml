@@ -1,0 +1,38 @@
+﻿@model HCF.BDO.EPDetails
+
+@if (Model.EPUsers != null && Model.EPUsers.Where(x => x.IsActive).Any() && Model.EPUsers.Where(x => x.IsActive) != null)
+{
+    var countUser = Model.EPUsers.Where(x => x.IsCRxUser == false && x.IsActive).Distinct().Count();
+    var userId_CSV = string.Join(",", Model.EPUsers.Where(x => x.IsActive ).Distinct().Select(x => x.UserId));
+    var userName_CSV = string.Join(",", Model.EPUsers.Where(x => x.IsActive).Distinct().Select(x => x.FullName));
+    var users = Model.EPUsers.Where(x => x.IsCRxUser == false && x.IsActive).ToList();
+    var showCounts = 3;
+    var totalCount = countUser;
+    var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+    if (countUser > 1)
+    {
+        <div data-toggle="modal" data-target="#addEpAssigneeModel"  class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="@userId_CSV">
+            @if (totalCount > showCounts)
+            {
+                <a href="javascript:void(0);">@($"{usersText}{" + "}{totalCount - showCounts}{" More"}")</a>
+            }
+            else
+            {
+                <a href="javascript:void(0);">@($"{userName_CSV.Split(',').ToList().FirstOrDefault()}{" + "}{countUser - 1}{" More"}")</a>
+            }
+        </div>
+    }
+    else if (countUser > 0)
+    {
+        <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId"
+             data-userlist="@userId_CSV">
+            <a href="javascript:void(0);">@userName_CSV.Split(',').ToList().FirstOrDefault()</a>
+        </div>
+    }
+}
+else
+{
+    <div data-toggle="modal" data-target="#addEpAssigneeModel" class="addEpAssignee" title="Assign User" id="EPDetailId_@Model.EPDetailId" data-userlist="">
+        <a href="javascript:void(0);">Assign User</a>
+    </div>
+}

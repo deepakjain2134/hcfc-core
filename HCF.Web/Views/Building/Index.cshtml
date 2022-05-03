@@ -1,0 +1,726 @@
+﻿@model List<HCF.BDO.Buildings>
+@{
+    ViewBag.Title = "Fire Extinguisher";
+
+}
+
+@section pageHeader
+{
+    <section class="content-header">
+        <h1>
+            Building & Floors
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-3 col-xs-4 asset_list_view">
+            <div class="box box-primary route-assetsleft">
+                @await Component.InvokeAsync("FireExtinguisherAsset", new { mode = ViewBag.PageMode })
+            </div>
+        </div>
+        <div class="col-md-9 col-xs-8">
+            <div class="box box-primary">
+                <input type="hidden" name="sassetId" id="sassetId" />
+                <div class="col-lg-12 views" id="view1">
+                </div>
+                <div class="col-lg-12 views" id="view2" style="display:none">
+                    <p>Assets without floor (Inventory)</p>
+                    <div id="loadpartialAssetWithoutfloor">
+
+                    </div>
+                </div>
+                <div class="views" id="view3">
+                    <div class="">
+                        <div style="float:right">
+                            <a class="pull-right">
+                                <input type="button" name="btnInspectby" id="btnInspectby" class="button1" value="Inspect by Tag# or Stop# " style="float:right;margin: -1px 0 6px 4px;" />
+                            </a>
+                            <a class="assetBarCode button1" id="btnprintstop" value="0"><strong>Print Stop BarCode</strong></a>
+                            <a class="assetBarCode button1" id="btnprint" value="1"><strong>Print Asset BarCode</strong></a>
+                        </div>
+                        <div id="routeView">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="InspectbyTagNoorStopNo" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content" style="max-width: 50%; margin: 0px auto;">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span class="modelTitle">Search</span>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <h4 class="text-center">Please select one option</h4>
+
+                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                        <label style="float:left">Inspect by</label>
+                        <label class="btn active">
+                            @Html.RadioButton("inspectbyview", 1, true)@Html.Label("Tag#")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        <label class="btn">
+                            @Html.RadioButton("inspectbyview", 2)@Html.Label("Stop #")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                        </label>
+                        @if (ViewBag.OsName != null && ViewBag.OsName != "IOS")
+                        {
+                            <img src="~/dist/Images/Icons/scanner_icon.png" id="btnbarcode" style="text-align:left" />
+                        }
+                    </div>
+                    <div id="inspectbyview1">
+                        <input type="text" placeholder="Please enter Tag #" id="txtserialno" class="form-control" maxlength="100" />
+                    </div>
+                    <div id="inspectbyview2" style="display:none">
+                        <input type="text" placeholder="Please enter Stop #" id="txtstopno" class="form-control" maxlength="100" />
+                    </div>
+                    <section id="container" class="cam-container" style="width: 100% !important;display:none">
+                        <div class="controls">
+                            <fieldset class="reader-config-group"></fieldset>
+                        </div>
+                        <div id="interactive" class="viewport" style="padding: 26px 0 0 6px; border-style:ridge;"></div>
+                    </section>
+                    <br />
+                    <div class="text-right button_Div">
+                        <input type="button" value="Search" id="txtSearch" class="button1" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addNewAssets" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartialAddNew">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stopsinfo" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartialstopsinfo">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="extinguisherInsPopUp" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="searchAssetView" role="dialog">
+    <div id="loadpartialAssets">
+    </div>
+</div>
+
+<div class="modal fade" id="searchStopView" role="dialog">
+    <div id="loadpartialStops">
+    </div>
+</div>
+
+
+
+<script src='@Url.Content(string.Format("~/dist/Scripts/page_scripts/Route/routes.js?v={0}", DateTime.Now.Ticks))' type="text/javascript"></script>
+
+
+<script type="text/javascript" src="@Url.Content("~/dist/Scripts/quagga.js")"></script>
+<script>
+
+    $('body').on('click', '.routePrintBcode', function () {
+        var routeId = $(this).attr("id");
+        openBarCodePopUp(routeId,1);
+
+    });
+
+    $('body').on('click', '.reportAssets', function () {
+        var routeId = $(this).attr("routid");
+        var assetId = GetSelectedAssets();
+        openReportPage(routeId, assetId);
+    });
+
+
+    var openReportPage = function (routeId, assetId) {
+        var url = "@Url.Action("FERouteReports", "FireExtinguisher")";
+        location.href = url + "?assetId=" + assetId + "&routeId=" + routeId;
+    }
+
+    $(".assetBarCode").click(function () {
+        var value = $(this).attr('value');
+        openBarCodePopUp(0, value);
+    });
+
+    var openBarCodePopUp = function (routeId, type) {
+        var assetId = GetSelectedAssets();
+        if (assetId.length > 0) {
+            var url = CRxUrls.Assets_AssetsBarCodes;
+            window.open(url + "?assetId=" + assetId + "&routeId=" + routeId + "&type=" + type);
+        } else
+            infoAlert("select first asset from left side.");
+
+    }
+
+    $(document).ready(function () {
+        var assetId = GetSelectedAssets();
+        loadRoutes(assetId);
+        BindInspType(assetId);
+        //SelectCheckedView();
+        loadPageData();
+    });
+
+    function SelectCheckedView() {
+        //$('.views').hide();
+        //var checkedViewId = $('input[type="radio"][name="pageView"]:checked').val();
+        //$('#view' + checkedViewId).show();
+    }
+
+    $('input:checkbox[id^="cb"]').change(function () {
+        //SelectCheckedView();
+        loadPageData();
+    });
+
+
+    var loadPageData = function () {
+        var pageMode = 3;  //parseInt($("input[name=pageView]:checked").val());
+        var assetId = $('input:checkbox[id^="cb"]:checked').val();
+        $("#assetId").val(assetId);
+        //debugger;
+        var yourArray = [];
+        $(".assetsCount").addClass("hide");
+        $('input:checkbox[id^="cb"]:checked').each(function () {
+           yourArray.push($(this).val());
+            $(".div_" + $(this).val() + "_asset").removeClass("hide");
+        });
+
+        localStorage.setItem('rbi_assts', JSON.stringify(yourArray));
+
+        //BindInspType(assetId);
+        //if (pageMode === 1) {
+        //} else if (pageMode === 2) {
+        //    GetAssetsWithOutFloors(assetId);
+        //} else if (pageMode === 3) {
+        //    loadRoutes(assetId);
+        //}
+    };
+
+    function BindInspType(assetId) {
+        var postData = { assetId: assetId };
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetAssetsFrequencies", "Building")',
+            data: postData,
+            success: function (result) {
+                $("#dvInspTypes").empty().append(result).fadeIn('fast');;
+                callMethod();
+            },
+            dataType: "html",
+            traditional: true
+        });
+
+    }
+
+    function GetAssetsWithOutFloors(assetId) {
+        var url = '@Url.Action("GetExtinguisherAssetsWithOutFloor", "FireExtinguisher")';
+        $('#loadpartialAssetWithoutfloor').html('');
+        $.get(url + "?assetId=" + assetId, function (data) {
+            $('#loadpartialAssetWithoutfloor').html(data);
+            $('#loadpartialAssetWithoutfloor').fadeIn('fast');
+        });
+    }
+
+
+    var loadRoutes = function (assetId) {
+        debugger;
+        $('#routeView').empty();
+        console.log(assetId);
+        var url = '@Url.Action("LoadRoutes", "FireExtinguisher")';
+        $.get(url + "?assetId=" + assetId, function (data) {
+            $('#routeView').html(data);
+            $('#routeView').fadeIn('fast');
+            loadPageData();
+        });
+    }
+
+
+
+    $("input[name=pageView]").on('change', function () {
+        $("#view1").hide();
+        $("#view2").hide();
+        $("#view3").hide();
+        $("#view" + $(this).val()).show();
+        loadPageData();
+
+    });
+
+    function GoTOPage(floorId, routeId) {
+       // debugger
+        var assetId = GetSelectedAssets();
+        var assetids = GetMultpleSelectedAssets(routeId);
+        var drpInspTypes = $('input[name=drpInspTypes]:checked').val();
+        if (assetId == "") {
+            infoAlert("Please select asset from left panel!");
+        }
+        else {
+            if (drpInspTypes == "" || drpInspTypes == undefined) {
+                drpInspTypes = 7;
+            }
+            //$(".foo").attr("checked", false);
+            var url = '@Url.Action("Index", "FireExtinguisher")';
+            url = url + '?floorId=' + floorId + "&inspType=" + drpInspTypes + "&assetId=" + assetId + "&routeId=" + routeId + "&assetids=" + assetids;
+            window.location.href = url;
+        }
+    }
+
+
+    function GetSelectedAssets() {
+        var assets = [];
+        $.each($('input:checkbox[id^="cb"]:checked'), function () {
+            assets.push($(this).val());
+        });
+        //$('#' + routeid + ' tr[id=5126] td:eq(1)').find('div').each(function () {
+
+        //    var asset = $(this).attr('assetid');
+        //    assets.push(asset);
+
+        //});
+        if (assets.length === 0)
+            return "";
+        else {
+            $("#sassetId").val(assets[0]);
+            return assets[0];
+        }
+    }
+    function GetMultpleSelectedAssets(routeid) {
+        var assets = [];
+        //$.each($('input:checkbox[id^="cb"]:checked'), function () {
+        //    assets.push($(this).val());
+        //});
+        $('#routes tr[id=' + routeid + '] td:eq(1)').find('div').not('.hide').each(function () {
+
+            var asset = $(this).attr('assetid');
+            assets.push(asset);
+
+        });
+        if (assets.length === 0)
+            return "";
+        else {
+          //  $("#sassetId").val(assets[0]);
+            return assets.join(",");
+        }
+    }
+
+    $("body").on("change", "input[name=drpInspTypes]:radio", function () {
+        callMethod();
+    });
+
+    function callMethod() {
+      @*//  debugger;
+        var valueArray = [];
+        var drpInspTypes = 0;
+        if ($('input[name=drpInspTypes]:checked').val() != undefined)
+        {drpInspTypes = $('input[name=drpInspTypes]:checked').val()}
+
+
+        $("ul.floor_no li").removeClass();
+        var Ids = "";
+        var assetsSubCategoryId = "";
+        $('input:checkbox[id^="cb2"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    Ids = Ids + $(this).val() + ",";
+                }
+            }
+        });
+        $('input:checkbox[id^="cb3"]').each(function () {
+            var $this = $(this);
+            if ($this.is(":checked")) {
+                if ($(this).val() != "on") {
+                    assetsSubCategoryId = assetsSubCategoryId + $(this).val() + ",";
+                }
+            }
+        });
+        var postData = { assetId: Ids, ascIds: assetsSubCategoryId ,insptype: drpInspTypes };
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("FilterFloorAssets", "FireExtinguisher")',  //"/Assets/FilterFloorAssets",
+            data: postData,
+            success: function (datas) {
+                if (datas.Result.length > 0) {
+                    for (var i = 0; i < datas.Result.length; i++) {
+                        if (datas.Result[i].TotalAssets > 0) {
+                            if (datas.Result[i].TotalInspectedAssets == 0) {
+                                $("li#" + datas.Result[i].FloorId).addClass("assets-notdone");
+                            } else if (datas.Result[i].TotalAssets > datas.Result[i].TotalInspectedAssets) {
+                                $("li#" + datas.Result[i].FloorId).addClass("assets-inprogress");
+                            } else if (datas.Result[i].TotalAssets == datas.Result[i].TotalInspectedAssets) {
+                                $("li#" + datas.Result[i].FloorId).addClass("assets-done");
+                            }
+                        }
+                    }
+                }
+            },
+            dataType: "json",
+            traditional: true
+        });*@
+    }
+
+    $('body').on('click', '.addnew', function () {
+        var assetId = GetSelectedAssets();
+        openNewAsset(0, assetId, '');
+        @*var url = '@Url.Action("AddNewAssets", "FireExtinguisher")';
+        $.get(url + "?floorAssetsId=0", function (data) {
+            $('#addNewAssets').modal('show');
+            $('#loadpartialAddNew').html(data);
+            $('#loadpartialAddNew').fadeIn('fast');
+        });*@
+    });
+
+    //$(".stops").click(function () {
+    $('body').on('click', '.stops', function () {
+    var routeId = $(this).attr("id");
+        var url = '@Url.Action("GetStopsbyRouteId", "FireExtinguisher")';
+        $.get(url + "?routeId=" + routeId, function (data) {
+            $('#stopsinfo').modal('show');
+            $('#loadpartialstopsinfo').html(data);
+            $('#loadpartialstopsinfo').fadeIn('fast');
+        });
+    });
+
+    $("#btnInspectby").click(function () {
+        $('#InspectbyTagNoorStopNo').modal('show');
+        $("#txtserialno").val('');
+        $("#txtstopno").val('');
+        $("#container").hide();
+    });
+
+    $("input[name=inspectbyview]").on('change', function () {
+        $("#inspectbyview1").hide();
+        $("#inspectbyview2").hide();
+        $("#txtserialno").val('');
+        $("#txtstopno").val('');
+        var view = $(this).val();
+        $("#inspectbyview" + view).show();
+    });
+
+    $("#txtSearch").click(function () {
+        var assetId = GetSelectedAssets();
+        var value = $('input[name=inspectbyview]:checked').val();
+        var textMsg = (value == 1) ? "Tag #" : "Stop #";
+        var mode = (value == 1) ? "asset" : "stop";
+        var tagNo = $("#txtserialno").val();
+        var stopno = $("#txtstopno").val();
+        if ((tagNo != undefined && tagNo != "") || (stopno != undefined && stopno != "")) {
+            var url = CRxUrls.fireExtinguisher_GetAssetsByTagNo;
+            $.get(url + '?tagNo=' + tagNo + "&stopcode=" + stopno + "&assetId=" + assetId + "&mode=" + mode, function (data) {
+                if (data.success == false) {
+                    infoAlert(data.msg);
+                } else {
+                    if (mode == "assets") {
+                        $('#loadpartialAssets').html(data);
+                        $('#loadpartialAssets').fadeIn('fast');
+                        $('#searchAssetView').modal('show');
+                    } else {
+                        $('#loadpartialStops').html(data);
+                        $('#loadpartialStops').fadeIn('fast');
+                        $('#searchStopView').modal('show');
+                    }
+                    @*//console.log(data.success);
+                    //console.log(data.Result);
+                    var inspType = $('input[name=drpInspTypes]:checked').val();
+                    if (inspType == "" || inspType == undefined) {
+                        inspType = 7;
+                    }
+                    var floorAssetId = data.Result.FloorAssetsId;
+                    var locationId = data.Result.StopId;
+                    var insMode = 'inspection';
+                    //var insMode = 'FE';
+                    //if (assetId == 173) {
+                    //    insMode = 'EW';
+                    //} else if (assetId == 127) { insMode = 'EW'; }
+                    //else if (assetId == 128) { insMode = 'BOL'; }
+                    var isloaddata = 0;
+                    var url = '@Url.Action("ExtinguisherInspetion", "FireExtinguisher")';
+                    $.get(url + '?mode=' + insMode + '&floorAssetId=' + floorAssetId + "&inspType=" + inspType + "&locationid=" + locationId + "&isloaddata=" + isloaddata + "&assetId=" + assetId, function (data) {
+                        $('#loadpartial').html(data);
+                        $('#loadpartial').fadeIn('fast');
+
+                        $('#extinguisherInsPopUp').modal('show');
+                    });*@
+                }
+            });
+        } else {
+            infoAlert("Please enter " + textMsg);
+        }
+    });
+
+
+
+
+
+    $(function () {
+
+        $("#btnbarcode").click(function () {
+            $("#container").toggle();
+            App.init();
+        });
+
+        $('#InspectbyTagNoorStopNo').on('hidden.bs.modal', function () {
+            window.Quagga.stop();
+        });
+
+
+        // window.Quagga.stop();
+        var value;
+        var App = {
+            init: function () {
+                debugger;
+                Quagga.init(this.state, function (err) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    App.attachListeners();
+                    // Quagga.start();
+                });
+            },
+            initCameraSelection: function () {
+                var streamLabel = Quagga.CameraAccess.getActiveStreamLabel();
+
+                return Quagga.CameraAccess.enumerateVideoDevices()
+                    .then(function (devices) {
+                        function pruneText(text) {
+                            return text.length > 30 ? text.substr(0, 30) : text;
+                        }
+                        var $deviceSelection = document.getElementById("deviceSelection");
+                        while ($deviceSelection.firstChild) {
+                            $deviceSelection.removeChild($deviceSelection.firstChild);
+                        }
+                        devices.forEach(function (device) {
+                            var $option = document.createElement("option");
+                            $option.value = device.deviceId || device.id;
+                            $option.appendChild(document.createTextNode(pruneText(device.label || device.deviceId || device.id)));
+                            $option.selected = streamLabel === device.label;
+                            $deviceSelection.appendChild($option);
+                        });
+                    });
+            },
+            querySelectedReaders: function () {
+                return Array.prototype.slice.call(document.querySelectorAll('.readers input[type=checkbox]'))
+                    .filter(function (element) {
+                        return !!element.checked;
+                    })
+                    .map(function (element) {
+                        return element.getAttribute("name");
+                    });
+            },
+            attachListeners: function () {
+                var self = this;
+                debugger;
+                self.initCameraSelection();
+                $(".controls").on("click", "button.stop", function (e) {
+                    e.preventDefault();
+                    Quagga.stop();
+                });
+                $(".searchDiv").on("click", "a.isScanOpen", function (e) {
+                    e.preventDefault();
+                    Quagga.stop();
+                    // $("#scanContainer").hide();
+                });
+                $(".controls").on("click", "button.btnbarcode", function (e) {
+                    e.preventDefault();
+                    App.init();
+                });
+
+                if ($(".cam-container").hasClass("hide")) {
+                    Quagga.stop();
+
+                };
+
+                $(".controls .reader-config-group").on("change", "input, select", function (e) {
+                    e.preventDefault();
+                    var $target = $(e.target);
+                    // value = $target.attr("type") === "checkbox" ? $target.prop("checked") : $target.val(),
+                    value = $target.attr("type") === "checkbox" ? this.querySelectedReaders() : $target.val();
+                    var name = $target.attr("name"),
+                        state = self._convertNameToState(name);
+
+                    console.log("Value of " + state + " changed to " + value);
+                    self.setState(state, value);
+                });
+            },
+            _accessByPath: function (obj, path, val) {
+                var parts = path.split('.'),
+                    depth = parts.length,
+                    setter = (typeof val !== "undefined") ? true : false;
+
+                return parts.reduce(function (o, key, i) {
+                    if (setter && (i + 1) === depth) {
+                        if (typeof o[key] === "object" && typeof val === "object") {
+                            Object.assign(o[key], val);
+                        } else {
+                            o[key] = val;
+                        }
+                    }
+                    return key in o ? o[key] : {};
+                }, obj);
+            },
+            _convertNameToState: function (name) {
+                return name.replace("_", ".").split("-").reduce(function (result, value) {
+                    return result + value.charAt(0).toUpperCase() + value.substring(1);
+                });
+            },
+            detachListeners: function () {
+                $(".controls").off("click", "button.stop");
+                $(".controls .reader-config-group").off("change", "input, select");
+            },
+            setState: function (path, value) {
+                var self = this;
+
+                if (typeof self._accessByPath(self.inputMapper, path) === "function") {
+                    value = self._accessByPath(self.inputMapper, path)(value);
+                }
+
+                self._accessByPath(self.state, path, value);
+
+                console.log(JSON.stringify(self.state));
+                App.detachListeners();
+                Quagga.stop();
+                App.init();
+            },
+            inputMapper: {
+                inputStream: {
+                    constraints: function (value) {
+                        if (/^(\d+)x(\d+)$/.test(value)) {
+                            var values = value.split('x');
+                            return {
+                                width: { min: parseInt(values[0]) },
+                                height: { min: parseInt(values[1]) }
+                            };
+                        }
+                        return {
+                            deviceId: value
+                        };
+                    }
+                },
+                numOfWorkers: function (value) {
+                    return parseInt(value);
+                },
+                decoder: {
+                    readers: function (value) {
+                        if (value === 'ean_extended') {
+                            return [{
+                                format: "ean_reader",
+                                config: {
+                                    supplements: [
+                                        'ean_5_reader', 'ean_2_reader'
+                                    ]
+                                }
+                            }];
+                        }
+                        console.log("value before format :" + value);
+                        return [{
+                            format: value + "_reader",
+                            config: {}
+                        }];
+                    }
+                }
+            },
+            state: {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    constraints: {
+                        //width: { min: 640 },
+                        //height: { min: 480 },
+                        zoom: 0,
+                        aspectRatio: { min: 1, max: 100 },
+                        facingMode: "environment" // or user
+                    }
+                },
+                locator: {
+                    patchSize: "large",
+                    halfSample: true
+                },
+                numOfWorkers: 4,
+                decoder: {
+                    readers: ["code_39_reader", "code_128_reader"]
+                },
+                locate: true,
+                multiple: true
+            },
+            lastResult: null
+        };
+
+        //value =  App.querySelectedReaders() ;
+        //App.init();
+
+        Quagga.onProcessed(function (result) {
+            var drawingCtx = Quagga.canvas.ctx.overlay,
+                drawingCanvas = Quagga.canvas.dom.overlay;
+
+            if (result) {
+                if (result.boxes) {
+                    drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                    result.boxes.filter(function (box) {
+                        return box !== result.box;
+                    }).forEach(function (box) {
+                        Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
+                    });
+                }
+
+                if (result.box) {
+                    Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#00F", lineWidth: 2 });
+                }
+
+                if (result.codeResult && result.codeResult.code) {
+                    Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: 'red', lineWidth: 3 });
+                }
+            }
+        });
+
+        Quagga.onDetected(function (result) {
+            console.log(result);
+            var code = result.codeResult.code;
+            var value = $('input[name=inspectbyview]:checked').val();
+            if (value == 1) { $("#txtserialno").val(code); } else { $("#txtstopno").val(code); }
+            $("#container").hide();
+            //alert(code);
+            if (App.lastResult !== code) {
+                App.lastResult = code;
+                var $node = null, canvas = Quagga.canvas.dom.image;
+
+                $node = $('<li><div class="thumbnail"><div class="imgWrapper"><img /></div><div class="caption"><h4 class="code"></h4></div></div></li>');
+                $node.find("img").attr("src", canvas.toDataURL());
+                $node.find("h4.code").html(code);
+                $("#result_strip ul.thumbnails").prepend($node);
+                Quagga.stop();
+            }
+        });
+    });
+
+
+    window.onpopstate = function (event) {
+        alert(`location: ${document.location}, state: ${JSON.stringify(event.state)}`)
+    }
+</script>
+
+<style>
+   .drawingBuffer {
+        display: none;
+    }
+</style>

@@ -1,0 +1,588 @@
+﻿@model List<HCF.BDO.BinderFolders>
+
+@{
+    int? parentId = 0;
+    List<HCF.BDO.BinderFolders> binderFolders = Model;
+    DateTime dateTime = DateTime.UtcNow.Date;
+    List<HCF.BDO.BinderFolders> breadcumList = (List<HCF.BDO.BinderFolders>)ViewBag.Routs;
+    var isSurveyPrepBinder = (bool)ViewBag.IsSurveyPrepBinder;
+}
+<div class="binderpage-heading">
+    <img class="img_binder"
+         alt="details @(isSurveyPrepBinder==true  ? "TJC Survey Prep Binder" : "AHJ Documents")"
+         src="@(isSurveyPrepBinder==true  ? "/dist/Images/Icons/tjc_survey_prep_binder.png" : "/dist/Images/Icons/ahj_doc_icon.png")">
+    <div class="binder-RightHeading">
+        <h3>
+            @(isSurveyPrepBinder==true  ? "TJC Survey Prep Binder" : "AHJ Documents")
+        </h3>
+        <div class="add_button_comman">
+            <input type="hidden" name="IsSurveyPrepBinder" id="IsSurveyPrepBinder" value="@ViewBag.IsSurveyPrepBinder" />
+            <div class="dropup" style="display: inline-flex;">
+                <input type="text" class="form-control searchbox" name="searchval" placeholder="Search" />
+                <div class="suggestion-Box" style="display:none">
+                    <div id="recordnotfound" style="display:none">
+                        <span><b> No record found!  </b></span>
+                    </div>
+                    <div class="EpsDetails">
+                        <h4>Folders</h4>
+                        <ul id="EpsDetails"> </ul>
+                    </div>
+                    <div class="DocumentsDetails">
+                        <h4>Files</h4>
+                        <ul id="DocumentsDetails"></ul>
+                    </div>
+                </div>
+                <input type="submit" name="button" class="button1 dropdown-toggle btn_users lsdform_button" id="btn_users" title="New Folder"
+                       value="" data-toggle="dropdown" />
+                <ul class="dropdown-menu" id="btn_user_ddl">
+                    <li>
+                        <a href="#" class="newfolder">New Folder</a>
+                        <a href="#" class="uploadFile">Upload Document</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="foldercrumbs">
+            <span folderId="" class="folder-crumb folderName">Home</span>
+            @foreach (var item in breadcumList)
+            {
+                <span class="folder-crumb-separator"></span>
+                <span class="folder-crumb folderName" folderId="@item.FolderId">@item.FolderName</span>
+            }
+            @if (ViewBag.CurrentPage != null && !string.IsNullOrEmpty(ViewBag.CurrentPage.FolderName))
+            {
+                <span class="folder-crumb-separator"></span>
+                <span class="folder-crumb">
+                    @ViewBag.CurrentPage.FolderName
+                    @{
+                        parentId = ViewBag.CurrentPage.FolderId;
+                    }
+                </span>
+            }
+        </div>
+        <h4 id="binderEpTitle"></h4>
+        <h4 id="binderEpDocTitle"></h4>
+    </div>
+</div>
+
+<div id="masterTables">
+    <div class="ajhTable">
+        @await Component.InvokeAsync("DocumentSpaceStatusBar")
+
+        <table id="c_myTable" class="table">
+            <thead>
+                <tr>
+                    <th style="display:none"></th>
+                    <th style="width: 300px;">Name</th>
+                    <th style="width: 300px;">Common Document Name</th>
+                    <th>FileSize</th>
+                    <th>Date Expires</th>
+                    <th>Uploaded By</th>
+                    <th style="width: 172px;">Date Uploaded</th>
+                    <th style="width: 50px; text-align:center !important;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in binderFolders.OrderBy(x => !x.IsFolder).ThenBy(x => x.FolderName))
+                {
+                    <tr id="@item.FolderId" class="details @(@item.TFileId.HasValue  ? "file" : "folder")" folderName="@item.FolderName"
+                    filepath="@item.File?.FilePath"
+                    folderType="@((item.IsPublic)?"1":"0")">
+                        <td style="display:none">@item.FolderId</td>
+                        <td class="bindertitleIcons details @(@item.TFileId.HasValue  ? "file" : "folderName")" folderId="@item.FolderId">
+                            @if (item.IsFolder)
+                            {
+                                <img src="@Url.Content("~/dist/Images/Icons/folder_icon_colour.png")" alt="folder" title="folder" />
+                            }
+                            else
+                            {
+                                <img src="@Url.Content("~/dist/Images/Icons/folder_icon.png")"
+                             onclick="viewfile('@item.File.FilePath');" alt="file" title="file" />
+                            }
+                            <span class="ahjFilename">@item.FolderName</span>
+                            @if (!item.IsFolder)
+                            {
+                                var statedata = ViewBag.searchedvalue;
+                                if (statedata == "true" && binderFolders.Count > 1)
+                                {
+                                    <span id="parentlink">
+                                        <button type="button" class="form-control btn" name="parentfolderbtn" value="@item.ParentFolderId" title="Go To Folder">
+                                            <img src="@Url.Content("~/dist/Images/Icons/folder_icon_colour.png")" />
+                                        </button>
+                                    </span>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @item.CommonName
+                        </td>
+                        <td>
+                            @if (item.File != null && !item.IsFolder)
+                            {
+                                <span>@commonModelFactory.SizeSuffix(item.File.FileSize, 0)</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.ValidUpTo != null)
+                            {
+                                if (dateTime >= item.ValidUpTo)
+                                {
+                                    <span class="expirecolor">@item.ValidUpTo.ToFormatDate()</span>
+                                }
+                                else
+                                {
+                                    <span>@item.ValidUpTo.ToFormatDate()</span>
+                                }
+                            }
+                        </td>
+                        <td>@((item.CreatedByUserProfile != null) ? item.CreatedByUserProfile.FullName : "System")</td>
+                        <td>@item.CreatedDate.ToClientTime().ToFormatDateTime()</td>
+                        <td class="text-center">
+                            <div class="dropdown icratable-drop">
+                                <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </button>
+                                <ul class="dropdown-menu ctmenu" id="@string.Format("file_{0}",item.FolderId)">
+                                    @if (item.IsFolder)
+                                    {
+                                        <li onclick="addFolder('@item.FolderName', '@item.FolderId');"><a>Rename</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li onclick="viewfile('@item.File.FilePath');" class="view_file"><a>View</a></li>
+                                        <li onclick="editfile('@item.FolderId')"><a>Edit</a></li>
+                                    }
+                                    <li onclick="deletefile('@item.FolderId')"><a>Delete</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+    <input type="hidden" id="folderId" />
+    <input type="button" class="form-control hide" value="Add Document" id="btn_addDoc" />
+    <div id="context-menu">
+        <ul class="dropdown-menu" role="menu">
+            <li class="modal-link"><a class="file modal-link" tabindex="7">View</a></li>
+            <li><a class="folder edit_li" tabindex="1">Rename</a></li>
+            <li><a class="del_li" tabindex="3">Delete</a></li>
+            <li><a class="file" tabindex="6">Edit File</a></li>
+            <li><a class="common" tabindex="4">Upload Document</a></li>
+            <li><a class="common" tabindex="5">New Folder</a></li>
+
+        </ul>
+    </div>
+</div>
+<div class="survey-bottomrow">
+    @if (isSurveyPrepBinder)
+    {
+        <div>
+            <b> Important:</b> Please be aware that files will only remain in survey prep binder for 6 Months.
+        </div>
+    }
+
+    @if (isSurveyPrepBinder && binderFolders.Count > 0)
+    {
+        <form asp-controller="Documents" asp-action="GetZipFile" LoadingElementId="loadingModal"
+          data-ajax="false" data-ajax-method="POST">
+            @Html.AntiForgeryToken()
+            @Html.Hidden("cookieValue")
+            <input type="hidden" name="folderId" value="@parentId" />
+            <input type="submit" value="Download as a Zip" id="downloadZip" class="button1" />
+        </form>
+    }
+</div>
+
+<div class="modal fade" id="imagepreview" role="dialog">
+</div>
+<div class="modal fade" id="editbinderfolder" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var _tmr;
+    var isSurveyPrepBinder = '@isSurveyPrepBinder';
+
+    var searchvalue = "@TempData["searchedvalue"]";
+    $('input[name="searchval"]').val(searchvalue);
+    $('button[name="parentfolderbtn"]').click(function () {
+        var parentfolderid = $(this).val();
+        $.ajax({
+            url: "/Documents/BinderFolders?folderId=" + parentfolderid,
+            method: "POST",
+            contentType: 'HTML',
+            success: function (data) {
+                $("#ep_view").empty();
+                $("#ep_view").append(data);
+            }
+        })
+    })
+    function addFolder(folderName, folderId) {
+        //debugger;
+        var parentFolderId='@parentId';
+        swal({
+            title: "",
+            text: (folderId>0)? "Rename Folder": "New Folder",
+            type: "input",
+            showCancelButton: true,
+            inputValue: folderName,
+            confirmButtonText: "Save",
+            closeOnConfirm: false,
+            animation: "slide-from-top",
+            inputPlaceholder: "Please enter folder name"
+        },
+            function (inputValue) {
+                if (inputValue === false)
+                    return false;
+
+                if (inputValue === "") {
+                    swal.showInputError("You need to write something!");
+                    return false
+                }
+                var fileFolders = [];
+
+                var fileFolder = {
+                    FolderId: folderId,
+                    FolderName: inputValue,
+                    CommonName: '',
+                    ParentFolderId: parentFolderId,
+                    IsSurveyPrepBinder: isSurveyPrepBinder
+                };
+                var jsonArray = getJsonData();
+
+                if (folderId == 0) {
+                    var data = $(jsonArray)
+                        .filter(function (i, n) {
+                            return n.name === inputValue;
+                        });
+
+                    if (data.length > 0) {
+                        swalalert("folder name already exits");
+                        return false;
+                    }
+                } else {
+                    var data = $(jsonArray)
+                        .filter(function (i, n) {
+                            return n.name === inputValue && n.folderId != folderId;
+                        });
+
+                    if (data.length > 0) {
+                        swalalert("folder name already exits");
+                        return false;
+                    }
+                }
+
+                //console.log(data);
+                //debugger;
+                fileFolders.push(fileFolder);
+                saveFolder(fileFolders);
+            });
+    }
+
+    $(".folderName").unbind("click").bind("click", function (e) {
+        var folderId = $(this).attr("folderId");
+       // debugger;
+        getFolderDocs(folderId);
+    });
+
+    $(".newfolder").unbind("click").bind("click", function (e) {
+        addFolder('', 0);
+    });
+
+    $(".uploadFile").unbind("click").bind("click", function (e) {
+        LoadRecentFiles();
+    });
+
+    $("#downloadZip").unbind("click").bind("click", function (e) {
+
+
+
+    });
+
+
+    function saveFolder(fileFolder,fileIds) {
+        $.ajax({
+            url: "/Documents/UpdateFileFolder?fileIds=" + fileIds,
+            method: "POST",
+            data: { folders: fileFolder },
+            success: function (data) {
+                if (data.status) {
+                    getFolderDocs('@parentId');
+                    swal.close();
+                } else {
+                    AlertWarningMsg(data.statusmsg);
+                }
+            }
+        });
+    }
+
+
+    var getJsonData = function () {
+        var folders = [];
+        $("#c_myTable tr").each(function () {
+            var self = $(this);
+            var col_1_value = self.find("td:eq(0)").text().trim();
+            var col_2_value = self.find("td:eq(0)").attr("folderId");
+            if (col_1_value) {
+                var folder = {
+                    name: col_1_value,
+                    folderId: col_2_value
+                }
+                folders.push(folder);
+            }
+        });
+        //console.log(folders);
+
+        return folders;
+    }
+
+    $(document).ready(function () {
+
+       // debugger;
+        if ($('.modal-backdrop').hasClass('fade in')) {
+            $('.modal-backdrop').removeClass('fade in')
+            $('.modal-backdrop').addClass('fade out')
+        }
+        //$('.modal-backdrop').remove();
+        $("#masterTables").contextmenu({
+            target: '#context-menu',
+            onItem: function (row, e) {
+                //var folderId = $(row).attr("id");
+                //var folderName = $(row).attr("folderName");
+                //var action = $(e.target).text();
+                var index = $(e.target).attr("tabindex");
+                if (index == 5) {
+                    addFolder('',0);
+                } else if (index == 4) {
+                    LoadRecentFiles();
+                }
+            },
+            before: function (e, row) {
+                this.getMenu().find("li").find("a").hide();
+                this.getMenu().find("li").find("a.common").show();
+            }
+        });
+
+        $('#c_myTable').contextmenu({
+            target: '#context-menu',
+            scopes: 'tbody > tr',
+            onItem: function (row, e) {
+                var folderId = $(row).attr("id");
+                $("folderId").val(folderId);
+                var folderName = $(row).attr("folderName");
+                var filepath = $(row).attr("filepath");
+                var action = $(e.target).text();
+                var index = $(e.target).attr("tabindex");
+                if (index == 5) {
+                    addFolder('');
+                } else if (index == 4) {
+                    LoadRecentFiles();
+                } else if (index == 1) {
+                    addFolder(folderName, folderId);
+                } else if (index == 6) {
+                    editfile(folderId);
+                    //swal(swalFileConfig);
+                }
+                else if (index == 3) {
+                    deletefile(folderId);
+                }
+                else if (index == 7) {
+                    viewfile(filepath);
+                }
+            },
+            before: function (e, row) {
+                var folderType = $(row).attr("foldertype");
+                this.getMenu().find("li").find("a").show();
+                this.getMenu().find("li").find("a").removeClass("disable");
+                if (folderType == "1") {
+                    this.getMenu().find("li").find("a.del_li").hide();
+                    this.getMenu().find("li").find("a.edit_li").hide();
+
+                }
+                if ($(row).hasClass("file")) {
+                    this.getMenu().find("li").find("a.folder").addClass("disable");
+                } else {
+                    this.getMenu().find("li").find("a.file").addClass("disable");
+                }
+            },
+
+        });
+
+    });
+    $('input[name="searchval"]').blur(function () {
+        var seachValues = $(this).val();
+        if (seachValues != "" && seachValues.trim() != "") {
+            $("#searchform").submit();
+        }
+    });
+
+
+    function deletefile(folderId) {
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this Folder/File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: false
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Documents_DeleteBinderFolder + "?folderId=" + folderId,
+                    success: function (data) {
+                        swal("Deleted!", "Your file has been deleted.", "success");
+                        getFolderDocs('@parentId');
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+
+            });
+    }
+
+    function OnBinderSuccess() {
+        getFolderDocs('@parentId');
+        $('#editbinderfolder').modal('hide');
+    }
+
+    function viewfile(filepath) {
+        $.ajax({
+            url: '@Url.Action("ImagePreview", "Common")' + '?imgSrc=' + filepath + "&title=Preview",
+            success: function (data) {
+                $("#imagepreview").empty();
+                $("#imagepreview").html(data);
+                $('#imagepreview').fadeIn('fast');
+                $('#imagepreview').modal('show');
+            }
+        });
+    }
+
+
+    function editfile(folderId) {
+        var url = CRxUrls.Documents_EditFileFolder;
+        $.get(url + '?folderId=' + folderId, function (data) {
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+            $('#editbinderfolder').modal('show');
+        });
+    }
+
+    function fileUploadSuccess(tFiles) {
+        debugger;
+        var fileFolders = [];
+        $.each(tFiles, function (index, value) {
+            var fileFolder = {
+                FolderId: 0,
+                FolderName: value.FullName,
+                CommonName: '',
+                ParentFolderId: '@parentId',
+                TFileId: value.TFileId,
+                IsSurveyPrepBinder: isSurveyPrepBinder,
+                FileSize : value.FileSize
+            };
+            fileFolders.push(fileFolder);
+        });
+        saveFolder(fileFolders);
+    }
+
+    function getFolderDocs(folderId) {
+        $.ajax({
+            url: CRxUrls.Documents_BinderFolders + "?folderId=" + folderId + "&isSurveyPrepBinder=" + isSurveyPrepBinder,
+            cache: false,
+            type: "GET",
+            dataType: "HTML",
+            success: function (data) {
+                $('#ep_view').html(data);
+                $('#ep_view').fadeIn('fast');
+            }
+        });
+    }
+
+
+    $('.searchbox').keyup(delay(function (e) {
+        var searchString = $(this).val();
+        $('.dropup .suggestion-Box').show();
+        if (searchString != "") { filterData(searchString.toLowerCase()); } else { $('.dropup .suggestion-Box').hide(); }
+    }, 1000));
+
+    function filterData(data) {
+        var urlAction = '@Url.Action("SearchBinderFolders", "Documents")';
+        $.ajax({
+            url: urlAction + "?isSurveyPrepBinder=" + isSurveyPrepBinder+"&searchval=" + data,
+            type: "GET",
+            global: false,
+           // data: model,
+            success: function (data) {
+                //console.log(data);
+                $(".EpsDetails").show();
+                $(".DocumentsDetails").show();
+                $(".suggestion-Box div#recordnotfound").hide();
+                $("ul#EpsDetails").empty();
+                $("ul#DocumentsDetails").empty();
+                debugger;
+                var data_filter_folders = data.filter(element => element.IsFolder == true);
+                $.each(data_filter_folders, function (index, data) {
+                    console.log('index', data)
+                    $("<li class='ulfolderName' folderId='" + data.FolderId + "'>" + data.FolderName + "</li>").appendTo("ul#EpsDetails");
+                });
+                if (data_filter_folders.length == 0) {
+                    $(".EpsDetails").hide();
+                }
+
+
+                var data_filter_files = data.filter(element => element.IsFolder == false);
+                $.each(data_filter_files, function (index, data) {
+                    console.log('index', data)
+                    $("<li class='ulfolderName' folderId='" + data.ParentFolderId+"'>" + data.FolderName + "</li>").appendTo("ul#DocumentsDetails");
+                });
+
+                if (data_filter_files.length == 0) {
+                    $(".DocumentsDetails").hide();
+                }
+
+
+                if (data_filter_folders.length == 0 && data_filter_files.length == 0) {
+                    debugger;
+                    $(".suggestion-Box div#recordnotfound").show();
+                }
+
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+
+            }
+        });
+    }
+
+    $(document).on("click", "li.ulfolderName", function (e) {
+        var folderId = $(this).attr("folderId");
+        //debugger;
+        getFolderDocs(folderId);
+    });
+
+
+
+</script>
+<style>
+    .add_button_comman {
+        float: right;
+        padding: 5px 10px;
+        z-index: 999;
+    }
+
+    .lsdform_button {
+        background: url(/dist/Images/Icons/3d_add_button.png) 5px 3px no-repeat #fff;
+        color: #000;
+        padding: 10px 10px 10px 22px;
+        border-radius: 20px;
+    }
+</style>

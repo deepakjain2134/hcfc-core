@@ -1,0 +1,44 @@
+﻿@model HCF.BDO.UserProfile
+@{
+
+    var otherList = (List<HCF.BDO.Roles>)ViewBag.OtherRoles;
+}
+<h4>User Groups</h4>@((Model != null && Model.UserGroups.Count() > 0) ? string.Join(", ", Model.UserGroups.Select(x => x.Name)) : "")
+
+<div class="userrole_view" style="width:100% !important;">
+    <h4>Roles (based on user group)</h4>
+    <ul class="uname-listitem">
+        @foreach (var item in Model.Roles.Where(x => x.IsActive).OrderBy(x => x.DisplayText).Distinct())
+        {
+        <li>
+            <input type="checkbox" value='@item.RoleId' name="userrole"  @((item.Status && !item.Status)?"":"checked='checked'") /> <span></span>  @*disabled="disabled"*@
+            @item.DisplayText
+        </li>
+        }
+    </ul>
+    <h4>    
+        Additional Roles
+    </h4>
+    <ul class="uname-listitem">
+        @foreach (var item in otherList.Where(x => x.IsActive).OrderBy(x => x.DisplayText))
+        {
+            <li>
+                <input type="checkbox" value='@item.RoleId' name="user" @((Model.AdditionalRoles.Any(x=>x.RoleId==item.RoleId)) ? "checked='checked'" : "") /> <span></span>
+                @item.DisplayText
+            </li>
+        }
+    </ul>
+
+</div>
+<script>
+    $("input[name='user'],input[name='userrole']").on('change', function () {
+        debugger;
+        var status = $(this).is(':checked');
+        var userID = $("#drpUser").val();
+        var roleID = $(this).val();
+        var url = '@Url.Action("UpdateUserrole","Menu")';
+        $.get(url + '?userID=' + userID + '&roleID=' + roleID + '&status=' + status, function (data) {
+            swalalert("saved successfully.")
+        });
+    });
+</script>

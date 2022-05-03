@@ -1,0 +1,203 @@
+﻿@model HCF.BDO.WorkOrder
+<div class="modal-header">
+    <h4 class="modal-title">
+        Floor Inspection (@($"{Model.Floor.FloorLocation}"))
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("FloorRoundInspection", "Rounds", FormMethod.Post, new { id = "floorInspectionform" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(m => Model.Xcoordinate)
+        @Html.HiddenFor(m => Model.Ycoordinate)
+        @Html.HiddenFor(m => Model.FloorId)
+        @Html.HiddenFor(m => Model.BuildingCode)
+        @Html.HiddenFor(m => Model.IssueId)
+        @Html.HiddenFor(m => Model.ActivityId)
+        <div id="tbl">
+            <div class="row">
+                <div class="col-md-6 form-group datetimeDiv">
+                    <label>Date:&nbsp;&nbsp;</label>@DateTime.UtcNow.ToClientTime().ToFormatDateTime()
+                </div>
+                <div class="col-md-6 form-group floopinsp-tab">
+                    <div class="MarkDeficiency show floor_inspection_pop text-right">
+                        <span class="btn-group btn-group-vertical left_setting">
+                            <label class="btn">
+                                @Html.RadioButtonFor(m => Model.IsDeficiency, true, new { onclick = "GetSelectedItem(this);" })@Html.Label("Mark deficiency")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                            <label class="btn active">
+                                @Html.RadioButtonFor(m => Model.IsDeficiency, false, new { onclick = "GetSelectedItem(this);" })@Html.Label("Time to resolve it")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                            </label>
+                        </span>
+                        <span id="dvtimetoresolve" class="dvtimetoresolve">
+                            @Html.TextBoxFor(m => Model.TimetoResolve, new { @class = "numeric TimeToresolve", @type = "number", maxlength = 2, @Value = "4" })<label>&nbsp;(hrs)</label>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @*<div class="col-md-12 form-group datetimeDiv">
+                <label>Date:&nbsp;&nbsp;</label>@DateTime.UtcNow.ToClientTime().ToFormatDateTime()
+            </div>*@
+            <div class="col-md-12 form-group">
+                <label>Problem:</label><em class="required-field"> *</em>
+                @Html.TextAreaFor(m => Model.Description, new { @class = "form-control Prob", required = "required", maxlength = 150, oninput = "validate(this)" })
+            </div>
+            <div class="col-md-12 form-group">
+              @*  <label>Issue Type:</label>*@
+                <span class="datetimeDiv">
+                    <span class="form-group">
+                        @Html.CheckBox("isIlsmRequired", false, new { @class = "no", @title = "Check Checkbox to add ILSM" })
+                        <span></span>
+                    </span>
+                    <label>ILSM Required</label>
+                </span>
+            </div>
+            <div class="dvtimetoresolve">
+                <div class="col-lg-12 form-group">
+                    <label>User:</label>
+                    <userdropdownlist name="UserId" selectedvalue="0" firsttext="Select User" class="form-control email_drop"></userdropdownlist>
+                    @*@Html.UserDropDownList("UserId", 0, "Select User", new { @class = "form-control email_drop" })*@
+                </div>
+                <div class="col-md-12 dvtimetoresolve fileUpload">
+                    <div class="form-group">
+                        <label style="display:flex;">
+                            <label>Upload: &nbsp;&nbsp;</label>
+                            <input type="file" name="file" accept="image/*" id="file" tempname="WorkOrderFiles[0].FileName" filecontent="WorkOrderFiles[0].FileContent" class="fileUpload" onchange="Uploadfile(this)" />
+                        </label>
+                        <div id="hdn_div">
+                            <input type="hidden" name="WorkOrderFiles[0].FileName" />
+                            <input type="hidden" name="WorkOrderFiles[0].FileContent" />
+                            <input type="hidden" name="WorkOrderFiles[0].FilePath" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @*@if (Model.WorkOrderFiles.Count > 0)
+                            {
+                                <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;margin-left: 15px;"
+                                     src="@commonModelFactory.FilePath(Model.WorkOrderFiles[0].FilePath)" />
+                            }
+                            else
+                            {
+                                <img id="user_img" class="img" height="100" width="100" style="border:#ccc solid 1px; margin-top:8px;margin-left: 15px;"
+                                     src='@Url.Content("~/dist/Images/Floors/default.jpg")' />
+                            }*@
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 text-right button_Div">
+                <button name="submitButton" class="comm-button" id="Submit" type="submit">Save</button>
+                <button name="cancelButton" class="comm-Cancelbutton" id="cancelButton" type="button">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script type="text/javascript">
+
+    $("#StatusCode").change(function () {
+        var statusCode = $(this).val();
+        var completionCommentsbox = $("#CompletionComments");
+        if (statusCode == "CMPLT") {
+            completionCommentsbox.prop('required', true);
+        } else {
+            completionCommentsbox.prop('required', false);
+        }
+    });
+
+    $("#cancelButton").click(function () {
+        // CreateNewILSM('cancel');
+        $('#floorInspection').modal('hide');
+    });
+
+    var GetSelectedItem = function (rdbtnctrl) {
+
+        var Name = $(rdbtnctrl).attr("name");
+        var Val = $(rdbtnctrl).val();
+        if (Val == "True") {
+            $(".dvtimetoresolve").hide();
+            //$("#TimetoResolve").val(0);
+        } else {
+            $(".dvtimetoresolve").show();
+            $("dvtimetoresolve").css("display", "inline-block");
+        }
+    }
+
+    // btn active class add remove
+    $('.MarkDeficiency.floor_inspection_pop .btn input').click(function () {
+        $('.MarkDeficiency.floor_inspection_pop .btn').removeClass('active');
+        $(this).parent('.MarkDeficiency.floor_inspection_pop .btn').addClass('active');
+    });
+
+    $("#Submit").click(function () {
+        //debugger;
+        // CreateNewILSM();
+        if ($("#Description").val() != "") {
+            var isDeficiency = document.querySelector('input[name="IsDeficiency"]:checked').value;
+            if (isDeficiency.toLowerCase() == "true") {
+                CallSubmit();
+            } else {
+                if ($("#TimetoResolve").val() > 0) {
+                    CallSubmit();
+                } else {
+                    AlertWarningMsg("Resolve Time should be greater than zero!");
+                    return false;
+                }
+            }
+        }
+    });
+
+
+    function CallSubmit() {
+        var UserIds = $('#UserId').val() + ",";
+        $("#UserIds").val(UserIds);
+        $("#floorInspectionform").submit();
+    }
+
+    function Uploadfile(file) {
+
+        var C_fileName = file.getAttribute("tempName");
+        var fileContent = file.getAttribute("filecontent");
+        if (file.files.length > 0) {
+            var file = file.files[0];
+            var fileName = file.name;
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                var array = reader.result.split(",");
+                $("input[name='" + C_fileName + "'][type=hidden]").val(fileName);
+                $("input[name='" + fileContent + "'][type=hidden]").val(array[1]);
+                $("input[name='FilePath'][type=hidden]").val(null);
+                $('input[name="FilePath"').attr('data-dirrty-initial-value', '');
+            };
+            reader.onerror = function (error) {
+                console.log('Error: ', error);
+                $("#FileContent").val("");
+            };
+        }
+    }
+
+    $("#file").change(function () {
+        var file = document.getElementById("file").files[0];
+        var readImg = new FileReader();
+        readImg.readAsDataURL(file);
+        readImg.onload = function (e) {
+            $('.img').attr('src', e.target.result).fadeIn();
+        }
+    });
+
+    var validate = function (input) {
+        if (/^\s/.test(input.value))
+            input.value = '';
+    }
+
+</script>
+<style>
+    input#TimetoResolve {
+        width: 48px;
+    }
+</style>

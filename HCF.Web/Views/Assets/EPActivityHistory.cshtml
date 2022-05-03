@@ -1,0 +1,90 @@
+﻿@model HCF.BDO.EPDetails
+@using HCF.BDO
+@{
+    var inspectiondocs = new List<InspectionEPDocs>();
+
+    ViewBag.Title = "EP History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    if (Model != null && Model.Inspection != null)
+    {
+        inspectiondocs = Model.InspectionEPDocs; //Transaction.GetInspectionDocs(Model.Inspection.InspectionId).ToList();
+    }
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP History 
+        </h1>
+    </section>}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-left">
+            <div class="box box-primary assetsInspection">
+                @*@Html.Action("InspectionActivityHistory", "Goal")*@
+                @await Component.InvokeAsync("GoalInspectionActivityHistory", new { epId = Model?.EPDetailId, inspectionId = Model?.Inspection?.InspectionId })
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-12">
+                        <div class="ephisCol-1">
+                            <div class="epDetails">
+                                <span class="@commonModelFactory.GetInspectionStatus(Model.Inspection?.SubStatus)"></span>
+                                <span>
+                                    @Model.StandardEp <br />
+                                    <ep-risk-score risk-score="@Model.Scores.Name">
+                                    </ep-risk-score>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ephisCol-2">
+                            @*@await Html.PartialAsync("_EpDescription", Model.Description, new ViewDataDictionary(
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                 new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                 {{ "standardEp",@Model.StandardEp }}
+                                )*@
+                                @await Component.InvokeAsync("EpDescription", new { epDetailId = 0, maxLength = 0, epdetails = Model })
+                        </div>
+                    </div>
+                </div>
+                <div class="epview-row">
+                    <div class="epview-cols3">
+                        <div class="inpesCols1"><p><label>Status:&nbsp;</label> @commonModelFactory.GetEpStatus(Model.Inspection.Status ?? -1)</p></div>
+                    </div>
+                    <div class="epview-cols3">
+                        <p>
+                            @{
+                                var currentEpActivity = Model.Inspection.TInspectionActivity.FirstOrDefault(x => x.ActivityType == 1);
+                            }
+                            <label>EP Reviewed By:&nbsp;</label>
+                            <span>
+                                @($"{currentEpActivity?.UserProfile.FullName} {"on"} {((Model.Inspection.InspectionId > 0) ? Model.Inspection.CreatedDate.ToFormatDate() : "")}")
+                            </span>
+                            @if (Model.Inspection != null && Model.Inspection.TInspectionActivity.Any(x => x.ActivityType == 1))
+                            {
+                                <a class="epview-btn" href="@Url.Action("ActivityHistory", "assets", new { activityId = Model.Inspection.TInspectionActivity.FirstOrDefault(x => x.ActivityType == 1).ActivityId })">View Detailed Review Checkpoints</a>
+                            }
+                        </p>
+                    </div>
+                    <div class="epview-cols3"><p><label>Review Comment: &nbsp;</label>@(currentEpActivity?.Comment)</p></div>
+                </div>
+                <div class="epdetailsBox-row">
+                    @*@await Html.PartialAsync("_InspectionDocs", inspectiondocs, new ViewDataDictionary { { "ishistory", true } })*@
+
+                    @await Html.PartialAsync("_InspectionDocs", inspectiondocs,
+                           new ViewDataDictionary(
+                           new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                           new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                           {{ "ishistory", true }}
+                          )
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Unauthorized";
+}
+
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Unauthorized
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary" style="text-align:center">
+                    <p>
+                        You do not have permission to access the requested resource due to security restrictions.
+                        In order to gain access, please speak to your system administrator.
+                    </p>
+                    <a href="@Url.RouteUrl("dashboard")" class="btn btn-large btn-info"><i class="icon-home icon-white"></i> Take Me Home</a>
+                </div>
+            </div>
+        </div>
+    </div>

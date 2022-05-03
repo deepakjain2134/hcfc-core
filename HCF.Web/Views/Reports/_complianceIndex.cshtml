@@ -1,0 +1,283 @@
+﻿@model IEnumerable<HCF.BDO.TInspectionActivity>
+
+<table id="c_myTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th style="display:none">Status</th>
+            <th style="display:none">CategoryId</th>
+            <th style="display:none">SubStatus</th>
+            <th>
+                Asset Name
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                @Localizer["AssetNo"]
+            </th>
+            <th>
+                Location
+            </th>
+            <th>
+                @Localizer["NearBy"]
+            </th>
+            <th>
+                @Localizer["LastInspectionDate"]
+            </th>
+            <th>
+                Comment
+            </th>
+            <th>
+                Inspector Name
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                @Localizer["StandardEP"]
+            </th>
+            <th>
+                Detail
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var activity in Model.OrderByDescending(x => x.ActivityInspectionDate.Value))
+        {
+            <tr>
+                <td style="display:none">
+                    @Html.DisplayFor(modelItem => activity.Status)
+                </td>
+                <td style="display:none">@Html.DisplayFor(modelItem => activity.StandardEps.CategoryId)</td>
+                <td style="display:none">
+                    @Html.DisplayFor(modelItem => activity.SubStatus)
+                </td>
+                <td>@Html.DisplayFor(modelItem => activity.TFloorAssets.Assets.Name)</td>
+                <td>@Html.DisplayFor(modelItem => activity.TFloorAssets.Name)</td>
+                <td>@Html.DisplayFor(modelItem => activity.TFloorAssets.AssetNo)</td>
+                <td>
+                    @*@HCF.Web.Base.Common.GetFloorAssetLocation(activity.TFloorAssets)*@
+                    @if (activity.TFloorAssets.Floor.FloorName != null)
+                    {
+                        @commonModelFactory.GetFloorAssetLocation(activity.TFloorAssets)
+                    }
+                    else
+                    {
+                        <span>NA</span>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => activity.TFloorAssets.NearBy)</td>
+                <td data-sort="@activity.ActivityInspectionDate.Value.ToClientTime()">
+                    @if (activity.ActivityInspectionDate.HasValue)
+                    {
+                        @activity.ActivityInspectionDate.Value.ToClientTime().ToFormatDateTime();
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => activity.Comment)</td>
+                <td>@Html.DisplayFor(modelItem => activity.UserProfile.FullName)</td>
+                <td>
+                    @if (activity.Status == 1)
+                    {
+                        <span> @Localizer["CompliantText"]  </span>
+                    }
+                    else if (activity.Status == 0)
+                    {
+                <span>@Localizer["NonCompliantText"] </span>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => activity.StandardEps.StandardEP)</td>
+                <td>
+                    <img onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = activity.ActivityId })'"
+                         src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<script>
+    $(document).ready(function () {
+        //localStorage.clear();
+        $(".comment").shorten({
+            "showChars": 150,
+            "moreText": "See More",
+        });
+
+        var dataTables = $('#c_myTable').DataTable({
+            "lengthChange": false,
+            "aaSorting": [[7, 'desc']],
+            "pageLength": 20,
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            },
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'f p>>" +
+               
+                "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                "<'row'<'col-sm-5'i>>" + "Blrtip",
+            
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    //pageSize:'LEGAL',
+                    title: 'Compliance/Non-compliance Report',
+                    exportOptions: {
+                        columns: [3, 5, 6, 7, 8, 9, 10, 11, 12]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        //genereateRpeort(doc)
+                        //Remove the title created by datatTables
+                        doc.content.splice(0, 1);
+                        //Create a date string that we use in the footer. Format is dd-mm-yyyy
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        //var jsDate = now.getDate() + '-' + (now.getMonth() + 1) + '-' + now.getFullYear();
+                        // Logo converted to base64
+                        //var logo = $("#logoimgbase64").val();
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        //console.log(logo);
+                        // The above call should work, but not when called from codepen.io
+                        // So we use a online converter and paste the string in.
+                        // Done on http://codebeautify.org/image-to-base64-converter
+                        // It's a LONG string scroll down to see the rest of the code !!!
+                        //var logo = '';
+                        // A documentation reference can be found at
+                        // https://github.com/bpampuch/pdfmake#getting-started
+                        // Set page margins [left,top,right,bottom] or [horizontal,vertical]
+                        // or one number for equal spread
+                        // It's important to create enough space at the top for a header !!!
+                        doc.pageMargins = [20, 60, 20, 30];
+                        // Set the font size fot the entire document
+                        doc.defaultStyle.fontSize = 8;
+                        // Set the fontsize for the table header
+                        doc.styles.tableHeader.fontSize = 7;
+                        // Create a header object with 3 columns
+                        // Left side: Logo
+                        // Middle: brandname
+                        // Right side: A document title
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+                                    {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: '',
+                                        fontSize: 14,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') + '\n Compliance/Non-compliance Report',
+                                        margin: [0, 6, 0, 0],
+                                        width: 600,
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        // Create a footer object with 2 columns
+                        // Left side: report creation date
+                        // Right side: current page and total pages
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Created on: ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated from: ', { text:  '@HCF.Web.Base.UserSession.CurrentOrg.Name' }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: [{ text: page.toString() }, ' of ', { text: pages.toString() }],                                        
+                                    }
+                                ],
+                                margin: [20]
+                            }
+                        });
+                        // Change dataTable layout (Table styling)
+                        // To use predefined layouts uncomment the line below and comment the custom lines below
+                        // doc.content[0].layout = 'lightHorizontalLines'; // noBorders , headerLineOnly
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Compliance/Non-compliance Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [3, 5, 6, 7, 8, 9, 10, 11, 12],
+                        orthogonal: 'export'
+                    }
+                }
+            ],
+            drawCallback: function () {
+                var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+                $('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+            }
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+      
+
+        $("input[name=EPCat]:radio").change(function () {
+            var catId = $("input[name='EPCat']:checked").val();
+            localStorage.setItem("EPCatId", catId);
+            Searching();
+        });
+
+        function Searching() {
+            var catId = localStorage.getItem("EPCatId");
+            var status = localStorage.getItem("btnValue");
+            if (catId == null || catId == 0) {
+                catId = "";
+                if (status == null) {
+                    status = ""
+                }
+            } else if (status == null) {
+                status = "";
+            }
+            dataTables.columns(0).search(status, true).columns(1).search(catId).draw();
+        }
+    });
+</script>
+<style>
+   
+    .button1.active {
+        background-color: red;
+    }
+    .dataTables_paginate.paging_simple_numbers {
+        text-align: right;
+        float: right;
+    }
+   
+</style>

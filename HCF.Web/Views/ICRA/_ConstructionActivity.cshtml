@@ -1,0 +1,37 @@
+﻿@model HCF.BDO.ConstructionType
+<div class="slider">
+    <div class="tabbable tabs-left">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab3" data-info="tab3" class="tbs" data-toggle="tab">Construction Activity</a></li>
+        </ul>
+        <div class="tab-content ">
+            <div class="tab-pane active" id="tab3">
+                <table class="table table-bordered table-striped" id='@($"table{Model.ConstructionTypeId}")'>
+                    <thead style="display:none">
+                        <tr>
+                            <th></th>
+                            <th>Active</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ConstructionActivity.OrderBy(x => x.CreatedDate))
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Activity)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Modify ", "AddConstuctionActivity", "ICRA", new { constructiontypeId = item.ConstructionTypeId, ConstActivityId = item.ConstActivityId }, new { @class = "modal-link button1" })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

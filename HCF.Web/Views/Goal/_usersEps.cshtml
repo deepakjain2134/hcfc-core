@@ -1,0 +1,157 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    List<HCF.BDO.Standard> standards = (List<HCF.BDO.Standard>)TempData["Standards"];
+}
+<div class="col-lg-12 row">
+    <div class="col-lg-3">
+        <div class="search_options">
+            <label>Standards :</label>
+            <dl class="dropdown">
+                <dt>
+                    <a href="#">
+                        <span class="multiSelStaus">Select</span>
+                    </a>
+                </dt>
+                <dd>
+                    <div class="mutliSelect">
+                        <ul class="mutliSelectUl">
+                            <li class="comman_checkbox1" style="width:100%">
+                                <input type="checkbox" class="selectAll" id="0" value="0" checked /><span></span>Select All
+                            </li>
+                            @foreach (var item in standards.Where(x => x.IsActive == true).OrderBy(x => x.TJCStandard))
+                            {
+                                <li class="comman_checkbox1" style="width:100%" categoryId="@item.CategoryId">
+                                    <input type="checkbox" class="assetChekcBox" id="@item.StDescID" value="@item.TJCStandard" checked /><span></span>@item.TJCStandard
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <div class="col-lg-9">
+        <div class="btn-group btn-group-vertical right_setting" data-toggle="buttons">
+            <label class="btn active">
+                @Html.RadioButton("EPCat", 1)@Html.Label("EC")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 2)@Html.Label("LS")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 3)@Html.Label("EM")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+            <label class="btn">
+                @Html.RadioButton("EPCat", 0, true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+            </label>
+        </div>
+    </div>
+</div>
+<div class="asset_list_view">
+    <ul>
+        <li id="liSelectAll">
+            <input type="checkbox" value="0" class="checkboxstatus" id="selectAll" /><span></span>Select All
+        </li>
+        <li id="epdetails_list_view" style="width:100%">
+            <ul>
+                @foreach (var stnd in standards.Where(x => x.IsActive).OrderBy(x => x.TJCStandard))
+                {
+                    foreach (var item in stnd.EPDetails.Where(x => x.IsActive).OrderBy(x => x.EPNumber))
+                    {
+                        if (Model.Any(x => x.EPDetailId == item.EPDetailId))
+                        {
+                            <li stdescId="@stnd.StDescID" categoryId="@stnd.CategoryId"><input type="checkbox" value="@item.EPDetailId" checked class="checkboxstatus" /> <span></span>@($"{stnd.TJCStandard} , {item.EPNumber}")</li>
+                        }
+                        else
+                        {
+                            <li stdescId="@stnd.StDescID" categoryId="@stnd.CategoryId"><input type="checkbox" value="@item.EPDetailId" class="checkboxstatus no-checked" /> <span></span>@($"{stnd.TJCStandard} , {item.EPNumber}")</li>
+                        }
+                    }
+                }
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $(".checkboxstatus").change(function () {
+            var userId = $("#userId").val();
+            var epdetailId = $(this).val();
+            var status = $(this).is(':checked');
+            var checkboxes = $('#epdetails_list_view ul>li>input:checked:visible');
+            debugger;
+            var epdetailsId = [];
+            for (var i = 0; i < checkboxes.length; i++) {
+                epdetailsId.push(parseInt($(checkboxes).eq(i).val()));
+            }
+            $.ajax({
+                url: "/goal/SaveUserEps",
+                method: "POST",
+                data: JSON.stringify({ userId: userId, epdetailId: epdetailId, epdetailIds: epdetailsId.join(","), status: status }),
+                contentType: 'application/json',
+                success: function (data) {                   
+                }
+            })
+        });
+
+        var len = $('input:checkbox.no-checked').length;
+        if (len == 0) {
+            $("#selectAll").prop("checked", true);
+        }
+    });
+
+
+    $("#selectAll").click(function () {
+        var isChecked = $(this).prop('checked');
+        $('.asset_list_view').find('input[type="checkbox"]').each(function (index) {
+            $(this).prop("checked", isChecked);
+        });
+    });
+
+
+
+    $(".dropdown dt a").on('click', function () {
+        $(".dropdown dd ul").slideToggle('fast');
+    });
+
+    $(".dropdown dd ul li a").on('click', function () {
+        $(".dropdown dd ul").hide();
+    });
+
+    $(document).bind('click', function (e) {
+        var $clicked = $(e.target);
+        if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
+    });
+
+
+    $("input[name=EPCat]:radio").change(function () {
+        var catId = $("input[name='EPCat']:checked").val();
+        if (catId > 0) {
+            $("li.comman_checkbox1").hide();
+            $("li.comman_checkbox1[categoryId=" + catId + "]").show();
+            $("#epdetails_list_view ul li").hide();
+            $("#liSelectAll").show();
+            $("#epdetails_list_view ul li[categoryId=" + catId + "]").show();
+        } else {
+            $("li.comman_checkbox1").show();
+            $("#epdetails_list_view ul li").show();
+            $('li.comman_checkbox1').find('input[type="checkbox"]').each(function (index) {
+                $(this).prop("checked", true);
+            });
+        }
+    });
+
+    $('.mutliSelect input[type="checkbox"]').on('click', function () {
+        var stdescId = $(this).attr("id");
+        if ($(this).is(':checked')) {
+            $("#liSelectAll").show();
+            $("#epdetails_list_view ul li[stdescId=" + stdescId + "]").show();
+        }
+        else {
+            $("#epdetails_list_view ul li[stdescId=" + stdescId + "]").hide();
+        }
+    });
+
+</script>

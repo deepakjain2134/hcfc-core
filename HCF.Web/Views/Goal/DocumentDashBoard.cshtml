@@ -1,0 +1,211 @@
+﻿@model IEnumerable<HCF.BDO.UserProfile>
+@{
+    ViewBag.Title = "DocumentDashBoard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var users = Model; //Users.GetUsers().Where(x =>( x.IsActive && !string.IsNullOrEmpty(x.Email) && x.EpsCount > 0 ) || x.UserId==HCF.Web.Base.UserSession.CurrentUser.UserId).OrderBy(x => x.FullName).ToList();
+
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Document Dashboard
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-12">
+                        <div class="input-group hide" id="dvsearch">
+                            <input type="text" class="form-control" id="inputSuccess2" placeholder="Search" />
+                            <i class="closesearch" id="closesearch">x</i>
+                            <span class="input-group-addon">
+                                <i class="fa fa-search" id="btntxtsearch"></i>
+                            </span>
+                        </div>
+                        <div class="dash_btnfilter" id="dash_btnfilter">
+                            <div class="dropup" style="display: inline-flex;">
+                                <div class="dropup dash_btnfilter" style="display: inline-flex; float:left;margin-right: 18px;">
+                                    @if (HCF.Web.Base.UserSession.CurrentUser.IsPowerUser)
+                                    {
+                                        <select name="ddlUsers" id="ddlUsers" class="form-control">
+                                            <option value="0"> All Users</option>
+                                            @foreach (var data in users)
+                                            {
+                                                <option username="@data.FullName" value="@data.UserId">
+                                                    @($"{data.FullName} {((data.IsPowerUser == true) ? "(PU)" : "")}")
+                                                </option>
+                                            }
+
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <select name="ddlUsers" id="ddlUsers" class="form-control disable">
+
+                                            @foreach (var data in users.Where(x => x.UserId == HCF.Web.Base.UserSession.CurrentUser.UserId))
+                                            {
+                                                <option value="@data.UserId">
+                                                    @*@($"{data.FullName} ({((data.IsPowerUser == true) ? "PU " : "")})")*@
+                                                    @($"{data.FullName} {((data.IsPowerUser == true) ? "(PU)" : "")}")
+                                                </option>
+
+                                            }
+
+                                        </select>
+                                    }
+                                </div>
+                                <input type="submit" name="button" class="button1 dropdown-toggle due_with_day" id="btn_dueWithin" value="Due within Days" data-toggle="dropdown" />
+                                <ul class="dropdown-menu assets-dropdown" id="btn_Duewithin">
+                                    <li><a href="#" class="filter_due_within" value="1">1 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="5">5 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="10">10 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="15">15 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="20">20 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="25">25 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="30">30 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="60">60 days</a></li>
+                                    <li><a href="#" class="filter_due_within" value="90">90 days</a></li>
+                                </ul>
+                            </div>
+                            <input type="submit" name="button" class="button1 btn_pastdue" id="btn_pastdue" value="Deficient" />
+                            <input type="submit" name="button" class="button1 Inprogress" id="btn_Inprogress" value="In Progress" />
+                            <input type="submit" name="button" class="button1 alleps active" id="btn_all" value="Show All " />
+                            <div class="gorefersh-btn">
+                                <button class="comm-button" id="btnloaddata">Go</button>
+                                <button class="comm-Cancelbutton" id="btnrefresh">Reset</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-4">
+                        <span class="documentprogressDocument">
+                            <div id="documentprogressBarVal" style="text-align: right;margin: 0; color: #ff0000; font-weight: 600;">(<label id="lblprogress">0</label>)%</div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+                <table width="100%" style="display:none">
+                    <tr>
+                        <td>
+                            <span id="tabletext">User:&nbsp;&nbsp;<label id="lbluser">All Users</label> &nbsp;&nbsp;Status:&nbsp;&nbsp;<label id="lblstatus">Show All</label></span>
+                        </td>
+                    </tr>
+                </table>
+                <div id="partialContents">
+                    @*@AsyncLoader.Render("Goal", "DocumentDashBoardView", "partialContents")*@
+                    @await Component.InvokeAsync("GoalDocumentDashBoardView")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    var btnloaddata = $("#btnloaddata");
+    var btnrefresh = $("#btnrefresh");
+    var ddlUsers = $("#ddlUsers");
+
+    $('#btn_Inprogress').on('click', function () {
+        debugger
+        $(this).toggleClass("active");
+    });
+
+    $('#btn_pastdue').on('click', function () {
+        debugger
+        $(this).toggleClass("active");
+    });
+
+    $('#btn_all').on('click', function () {
+        debugger
+        $(".button1").removeClass("active");
+        $(this).addClass("active");
+        removeFilter();
+    });
+
+    $(".filter_due_within").on('click', function () {
+        debugger
+        var text = $(this).text();
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
+            $("#btn_dueWithin").removeClass('active');
+        } else {
+            $(".filter_due_within").removeClass('active');
+            $(this).addClass('active');
+            $("#btn_dueWithin").addClass('active');
+            $("#btn_dueWithin").val("Due within " + text);
+        }
+        //filterTblData();
+    });
+
+    var filterTblData = function () {
+        debugger
+        var inprogress = 0;
+        var pastDue = 0;
+        var dueWithIndays = 0;
+        var selectedStatus = "";
+        var selectedUser = ddlUsers.val();
+        if ($('#btn_Inprogress').hasClass('active')) {
+            inprogress = 1;
+            selectedStatus = "In-Progress"
+        }
+        if ($('#btn_pastdue').hasClass('active')) {
+            pastDue = 1;
+            selectedStatus = "Deficient/Pastdue"
+        }
+        if ($(".filter_due_within").hasClass('active')) {
+            dueWithIndays = $(".filter_due_within.active").attr('value');
+            $("#btn_dueWithin").addClass('active');
+            selectedStatus = "Due within " + dueWithIndays + " Days";
+        } else {
+            $("#btn_dueWithin").removeClass('active');
+        }
+        var selUser = $("#ddlUsers option:selected").text();
+        $("#lbluser").html(selUser);
+        $("#lblstatus").html(selectedStatus);
+        var url = CRxUrls.Goal_PartialDocDashBoard;
+        $.get(url + '?selectedUser=' + selectedUser + '&inprogress=' + inprogress + "&dueWitndays=" + dueWithIndays + "&pastDueordef=" + pastDue, function (data) {
+            $('#partialContents').html(data);
+            $('#partialContents').fadeIn('fast');
+        });
+    }
+
+    btnloaddata.click(function () {
+        debugger
+        filterTblData();
+    });
+
+    btnrefresh.click(function () {
+        debugger
+        removeFilter();
+    });
+
+    ddlUsers.change(function () {
+        debugger
+        filterTblData();
+    });
+
+    function removeFilter() {
+        debugger
+        $(".button1").removeClass("active");
+        $('#btn_all').addClass("active");
+        $("#btn_dueWithin").val("Due within Days");
+        filterTblData();
+    }
+
+</script>
+@*<style>
+        div#documentep_filter {
+            text-align: right;
+        }
+    </style>*@

@@ -1,0 +1,85 @@
+﻿@model HCF.BDO.DocumentType
+@{
+    ViewBag.Title = "PolicyBinderHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Policy Binder History
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+           
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary ">
+                    
+                       
+
+                        <div>
+                            <p><strong>Policy:</strong> @Model.Name</p>
+                        </div>
+
+                        <div class="table-responsive">
+                            @if (Model.TInspectionActivity.Any())
+                            {
+                                <table class="tble_shadow table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>FileName</th>
+                                            <th>Review Date</th>
+                                            <th>Uploaded Date</th>
+                                            @*<th>Next Review Date</th>*@
+                                            <th>Uploaded By</th>
+                                            <th>StandardEP</th>
+                                            <th>Details</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var inspectionActivity in Model.TInspectionActivity.OrderByDescending(x => x.ActivityInspectionDate))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(inspectionActivity.InspectionEPDocs.Path))
+                                                    {
+                                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = inspectionActivity.InspectionEPDocs.Path, title = "Preview" })" class="modal-link" title="View">
+                                                            <img src="/dist/Images/Icons/documentview_icon.png" alt="" />
+                                                        </a>
+                                                        @inspectionActivity.InspectionEPDocs.DocumentName
+                                                    }
+                                                </td>
+                                                <td>@inspectionActivity.InspectionEPDocs.DtEffectiveDate.CastLocaleDate()</td>
+                                                <td>@inspectionActivity.InspectionEPDocs.CreatedDate.ToFormatDate()</td>
+
+                                                @*<td>@inspectionActivity.InspectionEPDocs.ExpiredDate.CastDate()</td>*@
+                                                <td>@inspectionActivity.UserProfile.FullName</td>
+                                                <td>
+                                                    <a href="@Url.Action("EPActivityHistory", "Assets", new { InspectionId = inspectionActivity.InspectionId, epId = inspectionActivity.EPDetailId })"> @(inspectionActivity?.StandardEps?.StandardEP ==null ?"": inspectionActivity?.StandardEps?.StandardEP )</a>
+                                                </td>
+                                                <td>
+                                                    <img onclick="location.href ='@Url.Action("ActivityHistory", "Assets", new { activityId = inspectionActivity.ActivityId })'"
+                                                         src="@Url.Content("~/dist/Images/Icons/detail_icon.png")" title="Detail" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            { <div class="tble_shadow text-center">No history available</div>}
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(function () {
+        $("[rel=popover]").popover({ placement: 'bottom' });
+    });
+</script>

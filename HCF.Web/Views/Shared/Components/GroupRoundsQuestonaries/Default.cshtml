@@ -1,0 +1,288 @@
+﻿@model HCF.BDO.TRounds
+@{
+
+    Layout = null;
+    int currentuserid = (HCF.Web.Base.UserSession.CurrentUser != null ? HCF.Web.Base.UserSession.CurrentUser.UserId : 0);
+    // var isnpStatus = Model.Inspections.Any(x => x.IsOpen) && Model.Status != 1 ? "2" : "1";
+    var isOpen = Model.IsFloorRoundOpenForUser(HCF.Web.Base.UserSession.CurrentUser.UserId, Model.Inspections.FirstOrDefault().FloorId);
+}
+
+<div class="row tablelist-topform tble_shadow">
+
+    @if (ViewBag.sequennce == "1")
+    {
+
+
+        <div class="col-md-12">
+            <strong>Location: </strong>@Model.Inspections.FirstOrDefault().Floor.FloorBuildingLocation
+            <input type="hidden" id="hdn_floorId" value="@Model.Inspections.FirstOrDefault().Floor.FloorId" />
+            <input type="hidden" id="hdn_isOpen" value="@Convert.ToString(isOpen)" />
+        </div>
+        <br>
+
+        <div class="col-md-12 text-right">
+            <a style="float: left;" id="apdfdownload" class="bbi-pdf" title="Download Pdf">
+                <span>
+                    <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                </span>
+            </a>
+            @if (Model.Inspections.FirstOrDefault().IsOpen && Model.Status != 1 && Model.Status != 1)
+            {
+                <button class="comm-button saveFloorRound" id="saveFloorRound">Close Floor</button>
+            }
+            @if (Model.Inspections.FirstOrDefault().Floor.FloorId != Model.GetNextFloor(Model.Inspections.FirstOrDefault().Floor.FloorId))
+            {
+                <button class="comm-bluebutton nextFloor" id="getFloorRound">Next Floor</button>
+            }
+
+            <button class="@(Model.Status != 1 ? "comm-Cancelbutton closeRound" : "comm-Cancelbutton closeRound hide")" id="closeRound">Close round for Everyone</button>
+            @if (Model.IsRoundOpenForUser(HCF.Web.Base.UserSession.CurrentUser.UserId) == true)
+            {
+                <button class="comm-bluebutton submitRound closedbtn" id="submitRound">Close round for Me </button>
+            }
+            @if (Model.IsRoundOpenForUser(HCF.Web.Base.UserSession.CurrentUser.UserId) == false)
+            {
+                <button class="comm-button reopenRound" id="reopenRound">Re-Open Closed Round </button>
+            }
+            <a onclick="ShowCombinedInspection(@Model.Inspections.FirstOrDefault().Floor.FloorId)" class="comm-button align-right" title="Detail">
+                Combined View
+            </a>
+        </div>
+    }
+</div>
+
+<div id="round_cat_box">
+    @await Html.PartialAsync("_RoundCategoryInspection", Model)
+</div>
+
+@if (ViewBag.sequennce == "-1")
+{
+
+    <div class="row">
+        <div class="col-md-12 text-right">
+            @if (Model.Inspections.FirstOrDefault().IsOpen && Model.Status != 1)
+            {
+                <button class="comm-button saveFloorRound" id="saveFloorRound">Close Floor</button>
+            }
+            @if (Model.Inspections.FirstOrDefault().Floor.FloorId != Model.GetNextFloor(Model.Inspections.FirstOrDefault().Floor.FloorId))
+            {
+                <button class="comm-bluebutton nextFloor" id="getFloorRound">Next Floor</button>
+            }
+            <button class="@(Model.Status != 1 ? "comm-Cancelbutton closeRound" : "comm-Cancelbutton closeRound hide")" id="closeRound">
+                Close round for Everyone
+            </button>
+            <button class="comm-bluebutton submitRound closedbtn" id="submitRound">Close round for Me </button>
+            <button class="comm-button reopenRound" id="reopenRound">Re-Open Closed Round </button>
+        </div>
+    </div>
+}
+
+
+
+<script>
+
+    var troundId='@Model.TRoundId';
+
+    //console.log('@Model.RoundType');
+    $(document).ready(function(){
+        var hdn_floorId=$("#hdn_floorId").val();
+        var roundType=$("#hdnRoundType").val();
+
+    //    if(roundType==2)
+    //    {
+    //         loadFloorUserRoundCatDiv(troundId, hdn_floorId, 0);
+
+
+    //    function loadFloorUserRoundCatDiv (troundId, floorId, userId) {
+    //    var url='@Url.Action("LoadFloorUserRoundCat", "Round")'
+    //    $.get(url + '?troundId=' + roundId + "&userId="+userId +"&floorId="+ floorId, function (data) {
+    //        $('#insp_Add_categories').empty();
+    //        $('#insp_Add_categories').html(data);
+    //        $('#insp_Add_categories').fadeIn('fast');
+    //    });
+    //    }
+    //}
+    });
+
+
+    var floorId = $("#hdn_floorId").val();
+    var roundId = $("#hdnRoundId").val();
+    /* When the user clicks on the button,
+     toggle between hiding and showing the dropdown content */
+    function showstepsOptions(roundquesId) {
+       // debugger;
+        $(".dropdown-content").removeClass("show");
+        document.getElementById("round_steps_" + roundquesId).classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.ins_check3_btn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+           // debugger;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }    
+
+    $(".reopenRound").click(function () {      
+        var status = 2;
+        swal({
+            title: "Are you sure? ",
+            text: "Are you sure you want to re-open the closed round?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                reopenround(roundId, status);
+            }
+        });
+    });
+
+    function reopenround(roundId, status) {
+        var splitroundid = $("#hdnRoundId").val().split(',');
+        $.each(splitroundid, function (i) {
+            $.get(CRxUrls.Round_SaveRoundStatus + '?roundId=' + splitroundid[i] + "&status=" + status, function (data) {
+                // debugger;
+                if (data.result == true) {
+                    swalalert('Round opened Successfully!')
+                }
+                location.reload();
+
+            });
+        });
+    }
+    $(".closeRound").click(function () {  
+        // close round for everyone
+        var status = 1;
+        swal({
+            title: "Are you sure? ",
+            text: "Are you sure you want to close this round?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                closeRounds(roundId, status);
+            }
+        });
+    });
+
+    $(document).off("click", ".submitRound").on("click", ".submitRound", function () {    
+        // close round for user
+        var status = 3;
+        var floorId = 0;
+        swal({
+            title: "Are you sure? ",
+            text: "Are you sure you want to close your round?",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+            closeOnCancel: true
+        }, function (isConfirm) {
+            if (isConfirm) {
+                submitRounds(roundId, floorId, status);
+            }
+        });
+    })
+
+
+    function closeRounds(roundId, status) {
+        var splitroundid = $("#hdnRoundId").val().split(',');
+        $.each(splitroundid, function (i) {
+            $.get(CRxUrls.Round_SaveRoundStatus + '?roundId=' + splitroundid[i] + "&status=" + status, function (data) {               
+                if (data.result == true) {
+                    swalalert('Round Closed Successfully!')
+                }
+                var url = CRxUrls.Round_Index;
+                window.location.href = url;
+            });
+        });
+    }
+
+    function submitRounds(roundId, floorId, status) {
+       // debugger;
+        var splitroundid = $("#hdnRoundId").val().split(',');
+        $.each(splitroundid, function (i) {
+            $.get(CRxUrls.Round_SaveRoundInspStatus + '?roundId=' + splitroundid[i] + "&floorId=" + floorId + "&status=" + status, function (data) {
+
+            });
+        });
+        setTimeout(function () {
+            var floorId = getNextFloor();
+            openRoundQuestons(floorId);
+        }, 3000);
+
+
+    }
+    $(document).off("click", ".saveFloorRound").on("click", ".saveFloorRound", function () {
+        //var questionnaires = [];
+        //saveInspection(questionnaires, false);
+        var status = 2;
+        submitRounds(roundId, floorId, status);
+    });
+
+     $(document).ready(function () {
+         $("#apdfdownload").attr("href", "/PDF/RoundInspectionPdf?floorid=" + '@Model.Inspections.FirstOrDefault().Floor.FloorId' + "&roundid=" + $("#hdnRoundId").val() + "&groupround=1");
+        var isclosed = '@Convert.ToBoolean(Model.Status != 1 && Model.Inspections.Where(x => x.UserId == currentuserid && x.IsOpen).Any())';
+         if (isclosed== 'True') {
+             $(".closedbtn").show();
+         }
+         else {
+             $(".closedbtn").hide();
+         }
+        var isreopenshow = '@Convert.ToBoolean(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")  && (Model.Inspections.Where(x => x.UserId == currentuserid && (x.Status==1 && !x.IsOpen )).Any() || (Model.Status==1 && Model.Inspections.FirstOrDefault().IsOpen)))';
+
+          if (isreopenshow == 'True') {
+              $(".reopenRound").show();
+          }
+          else {
+              $(".reopenRound").hide();
+          }
+     });
+</script>
+<style>
+    td {
+        position: relative;
+    }
+
+    /* Dropdown Content (Hidden by Default) */
+    .dropdown-content {
+        position: absolute;
+        z-index: 1;
+    }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: black;
+            text-decoration: none;
+            display: block;
+        }
+
+            /* Change color of dropdown links on hover */
+            .dropdown-content a:hover {
+                background-color: #ddd
+            }
+
+    /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+    .show {
+        display: block;
+    }
+</style>

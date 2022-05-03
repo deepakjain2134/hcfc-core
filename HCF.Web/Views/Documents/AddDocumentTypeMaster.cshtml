@@ -1,0 +1,208 @@
+﻿@model HCF.BDO.DocumentType
+@*@using HCF.Web.Heleprs*@
+@{
+
+    ViewBag.Title = "Add Document Type";
+}
+@*@using HCF.Web.Views*@
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add Document Type
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+
+                @await Html.PartialAsync("_MoreConfig")
+
+                <div class="rightcol-setting">
+                   
+                    <div class="col-md-12">
+                        <div class="box box-primary">
+                            @using (Html.BeginForm("AddDocumentTypeMaster", "Documents", FormMethod.Post, new { enctype = "multipart/form-data", id = "documentType", autocomplete = "off" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                               
+                                    <div id="hdn_div">
+                                        @if (Model != null)
+                                        {
+                                            @Html.HiddenFor(x => x.DocTypeId)
+                                        }
+                                        <input type="hidden" name="FileName" value="" id="DocFileName" />
+                                        <input type="hidden" name="FileContent" value="" />
+                                        <input type="hidden" name="FilePath" />
+                                        <input type="hidden" name="Path" id="DocPath" />
+                                        <input type="hidden" name="strJson" id="strJson" />
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 col-sm-6">
+                                            @if (Model != null)
+                                            {
+                                                @Html.HiddenFor(m => m.DocTypeId)
+                                            }
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.Name)<em class="required-field"> *</em>
+                                                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = "required", maxlength = 250 })
+                                                @Html.ValidationMessageFor(model => model.Name)
+                                            </div>
+
+                                            <div class="form-group">
+                                                @Html.LabelFor(model => model.DocCategoryID)<em class="required-field"> *</em>
+
+                                                <doccategorydropdown firsttext="Select"
+                                                                   required="required"
+                                                                   class="form-control"
+                                                                   selectedvalue="@((Model !=null)? Convert.ToString(Model.DocCategoryID):"" )"
+                                                                   name="DocCategoryID">
+                                                </doccategorydropdown>
+
+
+                                                @*@if (Model != null)
+         {
+             @Html.DocCategoryDropdown("DocCategoryID",
+            (int)Model.DocCategoryID, "Select",
+            new
+                 {
+                     controllerName = Model,
+                     @class = "form-control",
+                     required = "required"
+                 })
+         }
+         else
+         {
+             @Html.DocCategoryDropdown("DocCategoryID", 0, "Select", new
+             {
+            controllerName = Model,
+            @class = "form-control",
+            required = "required"
+        })
+         }*@
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-sm-6">
+                                            <div class="form-group">
+
+                                                @Html.LabelFor(m => m.Path)<em class="required-field"> *</em>
+                                                @if (Model != null)
+                                                {
+                                                    <div>
+                                                        <input type="file" name="file" accept="file/*" id="file" tempname="FileName" tempfileName="FileName" tempfilecontent="FileContent" class="fileUpload" onchange="Uploadfiles(this)" />
+                                                    </div>
+                                                    <input type="hidden" id="attachedpath" value="@Model.Path" />
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = Model.Path, title = "Preview" })" id="deleteimg_@Model.DocTypeId" class="modal-link allowclick">
+                                                        <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@Model.Path" />
+                                                    </a>
+                                                    <a data-id="@Model.DocTypeId" class="delete">
+                                                        <img id="deleteplanimg_@Model.DocTypeId" class="deleteplanimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <div>
+                                                        <input type="file" name="file" accept="file/*" id="file" tempname="FileName" tempfileName="FileName" tempfilecontent="FileContent" class="fileUpload" required="required" onchange="Uploadfiles(this)" />
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <div class="form-group comman_checkbox">
+                                                @Html.LabelFor(m => m.IsActive)
+                                                @Html.CheckBoxFor(m => m.IsActive, new { @checked = "checked" })<span></span>
+                                                @Html.ValidationMessageFor(m => m.IsActive)
+                                            </div>
+
+                                        </div>
+
+                                        <div class="button_Div">
+                                            <input type="submit" id="submit" value='@Localizer["Save"]' class="comm-button" />
+                                            @*@Html.ActionLink("Cancel ", "DocumentType", "Documents", new { @class = "comm-button" })*@
+                                            @Html.ActionLink("Cancel", "DocumentType", new { controller = "Documents" }, new { @class = "comm-Cancelbutton" })
+                                        </div>
+
+                                    </div>
+                                
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="updatemultipleFloorPlan" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div id="loadpartial" style="margin-top:0;">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('.date').datepicker();
+    
+    function Uploadfiles(file) {
+        debugger;
+        var fileExtensionas = ['pdf'];
+        if (file.files.length > 0) {
+            var control = file.getAttribute("tempfilecontent");
+            var fileControl = file.getAttribute("filename");
+            var filepath = file.getAttribute("filepath");
+            file = file.files[0];
+            var fileName = file.name;
+            if (fileName != null) {
+                var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                if ($.inArray(fileExtension, fileExtensionas) == -1) {
+                    infoAlert("Only formats are allowed : " + fileExtensionas.join(', '));
+                    $('#file').val("")
+                } else {
+                    var fileNamewithoutext = fileName.substr(0, fileName.lastIndexOf('.'));
+                    $("#DocFileName").val(fileName);
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        var array = reader.result.split(",");
+                        $("input[name='" + control + "'][type=hidden]").val(array[1]);
+                        $("input[name='" + fileControl + "'][type=hidden]").val(fileName);
+                        $("input[name='" + filepath + "'][type=hidden]").val("");
+                    };
+                    reader.onerror = function (error) {
+                        $("#FileContent").val("");
+                    };
+                }
+            }
+        }
+    }
+
+
+    $(document).on('click', 'a.delete', function (e) {
+        debugger
+        e.preventDefault();
+        var certiId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this file!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, Remove it!",
+            closeOnConfirm: true
+        },
+            function () {
+
+                $("#deleteimg_" + certiId).remove();
+                $("#deleteplanimg_" + certiId).remove();
+                swal("Deleted!", "Your file has been deleted.", "success");
+                $('#file').prop('required', true);
+            });
+    });
+
+</script>  

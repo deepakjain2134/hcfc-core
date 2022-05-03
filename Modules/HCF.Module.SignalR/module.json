@@ -1,0 +1,6 @@
+{
+  "id": "HCF.Module.SignalR",
+  "name": "SignalR",
+  "isBundledWithHost": true,
+  "version": "1.0.0"
+}

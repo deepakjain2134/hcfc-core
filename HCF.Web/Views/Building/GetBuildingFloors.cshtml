@@ -1,0 +1,31 @@
+﻿@model List<HCF.BDO.Buildings>
+<div class="btn-group btn-group-vertical" data-toggle="buttons">
+    @foreach (HCF.BDO.FrequencyMaster item in (List<HCF.BDO.FrequencyMaster>)(ViewBag.InspectionType))
+    {
+        <input type="radio" name="drpInspTypes" value="@item.FrequencyId" />@item.DisplayName
+    }
+</div>
+<div style="float:right">
+    <a class="pull-right addnew">
+        <img src="@Url.Content("~/Images/Icons/3d_add_button.png")" title="Add New Assets" alt="3d_add_button" />
+    </a>
+</div>
+<div class="row">
+    <div class="col-lg-6 col-xs-6"><h4 class="headings">Buildings</h4></div>
+    <div class="col-lg-6 col-xs-6"><h4 class="headings">Floors</h4></div>
+</div>
+<input type="hidden" value="@ViewBag.AssetId" id="assetId" />
+@foreach (var building in Model.Where(x => x.IsActive && x.Floor.Where(f => f.IsActive).Count() > 0))
+{
+    <div class="asset_list">
+        <label>@building.BuildingName</label>
+        @foreach (var floor in building.Floor.Where(x => x.IsActive))
+        {
+            <ul class="floor_no">
+                <li id="@floor.FloorId" title="@floor.FloorName">
+                    <a onclick="GoTOPage('@floor.FloorId')" title="@floor.FloorName">@floor.FloorCode.Substring(0, Math.Min(floor.FloorCode.Length, 2)) </a>
+                </li>
+            </ul>
+        }
+    </div>
+}

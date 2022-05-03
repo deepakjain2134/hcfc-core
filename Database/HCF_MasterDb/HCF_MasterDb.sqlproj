@@ -1,0 +1,287 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>HCF_MasterDb</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{f2a5397e-5616-4b51-b9c3-479c304d0238}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>HCF_Master</RootNamespace>
+    <AssemblyName>HCF_Master</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <GenerateCreateScript>False</GenerateCreateScript>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found-->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Tables\" />
+    <Folder Include="Security\" />
+    <Folder Include="Functions\" />
+    <Folder Include="Stored Procedures\" />
+    <Folder Include="Views" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Tables\CityMaster.sql" />
+    <Build Include="Tables\UserGroup.sql" />
+    <Build Include="Tables\DeviceTypes.sql" />
+    <Build Include="Tables\EpBinder.sql" />
+    <Build Include="Tables\UserTypes.sql" />
+    <Build Include="Tables\EPDocuments.sql" />
+    <Build Include="Tables\Organization.sql" />
+    <Build Include="Tables\UserLogin.sql" />
+    <Build Include="Tables\InspResult.sql" />
+    <Build Include="Tables\InspStatus.sql" />
+    <Build Include="Tables\EPFrequency.sql" />
+    <Build Include="Tables\Menus.sql" />
+    <Build Include="Tables\IncomingMail.sql" />
+    <Build Include="Tables\InboxEmails.sql" />
+    <Build Include="Tables\Roles.sql" />
+    <Build Include="Tables\EPDescriptions.sql" />
+    <Build Include="Tables\BuildVersion.sql" />
+    <Build Include="Tables\RolesInGroups.sql" />
+    <Build Include="Tables\HospitalType.sql" />
+    <Build Include="Tables\FrequencyMaster.sql" />
+    <Build Include="Tables\PasswordResetRequests.sql" />
+    <Build Include="Tables\OrgServices.sql" />
+    <Build Include="Tables\Assets.sql" />
+    <Build Include="Tables\UserOrganization.sql" />
+    <Build Include="Tables\EpAssets.sql" />
+    <Build Include="Tables\UserProfile.sql" />
+    <Build Include="Tables\AssetInspFrequency.sql" />
+    <Build Include="Tables\EPGroups.sql" />
+    <Build Include="Tables\AffectedEPs.sql" />
+    <Build Include="Tables\Steps.sql" />
+    <Build Include="Tables\Tips.sql" />
+    <Build Include="Tables\EPGroupsDetail.sql" />
+    <Build Include="Tables\AssetType.sql" />
+    <Build Include="Tables\Manufactures.sql" />
+    <Build Include="Tables\Category.sql" />
+    <Build Include="Tables\Binders.sql" />
+    <Build Include="Tables\NotificationCategory.sql" />
+    <Build Include="Tables\NotificationEvent.sql" />
+    <Build Include="Tables\Score.sql" />
+    <Build Include="Tables\NotificationMapping.sql" />
+    <Build Include="Tables\Standards.sql" />
+    <Build Include="Tables\ConstructionActivity.sql" />
+    <Build Include="Tables\Attachments.sql" />
+    <Build Include="Tables\Status.sql" />
+    <Build Include="Tables\ConstructionClass.sql" />
+    <Build Include="Tables\UserAdditionalRole.sql" />
+    <Build Include="Tables\ConstructionClassActivity.sql" />
+    <Build Include="Tables\News.sql" />
+    <Build Include="Tables\ConstructionRisk.sql" />
+    <Build Include="Tables\ConstructionType.sql" />
+    <Build Include="Tables\FiredrillCategory.sql" />
+    <Build Include="Tables\FireDrillQuestionnaires.sql" />
+    <Build Include="Tables\AssetsSubCategory.sql" />
+    <Build Include="Tables\ICRAMatixPrecautions.sql" />
+    <Build Include="Tables\FireExtinguisherTypes.sql" />
+    <Build Include="Tables\ICRAObsReportCheckPoints.sql" />
+    <Build Include="Tables\StandardManuals.sql" />
+    <Build Include="Tables\ICRARiskArea.sql" />
+    <Build Include="Tables\ICRASteps.sql" />
+    <Build Include="Tables\EPVersions.sql" />
+    <Build Include="Tables\IlsmStepsMapping.sql" />
+    <Build Include="Tables\EPDetails.sql" />
+    <Build Include="Tables\MainGoal.sql" />
+    <Build Include="Tables\SiteType.sql" />
+    <Build Include="Tables\DocumentType.sql" />
+    <Build Include="Tables\StateMaster.sql" />
+    <Build Include="Security\DESKTOP-C532C0L_deepak.sql" />
+    <Build Include="Security\DESKTOP-C532C0L_deepak_1.sql" />
+    <Build Include="Functions\InitCap.sql" />
+    <Build Include="Functions\ProperCase.sql" />
+    <Build Include="Functions\Rm_IsRiskAreaEmpty.sql" />
+    <Build Include="Functions\SplitString.sql" />
+    <Build Include="Stored Procedures\AssetType_CRUD.sql" />
+    <Build Include="Stored Procedures\AuthenticateUser.sql" />
+    <Build Include="Stored Procedures\ChangerecoverPassword.sql" />
+    <Build Include="Stored Procedures\Check_IsExistingUser.sql" />
+    <Build Include="Stored Procedures\Delete_DocumentTypeMaster.sql" />
+    <Build Include="Stored Procedures\Delete_News.sql" />
+    <Build Include="Stored Procedures\FlagRecoveryCode.sql" />
+    <Build Include="Stored Procedures\Get_All_Tips.sql" />
+    <Build Include="Stored Procedures\Get_BuildVersions.sql" />
+    <Build Include="Stored Procedures\Get_ChildOrganization.sql" />
+    <Build Include="Stored Procedures\Get_ConstructionClass.sql" />
+    <Build Include="Stored Procedures\Get_ConstructionType.sql" />
+    <Build Include="Stored Procedures\Get_Documents.sql" />
+    <Build Include="Stored Procedures\Get_DocumentTypesMaster.sql" />
+    <Build Include="Stored Procedures\Get_EPGroupNameList.sql" />
+    <Build Include="Stored Procedures\Get_EPGroupsDetail.sql" />
+    <Build Include="Stored Procedures\Get_FrequencyMaster.sql" />
+    <Build Include="Stored Procedures\Get_ICRAMatixPrecautions.sql" />
+    <Build Include="Stored Procedures\Get_ICRAObsReportCheckPoints.sql" />
+    <Build Include="Stored Procedures\Get_ICRASteps.sql" />
+    <Build Include="Stored Procedures\Get_LoginToken.sql" />
+    <Build Include="Stored Procedures\Get_Manufacture.sql" />
+    <Build Include="Stored Procedures\Get_MasterOrganization.sql" />
+    <Build Include="Stored Procedures\Get_News.sql" />
+    <Build Include="Stored Procedures\Get_NewsOnMarquee.sql" />
+    <Build Include="Stored Procedures\Get_Organizations.sql" />
+    <Build Include="Stored Procedures\Get_PopEmails.sql" />
+    <Build Include="Stored Procedures\Get_SaltFromEmailAddress.sql" />
+    <Build Include="Stored Procedures\Get_Tips.sql" />
+    <Build Include="Stored Procedures\Get_User.sql" />
+    <Build Include="Stored Procedures\Get_UserLogins.sql" />
+    <Build Include="Stored Procedures\Get_UserOrganizations.sql" />
+    <Build Include="Stored Procedures\Get_UserOrgs.sql" />
+    <Build Include="Stored Procedures\Get_WoCountByDbName.sql" />
+    <Build Include="Stored Procedures\GetEmailAddressFromRecoveryCode.sql" />
+    <Build Include="Stored Procedures\Hcf_UserOrganization.sql" />
+    <Build Include="Stored Procedures\HCFGet_Organization.sql" />
+    <Build Include="Stored Procedures\Insert_AssignEPs.sql" />
+    <Build Include="Stored Procedures\Insert_Attachments.sql" />
+    <Build Include="Stored Procedures\Insert_ClientUser.sql" />
+    <Build Include="Stored Procedures\Insert_ConstructionActivity.sql" />
+    <Build Include="Stored Procedures\Insert_ConstructionClass.sql" />
+    <Build Include="Stored Procedures\Insert_ConstructionClassActivity.sql" />
+    <Build Include="Stored Procedures\Insert_ConstructionRisk.sql" />
+    <Build Include="Stored Procedures\Insert_ConstructionType.sql" />
+    <Build Include="Stored Procedures\Insert_DocumentTypeMaster.sql" />
+    <Build Include="Stored Procedures\Insert_EPGroupsName.sql" />
+    <Build Include="Stored Procedures\Insert_EPVersions.sql" />
+    <Build Include="Stored Procedures\Insert_FrequencyMaster.sql" />
+    <Build Include="Stored Procedures\Insert_ICRAMatixPrecautions.sql" />
+    <Build Include="Stored Procedures\Insert_ICRAReportCheckPoint.sql" />
+    <Build Include="Stored Procedures\Insert_ICRASteps.sql" />
+    <Build Include="Stored Procedures\Insert_InboxEmails.sql" />
+    <Build Include="Stored Procedures\Insert_Mail.sql" />
+    <Build Include="Stored Procedures\Insert_Manufacture.sql" />
+    <Build Include="Stored Procedures\Insert_News.sql" />
+    <Build Include="Stored Procedures\Insert_PasswordResetQueue.sql" />
+    <Build Include="Stored Procedures\Insert_Tip.sql" />
+    <Build Include="Stored Procedures\Insert_Update_Tip.sql" />
+    <Build Include="Stored Procedures\IsValidRecoveryCode.sql" />
+    <Build Include="Stored Procedures\Main_MasterOrganization.sql" />
+    <Build Include="Stored Procedures\Rm_Get_ConstructionRisk.sql" />
+    <Build Include="Stored Procedures\Rm_Get_ICRARiskArea.sql" />
+    <Build Include="Stored Procedures\Rm_Insert_ICRARiskArea.sql" />
+    <Build Include="Stored Procedures\Rm_Update_ICRARiskArea.sql" />
+    <Build Include="Stored Procedures\sp_helptext2.sql" />
+    <Build Include="Stored Procedures\SYS_ScriptAllTriggers.sql" />
+    <Build Include="Stored Procedures\Updade_EPsAssignList.sql" />
+    <Build Include="Stored Procedures\Update_ApprovalOfTips.sql" />
+    <Build Include="Stored Procedures\Update_Attachment.sql" />
+    <Build Include="Stored Procedures\Update_DocumentTypeMaster.sql" />
+    <Build Include="Stored Procedures\Update_LogOutUser.sql" />
+    <Build Include="Stored Procedures\Update_News.sql" />
+    <Build Include="Stored Procedures\Update_Password.sql" />
+    <Build Include="Stored Procedures\Update_UserLoginIP.sql" />
+    <Build Include="Stored Procedures\Get_AllClientUsers.sql" />
+    <Build Include="Stored Procedures\CheckICRAPCRAMenuExist.sql" />
+    <Build Include="Tables\ProjectType.sql" />
+    <Build Include="Stored Procedures\Get_ProjectType.sql" />
+    <Build Include="Tables\CopDetails.sql" />
+    <Build Include="Tables\CopStdesc.sql" />
+    <Build Include="Tables\CmsEpMapping.sql" />
+    <Build Include="Views\view_cmsEPs.sql" />
+    <Build Include="Views\View_MasterEps.sql" />
+    <Build Include="Tables\ModuleMaster.sql" />
+    <Build Include="Stored Procedures\Get_ModuleMaster.sql" />
+    <Build Include="Stored Procedures\Get_RoundCommonQuestionaries.sql" />
+    <Build Include="Stored Procedures\Insert_RoundsQuestionnaires.sql" />
+    <Build Include="Tables\RoundCategory.sql" />
+    <Build Include="Tables\RoundsQuestionnaires.sql" />
+    <Build Include="Stored Procedures\Get_FiredrillQuestionnaries.sql" />
+    <Build Include="Stored Procedures\Update_FiredrillQuestionnaries.sql" />
+    <Build Include="Stored Procedures\Insert_FireDrillQuestionnaires.sql" />
+    <Build Include="Stored Procedures\GetCommonRoundCategory.sql" />
+    <Build Include="Stored Procedures\Insert_RoundCategory.sql" />
+    <Build Include="Stored Procedures\Get_VendorbyOrgid.sql" />
+    <Build Include="Stored Procedures\Get_IsVendorExist.sql" />
+    <Build Include="Stored Procedures\Check_UserVendorExist.sql" />
+    <Build Include="Tables\Vendors.sql" />
+    <Build Include="Stored Procedures\Insert_FiredrillCategory.sql" />
+    <Build Include="Stored Procedures\GetCommonFireDrillCategory.sql" />
+    <Build Include="Functions\fnFirstieInitials.sql" />
+    <Build Include="Tables\SyncMongoMaster.sql" />
+    <Build Include="Tables\VendorOrganizations.sql" />
+    <Build Include="Stored Procedures\Get_VendorOrgInvitation.sql" />
+    <Build Include="Stored Procedures\Get_Cities.sql" />
+    <Build Include="Stored Procedures\Get_States.sql" />
+    <Build Include="Stored Procedures\IsValidNewPassword.sql" />
+    <Build Include="Tables\UserProfileHistory.sql" />
+    <Build Include="Stored Procedures\Userlockout.sql" />
+    <Build Include="Stored Procedures\Get_Usersforlockout.sql" />
+    <Build Include="Stored Procedures\Get_User_salt.sql" />
+    <Build Include="Stored Procedures\IsNewDevice.sql" />
+    <Build Include="Stored Procedures\UpdateNewDevice.sql" />
+    <Build Include="Stored Procedures\Get_LastPasswords.sql" />
+    <Build Include="Tables\OrgSettings.sql" />
+    <Build Include="Stored Procedures\Get_Refreshtoken.sql" />
+    <Build Include="Stored Procedures\Get_UserOrgsByUserId.sql" />
+    <Build Include="SetArchiveRound.sql" />
+    <Build Include="Tables\TrainingSessionMaster.sql" />
+    <Build Include="Tables\OrgTrainingSessions.sql" />
+    <Build Include="Stored Procedures\Get_TrainingSessionsDetails.sql" />
+    <Build Include="Stored Procedures\Insert_Update_OrgTrainingSessions.sql" />
+    <Build Include="Stored Procedures\Insert_Update_TrainingSessionMaster.sql" />
+    <Build Include="Stored Procedures\Get_UsersList.sql" />
+    <Build Include="Tables\UsedPassword.sql" />
+    <Build Include="Stored Procedures\IsValidInvitationIdCode.sql" />
+    <Build Include="Stored Procedures\Get_lockingUsers.sql" />
+    <Build Include="Stored Procedures\Insert_UserLoginCodes.sql" />
+    <Build Include="Stored Procedures\Get_UserOrgsByRefreshToken.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="HCF_DB">
+      <DefaultValue>HCF</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="HCF_MasterDb.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HCF_MasterDb_Local.publish.xml" />
+    <None Include="Stored Procedures\sp_UnlockUsers.sql" />
+  </ItemGroup>
+</Project>

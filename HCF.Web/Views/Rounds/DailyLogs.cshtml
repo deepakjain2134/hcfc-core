@@ -1,0 +1,186 @@
+﻿@model List<HCF.BDO.TPMLogs>
+@{
+    ViewBag.Title = "DailyLogs";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            PM Logs
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                     
+                            @using (Html.BeginForm("DailyLogs", "Rounds", FormMethod.Get, new { @id = "dailylogform" }))
+                            {
+                                <div class="row tablelist-topform">
+                                    <div class="col-md-12 form-inline">
+                                        <div class="form-group">
+                                            <label>From:</label>
+                                            @Html.TextBox("FromDate", "", new { @class = "form-control datepicker readonly", required = "required", @readonly = "readonly", @placeholder = "Enter From Date" })
+                                            <span class="text-danger" id="FromDateError"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>To:</label>
+                                            @Html.TextBox("ToDate", "", new { @class = "form-control datepicker readonly", required = "required", @readonly = "readonly", @placeholder = "Enter To Date" })
+                                            <span class="text-danger" id="ToDateError"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" class="comm-button" value="GO" />
+                                            <input type="button" class="comm-button" id="Cleardailylogs" value="Refresh" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                       
+                       
+                    
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href='@(Url.Action("PMDailyLogs", "Rounds"))' class="pull-right">
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add New Log" alt="3d_add_button" />
+                        </a>
+                    </div>
+                   
+                    <table id="myTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Date
+                                </th>
+                                <th>
+                                    Created By
+                                </th>
+                                <th>
+                                    Comments
+                                </th>
+                                <th>
+                                    Name
+                                </th>
+                                <th>Reviewed By</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderByDescending(x => x.CreatedDate))
+                            {
+                                <tr>
+                                    <td data-sort="@item.Date.Ticks">
+                                        @item.Date.ToFormatDate()
+                                    </td>
+                                    <td>
+                                        @item.CreatedByUser.FullName
+                                    </td>
+                                    <td>
+                                        @item.Comments.Substring(0, Math.Min(item.Comments.Length, 100))
+                                        @if (item.Comments.Length > 100)
+                                        {
+                                            <a href="javascript:void(0);"
+                                                tabindex="0" data-trigger="focus"
+                                                class="dailyLogComment" rel='popover'
+                                                data-placement='right'
+                                                data-original-title=""
+                                                data-content='@item.Comments'>
+                                                @("...See More")
+                                            </a>
+                                        }
+
+                                    </td>
+                                    <td>
+                                        <span> @item.Name</span>
+                                    </td>
+                                    <td>
+                                        @if (item.ReviewedByUser != null)
+                                        {
+                                            @item.ReviewedByUser.FullName.CastToNA()
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("PMDailyLogs", "Rounds", new { pmlogId = item.PMLogId })">
+                                            <span>
+                                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="" />
+                                            </span>
+                                        </a>
+                                        <a href="@Url.Action("DailyMaintenanceReport", "Pdf", new { pmlogId = item.PMLogId })">
+                                            <span>
+                                                <img src="~/dist/Images/Icons/pdf_icon.png" title="Download Pdf" alt="" />
+                                            </span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+<script>
+
+    $(document).ready(function () {
+
+        var fromDate = $("#FromDate");
+        var toDate = $("#ToDate");
+        var FromDate = "@ViewBag.FromDate";
+        var ToDate = "@ViewBag.ToDate";
+        fromDate.val(FromDate);
+        toDate.val(ToDate);
+        $('.dailyLogComment').popover({
+            trigger: 'focus'
+        });
+        toDate.datepicker({
+            dateFormat: "M dd, yy", 
+            minDate: new Date($('#FromDate').val()),
+            maxDate: new Date()
+        });  
+        fromDate.datepicker({
+            dateFormat: "M dd, yy", 
+            onClose: function () {
+                $("#ToDate").datepicker(
+                    "change", {
+                        minDate: new Date($('#FromDate').val())                        
+                });                
+            }
+        });
+        $('input[type="submit"]').click(function (e) {
+            var fromdate = $("#FromDate").val();
+            var todate = $("#ToDate").val();
+            if (fromdate == "" && todate == "") {
+                $("#FromDateError").text("From date is required.");
+                $("#ToDateError").text("To date is required.");
+                return false;
+            }
+            else if (fromdate == "") {
+                $("#FromDateError").text("From date is required.");
+                $("#ToDateError").text("");
+                return false;
+            }
+            else if (todate == "") {
+                $("#FromDateError").text("");
+                $("#ToDateError").text("To date is required.");
+                return false;
+            }
+            else {
+                $("#FromDateError").text("");
+                $("#ToDateError").text("");
+                return true;
+            }
+        });
+
+        $('#Cleardailylogs').click(function () {
+            $("#FromDate").val("");
+            $("#ToDate").val("");
+            $("#dailylogform").submit();
+        });
+        
+    });
+</script>

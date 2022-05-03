@@ -1,0 +1,104 @@
+﻿@model IEnumerable<HCF.BDO.AssetType>
+
+<h4 class="uploadAssets-heading">Asset Type</h4>
+<p class="addremove-data"><span class="uploadAssets-dynamic"></span><a class="assetsPlus" style="font-size:20px;margin-top: -4px;" title="View List" href="#" id="uploadlistShow" class="float-right"><img src="/dist/Images/Icons/edit_button2.png" title="" alt=""></a></p>
+<ul>
+    <li>
+        @foreach (var item in Model.OrderBy(x => x.Name))
+        {
+            <ul class="list">
+                <li>
+                    <a style="cursor:pointer" class="assetcat" title="Click to expand">
+                        <label for="@($"cb1{item.Name}")" id="lbl">
+                            <i class="fa fa-angle-right" aria-hidden="true"></i>
+                            @item.Name
+                        </label>
+                    </a>
+                    <ul class="crxcheckbox assetsList">
+                        @foreach (var asset in item.Assets.Where(y => y.Count > 0 && y.StandardEps.Any()).OrderBy(x => x.Name))
+                        {
+                            <li class="uploadInspList">
+                                <div class="crxcheckbox-success">
+
+                                    <a class="assetsListLi" style="cursor:pointer" title="Click to expand">
+
+                                        <input type="checkbox" id="@($"cb2{asset.AssetId}")" value=@asset.AssetId name="AssetsId" class="foo" />
+                                        <label for="@($"cb2{asset.AssetId}")">
+                                            <img class="img" src="@commonModelFactory.CommonFilePath(asset.IconPath)" height="25"
+                                                 width="25" alt="" />
+
+                                            @asset.Name (@asset.Count)
+                                        </label>
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        }
+
+    </li>
+</ul>
+
+
+<script>
+
+    $(function () {
+        $(".assetsListLi").click(function () {
+            //debugger
+            $(".uploadAssets-dynamic").text($(this).text());
+            $(".uploadAssets-dynamic").val($(this).text());
+            var assetstypes = $(this).parent(".crxcheckbox-success").find(".img").attr("src");
+            $(".uploadAssets-dynamic").prepend('<img src="' + assetstypes + '" height="25" width="25" alt="">');
+            // $(this).find('input[type=checkbox]').prop("checked", true);
+        });
+
+        $('.assetsPlus').click(function () {
+            $('.uploadAssets-dynamic').empty();
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#uploadlistShow').click(function () {
+            $('.list').removeClass("uploadShowhide");
+        });
+
+        $('.uploadInspList').click(function () {
+            $('.list').addClass("uploadShowhide");
+            $(this).closest(".list").addClass('activeinsplist').siblings().removeClass('activeinsplist');
+        });
+
+        $('.uploadInspList').click(function () {
+            $('#uploadlistShow').addClass("plusShowhide");
+        });
+        $('#uploadlistShow').click(function () {
+            $('#uploadlistShow').removeClass("plusShowhide");
+        });
+    });
+
+    $(".foo").click(function () {
+        if ($(this).closest("li").hasClass('activeUl')) {
+            $(this).find('input[type=checkbox]').prop("checked", true);
+            return false;
+        };
+        var checked = $(this).prop("checked");
+        if (checked) {
+            $(".foo").not(this).attr("checked", false);
+        }
+        $("li").removeClass("activeUl");
+        $(this).closest("li").addClass("activeUl");
+    });
+
+    $('.list > li a').click(function () {
+        //debugger;
+        $(this).parent().find('ul.assetsList').toggle();
+    });
+
+    $('.assetsListLi').click(function () {
+        $(this).parent().find('ul.assetsubCategoryList').toggle();
+    });
+
+</script>
+

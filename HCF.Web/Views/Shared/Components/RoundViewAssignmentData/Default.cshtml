@@ -1,0 +1,154 @@
+﻿@model List<HCF.BDO.RoundGroup>
+@{
+    var userid = -1;
+    var locationGroupId = -1;
+    if (ViewBag.UserId != null)
+    {
+        userid = ViewBag.UserId;
+    }
+    if (ViewBag.locationGroupId != null)
+    {
+        locationGroupId = ViewBag.locationGroupId;
+    }
+}
+
+<div class="col-lg-6">
+    <div id='calendar' class="calender"></div>
+</div>
+<div class="col-lg-6">
+    <div id="RecentChangesTab">
+    </div>
+    <div id="detailsTab">
+        @await Component.InvokeAsync("RoundGetRoundByDate",
+        new
+        {
+        userId = userid == -1 ? HCF.Web.Base.UserSession.CurrentUser.UserId : userid,
+        locationGroupId = userid == -1 ? 0 : locationGroupId,
+        date = DateTime.Now.Date
+        })
+    </div>
+</div>
+
+
+<div id="fullCalModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                <h4 id="modalTitle" class="modal-title">Round </h4>
+            </div>
+            <div id="modalBody" class="modal-body">
+                Location Group Name: <h4 id="groupName"></h4>
+                Round Name:  <h4 id="roundCategory"></h4>
+                Volunteer<ul id="userLists"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Close</button>
+                <button class="btn comm-button">
+                    <a id="eventUrl">Start Inspection</a>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        $(document).ready(function () {
+            if (@userid== -1) {
+                $("#ddlUsers").val(@HCF.Web.Base.UserSession.GetUserId());
+            } else {
+                 $("#ddlUsers").val(@userid);
+            }
+
+
+        $('#calendar').fullCalendar({
+            header: {
+                left: '',
+                center: 'prevYear,prev,title,next,nextYear',
+                right: 'today'
+            },
+            firstDay: 0,
+            slotMinutes: 0,
+            events: getdata(),
+            dayClick: function (date, jsEvent, view) {
+               // debugger;
+                $("td").removeClass("activeDate");
+                $(this).addClass("activeDate");
+               // console.log(date.format());
+                loadCalenderData(date.format());
+            },
+            eventClick: function(info) {
+                $("td").removeClass("activeDate");
+                $(this).addClass("activeDate");
+
+                var eventDate = new Date(info.eventDate)
+                var dd = String(eventDate.getDate()).padStart(2, '0');
+                var mm = String(eventDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+                var yyyy = eventDate.getFullYear();
+                eventDate = yyyy + '-' + mm + '-' + dd;
+                $("td[data-date='" + eventDate+"']").addClass("activeDate")
+               // console.log(eventDate);
+                loadRecentChanges(eventDate);
+                loadCalenderData(eventDate);
+            },
+            dayRender: function (date, cell) {               
+                var today = $.fullCalendar.moment();               
+                //console.log(date.get('date'),date.get('month'));
+               // console.log(today.get('date'),date.get('month'));
+                if (date.get('date') == today.get('date') && date.get('month') ==today.get('month')) {
+                    cell.css("background", "#90EE90");
+                }
+            }
+
+        });
+
+
+
+
+       // loadCalenderData('');
+
+        function getdata() {
+            debugger
+            var userId = $("#ddlUsers").val();//$("#ddlusers").val();
+            var groupId = $("#ddlroundgroup").val();
+            var events = '@Url.Action("GetRoundDate", "Round")' + "?locationGroupId=" + groupId + "&userId=" + userId;
+            //debugger
+            console.log(events);
+            return events;
+        }
+
+        function loadCalenderData(date) {
+            debugger;
+            var userId = $("#ddlUsers").val();
+            var groupId = $("#ddlroundgroup").val();
+
+
+            var url = '@Url.Action("GetRoundByDate", "Round")';
+            $.get(url + "?start=" + date + "&locationGroupId=" + groupId + "&userId=" + userId,
+                function (data) {
+                    $("#detailsTab").html(data);
+                    $("#detailsTab").fadeIn('fast');
+                    loadRecentChanges(date);
+                });
+        }
+
+        function loadRecentChanges(date) {
+            debugger
+            var userId = $("#ddlUsers").val();
+            var groupId = $("#ddlroundgroup").val();
+            var url = '@Url.Action("GetRoundRecentChangesByDate", "Round")';
+            $.get(url + "?start=" + date + "&locationGroupId=" + groupId + "&userId=" + userId,
+                function (data) {
+                    $("#RecentChangesTab").html(data);
+                    $("#RecentChangesTab").fadeIn('fast');
+                });
+        }
+    });
+</script>
+
+<style>
+    .activeDate {
+        background: green;
+        color: #ffffff;
+    }
+</style>

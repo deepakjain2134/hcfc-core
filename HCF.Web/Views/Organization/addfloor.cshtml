@@ -1,0 +1,350 @@
+﻿@model HCF.BDO.Floor
+
+@{
+    /**/
+    ViewBag.Title = (Model.FloorId > 0) ? Localizer["UpdateFloors"].Value : Localizer["AddFloor"].Value;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>@((Model.FloorId > 0) ? "Edit Floor" : "Add Floor")</h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row">
+                    @using (Html.BeginForm((Model.FloorId > 0) ? "editFloor" : "addfloor", "Organization", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        @Html.HiddenFor(model => model.FloorId)
+                        @Html.HiddenFor(model => model.FloorPlanId)
+                        @Html.HiddenFor(model => model.ImagePath)
+                        <input type="hidden" name="strJson" id="strJson" />
+
+
+                        <div id="hdn_div">
+                            <input type="hidden" name="FileName" value="@Model.FileName" />
+                            <input type="hidden" name="FileContent" />
+                            <input type="hidden" name="FilePath" value="@Model.ImagePath" />
+                            <input type="hidden" name="OldFloorCode" value="@Model.FloorCode" />
+                            <input type="hidden" name="floorTypeId" value="1" />
+                        </div>
+
+
+                        <div class="col-md-6 form-group">
+                            @Html.LabelFor(model => model.Building.BuildingName)<em class="required-field"> *</em>
+                            <buildingdropdownList name="BuildingID" selectedvalue="@Model.BuildingId" firsttext="Select Building Name" class="form-control" required="required"></buildingdropdownList>
+                            @*@Html.BuildingDropDownList("BuildingID", Model.BuildingId, "Select Building Name", new { @class = "form-control", required = "required" })*@
+                            @Html.ValidationMessageFor(model => model.BuildingId)
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.LabelFor(model => model.FloorName)<em class="required-field"> *</em>
+                            @Html.TextBoxFor(model => model.FloorName, new { @class = "form-control Spacevalid", required = "required", maxlength = 50 })
+                            @Html.ValidationMessageFor(model => model.FloorName)
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.LabelFor(model => model.FloorCode)<em class="required-field"> *</em>
+                            @Html.TextBoxFor(m => Model.FloorCode, new { @class = "form-control Spacevalid", required = "required", maxlength = 10 })
+                            @Html.ValidationMessageFor(model => Model.FloorCode)
+                        </div>
+                        @*<div class="form-group">
+                                @Html.LabelFor(model => model.Alias)<em class="required-field"> *</em>
+                                @Html.TextBoxFor(m => Model.Alias, new { @class = "form-control Spacevalid", maxlength = 10 })
+                                @Html.ValidationMessageFor(model => Model.Alias)
+                            </div>*@
+                        <div class="col-md-6 form-group">
+                            @Html.LabelFor(model => model.Alias)<em class="required-field"> *</em>
+                            @Html.DropDownList("Alias", new List<SelectListItem>(), "Select Floor", new { @class = "form-control selectpicker", required = "required" })
+                            @Html.Hidden("AliasSequence", Model.AliasSequence)
+                        </div>
+                        <div class="col-md-6 form-group comman_checkbox">
+                            Status
+                            @Html.CheckBoxFor(m => m.IsActive)<span></span>
+                            @Html.ValidationMessageFor(m => m.IsActive)
+                        </div>
+                        <div class="col-md-6 form-group" style="display:none;">
+                            <label>Floor Plan</label>
+                            <div>
+                                <input type="file" name="file" accept="image/*" id="file" tempname="FileName" filecontent="FileContent" class="fileUpload" onchange="ImageUpload(this)" />
+                            </div>
+                            <div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12">
+                            @for (int h = 0; h < Model.FloorPlanTypes.Count; h++)
+                            {
+                                @Html.HiddenFor(x => x.FloorPlanTypes[h].FloorTypeId)
+                                <div class="addfloor-items">
+                                    <span>@Model.FloorPlanTypes[h].FloorType</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <div id="div_@Model.FloorPlanTypes[h].FloorPlans.Count" floorplanindex="@Model.FloorPlanTypes[h].FloorPlans.Count">
+                                            <input type="hidden" name="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FloorPlanTypeId" value="@Model.FloorPlanTypes[h].FloorTypeId" />
+                                            <input type="hidden" name="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FileName" />
+                                            <input type="hidden" name="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FloorPlanId" />
+                                            <input type="hidden" name="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].ImagePath" />
+                                            <input type="hidden" name="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FileContent" />
+                                            <img id="imagePreview_@string.Format("{0}{1}", Model.FloorPlanTypes[h].FloorTypeId, (Model.FloorPlanTypes[h].FloorPlans.Count))" class="img" height="50" width="50" style="border:#ccc solid 1px; margin-top:8px;"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.FloorDefaultImg)" />
+                                            @*@if (Model.FloorPlanTypes[h].FloorTypeId == 1)
+                                                {
+                                                    <label><input type="radio" id="FloorPlanTypes[@h].FloorPlans[@Model.FloorPlanTypes[h].FloorPlans.Count].IsDefault" name="FloorPlanTypes[@h].FloorPlans[@Model.FloorPlanTypes[h].FloorPlans.Count].IsDefault" value="" class="chb" />IsDefault</label>
+                                                }*@
+                                            <div style="position:relative;">
+                                                <span class="upload_file floor_uploadicon">
+                                                    <input type="file" name="file" accept="image/*"
+                                                           filename="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FileName"
+                                                           tempname="FloorPlanTypes[@h].FloorPlans[@(Model.FloorPlanTypes[h].FloorPlans.Count)].FileContent"
+                                                           filepath=""
+                                                           class="fileUpload"
+                                                           onchange="InsUploadfile(this,@string.Format("{0}{1}",Model.FloorPlanTypes[h].FloorTypeId,(Model.FloorPlanTypes[h].FloorPlans.Count)),'F')" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-10">
+                                        <div class="floor-galleryBox">
+                                            @for (int i = 0; i < Model.FloorPlanTypes[h].FloorPlans.Count; i++)
+                                            {
+                                                //string imgPath = (!string.IsNullOrEmpty(Model.FloorPlanTypes[h].FloorPlans[i].ImagePath)) ? HCF.Web.Base.Common.FilePath(Model.FloorPlanTypes[h].FloorPlans[i].ImagePath) : Url.Content(HCF.Web.Models.ImagePathModel.FloorDefaultImg);
+                                                if (!string.IsNullOrEmpty(Model.FloorPlanTypes[h].FloorPlans[i].ImagePath))
+                                                {
+                                                    @Html.HiddenFor(x => x.FloorPlanTypes[h].FloorPlans[i].FloorPlanTypeId)
+                                                    @Html.HiddenFor(x => x.FloorPlanTypes[h].FloorPlans[i].FileName)
+                                                    @Html.HiddenFor(x => x.FloorPlanTypes[h].FloorPlans[i].FloorPlanId)
+                                                    @Html.HiddenFor(x => x.FloorPlanTypes[h].FloorPlans[i].ImagePath)
+                                                    <div class="for-gallery-item">
+                                                        <div class="gallery-itemBox" id="deleteplanimg_@Model.FloorPlanTypes[h].FloorPlans[i].FloorPlanId">
+                                                            @{
+                                                                var fileextension = commonModelFactory.GetExtension(Model.FloorPlanTypes[h].FloorPlans[i].ImagePath);
+                                                                string imgPath = (fileextension != ".pdf") ? commonModelFactory.FilePath(Model.FloorPlanTypes[h].FloorPlans[i].ImagePath) : Url.Content(HCF.Web.Models.ImagePathModel.PDFIcon);
+                                                            }
+                                                            <img class="img" height="50" width="50" style="border:#ccc solid 1px; margin-top:8px;"
+                                                                 src="@imgPath" />
+                                                            <a data-id="@Model.FloorPlanTypes[h].FloorPlans[i].FloorPlanTypeId" class="delete" floorplanId="@Model.FloorPlanTypes[h].FloorPlans[i].FloorPlanId">
+                                                                <img id="@Model.FloorPlanTypes[h].FloorPlans[i].FloorPlanTypeId" class="deleteplanimg" alt="Delete" title="Delete Floor Plan Image" src="~/dist/Images/Icons/close-black.png" />
+                                                            </a>
+                                                        </div>
+                                                        @*@if (Model.FloorPlanTypes[h].FloorTypeId == 1 && fileextension != ".pdf")
+                                                            {
+                                                                <label><input type="radio" id="FloorPlanTypes[@h].FloorPlans[@i].IsDefault" name="FloorPlanTypes[@h].FloorPlans[@i].IsDefault" value="@(Model.FloorPlanTypes[h].FloorPlans[i].IsDefault== true?"true":"false")" @(Model.FloorPlanTypes[h].FloorPlans[i].IsDefault== true ? "checked='true'" : "")  class="chb" />IsDefault</label>
+                                                            }*@
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                        <div class="col-md-12 text-right button_Div">
+                            <input type="submit" id="btnSubmit" value='Save' class="comm-button" />                           
+                            @Html.ActionLink("Cancel", "Floor", new { controller = "Organization" }, new { @class = "comm-Cancelbutton" })
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updatemultipleFloorPlan" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div id="loadpartial" style="margin-top:0;">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+    // init on pageload.
+    $('.date').datepicker();
+    BindFloorAlias();
+    var floorId = '@Model.FloorId';
+    var buildingddl=$("#BuildingID");
+
+    if ($('#FloorId').val() != undefined && parseInt($('#FloorId').val()) > 0) {
+        $('#FloorTypeId').addClass('disabled').attr('readonly', 'readonly');
+    }
+
+    $(document).ready(function () {
+        if (floorId > 0) {
+            buildingddl.addClass("disable");
+            $("#FloorCode").addClass("disable");
+        }
+    });
+
+    $(".chb").change(function () {
+        $(".chb").prop('checked', false);
+        $(".chb").val(false);
+        $(this).prop('checked', true);
+        $(this).val(true);
+    });
+
+    function InsUploadfile(file, controlId, fileType) {
+        debugger;
+        var thisfile = $(file);
+        var fileExtensionas = [];
+        if (fileType === "D") {
+            fileExtensionas = ['pdf', 'xlsx', 'xls', 'doc', 'docx', 'csv'];
+        }
+        if (fileType === "C") {
+            fileExtensionas = ['png', 'jpg', 'jpeg'];
+        }
+        if (fileType === "F") {  // for floorPlan
+            fileExtensionas = ['dwg', 'svg', 'png', 'jpg', 'jpeg', 'pdf'];
+        }
+        var control = file.getAttribute("tempName");
+        var fileControl = file.getAttribute("filename");
+        var filepath = file.getAttribute("filepath");
+
+        if (file.files.length > 0) {
+            var file = file.files[0];
+            var fileName = file.name;
+            var filesize = file.size / 1024 / 1024;
+            if (filesize > 7) {
+                swalalert('This file size is more than 7 mb,Please upload the file not more then 7 mb');
+                return false;
+            }
+            // alert('This file size is: ' + filesize + "MiB");
+            var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if ($.inArray(fileExtension.toLowerCase(), fileExtensionas) == -1) {
+                $(thisfile).val("")
+                swal("Only formats are allowed : " + fileExtensionas.join(', '));
+                return false;
+            } else {
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function () {
+                    // console.log(reader.result);
+                    var array = reader.result.split(",");
+                    $("input[name='" + control + "'][type=hidden]").val(array[1]);
+                    $("input[name='" + fileControl + "'][type=hidden]").val(fileName);
+                    $("input[name='" + filepath + "'][type=hidden]").val("");
+                };
+                reader.onloadend = function () {
+                    if (fileType == "C") {
+                        $("#imagePreview_" + controlId).attr('src', this.result);
+                    }
+                    else if (fileType == "F") { /// for floor Plan specail requirement
+                        if (fileExtension == "pdf") {
+                            $("#imagePreview_" + controlId).attr('src', "../dist/Images/Icons/pdf_icon.png");
+                        } else {
+                            $("#imagePreview_" + controlId).attr('src', this.result);
+                        }
+                    }
+                    else {
+                        $("#imagePreview_" + controlId).attr('src', "/dist/Images/Icons/document_blue-icon.png");
+                    }
+                    $("#imagePreview_" + controlId).removeClass("img_prev");
+                    $("#imagePreview_" + controlId).addClass("img_prev_upload");
+                };
+                reader.onerror = function (error) {
+                    $("#FileContent").val("");
+                };
+                $(".part1").hide();
+                $(".part2").show();
+            }
+        }
+    }
+
+
+    $(".Spacevalid").on("keypress", function (e) {
+        if (e.which === 32 && !this.value.length)
+            e.preventDefault();
+    });
+
+    function BindFloorAlias() {
+        $('#Alias option:not(:first-child)').remove();
+        $.each($.FloorAlias.AliasItem, function (key, value) {
+            $('#Alias').append($('<option/>').attr('value', value.AliasValue).text(value.AliasText + ' (' + value.AliasValue + ')'));
+        });
+        var aliasv = '@Model.Alias';
+        if (aliasv!='' && $('#Alias option[value="'+aliasv+'"]').length > 0) {
+            $('#Alias').val(aliasv);
+        }
+        else $('#Alias').val(1);
+    }
+
+    $(document).on('change', '#Alias', function () {
+        if ($(this)[0].selectedIndex > 0) {
+            var aliasval = $(this).val();
+            $.each($.FloorAlias.AliasItem, function (key, value) {
+                if (aliasval == value.AliasValue) {
+                    $('#AliasSequence').val(value.Sequence);
+                    return false;
+                }
+            });
+        }
+    });
+
+    $(document).on('click', 'a.delete', function (e) {
+        e.preventDefault();
+        var floortypeId = $(this).data("id");
+        var floorPlanId = $(this).attr("floorplanId");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this file!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, Remove it!",
+            closeOnConfirm: true
+        },
+            function () {
+                $.ajax({
+                    type: "GET",
+                    url: CRxUrls.Organization_DeleteFloorPlan + "?FloorPlanId=" + floorPlanId,
+                    success: function (data) {
+
+                        $("#deleteplanimg_" + floorPlanId).remove();
+                        swal("Deleted!", "Your file has been deleted.", "success");
+                    },
+                    dataType: "json",
+                    traditional: true
+                });
+
+            });
+    });
+
+
+    $(function () {
+        $("#btnSubmit").click(function () {
+            var buildingname = $("#BuildingID");
+            if (buildingname.val() == "") {
+                  swalalert("Please select Building Name ");
+                return false;
+            }
+            return true;
+        });
+    });
+
+
+</script>
+
+
+<style>
+    .img_prev_upload {
+        float: initial;
+        height: auto;
+        margin-right: 0px;
+        width: 50px;
+        background: #fff;
+        border: #ccc solid 1px;
+        margin-top: 8px;
+    }
+
+    .addfloor-items:nth-child(even) {
+        background: #f7f7f7;
+    }
+</style>

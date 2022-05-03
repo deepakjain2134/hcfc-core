@@ -1,0 +1,94 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@{
+    ViewBag.Title = "ImportCsv"; //Resources.Resource.TitleUserGroup;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>Import CSV File</h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header"></div>
+                    <div class="box-body">
+                        @using (Html.BeginForm("ImportCsv", "Import", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken();
+                            @Html.ValidationSummary();
+                            <div class="workOrder-search">
+                                <div class="csvfeild-item">
+                                    <div class="form-group col-md-2">
+                                        <label class="control-label"><b>Select File Type</b></label>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        @{
+                                            List<SelectListItem> lst = new List<SelectListItem> { new SelectListItem { Value = "0", Text = "Select File Type" }, new SelectListItem { Value = "Assest", Text = "Assest", Selected = true } };
+                                            @Html.DropDownList("ddlFiletype", lst, new { @class = "form-control" });
+                                        }
+                                    </div>
+                                </div>
+                                <div class="csvfeild-item">
+                                    <div class="form-group col-md-2">
+                                        <label class="control-label"><b>Browse file for Import #</b></label>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <input class="form-control" type="file" name="flImportCSVFile" accept=".csv" />
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <input type="submit" value="Import File" class="btn btn-primary" />
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        @Html.ActionLink("Download Sample File", "DownloadSampleInCSV", "Import", null, new { @class = "btn btn-primary", @id = "DownloadSampleFile", @data_src = "/Import/DownloadSampleInCSV" })
+                                    </div>
+                                </div>
+                            </div>
+                            if (Model != null)
+                            {
+                                <h3>Imported Record</h3>
+                                <table id="tblImportCSVData" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                @Html.CheckBox("chkAllExportData", false, new { @class = "check-box", @title = "Select All" })
+                                                <span></span>
+                                            </th>
+                                            @foreach (DataColumn col in Model.Columns)
+                                            {
+                                                <th>@col.ColumnName</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (DataRow dr in Model.Rows)
+                                        {
+                                            <tr>
+                                                <td class="text-center">
+                                                    @Html.CheckBox("chkExportData", false, new { @class = "check-box chkExportData" })
+                                                    <span></span>
+                                                </td>
+                                                @foreach (DataColumn col in Model.Columns)
+                                                {
+                                                    <td>@dr[col.ColumnName]</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <br />
+                                <button id="btnUploadData" class="btn btn-primary">Upload</button>
+                            }
+                        }
+                        <div id="dvFilterDataAfterUpload" class="panel"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/ImportCSV/importcsv.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<style>.csvfeild-item {overflow: hidden;padding: 6px 0;}</style>

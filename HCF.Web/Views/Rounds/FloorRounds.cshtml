@@ -1,0 +1,73 @@
+﻿@model HCF.BDO.TRounds
+@{
+    ViewBag.Title = "FloorRounds";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Readiness Rounds
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box box-primary">
+                    
+                        @using (Html.BeginForm("FloorRounds", "Rounds", FormMethod.Post, new { id = "Roundsform" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(x => Model.TRoundId)                            
+                            @Html.HiddenFor(x => Model.FloorId)
+                            <div id="loadpartial">
+                            </div>
+                        }
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var floorRoundView = {};
+    floorRoundView.floorId = '@Model.FloorId';
+    floorRoundView.roundId = '@Model.TRoundId';
+
+    $(document).ready(function (e) {
+        floorRoundView.LoadQuestions();
+    });
+
+    function tristate1(control) {
+        tristate(control, '0', '1');
+    }
+
+    function tristate(control, value1, value2) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value1;
+                break;
+
+        }
+        SetCheckValue(control);
+    }
+
+    function SetCheckValue(control) {
+        var controlId = $(control).attr("tempName");
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+    }
+
+    floorRoundView.LoadQuestions = function () {
+        var _showShare = true;
+        var urlAction = CRxUrls.rounds_roundsitems;
+        $.get(urlAction + '?floorId=' + floorRoundView.floorId + "&rId=" + floorRoundView.roundId + "&showShare=" + _showShare, function (data) {
+            $('#loadpartial').html(data);
+        });
+    }
+
+</script>

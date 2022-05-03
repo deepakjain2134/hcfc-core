@@ -1,0 +1,72 @@
+﻿@model IEnumerable<HCF.BDO.PopEmails>
+@{
+                /**/
+
+                /**/
+
+                ViewBag.Title = "InboxSetup";
+                Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Inbox Settings
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary col-lg-12">
+                        <div class="box-header">
+                            <a href='@Url.Action("InboxAdd", "Organization")' class="pull-right">
+                                <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Email" alt="3d_add_button" />
+                            </a>
+                        </div>
+                        
+                            <table id="myTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Email Id
+                                        </th>
+                                        <th>
+                                            Status
+                                        </th>
+                                        <th>
+                                            Server
+                                        </th>
+
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderByDescending(x => x.EmailId))
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.EmailId)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                            </td>
+
+                                            <td>@Html.DisplayFor(modelItem => item.PopServer)</td>
+
+                                            <td title="Edit">
+                                                <img onclick="location.href ='@Url.Action("InboxAdd", "Organization", new { Id = item.Id })'"
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

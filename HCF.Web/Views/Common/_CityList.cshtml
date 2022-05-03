@@ -1,0 +1,57 @@
+﻿@model IEnumerable<HCF.BDO.CityMaster>
+@{
+    ViewBag.Title = "Cities";
+}
+<div class="row">
+    @*<div class="col-md-12">
+        <label style="margin-top:50px"> @ViewBag.StateName</label>
+    </div>*@
+    <div class="col-md-12">
+        <table id="questtbl" class="table table-bordered table-striped">
+            <thead>
+                <tr>                   
+                    <th> Name </th>
+                    <th> Code </th>
+                    <th> Zipcode </th>
+                    <th> Active </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CityName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CityCode)<span></span>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Zipcode)
+                        </td>
+                        <td class = "Common_checkbox1 text-center">                            
+                            @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var table = $('#questtbl').DataTable({
+        "lengthChange": false,
+        "pageLength": 20,
+        "aaSorting": [1,'asc'],
+        "bPaginate": $('#questtbl tbody tr').length > 29,
+        "bInfo": false,
+        "searching": false,
+        "language": {
+            "emptyTable": "No data available in table"
+        },
+        dom: "<'row'<'col-sm-3'l><'col-sm-3'f><'col-sm-6'p>>" +
+            "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+    });
+</script>

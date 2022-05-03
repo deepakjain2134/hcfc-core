@@ -1,0 +1,123 @@
+﻿@model List<HCF.BDO.RoundCategory>
+@{
+    ViewBag.Title = "ManageAddRoundsQuestonaries";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Round Questionnaire
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="col-lg-12 col-xs-12">
+                        <div class="box box-primary">
+                            <div class="box-header vender_page">
+                                <div class="col-md-4 col-sm-8">
+                                    <round-category-drop-down 
+                                                              class = "form-control ddlbox"
+                                                              name="ddlRoundCat" selectedvalue="0"
+                                                              firsttext="Select"></round-category-drop-down>
+                                    @*@Html.RoundCategoryDropDown("ddlRoundCat", 0, "Select", new { @class = "form-control ddlbox" })*@
+                                </div>
+                            </div>
+                            
+                                <div id="transfer4" class="transfer-demo"></div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script src="@Url.Content("~/dist/js/crx.js.jquery.transfer.js")"></script>
+
+<input type="hidden" id="modelData" name="modelData" value="@ViewBag.ModelData" />
+
+<script>
+    var modelData = JSON.parse($("#modelData").val());
+    var selectedItems = [];
+    $("#ddlRoundCat").change(function () {
+        
+        var roundCatId = $(this).val();
+        if (roundCatId > 0) {
+            $("#transfer4").empty();
+
+            var filterData = $.grep(modelData, function (n, i) {
+                return n.RoundCatId == roundCatId;
+            });
+
+            modelData.forEach(function (item) {                
+                item.RoundItems.forEach(function (childItem) {
+                    if (item.RoundCatId == roundCatId) {
+                        childItem.selected = true;
+                        selectedItems.push(childItem);
+                    }
+                });
+            });
+
+            var settings3 = {
+                "groupDataArray": modelData,
+                "groupItemName": "CategoryName",
+                "groupArrayName": "RoundItems",
+                "itemName": "RoundStep",
+                "rightTabNameText": $("#ddlRoundCat option:selected").text(),
+                "valueName": "RouQuesId",
+                "callable": function (items) {                   
+                    callPostMethod(items, selectedItems);
+                }
+            };
+            $("#transfer4").transfer(settings3);
+           
+
+        }
+    }); 
+
+    var newItems = [];
+    function callPostMethod(items, selectedItems) {
+        console.log('main list->', selectedItems);
+        console.log('new list->',items)
+       
+
+
+
+        let output = selectedItems.filter(b => {
+            let indexFound = items.findIndex(a => compareName(a, b));
+            return indexFound == -1;
+        });
+        console.log('remove Item list->', output);
+
+        let output2 = items.filter(b => {
+            let indexFound = selectedItems.findIndex(a => compareName(a, b));
+            return indexFound == -1;
+        });
+
+        output.forEach(function (item) {
+            item.IsRemoved = 1; 
+            newItems.push(item);
+        });
+
+        output2.forEach(function (item) {
+            item.IsRemoved = 0;
+            newItems.push(item);
+        });
+
+        console.log('new item list->', output2);
+        console.log(newItems);
+
+    }
+
+    const compareName = (obj1, obj2) => {
+        return (obj1.RoundStep === obj2.RoundStep);
+    }
+
+</script>

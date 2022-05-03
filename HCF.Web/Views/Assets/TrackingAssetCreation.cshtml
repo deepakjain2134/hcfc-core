@@ -1,0 +1,412 @@
+﻿
+@{
+    ViewBag.Title = "Tracking Assets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedValues = "0";
+}
+
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Tracking Assets
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-5">
+                        <div class="search_options">
+                            <label>Assets (<strong>Select the assets for which you want the tracking report</strong>)</label>
+                            @*@Html.AssetsDownList("AssetId", selectedValues, "All",
+                                new { @class = "form-control ddlbox",
+                                    multiple = "multiple",
+                                    data_live_search = "true",
+                                    data_selected_text_format = "count > 1" })*@
+
+                            @*<assetsdownlist firsttext="Select Asset Type"
+                                                   required="required"
+                                                   class="form-control"
+                                                   selectedvalue=""
+                                                   multiple = "multiple"
+                                                   name="AssetId">
+                                </assetsdownlist>*@
+
+                            <assetsdownlist name="AssetId" selectedvalue="@selectedValues" firsttext="All" class="form-control ddlbox" multiple="multiple"></assetsdownlist>
+
+                        </div>
+                        <input type="hidden" value="@ViewBag.AssetsId" id="assetids" />
+                    </div>
+                    <div class="col-lg-2">
+
+                        <label>Campus</label>
+                        @Html.DropDownList("CampusSite", new SelectList(""), "All", new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+
+                    </div>
+                    <div class="col-lg-2">
+
+                        <label>Building</label>
+                        @Html.DropDownList("Buildings", new SelectList(""), "All", new { @class = "form-control ddlbox", @multiple = "multiple", data_live_search = "true", data_selected_text_format = "count > 1" })
+
+                    </div>
+                    <div class="col-lg-3">
+                        <div>&nbsp;</div>
+                        <button class="comm-button" id="btnrunreport">Run Report</button>
+                        <button class="comm-button" id="btnrefresh">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="trackingAssets-lenged">
+                            <ul class="">
+                                <li><i class="fa fa-check" style="color:green;"></i> Inspection Done</li>
+                                <li><i class="fa fa-plus" style="color:gray;"></i> Past Due</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="report_Trackasset" id="partialContents">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+       $("#CampusSite").val("");
+        $("#Buildings").val("");
+        getCampusSite()
+    });
+    var assetIdindex = 0;
+    var campusIndex = 0;
+    var buildingIndex = 0;
+
+    $(document).on("change", "#AssetId", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (assetIdindex == 0) {
+            var lastAllSelected = false;
+            assetIdindex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+
+    });
+
+    function getCampusSite() {
+        //debugger
+
+        $("#CampusSite").empty();
+        $('#Buildings').empty();
+        $('#Buildings').selectpicker('refresh');
+        $("#CampusSite").append('<option value = "-1" class="select-allcampus">All</option>');
+
+        var GetCampus = JSON.parse(@Html.Raw(Json.Serialize(@ViewBag.GetCampus)));
+        for (var i = 0; i < GetCampus.length; i++) {
+            $("#CampusSite").append('<option value = ' + GetCampus[i].Value + '>' + GetCampus[i].Text + '</option>');
+            $("#CampusSite").selectpicker('refresh');
+        }
+    }
+
+    $(document).on("change", "#CampusSite", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (campusIndex == 0) {
+            var lastAllSelected = false;
+            campusIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+        getBuildings();
+    });
+
+    function getBuildings() {
+        debugger;
+        var CampusId = $("#CampusSite").val();
+        if (CampusId != null) { CampusId = CampusId.filter(e => e !== "allcampus"); }
+        if (CampusId != "") {
+            $("#Buildings").empty();
+            $("#Buildings").append('<option value = "-1" class="select-allbuilding">All</option>');
+            $.ajax({
+                url: "/Organization/GetBuildingByMultipleSite?sitecode=" + CampusId,
+                type: "POST",
+                datatype: "json",
+                success: function (sitelst) {
+                    $.each(sitelst, function (index) {
+                        var optgroup = $('<optgroup>');
+                        optgroup.attr('label', sitelst[index].Name);
+                        $.each(sitelst[index].Buildings, function (i) {
+                            var option = $("<option></option>");
+                            option.val(sitelst[index].Buildings[i].BuildingId);
+                            option.text(sitelst[index].Buildings[i].BuildingName);
+                            optgroup.append(option);
+                        });
+                        $("#Buildings").append(optgroup);
+                    });
+                    $("#Buildings").selectpicker('refresh');
+                }
+            });
+        }
+        else {
+            $("#Buildings").empty();
+        }
+
+    }
+
+    $(document).on("change", "#Buildings", function () {
+        debugger
+        var thisObj = $(this);
+        var isAllSelected = thisObj.find('option[value="-1"]').prop('selected');
+        if (buildingIndex == 0) {
+            var lastAllSelected = false;
+            buildingIndex++;
+        }
+        else {
+            var lastAllSelected = $(this).data('all');
+        }
+        var selectedOptions = (thisObj.val()) ? thisObj.val() : [];
+        var allOptionsLength = thisObj.find('option[value!="-1"]').length;
+        var selectedOptionsLength = selectedOptions.length;
+
+        if (isAllSelected == lastAllSelected) {
+
+            if ($.inArray("-1", selectedOptions) >= 0) {
+                selectedOptionsLength -= 1;
+            }
+
+            if (allOptionsLength <= selectedOptionsLength) {
+
+                thisObj.find('option[value="-1"]').prop('selected', true).parent().selectpicker('refresh');
+                isAllSelected = true;
+            } else {
+                thisObj.find('option[value="-1"]').prop('selected', false).parent().selectpicker('refresh');
+                isAllSelected = false;
+            }
+
+        } else {
+            thisObj.find('option').prop('selected', isAllSelected).parent().selectpicker('refresh');
+        }
+
+        $(this).data('all', isAllSelected);
+
+    });
+
+    $("#btnrunreport").click(function () {
+        loadData();
+    });
+
+    function loadData() {
+        debugger
+        var assetids = $("#AssetId").val();
+        var campusIds = $("#CampusSite").val();
+        var buildingIds = $("#Buildings").val();
+        var url = '';
+        if (assetids != null) {
+            if (campusIds != null && buildingIds != null) {
+                url = '@Url.Action("TrackAssetReport", "Assets")' + '?assetIds=' + assetids + "&campusid=" + campusIds + "&buildingId=" + buildingIds;
+            } else if (campusIds != null) {
+                url = '@Url.Action("TrackAssetReport", "Assets")' + '?assetIds=' + assetids + "&campusid=" + campusIds;
+            }
+            else {
+                url = '@Url.Action("TrackAssetReport", "Assets")' + '?assetIds=' + assetids;
+            }
+            $.ajax({
+                url: url,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');                   
+                }
+            });
+        }
+        else {
+            AlertWarningMsg("Please select assets")
+        }
+    }
+
+    $("#btnrefresh").click(function () {
+        var url = "@Url.Action("TrackingAssetCreation", "Assets")";
+        window.location.href = url;
+    });
+
+    $('.ddlbox').selectpicker().on('loaded.bs.select', enableBoostrapSelectOptgroup);
+
+    function enableBoostrapSelectOptgroup() {
+
+        let that = $(this).data('selectpicker'),
+            inner = that.$menu.children('.inner');
+
+        // remove default event
+        inner.off('click', '.divider, .dropdown-header');
+        // add new event
+        inner.on('click', '.divider, .dropdown-header', function (e) {
+            // original functionality
+            e.preventDefault();
+            e.stopPropagation();
+            if (that.options.liveSearch) {
+                that.$searchbox.trigger('focus');
+            } else {
+                that.$button.trigger('focus');
+            }
+
+            // extended functionality
+            let position0 = that.isVirtual() ? that.selectpicker.view.position0 : 0,
+                clickedData = that.selectpicker.current.data[$(this).index() + position0];
+
+            // copied parts from changeAll function
+            let selected = null;
+            for (let i = 0, data = that.selectpicker.current.data, len = data.length; i < len; i++) {
+                let element = data[i];
+                if (element.type === 'option' && element.optID === clickedData.optID) {
+                    if (selected === null) {
+                        selected = !element.selected;
+                    }
+                    element.option.selected = selected;
+                }
+            }
+            that.setOptionStatus();
+            that.$element.triggerNative('change');
+        });
+    }
+
+</script>
+<style>
+    .trackingAssets-lenged {
+        width: 100%;
+        clear: both;
+        display: block;
+    }
+
+        .trackingAssets-lenged ul {
+            display: flex;
+            padding: 0;
+            justify-content: flex-end;
+        }
+
+            .trackingAssets-lenged ul li {
+                display: flex;
+                padding: 4px 15px;
+                align-items: center;
+            }
+
+                .trackingAssets-lenged ul li .fa {
+                    padding-right: 6px;
+                }
+
+    .vertical-mode {
+        writing-mode: vertical-rl;
+        word-break: keep-all;
+        max-height: 100px;
+        overflow: hidden;
+        transform: rotate(180deg);
+        display: block;
+        font-size: 13px;
+    }
+
+    .table {
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+        padding: 0;
+    }
+
+    .trackingemp {
+        z-index: 999 !important;
+    }
+
+    .round-steptable tbody tr td:first-child, .round-steptable thead tr th:first-child {
+        min-width: 180px;
+        position: sticky;
+        left: -2px;
+        background-color: #fbfbfb;
+        z-index: 99;
+        text-align: left;
+    }
+
+    .round-steptable td {
+        min-width: 56px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-responsive.round-steptable {
+        max-height: 460px;
+        border: 1px solid #ddd;
+        overflow: auto;
+    }
+
+    .round-steptable th {
+        position: sticky;
+        top: -1px;
+        background-color: #fbfbfb;
+        z-index: 9;
+        vertical-align: bottom !important;
+    }
+</style>

@@ -1,0 +1,124 @@
+﻿@model List<HCF.BDO.UserProfile>
+@{
+    ViewBag.Title = "EP Assignment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            EP Assignment
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-xs-3 col-lg-1-8">
+                <div class="box box-primary general_menu">
+                    @await Html.PartialAsync("_MoreConfig")
+                </div>
+            </div>
+            <div class="col-lg-12 col-xs-12 col-lg-8-2">
+                <div class="box box-primary col-lg-12" id="content">
+
+                    <table id="myTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Name
+                                </th>
+                                <th>
+                                    Email
+                                </th>
+                                <th>
+                                    EPs Count
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Where(x => x.IsActive == true).OrderByDescending(x => x.EpsCount).ThenBy(x => x.FullName))
+                            {
+                                <tr>
+                                    <td>@item.FullName</td>
+                                    <td>
+                                        @item.Email
+                                    </td>
+                                    <td data-toggle="modal" data-target="#addEpAssigneeModel"
+                                        class="addepUser" title="Assign Eps"
+                                        id="EPDetailId_@item.UserId" userName="@item.Name">
+                                        @{
+                                            if (item.EpsCount > 1)
+                                            {
+                                                <span>
+                                                    @($"{item.EpsCount} eps")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>
+                                                    @($"{item.EpsCount} ep")
+                                                </span>
+                                            }
+                                        }
+                                        <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover'
+                                           data-placement='right' style="float:right"
+                                           data-content=''>
+                                            @("Assign EP")
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<div class="modal fade" id="addEpAssigneeModel" role="dialog">
+    <div class="modal-dialog model_big">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span class="modelTitle"></span>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </h4>
+            </div>
+            <div class="modal-body asset_list_popup" id="modelContent">
+
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="userId" value="0" />
+                @*<button type="button" class="button1" id="saveEpUser">Save</button> *@
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('body').on('click', '.addepUser', function () {
+       
+        var userId = $(this).attr('id').split('_')[1]
+        var userName = $(this).attr('userName');
+      
+        $("#userId").val(userId);
+
+        $.ajax({
+            url: "/goal/usersEpsLists?userId=" + userId,
+            method: "GET",
+            success: function (data) {
+              
+                $(".modelTitle").text("Select Eps ( " + userName + " )");
+                $('#modelContent').html($(data));
+
+            }
+        })
+    });
+
+</script>

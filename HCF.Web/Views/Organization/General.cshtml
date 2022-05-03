@@ -1,0 +1,462 @@
+﻿@model HCF.BDO.Organization
+@{
+
+    ViewBag.Title = "General";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            General Settings
+        </h1>
+    </section>
+}
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="Setting_Content">
+                        @using (Html.BeginForm("General", "Organization", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(model => model.OrganizationId)
+                            <input type="hidden" name="UserDomain" value="@Model.UserDomain" />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="user-profilebanner">
+                                        <div class="banner-setting">
+                                            @*@Html.Image(Model.DashBoadImagePath, Model.Name, "img img-responsive")*@
+                                            <image src="@Model.DashBoadImagePath" title="@Model.Name" class="img img-responsive"></image>
+                                        </div>
+                                        @*
+                                            <div class="update_banner myprofile_photo">
+                                                <image src="@Model.LogoPath" title="Organization Logo" class="logoimg"></image>
+                                               @Html.Image(Model.LogoPath, "Organization Logo", "logoimg")
+                                            </div>
+                                        *@
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*<div class="clearfix" style="clear: both;margin-bottom: 115px;"></div>*@
+
+                    <div class="dl-horizontal general_setting">
+                        <div class="crxgeneral-details">
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">
+                                    @Html.DisplayNameFor(model => model.Name):
+                                </span>
+                                @Html.DisplayFor(model => model.Name)
+                                @*@Html.TextAreaFor(model => model.Name, new { @class = "form-control", required = "required" })*@
+                            </div>
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">
+                                    @Localizer["CRxInboxTitle"]:
+                                </span>
+                                @foreach (HCF.BDO.PopEmails item in Model.PopEmails.Where(x => x.IsActive))
+                                {
+                                    @Html.DisplayFor(model => item.EmailId)
+                                }
+                            </div>
+                            @*<h4>Address:</h4>*@
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">@Html.DisplayNameFor(model => model.City):</span><span class="discity">@Model.City</span> @Html.TextBoxFor(model => model.City, new { @class = "form-control city", required = "required" })
+                            </div>
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">@Html.DisplayNameFor(model => model.State):</span> @*<span class="disstate">@Model.State</span>*@<span class="disstate">@Model.StateMaster.StateName</span>
+                                @*@Html.DisplayFor(model => model.State, new { @class = "form-control disstate" })*@
+                                @*@Html.StateCodeDropDownList("State", Model.State, "All", new { @class = "form-control state ddlbox", required = "required" })*@
+                                <statecodedropdownlist name="State" selectedvalue="@Model.State" firsttext="All" class="form-control state ddlbox" required="required"> </statecodedropdownlist>
+                                @*@Html.TextAreaFor(model => model.State, new { @class = "form-control state", required = "required" })*@
+                            </div>
+                            @*<div class="crxgeneral-itemBox">
+            <span>@Html.DisplayNameFor(model => model.Country):</span><label class="discountry">@Model.Country</label> @Html.TextAreaFor(model => model.Country, new { @class = "form-control country", required = "required" })
+        </div>*@
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">@Html.DisplayNameFor(model => model.Zip):</span><span class="diszip">@Model.Zip</span>
+                                @Html.TextBoxFor(model => model.Zip, new { @class = "form-control zip numeric", required = "required" })
+                            </div>
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">@Html.DisplayNameFor(model => model.FireWatchTimeSlot):</span>
+                                Every&nbsp;
+                                <span class="disFirewatchSlot hidelblcntrl">@Model.FireWatchTimeSlot</span>
+                                <select id="FireWatchTimeSlot" class="form-control hideinputcntrl" name="FireWatchTimeSlot" style="width:18% !important">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="6">6</option>
+                                    <option value="8">8</option>
+                                    <option value="12">12</option>
+                                </select>
+                                &nbsp;Hours
+                            </div>
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">Accreditor:</span>
+                                <span class="disAccreditor hidelblcntrl">TJC</span>
+                                <select id="Accreditor" class="form-control hideinputcntrl" name="Accreditor">
+                                    <option value="1">TJC</option>
+                                </select>
+                            </div>
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">Organization Type:</span>
+                                <span class="dishospitalType hidelblcntrl">@((Model.HospitalType != null) ? Model.HospitalType.Type : "CAH")</span>
+                                <select id="HospitalTypeId" class="form-control hideinputcntrl" name="HospitalTypeId">
+                                    <option value="1">CAH</option>
+                                    <option value="2">HAP</option>
+                                </select>
+                            </div>
+
+                            @if (HCF.Web.Base.UserSession.CurrentUser.IsCRxUser)
+                            {
+                                <div class="crxgeneral-itemBox" id="id=" spamuser"">
+                                    <span class="crxgeneral-label" id="txt">User Domains:</span>
+                                    <span class="dishospitalType hidelblcntrl">@((Model.UserDomain != null) ? Model.UserDomain : "")</span>
+                                    @*<div id="Anchorpop">&nbsp;&nbsp;<a href="@Url.Action("UserDom", "Organization", new { UesrDomain = Model.UserDomain })" class="button1" id="Anchorpop" data-toggle="modal" data-target="#modal-container">Manage UserDomain</a></div>*@
+                                </div>
+                            }
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">Last TCJ Survey:</span><span class="discity hidelblcntrl ">@Model.LastTJCSurvey.ToFormatDate() </span> @Html.TextBoxFor(model => model.LastTJCSurvey, $"{Model.LastTJCSurvey:MMM d, yyyy}", new { @class = "form-control  readonly hideinputcntrl", @autocomplete = "off", @readonly = "readonly" })
+                            </div>
+                            <div style="display:none;">
+                                <div class="shownotifi-row">
+                                    <button type="button" class="comm-button" data-toggle="collapse" data-target="#demo">Show Notice Text</button>
+                                    <div id="demo" class="collapse">
+                                        <div class="form-group">
+                                            <h4 class="notice-heading">Notice Text</h4>
+                                            @*<label class="dNoticeText">@Model.NoticeText</label>*@
+                                            <div class="tnoticetext">
+                                                @Html.TextAreaFor(x => x.NoticeText, new { @class = "form-control NoticeText", placeholder = "Enter Notice Text" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 divtaggings" id="divtagging" style="display:none;">
+                                <p class="epFreq-alert">Checking the below box will enable "Tagging" feature in the permit and dashboard module. Unchecking the box will remove the "Tagging" button and feature.</p>
+                                <div class="toggleBox">
+                                    <div class="toggle-crxbtn">
+                                        <input type="checkbox" id="IsTaggingEnabled" name="IsTagging" class="crx-value" />
+                                        <input type="hidden" id="hdnIsPermitTag" name="IsTaggingEnabled" class="crx-value" />
+
+                                        <p class="round-white"></p>
+                                    </div>
+                                    <label>Tagging Permit</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="update-logobanner-row" id="upload-control">
+                            @*<div class="crxgeneral-itemBox">
+                <span class="crxgeneral-label">Update Logo:</span>
+                <input type="file" class="form-control" name="logofile" id="logofile" />
+            </div>*@
+                            <div class="crxgeneral-itemBox">
+                                <span class="crxgeneral-label">Update Banner:</span>
+                                <input type="file" class="form-control" name="file" id="file" />
+                            </div>
+                        </div>
+                     
+                        <div class="col-md-12 text-right button_Div crxgeneral-btnBox">
+                            <input type="button" value="Edit" class="comm-button" id="upda" />
+                            <input type="submit" value="Save" class="comm-button" id="sav" />
+                            @*@Html.ActionLink("Cancel ", "General", "Organization", new { @class = "comm-button" })*@
+                            @Html.ActionLink("Cancel", "General", new { controller = "Organization" }, new { @class = "comm-Cancelbutton generalCancel" })
+                        </div>
+                    </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+    <script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/dist/js/jQuery.tagify.min.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/dist/css/tagify.css")" rel="stylesheet">
+
+    <script>
+        var initialDashboardFilePath = $('.img').attr('src');
+        $("#FireWatchTimeSlot").val('@Model.FireWatchTimeSlot');
+        
+        var hospitalTypeId = '@Model.HospitalTypeId';
+        $("#HospitalTypeId").val(hospitalTypeId);
+   
+        $("#file").change(function () {
+            SetImageControlfile("file", "img");
+        });
+
+        $("#logofile").change(function () {
+            SetImageControlfile("logofile", "logoimg");
+        });
+        $(document).on('keypress', '#Zip', function (e) {
+            if ($(e.target).prop('value').length >=5) {
+                if (e.keyCode != 32) { return false }
+            }
+        })
+
+        function SetImageControlfile(cntrolId, contolclass) {
+            var fileExtensionas = ['png', 'jpg'];
+            var file = document.getElementById(cntrolId).files[0];
+            console.log(file);
+            var fileName = file.name;
+            var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if ($.inArray(fileExtension, fileExtensionas) == -1) {
+                $("#" + cntrolId).val("");
+                swalalert("Only formats are allowed : " + fileExtensionas.join(', '));
+            }
+            else {
+                var readImg = new FileReader();
+                readImg.readAsDataURL(file);
+                readImg.onload = function (e) {
+                    $("." + contolclass).attr('src', e.target.result).fadeIn();
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            debugger;
+            $('.city').hide();
+            $('.state').hide();
+            $('.country').hide();
+            $('.generalCancel').hide();
+            $('.zip').hide();
+            $('#sav').hide();
+            $('.can').hide();
+            $('.hideinputcntrl').hide();
+            $("#upload-control").hide();
+            CKEDITOR.replace('NoticeText');
+            $('#emails').hide();
+            $('#spamuser').show();
+            $('#achor').hide();
+
+            $('.tnoticetext').addClass("disable"); 
+
+            debugger;
+            var mainParent = $('.crx-value').parent('.toggle-crxbtn');
+            var isActive = '@Model.IsTaggingEnabled';
+            if (isActive == 'True') {
+                $(mainParent).addClass('active');
+                $('#IsTaggingEnabled').addClass('active');
+                $("#hdnIsPermitTag").val(true);
+            } else {
+                $(mainParent).removeClass('active');
+                $('#IsTaggingEnabled').removeClass('active');
+                $("#hdnIsPermitTag").val(false);
+            }
+        });
+
+        $('#upda').click(function () {
+            $('.discity').hide();
+            $('.disstate').hide();
+            $('.discountry').hide();
+            $('.generalCancel').show();
+            $('.diszip').hide();
+            $('.dNoticeText').hide();
+            $('.tnoticetext').removeClass("disable");
+            $('.city').show();
+            $('.state').show();
+            $('.country').show();
+            $('.zip').show();
+            $('#sav').show();
+            $('.can').show();
+            $('.hideinputcntrl').show();
+            $(".hidelblcntrl").hide();
+            $('#upda').hide();
+            $("#upload-control").show();
+            $('#emails').show();
+            $('#spamuser').hide();
+            $('#txt').hide();
+            $('#achor').show();
+            $('#Anchorpop').hide();
+            $("#HospitalTypeId").attr("disabled", true);
+            $("#Accreditor").attr("disabled", true); 
+        });
+
+        $('input[name="IsTagging"]').click(function () {
+            debugger;
+            var mainParent = $('.crx-value').parent('.toggle-crxbtn');
+            var status = false;
+
+            if ($('.crx-value').hasClass('active')) {
+                status = false;
+            } else {
+                status = true;
+            }
+            if (status == true) {
+                $(mainParent).addClass('active');
+                $('#IsTaggingEnabled').addClass('active');
+                $("#hdnIsPermitTag").val(true);
+            } else {
+                $(mainParent).removeClass('active');
+                $('#IsTaggingEnabled').removeClass('active');
+                $("#hdnIsPermitTag").val(false);
+            }
+
+        });
+
+    </script>
+
+    <style>
+
+        .customLook {
+            --tag-bg: #0052BF;
+            --tag-hover: #CE0078;
+            --tag-text-color: #FFF;
+            --tags-border-color: silver;
+            --tag-text-color--edit: #111;
+            --tag-remove-bg: var(--tag-hover);
+            --tag-pad: .6em 1em;
+            --tag-inset-shadow-size: 1.3em;
+            --tag-remove-btn-bg--hover: black;
+            display: inline-block;
+            min-width: 0;
+            border: none;
+        }
+
+            .customLook .tagify__tag {
+                margin-top: 0;
+            }
+
+                .customLook .tagify__tag > div {
+                    border-radius: 25px;
+                }
+
+                /* Do not show the "remove tag" (x) button when only a single tag remains */
+                .customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
+                    /*display: none;*/
+                }
+
+            .customLook .tagify__tag__removeBtn {
+                opacity: 0;
+                transform: translateX(-6px) scale(.5);
+                margin-left: -3ch;
+                transition: .12s;
+            }
+
+            .customLook .tagify__tag:hover .tagify__tag__removeBtn {
+                transform: translateX(-6px) scale(.5);
+                opacity: 1;
+                margin-left: -1ch;
+            }
+
+            .customLook + button {
+                color: #0052BF;
+                font: bold 1.4em/1.65 Arial;
+                border: 0;
+                background: none;
+                box-shadow: 0 0 0 2px inset currentColor;
+                border-radius: 50%;
+                width: 1.65em;
+                height: 1.65em;
+                cursor: pointer;
+                outline: none;
+                transition: .1s ease-out;
+                margin: 0 0 0 5px;
+                vertical-align: top;
+            }
+
+                .customLook + button:hover {
+                    box-shadow: 0 0 0 5px inset currentColor;
+                }
+
+            .customLook .tagify__input {
+                display: none;
+            }
+
+        .titleplusbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .tagify {
+            --tag-bg: #0052BF !important;
+            --tag-text-color: white !important;
+            --tag-pad: 0.5em 0.9em !important;
+            --tag-hover: #438bea !important;
+            padding: 6px 2px !important;
+            --tag-inset-shadow-size: 3.1em !important;
+            --tag-remove-bg: rgb(0 82 191) !important;
+        }
+
+        .customLook .tagify__tag {
+            margin-top: 0 !important;
+            padding: 2px !important;
+        }
+
+        .tagify__tag {
+            margin: 0 4px !important;
+        }
+
+        .tagify__tag__removeBtn {
+            order: 5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 54px;
+            cursor: pointer;
+            font: 29px/1 Arial;
+            background: var(--tag-remove-btn-bg,none);
+            color: var(--tag-remove-btn-color,#000);
+            width: 40px;
+            height: 40px;
+            margin-right: 7.66667px;
+            overflow: hidden;
+        }
+
+        .draftemail-control .selectBoxs {
+            padding: 0 0 9px 0;
+        }
+
+        .draftemail-control .bootstrap-tagsinput {
+            width: 100%;
+            border-radius: 0px;
+        }
+
+
+        .ullistitem {
+            z-index: 99;
+            position: static;
+            background: rgb(245, 245, 245);
+            left: 0px;
+            right: 0px;
+            border-top: none;
+            top: 32px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            max-height: 317px;
+            overflow: auto;
+        }
+
+        .selectBoxsfornotify .ullistitemfornotify li {
+            display: inline-block;
+            float: left;
+            width: 33.33%;
+            padding: 4px 10px;
+            position: relative;
+        }
+
+        .ullistitemfornotify {
+            z-index: 99;
+            position: static;
+            background: rgb(245, 245, 245);
+            left: 0px;
+            right: 0px;
+            border-top: none;
+            top: 32px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            max-height: 317px;
+            overflow: auto;
+        }
+
+        .crxgeneral-itemBoxNo {
+            width: 100%;
+        }
+    </style>
+}

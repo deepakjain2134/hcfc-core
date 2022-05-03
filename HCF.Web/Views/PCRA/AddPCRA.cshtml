@@ -1,0 +1,700 @@
+@model HCF.BDO.TPCRAQuestion
+@{ ViewBag.Title = "Add PCRA";
+
+
+    int MinSequence = Model!=null && Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence > 0 ? Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : 0;
+    int MaxSequence = Model != null &&  Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && Model.TPermitWorkFlowDetails.OrderByDescending(x => x.Sequence).ToList().FirstOrDefault().Sequence > 0 ? Model.TPermitWorkFlowDetails.OrderByDescending(x => x.Sequence).ToList().FirstOrDefault().Sequence : 0;
+    int CurrentSignSequence = Model != null && Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence;
+    if (CurrentSignSequence > 0)
+    {
+        bool CheckCurrentSequenceIsRequired = Model != null && Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Required : Model.TPermitWorkFlowDetails.OrderBy(x => x.Sequence).ToList().FirstOrDefault().Required;
+        if (Model != null && Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && !CheckCurrentSequenceIsRequired && Model.TPermitWorkFlowDetails.Any(x => x.LabelSignId != 0 && x.Sequence == CurrentSignSequence))
+        {
+
+            CurrentSignSequence = Model != null && Model.TPermitWorkFlowDetails != null && Model.TPermitWorkFlowDetails.Count > 0 && Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 && x.Sequence != CurrentSignSequence).OrderBy(x => x.Sequence).ToList().Count > 0 ? Model.TPermitWorkFlowDetails.Where(x => x.LabelSignId == 0 && x.Sequence != CurrentSignSequence).OrderBy(x => x.Sequence).ToList().FirstOrDefault().Sequence : MaxSequence;
+        }
+    } }
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Pre-Construction Risk Assessment [PCRA]
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @using (Html.BeginForm("AddPCRA", "PCRA", FormMethod.Post, new { id = "PCRAform", @autocomplete = "off" }))
+                {
+
+                    @Html.HiddenFor(m => Model.TPCRAQuesId)
+                    @Html.HiddenFor(m => Model.TPCRAQuesNumber)
+                    @Html.HiddenFor(m => Model.PCRANumber)
+                    @Html.HiddenFor(m => Model.TicraId)
+                    @Html.HiddenFor(m => Model.TIcraLog.Version)
+                    <input type="hidden" id="RiskAssessmentType" name="RiskAssessmentType" value="@(Model.TPCRAQuesId>0?Model.RiskAssessmentType:1)" />
+
+                    <input type="hidden" id="DSContractorSignature.FileName" name="DSContractorSignature.FileName" value="" />
+                    <input type="hidden" id="DSContractorSignature.FileContent" name="DSContractorSignature.FileContent" value="" />
+                    <input type="hidden" id="DSFacilitySignature.FileName" name="DSFacilitySignature.FileName" value="" />
+                    <input type="hidden" id="DSFacilitySignature.FileContent" name="DSFacilitySignature.FileContent" value="" />
+                    <input type="hidden" id="DSInfectionControlSignature.FileName" name="DSInfectionControlSignature.FileName" value="" />
+                    <input type="hidden" id="DSInfectionControlSignature.FileContent" name="DSInfectionControlSignature.FileContent" value="" />
+                    <input type="hidden" id="DSSafetySignature.FileName" name="DSSafetySignature.FileName" value="" />
+                    <input type="hidden" id="DSSafetySignature.FileContent" name="DSSafetySignature.FileContent" value="" />
+
+                    <input type="hidden" id="DSContractorSignature.DigSignatureId" name="DSContractorSignature.DigSignatureId" value="" />
+                    <input type="hidden" id="DSFacilitySignature.DigSignatureId" name="DSFacilitySignature.DigSignatureId" value="" />
+                    <input type="hidden" id="DSInfectionControlSignature.DigSignatureId" name="DSInfectionControlSignature.DigSignatureId" value="" />
+                    <input type="hidden" id="DSSafetySignature.DigSignatureId" name="DSSafetySignature.DigSignatureId" value="" />
+
+                    @Html.HiddenFor(m => m.ContractorSignatureId)
+                    @Html.HiddenFor(m => m.FacilitySignatureId)
+                    @Html.HiddenFor(m => m.InfectionControlSignatureId)
+                    @Html.HiddenFor(m => m.SafetySignatureId)
+                    @Html.HiddenFor(m => m.TDrawingFields, new { id = "attachdrawingFiles" })
+
+
+                    <input type="hidden" id="hdn_DSContractorSignature_LocalSignDateTime" name="DSContractorSignature.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSContractorSignature_CreatedBy" name="DSContractorSignature.CreatedBy" />
+
+                    <input type="hidden" id="hdn_DSFacilitySignature_LocalSignDateTime" name="DSFacilitySignature.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSFacilitySignature_CreatedBy" name="DSFacilitySignature.CreatedBy" />
+                    <input type="hidden" id="hdn_DSSafetySignature_LocalSignDateTime" name="DSSafetySignature.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSSafetySignature_CreatedBy" name="DSSafetySignature.CreatedBy" />
+
+                    <input type="hidden" id="hdn_DSInfectionControlSignature_LocalSignDateTime" name="DSInfectionControlSignature.LocalSignDateTime" />
+                    <input type="hidden" id="hdn_DSInfectionControlSignature_CreatedBy" name="DSInfectionControlSignature.CreatedBy" />
+                    <div class="row tablelist-topform">
+                        <div class="col-md-6">
+                            <label class="permitNumber">PCRA #:  @(Model.TPCRAQuesId > 0 ? Model.PCRANumber :Localizer["PermitNumber"])</label>
+                            @*<label class="permitNumber">Permit #: <span style="@(Model.CeilingPermitId>0 ? "display:block;" :"display:none;")">@Model.PermitNo</span></label>*@
+                        </div>
+                        <div class="col-md-4 text-right">
+                            @if (Model.ProjectId != 0)
+                            {
+                                <div class="dropdown icratable-drop">
+                                    <button class="btn dropdown-toggle button1" type="button" data-toggle="dropdown">
+                                        See Associated Permits
+                                    </button>
+                                    @await Html.PartialAsync("~/Views/Shared/_projectPermitoptions.cshtml", Model.TIcraProject)
+                                </div>}
+                        </div>
+                        <div class="col-md-2 text-right">
+                            <button type="button" class="comm-bluebutton" id="editproject" value="Edit Project">Edit Project</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Project Name :<em class="required-field"> *</em></label>
+                            <input type="hidden" name="ProjectId" id="ProjectId" />
+                            @await Component.InvokeAsync("CommonProjectCustomDDL", new { type = "SINGLE", ProjectId = Model.ProjectId.ToString() })
+                            @*@Html.Action("ProjectCustomDDL", "Common", new { type = "SINGLE", ProjectId = Model.ProjectId })*@
+                            <input type="text" id="txtprojectName" name="txtprojectName" class="ddlproject" required />
+                            @*@Html.ICRAProjectDropDown("ProjectId", 0, "--Select--", new { @class = "form-control", required = "required" })*@
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div id="loadpartial">
+                        </div>
+                        <div>
+                            @await Html.PartialAsync("_GetPCRAActionPlans", Model)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Status: <em class="required-field"> *</em></label>
+                            <input type="hidden" value="@Model.ApprovalStatus" id="ApprovalStatus" name="ApprovalStatus" class="hdnapprovalstatus">
+                            @*@Html.DropDownListFor(model => model.TIcraLog.Status, new SelectList(ViewBag.ICRAStatus, "Value", "Text"), new { @class = "form-control", required = "required", @style = "float: right;" })*@
+
+                            <div class="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? "form-group-cra" : "form-group disable")">
+                                <approvalstatusdropdownlist name="PCRAApprovalStatus" selectedvalue="@Model.ApprovalStatus" class="form-control hdnapprovalstatus" required="required" onchange="checkAppprovalStatus()"></approvalstatusdropdownlist>
+                                @*@Html.ApprovalStatusDropDownList("PCRAApprovalStatus", Model.ApprovalStatus, new { @class = "form-control hdnapprovalstatus", required = "required", @style = "width:100%;float: right;", @onchange = "checkAppprovalStatus();" })*@
+
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="trrejectreason">
+                            <label id="lbltext"></label>
+                            @Html.TextAreaFor(model => model.RejectionReason, new { @class = "form-control", @rows = "3" })
+                        </div>
+                    </div>
+                    <br />
+                    <div id="divWorkFlow" class="row cra-signatureBox signatureBoxBorder">
+
+                        @for (int i = 0; i < Model.TPermitWorkFlowDetails.Count; i++)
+                        {
+                        <div class="divpermitworkflow" isRequired="@Model.TPermitWorkFlowDetails[i].Required" sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" id="@string.Format("divSequence_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i)" signindex="@i">
+
+                            <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileName" id="@string.Format("DSPermitSignature_{0}_{1}.FileName", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                            <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.FileContent" id="@string.Format("DSPermitSignature_{0}_{1}.FileContent", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                            <input type="hidden" name="TPermitWorkFlowDetails[@i].DSPermitSignature.DigSignatureId" id="@string.Format("DSPermitSignature_{0}_{1}.DigSignatureId", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" value="" />
+                            <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_LocalSignDateTime", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.LocalSignDateTime" value="@DateTime.Now" />
+                            <input type="hidden" id="@string.Format("hdn_DSPermitSignature_{0}_{1}_CreatedBy", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" name="TPermitWorkFlowDetails[@i].DSPermitSignature.CreatedBy" value="0" />
+
+                            <div class="col-md-4 div-forworkflow">
+                                @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].FormSettingId)
+                                @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Id)
+                                @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].Sequence)
+                                @Html.HiddenFor(m => Model.TPermitWorkFlowDetails[i].LabelSignId)
+                                <label>@Model.TPermitWorkFlowDetails[i].LabelText:<em style="@((Model.TPCRAQuesId>0  && Model.TPermitWorkFlowDetails[i].Required) ||  (i==0)?"display:inline-block;":"display:none;")" class="required-field"> *</em></label>
+
+                                <select name="TPermitWorkFlowDetails[@i].LabelValue" id="@string.Format("selectSignBy_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)" class="@(i==0?"form-control disable":"form-control")">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var item in Model.lstUserProfile.OrderBy(x => x.FullName))
+                                    {
+                                        if (item.UserId == (Model.TPermitWorkFlowDetails[i].LabelValue.HasValue && Model.TPermitWorkFlowDetails[i].LabelValue.Value > 0 ? Model.TPermitWorkFlowDetails[i].LabelValue.Value : -1))
+                                        {
+
+                                            <option value="@item.UserId" selected="selected">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.UserId">@string.Format("{0}({1})", item.FullName, item.Email)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 div-forworkflow" style="display:none;">
+                                <label>@Model.TPermitWorkFlowDetails[i].LabelText Signature Date :<em style="@((Model.TPCRAQuesId>0  && Model.TPermitWorkFlowDetails[i].Required) ||  (i==0)?"display:inline-block;":"display:none;")" class="required-field"> *</em></label>
+                                @Html.TextBoxFor(m => m.TPermitWorkFlowDetails[i].LabelSignDate, Model.TPermitWorkFlowDetails[i].LabelSignDate.ToFormatDate(), new { id = string.Format("txtSignatureDate_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence), @i), @class = "form-control datepicker readonly", @autocomplete = "off" })
+                            </div>
+                            <div class="col-md-4 div-forworkflow">
+
+                                <label>Comments:</label>
+
+                                @Html.TextAreaFor(m => m.TPermitWorkFlowDetails[i].Comment, new { id = string.Format("txtWorkFlowComments_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence), @i), @class = "form-control workflowcomment", @rows = "3", @autocomplete = "off" , maxlength = 250, title = "max limit is 250 characters" })
+
+                            </div>
+                            <div class="col-md-4 crxSignBox">
+                                <div class="div-forworkflow @string.Format("sign_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence),@i)">
+
+
+                                    @await Component.InvokeAsync("ViewDigitalSign", new HCF.Web.ViewModels.DigitalSignatureViewModel()
+                               {
+                                   signs = Model.TPermitWorkFlowDetails[i].DSPermitSignature,
+                                   MainSignatureClass = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                   //ImgSignatureClass = "approverbysign",
+                                   HiddenFileControl = ($"{string.Format("DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[@i].Sequence), @i)}"),
+                                   ApprovalStatus = Model.ApprovalStatus,
+                                   SignIndex = i,
+                                   SignSequence = Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),
+                                   SignatureControlId = ($"{string.Format("TPermitWorkFlowDetails_{0}__LabelSignId", @i)}")
+                               })
+
+                                </div>
+
+
+                                <input isrequiredctl="@(Model.TPermitWorkFlowDetails[i].Required && Model.TPermitWorkFlowDetails[i].LabelSignId.HasValue && Model.TPermitWorkFlowDetails[i].LabelSignId.Value>0?"1":"0")" isRequired="@Model.TPermitWorkFlowDetails[i].Required" type="text" value="@(Model.TPermitWorkFlowDetails[i].DSPermitSignature != null && Model.TPermitWorkFlowDetails[i].DSPermitSignature.DigSignatureId > 0?Model.TPermitWorkFlowDetails[i].DSPermitSignature.FileName:"")" @(i == 0 ? "required" : string.Empty) id=@string.Format("hdn_DSPermitSignature_{0}_{1}", Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence),@i) sequence="@Convert.ToInt32(Model.TPermitWorkFlowDetails[i].Sequence)" class="ddlproject assigned hdnRequired" />
+                            </div>
+                        </div>
+                        }
+
+
+
+                    </div>
+
+
+
+                    <div class="row" style="display:none;">
+                        @Html.HiddenFor(m => m.BuildingId)
+                        @Html.HiddenFor(m => m.BuildingName)
+                        @Html.HiddenFor(m => m.FloorName)
+                        @Html.HiddenFor(m => m.Phone)
+                        @Html.HiddenFor(m => m.EmailAddress)
+
+                        <input type="hidden" name="lstBuildingDetails" id="lstBuildingDetails" />
+                        <div class="col-lg-12">
+                            <h4> Date Submitted : </h4>
+                            @Html.TextBoxFor(model => model.DateSubmitted, $"{Model.DateSubmitted:MMM d, yyyy}", new { id = "startdatepicker", @class = "futuredatepicker form-control readonly", @autocomplete = "off" })
+                        </div>
+                        <div class="col-lg-12">
+                            <h4> Brief Description of Work </h4>
+                            @Html.TextAreaFor(m => m.WorkDescription, new { @class = "form-control", @rows = "5" })
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 divattachment">
+                            <label class="attachedfile-lable"> Attach Drawings: </label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnattachingdrawings" data-toggle="modal" data-target="#modal-container1" />
+
+                            <div id="drawing-upload-list">
+                                <div id="drawing-lists">
+                                    <ul class="col-lg-12 attachdrawingfiles ">
+                                        @foreach (var item in Model.DrawingAttachments)
+                                        {
+                                            <li class="list-group-item files" id="lidrawingdv_@item.FloorPlanId">
+                                                @if (!string.IsNullOrEmpty(item.FullFileName))
+                                                {
+                                                    <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.ImagePath, title = item.FloorName + " , " + item.BuildingName })" title="@item.FileName" class="modal-link allowclick">
+                                                        @*<a href="@Url.Action("DrawingPreview", "Common", new { floorPlanId = item.FloorPlanId, mode = "drawing" ,permitId = 0})" title="@item.FileName" class="modal-link allowclick">*@
+                                                        @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FullFileName" />*@
+                                                        @item.FullFileName
+                                                    </a>
+                                                    <a data-id="@item.FloorPlanId" class="deletedrawing allowclick">
+                                                        <img id="deletedrawing" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                    </a>}
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-md-4">
+                            <div class="crxSignBox">
+                                <label>Requested By :<em class="required-field"> *</em></label>
+                                @*@Html.TextBoxFor(model => model.Sign1Name, null, new { @class = "form-control" })*@
+                                <userslist name="RequestedBy" selectedvalue="@((Model.RequestedBy.HasValue) ? Model.RequestedBy.Value : -1)" firsttext="-- Select --" class="form-control"></userslist>
+                                @*@Html.UsersList("RequestedBy", (Model.RequestedBy.HasValue) ? Model.RequestedBy.Value : 0, "-- Select --", new { @class = "form-control" })*@
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right button_Div">
+                            <button type="submit" name="submit" class="comm-button" id="btnsavepermit" value="Save">Submit</button>
+                            <input name="submit" type="submit" class="@( (Model.TPCRAQuesId > 0 && Model.ApprovalStatus > 0 &&  ViewBag.ShowIncomplete ==0) ? "comm-bluebutton hide" : "comm-bluebutton")" value="Save Incomplete" formnovalidate="formnovalidate" id="btnIncomplete" />
+                            @*@Html.ActionLink("Cancel", "getalltpcra", "PCRA", new { @class = "comm-button", @style = "" })*@
+                            @Html.ActionLink("Cancel", "getalltpcra", new { controller = "PCRA" }, new { @class = "comm-Cancelbutton" })
+                        </div>
+                        <input type="hidden" id="IsRequestEdited" name="IsRequestEdited" value="@ViewBag.IsRequestEdited" />
+                    </div>}
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="RejectMessage" name="RejectMessage" value="0" />
+<input id="hdnIsVendor" type="hidden" value="@(HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin") ? 0 : 1)" />
+<input type="hidden" id="hdnCurrentSignSequence" value="@CurrentSignSequence" />
+<input type="hidden" id="hdnMaxSequence" value="@MaxSequence" />
+<input type="hidden" id="hdnMinSequence" value="@MinSequence" />
+<input type="hidden" id="hdnCurrentUserId" value="@HCF.Web.Base.UserSession.CurrentUser.UserId" />
+
+<input type="hidden" id="hdnIsVendorUser" value="@(HCF.Web.Base.UserSession.CurrentUser.IsVendorUser?"True":"False")" />
+<input type="hidden" id="hdnIsPowerUser" value="@(HCF.Web.Base.UserSession.IsPowerUser()?"True":"False")" />
+<input type="hidden" id="hdnFormId" value="@Model.TPCRAQuesId" />
+<input type="hidden" id="hdnStatus" value="@Model.ApprovalStatus" />
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Permit/PermitWorkFlow.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+
+<script>
+
+    //var projectddl = $("#ProjectId");
+    var tquesPcraId = $("#TPCRAQuesId");
+    var statusddl = $("#PCRAApprovalStatus");
+    $(document).ready(function () {
+        var projectid = parseInt('@ViewBag.ProjectId');
+        if (projectid != "" && projectid != undefined && projectid > 0) {
+            $('.chkSigleSelect input[type="checkbox"][value="' + projectid + '"]').prop('checked', true).trigger('change');
+        }
+        //DecideAddorEdit(projectid);
+        loadProjectDetails(projectid);
+        if (tquesPcraId.val() > 0) {
+            //projectddl.addClass("disable");
+        }
+        $(".chkSigleSelect input[type='checkbox']").change(function () {
+            debugger;
+            var projectid = $(this).val();
+            loadProjectDetails(projectid);
+        });
+         var status = parseInt('@Model.ApprovalStatus');
+        if (tquesPcraId==0) {
+            status = 2;
+        }
+
+        statusddl.val(status);
+        checkAppprovalStatus();
+        if ('@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+            $("#ContractorId").addClass("disable");
+            $("#FacilityId").addClass("disable");
+            $("#SafetyId").addClass("disable");
+            $(".imgDSInfectionControlSignature").addClass("disable");
+            $(".imgDSFacilitySignature").addClass("disable");
+            $(".imgDSSafetySignature").addClass("disable");
+        }
+        if (('@Model.ApprovalStatus' == '1' || '@Model.TIcraLog.Status' == '5' ) && '@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+            debugger;
+            $("#PCRAform").find("input,textarea,select").addClass("disabled");
+            $(".selectList").addClass("disable");
+            $("select").addClass("disable");
+            $("input:button").addClass("disable");
+            $("input:submit").addClass("disable");
+            $("button:submit").addClass("disable");
+            $(".allowclick").not(".modal-link").addClass("disable");
+            $("#btnattachingdrawings").addClass("disable");
+            $("#btnuploadfile").addClass("disable");
+            $("input:hidden").removeClass("disabled");
+            $('#editproject').addClass("disabled");
+            $('#PCRADSContractorSignature').addClass('disabled')
+            $(".cra-signatureBox").addClass("disabled");
+            $(".modal-body").addClass("disabled");
+        }
+
+        if ('@Model.ApprovalStatus' == '1'  && ('@HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")' == 'True') && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False') ) {
+            debugger;
+            $("#PCRAform").find("input,textarea,select").addClass("disabled");
+            $(".selectList").addClass("disable");
+            $("select").addClass("disable");
+            //$("#PCRAApprovalStatus").removeClass("disabled");
+            //$("#PCRAApprovalStatus").attr("disabled", false);
+            $(".allowclick").not(".modal-link").addClass("disable");
+            $("input:submit").removeClass("disabled");
+            $("#btnattachingdrawings").addClass("disable");
+            $("#btnuploadfile").addClass("disable");
+            $("input:hidden").removeClass("disabled");
+            $('#editproject').addClass("disabled");
+            $(".cra-signatureBox").addClass("disabled");
+            $(".modal-body").addClass("disabled");
+        }
+        if ('@Model.ApprovalStatus' == '1' && ('@HCF.Web.Base.UserSession.IsInRole("setup_Constructions_superadmin")' == 'True') && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'True')) {
+            $(".cra-signatureBox").find("div.row").removeClass("disable");
+        }
+        var isincomplete = -1;
+        if ('@Model.TPCRAQuesId' != 0 && isincomplete!='@Model.ApprovalStatus') {
+            $("#PCRAApprovalStatus>option[value=-1]").hide();
+        }
+
+        if ('@Model.TPCRAQuesId' != 0 && isincomplete!='@Model.ApprovalStatus') {
+            $("#ApprovalStatus>option[value=-1]").hide();
+
+        }
+        $("#PCRAApprovalStatus>option[value=4]").hide();
+        $("#PCRAApprovalStatus>option[value=6]").hide();
+
+         setWorkFlowControl(1);
+            if ('@HCF.Web.Base.UserSession.CurrentUser.IsVendorUser' == 'True' && ('@HCF.Web.Base.UserSession.IsPowerUser()' == 'False')) {
+                SetUpVendorSignatureControl();
+            }
+    });
+
+    $('textarea').not(".workflowcomment").on('input', function () {
+        $(this).outerHeight(80).outerHeight(this.scrollHeight);
+    });
+    $('textarea').not(".workflowcomment").trigger('input');
+    $('.workflowcomment').on('input', function () {
+        $(this).outerHeight(35).outerHeight(this.scrollHeight);
+    });
+    $('.workflowcomment').trigger('input');
+    //projectddl.change(function () {
+    //    var projectid = projectddl.val();
+    //    loadProjectDetails(projectid);
+    //});
+
+    function loadProjectDetails(projectId) {
+        var url = CRxUrls.PCRA_GetProjectData;
+        $.get(url + "?projectid=" + projectId, function (data) {
+            $("#loadpartial").html('');
+            $('#loadpartial').html(data);
+            $('#loadpartial').fadeIn('fast');
+        });
+    }
+
+    function signCRA(signname) {
+        if (signname == "contractorsign") {
+            loadSignView('DSContractorSignature.FileName', 'DSContractorSignature.FileContent');
+            $('#signAndSave').modal('show');
+        }
+
+        else if (signname == "facilitysign") {
+            loadSignView('DSFacilitySignature.FileName', 'DSFacilitySignature.FileContent');
+            $('#signAndSave').modal('show');
+        }
+
+        else if (signname == "infectionsign") {
+            loadSignView('DSInfectionControlSignature.FileName', 'DSInfectionControlSignature.FileContent');
+            $('#signAndSave').modal('show');
+        }
+
+        else if (signname == "safetysign") {
+            loadSignView('DSSafetySignature.FileName', 'DSSafetySignature.FileContent');
+            $('#signAndSave').modal('show');
+        }
+    }
+    $("#editproject").click(function () {
+        debugger;
+        var projectId = $("#ProjectId").val();
+        var parentProjectId = $("#ParentProjectId").val();
+        debugger;
+        if (projectId > 0) {
+            var urlAction = CRxUrls.IcraProject_AddOrEdit;
+            if (parentProjectId != undefined && parentProjectId > 0) {
+                window.location.href = urlAction + "?parentProjectId=" + parentProjectId + "&id=" + projectId;
+            } else {
+                window.location.href = urlAction + "?id=" + projectId;
+            }
+        } else {
+            var urlAction = CRxUrls.IcraProject_Index;
+            window.location.href = urlAction
+        }
+    });
+
+
+
+
+   
+
+        $(document).off("click", "#btnsavepermit").on("click", "#btnsavepermit", function () {
+        debugger;
+
+        var IsValid = false;
+        if ($('#PCRAform')[0].checkValidity()) {
+           
+            IsValid = true;
+        }
+        else {
+            IsValid = false;
+        }
+        
+        if (IsValid) {
+            if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                IsValid = false;
+
+                swal({
+                    html: true,
+                    title: "Message",
+                    text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, reject permit",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        console.log("rejected is zer123o");
+                        $("#RejectMessage").val("1");
+                        $(".loadingModal").show();
+                        $("#btnsavepermit").click();
+                    }
+
+                });
+                if ($("#RejectMessage").val() == "0") {
+                    console.log("rejected is zero");
+                    $(".loadingModal").hide();
+                    return false;
+                }
+            }
+            else {
+                console.log("save is in process");
+               $(".loadingModal").show();
+                var iscompletedworkflow = setapprovalrequiredfield();
+                if (iscompletedworkflow) {
+                    console.log("save submit");
+                    $("#PCRAform").submit();
+                    console.log("save done");
+                }
+                else {
+                    console.log("incomplete flow done");
+                    $(".loadingModal").hide();
+                    return false;
+                }
+            }
+
+           
+        }
+        else {
+          //  $(".loadingModal").hide();
+        }
+    });
+    $("#btnIncomplete").click(function () {
+        // $("#hdnsubmitButton").val($(this).val());
+        if ($("#ProjectId").val() == "" || $("#ProjectId").val() == "0") {
+            swalalert("Please select Project");
+            IsValid = false;
+            return false;
+        }
+        else {
+
+            // $("#PCRAform").submit();
+        }
+
+    
+        IsValid = true;
+
+        if (IsValid) {
+            if (statusddl.val() == '0' && $("#RejectMessage").val() == "0") {
+                debugger;
+                IsValid = false;
+                $(".loadingModal").hide();
+                swal({
+                    html: true,
+                    title: "Message",
+                    text: "<label>You are rejecting this permit, all prior signatures will be removed. Once the permit is resubmitted the signature process will restart.</label>",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, reject permit",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        $("#RejectMessage").val("1");
+                        $(".loadingModal").show();
+                        $("#btnIncomplete").click();
+
+                    }
+
+                });
+                if ($("#RejectMessage").val() == "0") {
+                    $(".loadingModal").hide();
+                    return false;
+                }
+
+            }
+            else {
+
+                $(".loadingModal").show();
+                $("#PCRAform").submit();
+                return false;
+            }
+        } else {
+            $(".loadingModal").hide();
+            return false;
+        }
+    });
+
+    function checkAppprovalStatus() {
+        var StatusId = $("#PCRAApprovalStatus").val();
+        $("#ApprovalStatus").val(StatusId);
+        if ('@Model.TPCRAQuesId' == 0  || '@Model.ApprovalStatus' == -1 ) {
+            var lbltext = "Reason(s):";
+            lbltext += '<em class="required-field approverby">*</em>';
+            $("#lbltext").html(lbltext);
+            $("#RejectionReason").prop('required', false);
+            $("#RejectionReason").prev("label").find("em").hide();
+            $("#trrejectreason").show();
+
+            $("#RejectionReason").prop('required', false);
+
+        }
+        else {
+            if (StatusId == 0 || StatusId == 3) { // Reject && Penidng
+                var lbltext = StatusId == 0 ? "Reason(s) for Rejection:" : "Reason(s) for Hold/Pending:";
+                lbltext += '<em class="required-field approverby">*</em>';
+                $("#lbltext").html(lbltext);
+                $("#trrejectreason").show();
+                $(".divapprovaltime").removeClass("disable");
+
+            }
+            else if (StatusId == 1) {
+                $("#RejectionReason").prop('required', false);
+                var lbltext = "Reason(s):";
+                lbltext += '<em class="required-field approverby">*</em>';
+                $("#lbltext").html(lbltext);
+                $("#RejectionReason").prop('required', false);
+                $("#RejectionReason").prev("label").find("em").hide();
+                $("#trrejectreason").show();
+                $(".divapprovaltime").removeClass("disable");
+            }
+
+            else if (StatusId == 5) {
+                var lbltext = "Reason(s) for closing:";
+                lbltext += '<em class="required-field approverby">*</em>';
+                $("#lbltext").html(lbltext);
+
+                $("#RejectionReason").prop('required', true);
+                $("#RejectionReason").prev("label").find("em").hide();
+                $("#trrejectreason").show();
+
+                $("#RejectionReason").prop('required', false);
+                $(".divapprovaltime").addClass("disable");
+
+            }
+            else if (StatusId == 6) {
+                var lbltext = "Reason for Review:";
+                lbltext += '<em class="required-field approverby">*</em>';
+                $("#lbltext").html(lbltext);
+
+                $("#TIcraLog_ReasonRejection").prop('required', true);
+                $("#TIcraLog_ReasonRejection").prev("label").find("em").hide();
+                $("#trrejectreason").show();
+
+                $("#TIcraLog_ReasonRejection").prop('required', false);
+                $(".divapprovaltime").removeClass("disable");
+
+            }
+            else {
+                var lbltext = "Reason(s):";
+                lbltext += '<em class="required-field approverby">*</em>';
+                $("#lbltext").html(lbltext);
+                $("#RejectionReason").prop('required', false);
+                $("#RejectionReason").prev("label").find("em").hide();
+                $("#trrejectreason").show();
+                $("#RejectionReason").prop('required', false);
+
+            }
+        }
+    }
+
+
+      $(document).on('click', '#btnattachingdrawings', function () {
+        LoadDrawingPathway();
+        $('#modal-container1').modal('show');
+    });
+    var TDrawingFields = $("#attachdrawingFiles");
+    $(document).on('click', 'a.deletedrawing', function (e) {
+       // TDrawingFields = $("#attachdrawingFiles");
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TDrawingFields.val() != undefined && TDrawingFields.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TDrawingFields.val(), TFileId.toLowerCase(), ",");
+
+                    TDrawingFields.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.PCRA_DeletePCRADrawings + "?TPCRAQuesNumber=" + '@Model.TPCRAQuesNumber' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidrawingdv_" + TFileId).remove();
+                            deletedrawings(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                }
+                else {
+                    deletedrawings(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                }
+            });
+    });
+
+
+
+
+
+</script>
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Permit/PermitSignature.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<style>
+    .disable.crxSignBox ,.disable.div-forworkflow {
+        opacity: 1 !important;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+        .disable.div-forworkflow input, .disable.div-forworkflow select, .disable.div-forworkflow textarea, .disable.div-forworkflow .datepicker, .disable a[class*="DSPermitSignature"] .showSignPopUp {
+            opacity: .4 !important;
+            cursor: default !important;
+            pointer-events: none;
+        }
+</style>
+
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>

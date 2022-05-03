@@ -1,0 +1,477 @@
+﻿@model HCF.BDO.Certificates
+@{
+    var Title = (Model != null && Model.CertificateId > 0) ? "Edit Certificates" : "Add Certificates";
+    ViewBag.Title = Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";   
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Title 
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="box box-primary">
+
+                    @using (Html.BeginForm("AddOrEditCertificates", "User", FormMethod.Post, new { id = "AddOrEditCertificatesForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                       
+                            <input type="hidden" id="SlectedView" value="@ViewBag.view" />
+                            @if (Model != null && Model.CertificateId > 0)
+                            {
+                                @Html.HiddenFor(x => x.CertificateId)
+                                @Html.HiddenFor(x => x.UserId)
+                                @Html.HiddenFor(x => x.VendorId)
+                                @Html.HiddenFor(x => x.CertificateType)
+                                @Html.HiddenFor(x => x.FileName)
+                                @Html.HiddenFor(x => x.Path)
+                                @Html.HiddenFor(x => x.View)
+                            }
+                            else
+                            {
+                                <input type="hidden" name="CertificateType" id="CertificateType" />
+                                <input type="hidden" name="UserId" id="UserId" />
+                                <input type="hidden" name="VendorId" id="VendorId" />
+                                @Html.HiddenFor(x => x.View)
+                            }
+
+
+
+
+                            <div class="row tablelist-topform">
+                                <div class="select_view col-md-12">
+                                    <div class="btn-group btn-group-vertical" data-toggle="buttons" id="btncertificateTypes">
+                                        <label class="btn">
+                                            @Html.RadioButton("CertificateTypes", "3", new { @selradio = "3" })@Html.Label("General")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn active">
+                                            @Html.RadioButton("CertificateTypes", "1", new { @selradio = "1" })@Html.Label("Internal")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn">
+                                            @Html.RadioButton("CertificateTypes", "2", new { @selradio = "2" })@Html.Label("Vendor")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <div class="internalBoxes">
+                                        <div class="Internal_View" id="Internal_View">
+                                            <userdropdownlist name="drpUser" selectedvalue="0" class="form-control" firsttext="Select"></userdropdownlist>
+                                            @*@Html.UserDropDownList("drpUser", 0, "Select", new { @class = "form-control" })*@
+                                        </div>
+                                        <div class="Vendor_view" id="Vendor_view">
+                                            <vendordropdownlist name="drpVendor" selectedvalue="0" class="form-control" firsttext="Select"></vendordropdownlist>
+                                            @*@Html.VendorDropDownList("drpVendor", 0, "Select", new { @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+
+                            <div class="row">
+                                <div class="form-group col-lg-4">
+                                    @Html.LabelFor(model => model.CertificateName)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(x => x.CertificateName, new { @class = "form-control Spacevalid", placeholder = "Enter title for Certificate Name", required = "required" })
+                                </div>
+                                <div class="form-group col-lg-4">
+                                    @Html.LabelFor(model => model.CreatedDate)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(x => Model.IssueDate, $"{Model.IssueDate:MMM d, yyyy}", new { @class = "startDate form-control", @autocomplete = "off", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.IssueDate, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group col-lg-4">
+                                    @Html.LabelFor(model => model.ValidUpTo)<em class="required-field"> *</em>
+                                    @Html.TextBoxFor(x => Model.ValidUpTo, $"{Model.ValidUpTo:MMM d, yyyy}", new { @class = "endDate form-control", @autocomplete = "off", required = "required" })
+                                    @Html.ValidationMessageFor(model => Model.ValidUpTo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="form-group col-lg-6">
+
+                                    @Html.CheckBoxFor(x => x.IsActive)<span></span>
+                                    @Html.LabelFor(model => model.IsActive)
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="hidden" name="FileName" />
+                                    <input type="hidden" name="FileContent" />
+                                    <label>Upload Document</label><em class="required-field"> *</em>
+                                    @if (Model.CertificateId != 0 && Model.Path != "")
+                                    {
+                                        <div style="display: flex;align-items: flex-end;">
+                                            <img id="imagePreview_@string.Format("{0}", Model.CertificateId)" class="img"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentIcon)" />
+                                            <div style="position:relative;">
+                                                <span class="upload_file floor_uploadicon">
+                                                    <input type="file" name="file" filename="FileName" accept="file/*" tempname="FileContent"
+                                                           id="fileupdateid" class="fileUpload" onchange="Uploadsfile(this,'@Model.CertificateId','F')" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="gallery-itemBox">
+                                            <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = Model.Path, title = "Preview" })" id="deleteimg_@Model.CertificateId" class="modal-link allowclick">
+                                                <img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@Model.FileName" />
+                                            </a>
+                                            <a data-id="@Model.CertificateId" class="delete" id="existsfile" CertificateId="@Model.CertificateId">
+                                                <img id="deleteplanimg_@Model.CertificateId" class="deleteplanimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                            </a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div style="display: flex;align-items: flex-end;">
+                                            <img id="imagePreview_new" class="img"
+                                                 src="@Url.Content(HCF.Web.Models.ImagePathModel.DocumentIcon)" />
+                                            <div style="position:relative;">
+                                                <span class="upload_file floor_uploadicon">
+                                                    <input type="file" name="file" accept="file/*" filename="FileName" tempname="FileContent"
+                                                           required="required" class="fileUpload" onchange="Uploadsfile(this,'new','F')" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 text-right button_Div">
+                                    <input type="submit" value="Save" id="certiicatesave" class="comm-button">
+
+                                    @if (ViewBag.UserIDCertificate != null && ViewBag.view == "UserView")
+                                    {
+                                        <a class="comm-Cancelbutton" href="@Url.Action("UserCertificates", "User", new { UserId = @ViewBag.UserIDCertificate, view = "UserView" })">
+                                            <span>Cancel</span>
+                                        </a>
+
+                                    }
+                                    else if (ViewBag.CertificateVendorId != null && ViewBag.view == "UserView")
+                                    {
+                                        <a class="comm-button" href="@Url.Action("UserCertificates", "User", new { vendorid = @ViewBag.CertificateVendorId, view = "UserView" })">
+                                            <span>Cancel</span>
+                                        </a>
+
+                                    }
+                                    else
+                                    {
+                                        <a class="comm-Cancelbutton" href="@Url.Action("UserCertificates", "User", new { view =ViewBag.view })">
+                                            <span>Cancel</span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+
+                        
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+     $(document).ready(function () {
+        debugger;
+        $(".Vendor_view").hide();
+        $(".Internal_View").hide();
+        debugger;
+        var id = $('#CertificateId').val();
+        if (id != "" && id != undefined) {
+            var userid = '@Model.UserId';
+            var vendorid = '@Model.VendorId';
+            if (userid != "") {
+                $("[selradio=1]").prop("checked", true)
+                $(".Internal_View").show();
+                $('#drpUser').val(userid);
+                $('#drpUser').prop("disabled", true);
+                $('#btncertificateTypes').addClass('disabled', 'disabled')
+            } else if (vendorid != "") {
+                $("[selradio=2]").prop("checked", true)
+                $(".Internal_View").hide();
+                $(".Vendor_view").show();
+                $('#drpVendor').val(vendorid);
+                $('#drpVendor').prop("disabled", true);
+                $('#btncertificateTypes').addClass('disabled', 'disabled')
+            } else {
+                $("[selradio=3]").prop("checked", true)
+                $(".Vendor_view").hide();
+                $(".Internal_View").hide();
+                $('#btncertificateTypes').addClass('disabled', 'disabled')
+            }
+        } else {
+            $("[selradio=3]").prop("checked", true)
+            $(".Vendor_view").hide();
+            $(".Internal_View").hide();
+            $('#CertificateType').val(3);
+        }
+
+        var UserIDCertificate = '@ViewBag.UserIDCertificate'
+        if (UserIDCertificate != "") {
+            debugger;
+            $("[selradio=1]").prop("checked", true)
+            $(".Internal_View").show();
+            $('#UserId').val(UserIDCertificate);
+            $('#drpUser').val(UserIDCertificate);
+            $('#CertificateType').val(1);
+            $('#drpUser').prop('disabled', true);
+            $('#btncertificateTypes').addClass('disabled', 'disabled')
+       }
+
+        var VendorIds = '@ViewBag.CertificateVendorId'
+        if (VendorIds != "") {
+            debugger;
+            $("[selradio=2]").prop("checked", true)
+            $(".Internal_View").hide();
+            $(".Vendor_view").show();
+            $('#drpVendor').val(VendorIds);
+            $('#VendorId').val(VendorIds);
+            $('#CertificateType').val(2);
+            $('#drpVendor').prop('disabled', true);
+            $('#btncertificateTypes').addClass('disabled', 'disabled')
+        }
+
+         $('#certiicatesave').on('click', function () {
+             var view = $('#SlectedView').val();
+             if (view != "") {
+                 $('#View').val(view);
+             }
+         })
+
+        $("#file").change(function () {
+            var file = document.getElementById("file").files[0];
+            var readImg = new FileReader();
+            readImg.readAsDataURL(file);
+            readImg.onload = function (e) {
+                $('.img').attr('src', e.target.result).fadeIn();
+            }
+        });
+
+        $(".datepicker").datepicker({
+            showOn: "both",
+            buttonImage: ImgUrls.datepicker_calendar,
+            buttonImageOnly: true,
+            dateFormat: $.CRx_DateFormat,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+
+            //   dateFormat: 'MMM d, yyyy'
+        });
+
+
+    });
+
+
+    $("[name=CertificateTypes]").on('change', function () {
+        debugger;
+        var view = $(this).val();
+        $("#Internal_View").hide();
+        $("#Vendor_view").hide();
+        $('#CertificateType').val(view);
+        if (view == "1") {
+            $("#Internal_View").show();
+            $("#Vendor_view").hide();
+            $('#drpUser').prop('required', true);
+        } else if (view == "2") {
+            $("#Internal_View").hide();
+            $("#Vendor_view").show();
+            $('#drpVendor').prop('required', true);
+        } else {
+            $("#Internal_View").hide();
+            $("#Vendor_view").hide();
+        }
+    });
+
+    $('#drpUser').on('change', function () {
+        debugger;
+        var value = $(this).val();
+        $('#UserId').val(value);
+    });
+
+    $('#drpVendor').on('change', function () {
+        debugger;
+        var value = $(this).val();
+        $('#VendorId').val(value);
+    });
+
+    $('#ValidUpTo').on('change', function () {
+        var issuedate = $('#IssueDate').val();
+        var value = $(this).val();
+        if ((Date.parse(issuedate) >= Date.parse(value))) {
+
+            swalalert("Expiration date should be greater than Issue date");
+            $('#ValidUpTo').val("");
+        }
+    });
+
+
+
+    function Uploadsfile(file, controlId, filetype) {
+        debugger
+        var thisfile = $(file);
+        var fileExtensionas = [];
+        if (filetype === "D") {
+            fileExtensionas = ['pdf', 'xlsx', 'xls', 'doc', 'docx', 'csv'];
+        }
+        if (filetype === "C") {
+            fileExtensionas = ['png', 'jpg', 'jpeg'];
+        }
+        if (filetype === "F") {  // for floorPlan
+            fileExtensionas = ['png', 'jpg', 'jpeg', 'pdf'];
+        }
+        var control = file.getAttribute("tempName");
+        var fileControl = file.getAttribute("filename");
+        var filepath = file.getAttribute("filepath");
+
+        if (file.files.length > 0) {
+
+            var filename = file.files[0].name;
+            console.log(filename);
+         
+            let = formatstring = /[`~!$%&*()_?#-+]/;
+            if (formatstring.test(filename) == true) {
+                swalalert("Please remove the special characters from the file name and upload again.");
+                return false;
+            }
+
+        }
+
+        if (file.files.length > 0) {
+            var file = file.files[0];
+            var fileName = file.name;
+            var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if ($.inArray(fileExtension.toLowerCase(), fileExtensionas) == -1) {
+                $(thisfile).val("")
+                swal("Only formats are allowed : " + fileExtensionas.join(', '));
+                return false;
+            } else {
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+
+
+                reader.onload = function () {
+                    var array = reader.result.split(",");
+                    $("input[name='" + control + "'][type=hidden]").val(array[1]);
+                    $("input[name='" + fileControl + "'][type=hidden]").val(fileName);
+                    $("input[name='" + filepath + "'][type=hidden]").val("");
+                    // console.log(reader.result);
+
+                };
+                reader.onloadend = function () {
+                    if (filetype == "C") {
+                        $("#imagePreview_" + controlId).attr('src', this.result);
+                    }
+                    else if (filetype == "F") { /// for floor Plan specail requirement
+                        if (fileExtension == "pdf") {
+                            $("#imagePreview_" + controlId).attr('src', "/dist/Images/Icons/pdf_icon.png");
+                        } else {
+                            $("#imagePreview_" + controlId).attr('src', this.result);
+                        }
+                    }
+                    else {
+                        $("#imagePreview_" + controlId).attr('src', "/dist/Images/Icons/document_blue-icon.png");
+                    }
+                    $("#imagePreview_" + controlId).removeClass("img_prev");
+                    $("#imagePreview_" + controlId).addClass("img_prev_upload");
+                };
+                reader.onerror = function (error) {
+                    $("#FileContent").val("");
+                };
+                $(".part1").hide();
+                $(".part2").show();
+            }
+        }
+    }
+
+
+    $(document).on('click', 'a.delete', function (e) {
+        debugger
+        e.preventDefault();
+        var certiId = $(this).data("id");
+        var certificateId = $(this).attr("CertificateId");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this file!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, Remove it!",
+            closeOnConfirm: true
+        },
+            function () {
+
+                $("#deleteimg_" + certiId).remove();
+                $("#deleteplanimg_" + certiId).remove();
+                swal("Deleted!", "Your file has been deleted.", "success");
+                $('#fileupdateid').prop('required', true);
+                $('#existsfile').attr("CertificateId", "")
+            });
+    });
+
+
+    $('#fileupdateid').on('click', function () {
+        debugger;
+        var certiId = $('#existsfile').attr("CertificateId");
+        if (certiId != "") {
+            AlertInfoMsg("Please remove the attached file!");
+            return false;
+        }
+    });
+
+    </script>
+<style>
+    .img_prev_upload {
+        float: initial;
+        height: auto;
+        margin-right: 0px;
+        width: 50px;
+        background: #fff;
+        border: #ccc solid 1px;
+        margin-top: 8px;
+    }
+
+    .datepicker {
+        width: 100%;
+        border-radius: 0px;
+    }
+
+   
+
+    .button_Div {
+        clear: both;
+    }
+
+    .btn-group.bootstrap-select.form-control.ddlboxLive {
+        margin-bottom: 12px;
+    }
+
+    .select_view {
+        margin-bottom: 24px;
+    }
+
+    .bootstrap-select.btn-group .dropdown-menu {
+        max-height: 240px !important;
+    }
+
+    .gallery-itemBox .delete {
+        position: absolute;
+        left: 10px;
+        bottom: 6px;
+    }
+
+        .gallery-itemBox .delete .deleteplanimg {
+            width: 12px;
+        }
+
+    .gallery-itemBox {
+        clear: both;
+    }
+</style>

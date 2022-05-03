@@ -1,0 +1,64 @@
+﻿@model List<HCF.BDO.Organization>
+@{
+    var userOrg = ViewBag.UserOrgLists;
+
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="checj">
+        <ul>
+            @foreach (var item in Model.Where(x => x.IsActive == true && x.ParentOrgKey == null).OrderBy(x => x.Name))
+            {
+                <li>
+                    <input type="checkbox"
+                           value='@item.ClientNo'
+                           name="assets"
+                           checked="@HCF.Web.Controllers.UserController.IsChecked(item, userOrg)" /><span></span>
+                    @item.Name
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+<script>
+        var totalOrgCount = 0;
+        $(document).ready(function () {
+
+            totalOrgCount = $("[type=checkbox]:checked").length;
+            console.log(totalOrgCount);
+
+        });
+
+        $("[type=checkbox]").on('change', function () {
+           // debugger;
+            totalOrgCount = $("[type=checkbox]:checked").length;
+            var isActive = $(this).is(':checked');
+            var clientNo = $(this).val();
+            var userId = $("#drpUsers").val();
+            if (userId > 0) {
+                if (totalOrgCount == 0 && isActive === false) {
+                    swalalert("you can not  remove user from all hospitals");
+                    $(this).prop("checked", true);
+                } else {
+                     var url = '@Url.Action("SaveUserHospital", "User")';
+                    $.get(url + '?userid=' + userId + '&clientNo=' + clientNo + '&IsActive=' + isActive, function (data) {
+
+                    });
+                }
+            } else
+                swalalert("first select user");
+        });
+
+</script>
+
+<style>
+
+    .checj li {
+        width: 33%;
+        float: left;
+        padding: 10px;
+    }
+</style>

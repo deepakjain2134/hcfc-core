@@ -1,0 +1,315 @@
+﻿@model HCF.BDO.NotificationEmails
+@{
+    string title = "";
+    var allUser = ViewBag.Users as ICollection<HCF.BDO.UserProfile>;
+
+    if (Model != null && Model.NotifyCategory != null)
+    {
+        title = Model.NotifyCategory.CategoryName;
+    }
+    if (Model != null && Model.NotificationEventId != null && Model.NotificationEvent != null)
+    {
+        title = title + " (" + Model.NotificationEvent.EventDescription + ")";
+    }
+    else
+    {
+        title = title + " (Default)";
+    }
+
+}
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            <span class="modelTitle">@string.Format("Assign {0}{1}", title, " Emails") </span>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="asset_list_view">
+            <ul class="matrix-popupboxlist">
+                <li>
+                    <input type="radio" name="mailType" value="to" checked> To Emails<br>
+                    <input type="email" id="emails" name="" value="" class="form-control multiEmail" />
+                </li>
+                <li>
+                    <input type="radio" name="mailType" value="cc"> CC Emails<br>
+                    <input type="email" id="ccemails" name="" value="" class="form-control multiccEmail" />
+                </li>
+            </ul>
+            <div class="selectBoxs">
+                <div class="selectList" id="ullistitem">
+                    <label>--Select Users Email--</label>
+                    <ul class="ullistitem">
+                        @foreach (var m in allUser.Where(x => x.IsActive && (!string.IsNullOrEmpty(x.Email))).OrderBy(x => x.Name))
+                        {
+                            <li>
+                                <input type="checkbox" class="emailCHk" data-email="@m.Email" value="@m.UserId" />
+                                <span></span>
+                                <span class="email_nameuser">@m.Name <br /><span>(@m.Email)</span></span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="comm-button" id="updateEmails" data-dismiss="modal">Update</button>
+        <button type="button" class="comm-Cancelbutton" id="btn_close" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<script>
+    $('#btn_close').click(() => {
+        $('#addEmailModel').modal('hide');
+        $('.modal-backdrop').remove();
+        $("body").removeClass("modal-open");
+        RefreshNotificationPage();
+    });
+    var inputEmailcOntrol = $('input#emails');
+    var inputccEmailcOntrol = $('input#ccemails');
+     var emailsArray = [];
+    var emailccArray = [];
+    function SetCheckbox() {
+        //debugger
+        var items = $('input#emails').tagsinput("items");
+        var ccitems = $('input#ccemails').tagsinput("items");
+        if ($("input[name='mailType']:checked").val() == "to")
+        {
+
+            ccitems.forEach(function (email) {
+                $("input[data-email='" + email + "']:checkbox").prop('checked', false);
+            });
+            items.forEach(function (email) {
+                $("input[data-email='" + email+ "']:checkbox").prop('checked', true);
+            });
+        }
+
+        else {
+             items.forEach(function (email) {
+                $("input[data-email='" + email + "']:checkbox").prop('checked', false);
+            });
+            ccitems.forEach(function (email) {
+                $("input[data-email='" + email + "']:checkbox").prop('checked', true);
+            });
+        }
+
+    }
+
+    $(document).ready(function () {
+       // debugger
+        $(".ullistitem").hide();
+        $('#emails').tagsinput();
+        $('#ccemails').tagsinput();
+
+        @if (Model != null)
+                    {
+                        @:var selectedEmails = '@Model.NotificationEmail';
+                        @:emailsArray = selectedEmails.split(',');
+                      @: for (var i = 0; i < emailsArray.length; i++) { inputEmailcOntrol.tagsinput('add', emailsArray[i]);  }
+
+
+                        @:var selectedccEmails = '@Model.NotificationCCEmail';
+                        @:emailccArray = selectedccEmails.split(',');
+                        @:for (var i = 0; i < emailccArray.length; i++) { inputccEmailcOntrol.tagsinput('add', emailccArray[i]);  }
+
+           @: SetCheckbox();
+
+
+        }
+        $("input[name='mailType']").click(function () {
+           // debugger
+            if ($(this).is(':checked')) {
+                SetCheckbox();
+            }
+        });
+        $('.selectList').on('click', function () {
+           // debugger
+            $(this).children('ul').show();
+        })
+
+
+
+    });
+
+    $(document).on('click', '.emailCHk', function () {
+       // debugger
+        var currentMailType = $("input[name='mailType']:checked").val();
+        var emailID = $(this).data("email");
+        if (this.checked) {
+            if (currentMailType == "to") {
+                inputEmailcOntrol.tagsinput('add', emailID);
+            } else {
+                inputccEmailcOntrol.tagsinput('add', emailID);
+            }
+        } else {
+            if (currentMailType == "to") {
+                inputEmailcOntrol.tagsinput('remove', emailID);
+            } else {
+                inputccEmailcOntrol.tagsinput('remove', emailID);
+            }
+        }
+    });
+
+    inputEmailcOntrol.on('beforeItemRemove', function (event) {
+       // debugger
+           var eamil = event.item;
+            $("input[data-email='" + eamil + "']:checkbox").prop('checked', false);
+    });
+
+    inputccEmailcOntrol.on('beforeItemRemove', function (event) {
+        //debugger
+        var eamil = event.item;
+        $("input[data-email='" + eamil + "']:checkbox").prop('checked', false);
+    });
+
+    var invalidemail = "";
+    function validate(string) {
+        //debugger
+      var pattern = /^\b[A-Z0-9._%-]+@@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i
+        IsValid = true;
+        if (!pattern.test(string)) {
+
+            IsValid = false;
+            return false;
+        }
+        else {
+            return true;
+        }
+        return IsValid;
+    }
+
+    function updateEmails(notificationEmails) {
+        var postUrl = CRxUrls.notification_savenotificationemails;
+        $.ajax({
+            url: postUrl,
+            type: "POST",
+            data: notificationEmails,
+            contentType: 'application/x-www-form-urlencoded',
+            success: function (result) {
+                AlertSuccessMsg("Email updated successfully.");
+                $('#addEmailModel').modal('hide');
+                $('.modal-backdrop').remove();
+                $("body").removeClass("modal-open");
+                RefreshNotificationPage();
+            }
+        });
+    }
+
+    $("#updateEmails").click(function () {
+
+
+        invalidemail = "";
+        var items = $('input#emails').tagsinput("items");
+        var ccitems = $('input#ccemails').tagsinput("items");
+
+        var IsValid = true;
+        var NotValid = false;
+        items.forEach(function (email) {
+            IsValid = validate(email.trim());
+
+            if (!IsValid) {
+                invalidemail += email.trim() + ",";
+                NotValid = true;
+                return false;
+            }
+        });
+
+        ccitems.forEach(function (email) {
+            IsValid = validate(email.trim());
+            if (!IsValid) {
+                NotValid = true;
+                invalidemail += email.trim() + ",";
+                return false;
+            }
+        });
+
+
+        if (NotValid)
+        {
+            if (invalidemail != "") {
+                invalidemail = invalidemail.replace(/,\s*$/, "");
+                var emailcount = invalidemail.split(",");
+                if (emailcount.length > 1) {
+                    swalalert(invalidemail + " are not a valid email address");
+                  //  return false;
+                }
+                else {
+                    swalalert(invalidemail + " is not a valid email address");
+                  //  return false;
+                }
+
+            }
+        }
+        else{
+            var notificationEmails = [];
+            notificationEmails = {
+                Id: @Model.Id,
+                NotificationCatId: @Model.NotificationCatId,
+                NotificationCCEmail: ccitems.toString(),
+                NotificationEmail: items.toString(),
+                NotificationEventId: @((Model.NotificationEventId.HasValue)? Model.NotificationEventId : 0),
+                BuildingId:@((Model.BuildingId.HasValue)? Model.BuildingId: 0),
+                SiteId:@((Model.SiteId.HasValue)? Model.SiteId : 0),
+                FloorId:@((Model.FloorId.HasValue)? Model.FloorId : 0),
+                Type: 1
+            };
+
+            var postUrl = CRxUrls.notification_savenotificationemails;
+
+            if (items.length > 0 || ccitems.length > 0) {
+                debugger
+                updateEmails(notificationEmails);
+
+                //$.ajax({
+                //    url: postUrl,
+                //    type: "POST",
+                //    data: notificationEmails,
+                //    contentType: 'application/x-www-form-urlencoded',
+                //    success: function (result) {
+                //        swalalert("Email updated successfully.");
+                //        $('#addEmailModel').modal('hide');
+                //        $('.modal-backdrop').remove();
+                //        $("body").removeClass("modal-open");
+                //        RefreshNotificationPage();
+                //    }
+                //});
+            } else {
+                //swalalert("Select atleast one email");
+                swal({
+                    title: "Are you sure?",
+                    text: "You don't want to save any e-mail.",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: "No",
+                    closeOnConfirm: false,
+                    closeOnCancel: true
+                },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            updateEmails(notificationEmails);
+                            //var postUrl = CRxUrls.notification_savenotificationemails;
+                            //$.ajax({
+                            //    url: postUrl,
+                            //    type: "POST",
+                            //    data: notificationEmails,
+                            //    contentType: 'application/x-www-form-urlencoded',
+                            //    success: function (result) {
+                            //        swalalert("Email updated successfully.");
+                            //        $('#addEmailModel').modal('hide');
+                            //        $('.modal-backdrop').remove();
+                            //        $("body").removeClass("modal-open");
+                            //        RefreshNotificationPage();
+                            //    }
+                            //});
+                        }
+                    });
+
+            }
+        }
+    });
+</script>

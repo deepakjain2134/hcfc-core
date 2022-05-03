@@ -1,0 +1,134 @@
+﻿@model List<HCF.BDO.TFloorAssets>
+<div class="assetSlider">
+    @if (Model.Count > 0)
+    {
+        <table id="floorAssets_@Model.FirstOrDefault().FloorAssetsId" class="table table-bordered table-striped no-footer">
+            <thead>
+                <tr>
+                    <th> @Localizer["StandardEP"] </th>
+                    <th> @Localizer["Frequency"] </th>
+                    <th> @Localizer["LastInspectionDate"] </th>
+                    <th> @Localizer["NextDueDate"] </th>
+                    <th> @Localizer["History"] </th>
+                    <th>Inspect</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var floorAssets in Model)
+                {
+                    if (floorAssets.EPDetails.Count > 0)
+                    {
+                        foreach (var item in floorAssets.EPDetails)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="javascript:void(0);"
+                                       tabindex="0"
+                                       data-trigger="focus"
+                                       class="descriptions"
+                                       rel='popover'
+                                       data-placement='right'
+                                       data-original-title='@item.StandardEp'
+                                       data-content='@item.Description'>@item.StandardEp</a>
+                                    @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.StandardEp } })*@
+
+                                </td>
+                                <td>
+                                    @if (item.Frequency != null)
+                                    {
+                                        <span> @item.Frequency.DisplayName</span>
+
+                                    }
+                                </td>
+                                <td width="15%">
+                                    @{
+                                        var dateTime = item.GetFloorAssetLastInspectionDate(item.Inspections, floorAssets.FloorAssetsId, item.EPDetailId);
+                                        if (dateTime.HasValue)
+                                        {
+
+                                            <span>
+                                                @dateTime.Value.ToClientTime().ToFormatDateTime()
+                                            </span>
+                                        }
+                                    }
+                                </td>
+                                <td width="10%">
+                                    @{
+                                        if (item.EPDetailId > 0 && floorAssets.FloorAssetsId >0)
+                                        {
+                                            var nextDateTime = item.GetFloorAssetNextInspectionDate(item.Inspections, floorAssets.FloorAssetsId, item.EPDetailId);
+
+
+                                            if (nextDateTime.HasValue)
+                                            {
+
+                                            <span>
+                                                @nextDateTime.Value.ToClientTime().ToFormatDateTime()
+                                            </span>
+                                                }
+
+                                            }
+                                        }
+                                    @*@HCF.Web.Base.Transaction.GetFloorAssetNextInspectionDate(item.Inspections, floorAssets.FloorAssetsId, item.EPDetailId)*@
+                                </td>
+                                <td width="5%">
+                                    @if (item.Inspections != null)
+                                    {
+                                        var inpection = item.Inspections.FirstOrDefault(x => x.EPDetailId == item.EPDetailId && x.IsCurrent);
+                                        if (inpection != null)
+                                        {
+                                            if (inpection.TInspectionActivity.Any(x => x.FloorAssetId == floorAssets.FloorAssetsId))
+                                            {
+                                                <img class="ep_history_btn" onclick="location.href ='@Url.Action("history", "Assets", new { floorAssetId = floorAssets.FloorAssetsId, epId = item.EPDetailId })'" src="@Url.Content(HCF.Web.Models.ImagePathModel.HistoryIcon)" title="History" alt="" />
+                                            }
+
+                                        }
+                                    }
+                                </td>
+                                <td width="5%">
+                                    <img style="float: right; cursor:pointer"
+                                         onclick="location.href = '@(Url.Action("AssetEps", "Assets", new { floorAssetId = floorAssets.FloorAssetsId, epId = item.EPDetailId }))'"
+                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)"
+                                         title="Inspect" />
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="tble_shadow text-center">No data available in table</div>
+    }
+</div>
+<script>
+    $(document).ready(function() {
+
+        $('.ep_history_btn').click(function(e){
+            e.stopPropagation();
+        });
+
+        var floorAssetId = 0;
+        @if (Model.Count > 0) {
+           @:floorAssetId = '@Model.FirstOrDefault().FloorAssetsId';
+        }
+        $('#floorAssets_' + floorAssetId).DataTable({
+            "searching": false,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#floorAssets_' + floorAssetId+' tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [[3,'desc']],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            "drawCallback": function () {
+                $('[rel="popover"]').popover();
+            }
+        });
+    });
+</script>
+

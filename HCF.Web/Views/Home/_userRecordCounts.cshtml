@@ -1,0 +1,301 @@
+﻿
+
+@*delete this view user view component*@ 
+
+
+@*model List<HCF.BDO.UserRecordsCount>
+    @{
+        Layout = null;
+        HCF.BDO.UserRecordsCount data = Model.FirstOrDefault();
+    }
+    <!--
+    <div class="pendingAssets">
+        <ul class="crxhomeul">
+
+            @if (data != null && data.TotalRounds > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.TotalRounds</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a href="@Url.RouteUrl("newrounds")"><p>Round Assigned</p></a>
+                    </div>
+                </li>
+            }
+            @if (data != null && data.TodayFireDrill > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.TodayFireDrill</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a href="@Url.RouteUrl("firedrill", new { TodayDril = true} )"><p>Fire drills schedule for today</p></a>
+                    </div>
+                </li>
+            }
+
+            @if (commonModelFactory.IsMenuExist("ICRA", Convert.ToString(session.ClientNo)))
+            {
+                if (HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra") && HCF.Web.Base.UserSession.HasRoleForMenu("icra_inspectionicra"))
+                {
+
+                    if (data != null && data.PermitAuthorizedByCount > 0)
+                    {
+                        <li>
+                            <div class="homeul-col1">
+                                <span>@data.PermitAuthorizedByCount</span>
+                            </div>
+                            <div class="homeul-col2">
+                                <a href="@Url.RouteUrl("inspectionicra", new { ApprovalStatus = 5 })"><p>Pending for ICRA Authorized Permit</p></a>
+                            </div>
+                        </li>
+                    }
+                    if (data != null && data.PermitRequestByCount > 0)
+                    {
+
+                        <li>
+                            <div class="homeul-col1">
+                                <span>@data.PermitRequestByCount</span>
+                            </div>
+                            <div class="homeul-col2">
+                                <a href="@Url.RouteUrl("inspectionicra", new { ApprovalStatus = 3 })"><p>Pending for ICRA Request Permit</p></a>
+                            </div>
+                        </li>
+                    }
+                }
+            }
+            else
+            {
+                if (HCF.Web.Base.UserSession.HasRoleForMenu("permit_getallpermits") && HCF.Web.Base.UserSession.HasRoleForMenu("inspection_icra"))
+                {
+                    if (data != null && data.PermitAuthorizedByCount > 0)
+                    {
+                        <li>
+                            <div class="homeul-col1">
+                                <span>@data.AllPermitPendingCount</span>
+                            </div>
+                            <div class="homeul-col2">
+                                <a href="@Url.RouteUrl("all_permits", new { Status = 2 })"><p>Pending Permits</p></a>
+                            </div>
+                        </li>
+                    }
+                }
+            }
+            @if (data != null && data.WoCount > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.WoCount</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a href="@Url.RouteUrl("workorder")"><p>Open Work Orders</p></a>
+                    </div>
+                </li>
+            }
+
+            @if (data != null && data.AssetsReportPending > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.AssetsReportPending</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a href="@Url.RouteUrl("assets_generate_report")"><p>Assets Pending for Generate Report</p></a>
+                    </div>
+                </li>
+            }
+            @if (data != null && data.TotalInProgressEps > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.TotalInProgressEps</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a alt="" data-toggle="modal" data-target="#resumeEPReview" style="cursor:pointer">
+                            <p>EP Review In Progress</p>
+                        </a>
+                    </div>
+                </li>
+            }
+
+            @if (data != null && data.TaggedItem > 0)
+            {
+                <li>
+                    <div class="homeul-col1">
+                        <span>@data.TaggedItem</span>
+                    </div>
+                    <div class="homeul-col2">
+                        <a alt="" data-toggle="modal" data-target="#taggedItems" style="cursor:pointer">
+                            <p>Tagged Items</p>
+                        </a>
+                    </div>
+                </li>
+            }
+
+        </ul>
+    </div>
+
+
+    <div class="modal fade" id="resumeEPReview" role="dialog">
+        <div class="modal-dialog">-->
+    @*Modal content
+    <!--<div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">EP Review In Progress</h4>
+        </div>
+        <div class="modal-body">
+            <div class="epreview-scrollBar">
+
+                <div class="epreviewDashboard">
+                    @foreach (var item in data.StandardEps)
+                    {
+                        <div class="epreviewDashboard-row">
+                            <div class="viewDash-col1">
+                                <a href="@Url.Action("EpInspections", "Goal", new { epId = item.EPDetailId })">
+                                    @item.StandardEP
+                                </a>
+                            </div>
+                            <div class="viewDash-col2">-->
+    @*<h4> @($"{"On"} {item.LastUpdatedDate.Value.ToClientTime().ToFormatDate()} {item.UserProfile?.FullName}")</h4>
+    <!--<h4> @($"{"On"} {item.LastUpdatedDate.Value.ToClientTime().ToFormatDate()}") <span>@($"{item.UserProfile?.FullName}")</span></h4>
+        <p>
+            @await Html.PartialAsync("_EpDescription", item.Description)
+        </p>
+    </div>-->
+   
+    <!--</div>
+
+
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <div class="modal fade" id="taggedItems" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Tagged Items</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="epreview-scrollBar">
+
+                        <div class="epreviewDashboard">
+                            <table id="certification_myTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Tagged Item</th>
+                                        <th>Tagged By</th>
+                                        <th style="width:90px;">Ignore Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in data.TaggedMasters)
+                                    {
+                                    <tr id="@item.TaggedId">
+                                        <td>@item.CreatedDate.ToClientTime().ToFormatDateTime()</td>
+                                        <td class="userrecord-icons">
+                                            <a href="#">
+                                                @if (item.TaggedType == 3)
+                                                {
+
+                                                if (item.MainTaggedType == 0)
+                                                {
+                                                <img src="~/dist/Images/Icons/black_tag.png"
+                                                     onclick="location.href ='@Url.Action(" Index", "Permit" , new { Taggedid=item.TaggedId })'" />
+                                                }
+                                                else if (item.MainTaggedType == 1)
+                                                {
+                                                <img src="~/dist/Images/Icons/yellow_tag.png"
+                                                     onclick="location.href ='@Url.Action(" Index", "Permit" , new { Taggedid=item.TaggedId })'" />
+                                                }
+
+                                                }
+                                                else
+                                                {
+                                                if (item.MainTaggedType == 0)
+                                                {
+                                                <img src="~/dist/Images/Icons/black_tag.png"
+                                                     onclick="location.href ='@Url.Action(" Deficiencies", "Home" , new { activityId=item.ActivityId })'" />
+                                                }
+                                                else if (item.MainTaggedType == 1)
+                                                {
+                                                <img src="~/dist/Images/Icons/yellow_tag.png"
+                                                     onclick="location.href ='@Url.Action(" Deficiencies", "Home" , new { activityId=item.ActivityId })'" />
+                                                }
+                                                }
+                                                @if (item.TaggedType == 3)
+                                                {
+                                                <span> @item.PermitNo</span>
+                                                }
+                                                else
+                                                {
+                                                <span> @item.AssetName (@item.AssetNo)</span>
+                                                }
+                                            </a>
+
+                                        </td>
+
+                                        <td>@item.CreatedName</td>
+                                        <td>
+                                            <a title="Delete" href="#" activityId='@item.ActivityId' taggedId='@item.TaggedId' UserId='@HCF.Web.Base.UserSession.CurrentUser.UserId' tagtype="@item.TaggedType" permitno="@item.PermitNo"
+                                               class="delete">
+                                                <img src="/dist/Images/Icons/close-black.png" alt="Delete">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+    <!--<script>
+
+        $(".delete").click(function () {
+            var ctrName = $(this);
+            var activityId = ctrName.attr("activityId");
+            var taggedId = ctrName.attr("taggedId");
+            var UserId = ctrName.attr("UserId");
+            var Tagtype = ctrName.attr("tagtype");
+            var PermitNo = ctrName.attr("permitno");
+
+            if (Tagtype == 3) {
+                activityId = '';
+            }
+              swal({
+                html: true,
+                title: "Message",
+                text: "<label> Are you sure you want to hide this Tag? It will no longer appear on your dashboard. </label>",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes",
+                cancelButtonText: "No",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    //debugger
+                    $.get("@Url.Action("RemoveTagID", "Home")" + '?TagId=' + taggedId + '&activityID=' + activityId + '&UserId=' + UserId + '&Tagtype=' + Tagtype + '&PermitNo=' + PermitNo, function (data) {
+                       // debugger;
+                        ctrName.closest('tr').remove();
+                    });
+                }
+            });
+        });
+    </script>-->

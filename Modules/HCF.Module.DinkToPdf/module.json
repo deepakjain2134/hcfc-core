@@ -1,0 +1,6 @@
+﻿{
+  "id": "HCF.Module.DinkToPdf",
+  "name": "Dink to PDF",
+  "isBundledWithHost": true,
+  "version": "1.0.0"
+}

@@ -1,0 +1,199 @@
+﻿@model IEnumerable<HCF.BDO.TIcraLog>
+@{
+    ViewBag.Title = "ICRA v"+ViewBag.version;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+                <h1>
+                    ICRA v@(ViewBag.version)
+                </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row tablelist-topform">
+                        <div class="form-group col-md-4">
+                            <label>All Project</label>
+                            <icraprojectdropdown name="SelProjectId" selectedvalue="0" firsttext="-- All Project --" class="form-control"></icraprojectdropdown>
+                            @*@Html.ICRAProjectDropDown("SelProjectId", 0, "-- All Project --", new { @class = "form-control" })*@
+                        </div>
+                        <div class="icra-col col-lg-4 form-group">
+                            <label>Start Date From</label>
+                            <input type="text" id="from" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="icra-col col-lg-4 form-group">
+                            <label>Start Date To</label>
+                            <input type="text" id="todate" class="form-control" readonly="readonly" />
+                        </div>
+                        <div class="icra-col col-lg-4 form-group">
+                            <label>Status</label>
+                            <approvalstatusdropdownlist name="statusId" selectedvalue="-2" class="form-control"></approvalstatusdropdownlist>
+                            @*@Html.ApprovalStatusDropDownList("statusId", -2, new { @class = "form-control" })*@
+                        </div>
+                        <div class="icra-col col-lg-4 form-group">
+                            <label>Construction Risk</label>
+                            @Html.DropDownList("constructionriskId", new SelectList(ViewBag.ConstructionRisk, "ConstructionRiskId", "RiskName"),
+                                            "Select All",
+                                            new { @class = "ddlbox form-control" })
+                        </div>
+                        <div class="icra-col col-lg-4 form-group">
+                            <label>Pending Requested / Authorized</label>
+                            <select id="btn_reqauth" name="btn_reqauth" class="ddlbox form-control">
+                                <option value="0">All</option>
+                                <option value="1">Requested by me</option>
+                                <option value="2">Authorized by me</option>
+                                <option value="3">Pending Requested</option>
+                                <option value="4">Pending Authorized</option>
+                                <option value="5">Pending Authorized by me</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+
+
+                            <div id="partialContents">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<input type="hidden" value="@ViewBag.version" id="hdnVersion" />
+
+
+
+<div style="display:none">
+    <span id="dvgeneratedby">
+        <span>@(Localizer["PrintGeneratedFromTitle"]) :@(Localizer["PrintGeneratedFromText"])</span> <span> @(Localizer["PrintGeneratedByTitle"]): @(HCF.Web.Base.UserSession.CurrentUser.Name)</span>
+    
+       
+    </span>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        $("#statusId").val(-2);
+
+        $(function () {
+            var currentTime = new Date();
+            var startDate = new Date(currentTime.setMonth(currentTime.getMonth() - 36));
+            var dateFormat = "mm/d/yy",
+                from = $("#from")
+                    .datepicker({
+                        changeMonth: true,
+                        changeYear: true,
+                        dateFormat: 'M d, yy',
+                        maxDate: new Date(new Date().setMonth(12)),
+                        minDate: new Date(2016, 0, 1),
+                        numberOfMonths: 1,
+                        buttonImage: ImgUrls.datepicker_calendar,
+                        buttonImageOnly: true
+                    }).datepicker('setDate', startDate)
+                    .on("change", function () {
+                        to.datepicker("option", "minDate", getDate(this));
+                    }),
+                to = $("#todate").datepicker({
+                    changeMonth: true,
+                    numberOfMonths: 1,
+                    changeYear: true,
+                    dateFormat: 'M d, yy',
+                    maxDate: new Date(new Date().setMonth(12)),
+                    minDate: new Date(2016, 0, 1),
+                    buttonImage: ImgUrls.datepicker_calendar,
+                    buttonImageOnly: true
+                }).datepicker('setDate', 'today')
+                    .on("change", function () {
+                        from.datepicker("option", "maxDate", getDate(this));
+                    });
+
+            function getDate(element) {
+                var date;
+                try {
+                    date = $.datepicker.parseDate(dateFormat, element.value);
+                } catch (error) {
+                    date = null;
+                }
+                return date;
+            }
+            $("#from").val('');
+            $("#todate").val('');
+            loadData();
+        });
+        $(document).ready(function () {
+            $("#from").val('');
+            $("#todate").val('');
+            $("#statusId").prepend("<option selected='selected' value='-2' >Select All</option>");
+            $("#btn_reqauth").change(function () {
+                var value = $(this).val();
+                filterdatatable(value);
+            });
+        });
+
+        function loadData() {
+            debugger;
+            var statusId = $("#statusId").val();
+            if ($("#statusId").val() == null) {
+                $("#statusId").val(-2);
+                statusId = -2;
+            }
+            var constructionriskId = $("#constructionriskId").val();
+            var from = $("#from").val();
+            console.log(from);
+            var todate = $("#todate").val();
+            console.log(from);
+            console.log(todate);
+
+
+
+            $.ajax({
+                url: CRxUrls.ICRA_InspectionIcraPartial + '?fromdate=' + from + "&todate=" + todate + "&statusId=" + statusId + "&constructionrikId=" + constructionriskId + "&version=" + $("#hdnVersion").val(),
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#partialContents').html(data);
+                    $('#partialContents').fadeIn('fast');
+                }
+            });
+        }
+        var statusdrp = "";
+        $("#statusId").change(function () {
+            statusdrp = $("#statusId").val();
+            loadData();
+        });
+
+        $("#constructionriskId").change(function () {
+            loadData();
+        });
+
+        $('#from').change(function () {
+            loadData();
+        });
+
+        $('#todate').change(function () {
+            loadData();
+        });
+
+
+    </script>
+
+    <style>
+
+        .dash_btnfilter {
+            float: left;
+            margin-top: -15px;
+            position: relative;
+            margin-left: 5px;
+        }
+
+        .totalNoEntries .dataTables_wrapper {
+            margin-bottom: 100px;
+        }
+    </style>
+}

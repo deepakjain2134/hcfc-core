@@ -1,0 +1,106 @@
+﻿@model HCF.Web.ViewModels.Round.RoundViewModel
+@{
+    var roundUserGroup = Model.Roundgrouplist;
+    Layout = null;
+}
+<div class="row tablelist-topform">
+    <div class="col-md-12">
+        <h4>Location Group List <button class="button1 btnbacklst float-right" id="btnbacklst">Back to list</button></h4>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+
+        <table class="table table-bordered table-striped" id="myTable">
+            <thead>
+                <tr>
+                    <th>
+                        Location Group Name
+                    </th>
+                    <th style="width:60px;">
+                        Status
+                    </th>
+                    <th style="width:90px;">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (roundUserGroup != null)
+                {
+                    foreach (var item in roundUserGroup.Where(x => x.RoundType == 1).OrderBy(x => x.Name))
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>
+                                @if (item.IsActive == 1)
+                                {
+                                    <span>Active</span>
+                                }
+                                else if (item.IsActive == 0)
+                                {
+                            <span>Inactive</span>
+                                }
+                                else
+                                {
+                                    <span>Archived</span>
+                                }
+                                <span></span>
+                            </td>
+                            <td class="roundLVE-icons">
+                                <a roundgroupId="@item.RoundGroupId" class="location">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.LocationIcon)" title="Edit Location" roundgroupId="@item.RoundGroupId" alt="3d_add_button" />
+                                </a>
+                                <a roundgroupId="@item.RoundGroupId" class="volunteer">
+                                    <!--<img src="@Url.Content(HCF.Web.Models.ImagePathModel.Imageicon)" title="Edit Volunteer" roundgroupId="@item.RoundGroupId" alt="3d_add_button" />
+                                    -->
+                                    <img src="/dist/Images/Icons/Edit-Volunteer.png" title="Edit Volunteer" roundgroupid="1" alt="3d_add_button">
+                                </a>
+                                <a href="@Url.Action("AddRoundGroup", "Round", new { roundUserGroupId = item.RoundGroupId, mode = "Edit" })" class="modal-link">
+                                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit Location Group" alt="3d_add_button" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(".btnbacklst").click(function () {
+
+        $("#locationgroup").show();
+        $("#locationgrouplst").hide();
+    });
+
+    $(".location,.volunteer ").click(function () {
+        $('#step1').find('a').removeClass('roundActive')
+        $('#step2').find('a').addClass('roundActive')
+        $("#locationgroup").show();
+        $("#locationgrouplst").hide();
+        $("#ddlroundgroup").val($(this).attr("RoundGroupId"));
+    });
+
+    $(".volunteer").click(function () {
+
+        $('#step1').find('a').removeClass('roundActive')
+        $('#step3').find('a').addClass('roundActive')
+        $("#locationgroup").show();
+        $("#locationgrouplst").hide();
+        $("#ddlroundgroup").val($(this).attr("RoundGroupId"));
+    });
+    $(document).off("click", ".location").on("click", ".location", function () {
+        //debugger;
+        /*  $(".location").click(function () {*/
+        var roundgroupId = $(this).attr('roundgroupId');
+        openStep2(roundgroupId);
+    });
+    $(document).off("click", ".volunteer").on("click", ".volunteer", function () {
+        /* $(".volunteer").click(function () {*/
+        var roundgroupId = $(this).attr('roundgroupId');
+        openStep3(roundgroupId);
+    });
+</script>

@@ -1,0 +1,58 @@
+﻿<div id="epcontainer" style="min-width: 300px; height: 400px; margin: 0 auto">
+
+</div>
+
+<input type="hidden" id="hdnepcontainer" value="@ViewBag.EPStatusChart" />
+<script>
+    var epchartvalue = JSON.parse($("#hdnepcontainer").val());   
+    var chart = new Highcharts.chart({
+        chart: {
+            renderTo: 'epcontainer',
+            type: 'column'
+        },
+        title: {
+            text: 'EP Due /Past Due Status'
+        },
+        xAxis: {
+            type: 'category',
+            labels: {
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'EPs Count (#)'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        tooltip: {
+            pointFormat: 'Due /Past due EP in {point.name}: <b>{point.y} EPs</b>'
+        },
+        credits: {
+            enabled: false
+        },
+        series:
+            [{
+                name: '',
+                data: epchartvalue.EPStatusSeries.data,
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#FFFFFF',
+                    align: 'right',
+                    format: '{point.y}', 
+                    y: 10, 
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                }
+            }]
+    });
+</script>

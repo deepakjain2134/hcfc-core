@@ -1,0 +1,185 @@
+﻿@model HCF.BDO.RiskManagement
+
+@{
+    ViewBag.Title = "Risk Management Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Risk Management Dashboard
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="matrix-row">
+                                <div class="matrix-col1 saferMatrixbox">
+                                    <div class="table-responsive">
+                                        <table border="0" cellspacing="0" cellpadding="0" id="epsSaferMatrix">
+                                            @*@AsyncLoader.Render("Home", "EPsSaferMatrix", "epsSaferMatrix")*@
+                                            @await Component.InvokeAsync("HomeEPsSaferMatrix")
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="matrix-col2 saferMatrixbox">
+                                    <div class="table-responsive">
+                                        <table border="0" cellspacing="0" cellpadding="0" id="saferMatrixRounds">
+                                            @*@AsyncLoader.Render("Round", "SaferMatrixRounds", "saferMatrixRounds")*@
+                                            @await Component.InvokeAsync("RoundSaferMatrixRounds")
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 icon_list">
+                            <div class="riskdiv"><b># of Non-compliant Items</b></div>
+                            <ul class="riskul">
+                                <li>
+                                    <a title="@($"Ra EPs Count {Model.RAEP} - Assets Count {Model.RaCount}")"
+                                       href="@Url.RouteUrl("deficiencies", new { type = "0", mode = "ra" })">                                      
+                                        <common-image src="~/dist/Images/services/ra.png" class="dashimg" title="Risk Assessment"></common-image>
+                                        <span>Risk Assessment</span>
+                                    </a>
+                                    <em>@Html.DisplayFor(m => m.RaCount)</em>
+                                </li>
+                                <li>
+                                    <a title="@($"Deficiencies EPs Count {Model.DEEP} - Assets Count {Model.DefecienciesCount}")"
+                                       href="@Url.RouteUrl("deficiencies", new { type = "0", mode = "de" })">                                      
+                                        <common-image src="~/dist/Images/services/de.png" class="dashimg" title="Deficiencies"></common-image>
+                                        <span>Deficiencies</span>
+                                    </a>
+                                    <em>@Html.DisplayFor(m => m.DefecienciesCount)</em>
+                                </li>
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("inspection_ilsm"))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("IlsmView", "Goal", new { PageName = "ILSM", Id = 0 })">                                           
+                                            <common-image src="~/dist/Images/services/ilsm.png" class="dashimg" title="ILSM"></common-image>
+                                            <span>ILSM</span>
+                                        </a>
+                                        <em>@Html.DisplayFor(m => m.IlsmCount)</em>
+                                    </li>
+                                }
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("workorder_index"))
+                                {
+                                    <li>
+                                        <a href="@Url.Action("Index", "WorkOrder")">
+                                            <common-image src="~/dist/Images/services/work_order.png" class="dashimg" title="Work Order"></common-image>
+                                           
+                                            <span>Work Orders</span>
+                                        </a>
+                                        <em>@Html.DisplayFor(m => m.IsssueCount)</em>
+                                    </li>
+                                }
+
+                                @if (HCF.Web.Base.UserSession.IsInRole("const_icra"))
+                                {
+                                    <li>
+                                        <a href="@Url.RouteUrl("inspectionicra")">
+                                            <common-image src="~/dist/Images/services/icra.png" class="dashimg" title="ICRA"></common-image>
+                                            @*@Html.CommonImage("~/dist/Images/services/icra.png", "ICRA", "dashimg")*@
+                                            <span>ICRA</span>
+                                        </a>
+                                        <em>@Html.DisplayFor(m => m.ICRACount)</em>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 box-body Risk_management">
+                            <div class="riskdiv non-eps"><b>EP Deficiencies Analytics</b> <a id="eps-list">Click to view</a></div>
+                            <div class="analytics-row">
+                                <div class="col-md-4 col-sm-4">
+                                    <h3>Deficient 1x <span>@Model.OneTimeFailsCount</span></h3>
+                                    <div class="ep-analytics">
+                                        <ul>
+                                            @foreach (var item in Model.StandardEPs.GroupBy(x => x.EPDetailId).Where(y => y.Count() == 1).ToList())
+                                            {
+                                                <li>
+                                                    <a href="javascript:void(0);"
+                                                       tabindex="0"
+                                                       data-trigger="focus"
+                                                       class="descriptions"
+                                                       rel='popover'
+                                                       data-placement='right'
+                                                       data-original-title='@item.FirstOrDefault().StandardEP'
+                                                       data-content='@item.FirstOrDefault().Description'>@item.FirstOrDefault().StandardEP</a>
+                                                    @*@await Html.PartialAsync("_EpDescription", item.FirstOrDefault().Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.FirstOrDefault().StandardEP } })*@
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-4">
+                                    <h3>Deficient 2x <span>@Model.TwoTimesFailsCount</span></h3>
+                                    <div class="ep-analytics">
+                                        <ul>
+                                            @foreach (var item in Model.StandardEPs.GroupBy(x => x.EPDetailId).Where(y => y.Count() == 2).ToList())
+                                            {
+                                                <li>
+                                                    <a href="javascript:void(0);"
+                                                       tabindex="0"
+                                                       data-trigger="focus"
+                                                       class="descriptions"
+                                                       rel='popover'
+                                                       data-placement='right'
+                                                       data-original-title='@item.FirstOrDefault().StandardEP'
+                                                       data-content='@item.FirstOrDefault().Description'>@item.FirstOrDefault().StandardEP</a>
+                                                    @*@await Html.PartialAsync("_EpDescription", item.FirstOrDefault().Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.FirstOrDefault().StandardEP } })*@
+
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-4">
+                                    <h3>Deficient > 2x <span>@Model.MoreThanTwoFailsCount</span></h3>
+                                    <div class="ep-analytics">
+                                        <ul>
+                                            @foreach (var item in Model.StandardEPs.GroupBy(x => x.EPDetailId).Where(y => y.Count() > 2).ToList())
+                                            {
+                                                <li>
+                                                    <a href="javascript:void(0);"
+                                                       tabindex="0"
+                                                       data-trigger="focus"
+                                                       class="descriptions"
+                                                       rel='popover'
+                                                       data-placement='left'
+                                                       data-original-title='@item.FirstOrDefault().StandardEP'
+                                                       data-content='@item.FirstOrDefault().Description'>@item.FirstOrDefault().StandardEP</a>
+                                                    @*@await Html.PartialAsync("_EpDescription", item.FirstOrDefault().Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.FirstOrDefault().StandardEP } })*@
+
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        $("#eps-list").click(function () {
+            $(".ep-analytics").toggle(200);
+        });
+
+        $("#PrintPage").show();
+    });
+</script>
+

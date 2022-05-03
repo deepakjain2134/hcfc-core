@@ -1,0 +1,7 @@
+﻿@if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+{
+    <text>
+        <img id="profile_img" src='@Url.Content(HCF.Web.Base.UserSession.GetUserImage())' class="img-circle" alt="User Image" />
+        @*@HCF.Web.Base.UserSession.GetUserImage()*@
+    </text>
+}

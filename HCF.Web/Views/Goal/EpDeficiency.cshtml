@@ -1,0 +1,177 @@
+﻿@model List<HCF.BDO.EPDetails>
+@{
+    ViewBag.Title = "EP Deficiency";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Deficient EPs
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                        <div class="float-right">
+                            <input type="submit" name="button" class="@(ViewBag.Score == 1 ? "button1 filter active" : "button1 filter")" data-score="1" id="btn_high" value="High (@Model.Count(x => x.ScoreId==1)) " />
+                            <input type="submit" name="button" class="@(ViewBag.Score == 2 ? "button1 filter active" : "button1 filter")" data-score="2" id="btn_moderate" value="Moderate (@Model.Count(x => x.ScoreId==2))" />
+                            <input type="submit" name="button" class="@(ViewBag.Score == 3 ? "button1 filter active" : "button1 filter")" data-score="3" id="btn_low" value="Low (@Model.Count(x => x.ScoreId==3))" />
+                            <input type="submit" name="button" class="@(ViewBag.Score == 0 ? "button1 filter active" : "button1 filter")" data-score="0" id="btn_showall" value="Show All (@Model.Count())" />
+                        </div>
+                        <table id="epTable" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%" style="padding-top:5px;">
+                            <thead>
+                                <tr>
+                                    <th style="display: none">SubStatus</th>
+                                    <th>
+                                        @Localizer["StandardEP"]
+                                                                       
+                                                                    </th>
+                                    <th>Description</th>
+                                    <th>
+                                        Assets
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ep in Model.Where(x => x.Inspection != null).OrderBy(x => x.StandardEp))
+                                {
+                                    if (ep.Inspection.TInspectionActivity.Any())
+                                    {
+                                        <tr>
+                                            <td style="display: none">
+                                                @ep.ScoreId
+                                            </td>
+                                            <td>
+                                                @ep.StandardEp<br />
+                                                @ep.Scores.Name
+                                            </td>
+                                            <td style="text-align: left;">
+                                                @await Component.InvokeAsync("EpDescription", new { epDetailId = ep.EPDetailId, maxLength = 100, epdetails = ep })
+                                                @*@await Html.PartialAsync("_EpDescription", ep.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @ep.StandardEp } })*@
+                                            </td>
+                                            <td style="text-align:left;">
+                                                @if (ep.IsAssetsRequired)
+                                                {
+                                                    <span>@string.Join(",", ep.Assets.GroupBy(x => x.AssetId).Select(x => x.FirstOrDefault().Name)) </span>
+                                                    if (ep.Inspection.TInspectionActivity.Where(x => x.ActivityType == 2 && x.SubStatus != "NA").Any())
+                                                    {
+                                                        <span style="color:red">
+                                                            (@ep.Inspection.TInspectionActivity.Where(x => x.ActivityType == 2 && x.SubStatus != "NA").Count())
+                                                        </span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("EPstate", "Goal", new { epId = ep.EPDetailId, inspectionId = ep.Inspection.InspectionId, inspectionGroupId = 1 })">
+                                                    <img class="hover_sign" src="@Url.Content(HCF.Web.Models.ImagePathModel.InspectIcon)" title="Inspection" />
+
+                                                </a>
+                                                <img onclick="location.href ='@Url.Action("EPActivityHistory", "Assets", new { InspectionId = ep.Inspection.InspectionId, epId = ep.EPDetailId })'"
+                                                     src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)" /><br />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+
+                            </tbody>
+                        </table>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    $(document).ready(function () {
+        var assettable = $('#epTable').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#epTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            }
+        });
+
+        $(document).ready(function () {
+            var score = @ViewBag.Score;
+            if (score.length != 0){
+                assettable.columns(0).search(score).draw();
+            }else
+                assettable.columns(0).search("").draw();
+        });
+
+
+        $('.filter').on('click', function () {
+            $(".filter").removeClass("active");
+            var score = $(this).data("score");
+            $(this).addClass("active");
+            if (score > 0) {
+                assettable.columns(0).search(score).draw();
+            } else {
+                assettable.columns(0).search("").draw();
+            }
+        });
+
+        // Add event listener for opening and closing details
+        $('#epTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+            var control = $(this);
+            console.log(control.hasClass("tdshow"));
+
+            if (control.hasClass("tdshow")) {               
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    control.removeClass("tdshow");
+                    tr.find("td.details-control2").removeClass("tdshow");                    
+                });
+            }
+            else {
+                var activityId = $(this).attr("rel");
+                var Url = '@Url.Action("FailSteps", "Home")';
+                $.get(Url + "?activityId=" + activityId, function (steps) {
+                    row.child(steps, 'no-padding').show();
+                    tr.find("td").removeClass("tdshow");
+                    control.addClass("tdshow");                   
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+
+        $('#epTable tbody').on('click', 'td.details-control2', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+            var control = $(this);
+
+            if (control.hasClass("tdshow")) {               
+                $('div.slider_assets', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.find("td").removeClass("tdshow");                  
+                    tr.removeClass("tdshow");
+                });
+            }
+            else {               
+                var epDetailId = $(this).attr("epDetailId");
+                var inspectionId = $(this).attr("inspectionId");
+                var Url = '@Url.Action("EpDeficiencyDetails", "Goal")';
+                $.get(Url + "?epDetailId=" + epDetailId + "&inspectionId=" + inspectionId, function (steps) {
+                    row.child(steps, 'no-padding').show();                   
+                    tr.find("td").removeClass("tdshow");
+                    control.addClass("tdshow");
+                });
+                $('div.slider_assets', row.child()).slideDown();
+            }
+        });
+
+
+    });
+
+</script>

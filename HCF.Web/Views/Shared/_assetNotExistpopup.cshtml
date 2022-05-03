@@ -1,0 +1,21 @@
+﻿<div class="modal fade" id="extinguisherPopUpMsg" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartial">
+            <div class="modal-header">
+                <button type="button" class="close" id="closeBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                Tag/BarCode # you entered does not exist.
+                <button type="button" id="addnewBtn" class="btn btn-default" data-dismiss="modal">Add New</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#addnewBtn").click(function () {
+        var assetId = $("#sassetId").val();
+        var locationId = $("#locationId").val();
+        var serialNo = $("#SerialNo").val();
+        openNewAsset(locationId, assetId, serialNo);
+    });
+</script>

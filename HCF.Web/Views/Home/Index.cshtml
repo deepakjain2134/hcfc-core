@@ -1,0 +1,232 @@
+﻿@model HCF.BDO.RiskManagement
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Dashboard";
+}
+<link rel="stylesheet" href="@Url.Content("~/dist/css/hcf-admin-.css")" />
+
+@section pageHeader{
+    <section class="content-header">
+        <h1 class="float-left">
+            Dashboard
+        </h1>
+    </section>
+}
+
+@section marquee{
+    <div id="newsMarquee">
+        @await Component.InvokeAsync("NewsMarquee")
+    </div>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                @if (HCF.Web.Base.UserSession.CurrentUser.IsVendorUser)
+                {
+                    <div id="vendorDashboard">
+                        @await Component.InvokeAsync("HomeVendorDashboard")
+                    </div>
+                }
+                else
+                {
+
+                    <div id="userDashboard">
+                        @await Html.PartialAsync("_userDashboard", Model)
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-center">
+                            <span class="crx_name">CRx</span>
+                            <br>CRx for Compliance<br />
+                            @*America’s most comprehensive, Patent Pending, Healthcare Facility Compliance software*@ CRx - Automating Healthcare Facility Compliance.<br />
+                            <a href="http://www.hcfcompliance.com/" target="_blank">www.hcfcompliance.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+
+    $(document).ready(function () {
+        getBase64FromImageUrl();
+        $("#PrintPage").hide();
+   });
+
+    function getBase64FromImageUrl()
+    {
+        var logoImage64 = '@string.Format("logoimgbase64")';
+        if (localStorage.getItem(logoImage64) === null) {
+            var url = '@Url.Action("B64EncodeImage", "Common")';
+            $.ajax({
+                url: url + "?imgFile=" + '@commonModelFactory.CommonFilePath(HCF.Web.Base.UserSession.CurrentOrg.LogoPath)',
+                cache: true,
+                type: "GET",
+                global: false,
+                async: false,
+                success: function (data) {
+                    localStorage.setItem(logoImage64, data);
+                }
+            });
+        }
+        }
+
+    $(function () {
+        $('marquee').mouseover(function () {
+            $(this).attr('scrollamount', 0);
+        }).mouseout(function () {
+            $(this).attr('scrollamount', 5);
+        });
+    });
+
+    $('.counter-count').each(function () {
+        $(this).prop('Counter', 0).animate({
+            Counter: $(this).text()
+        }, {
+                duration: 2000,
+                easing: 'swing',
+                step: function (now) {
+                    $(this).text(Math.ceil(now));
+                }
+            });
+    });
+
+    </script>
+}
+
+<style>
+    .fc-row .fc-content-skeleton tbody td, .fc-row .fc-helper-skeleton tbody td {
+        padding: 2px 4px !important;
+    }
+
+    td.fc-head-container.fc-widget-header {
+        padding: 0 !important;
+    }
+
+    .panel.panel-default .panel-body {
+        padding: 4px;
+    }
+
+    .fc-event-container div {
+        display: inline-block;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 14px;
+        float: left;
+    }
+
+    .dashboardViewCalender {
+        position: relative;
+    }
+
+    .ViewCalenderRadio {
+        position: absolute;
+        display: flex;
+        top: 3px;
+        left: 0;
+        align-items: flex-end;
+    }
+
+    ul.legand {
+        margin-bottom: 10px;
+    }
+
+
+    .calender {
+        margin: 0 auto;
+        border: #ddd solid 1px;
+        min-height: 32px;
+    }
+
+    .activeDate {
+        background-color: #90EE90 !important;
+    }
+
+    .fc-toolbar .fc-center {
+        font-size: 10px;
+    }
+
+    .dashboardViewCalender .fc-day-grid-container,
+    .dashboardViewCalender .fc-widget-content {
+        height: auto !important;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 20px;
+        display: inline-block;
+        margin: 0 12px;
+        vertical-align: middle;
+    }
+
+    .fc-today-button {
+        height: 23px !important;
+        font-size: 12px !important;
+    }
+
+    .fc td, .fc th {
+        font-size: 15px;
+    }
+
+    .fc-basic-view .fc-day-number, .fc-basic-view .fc-week-number {
+        padding: 8px !important;
+        font-weight: 500;
+    }
+
+    .fc-day-number {
+        font-size: 15px;
+    }
+
+    .fc th {
+        padding: 5px 0 !important;
+        font-size: 14px;
+    }
+
+    .fc-today {
+        border: none !important;
+        border-top: 1px solid #ddd !important;
+        font-weight: bold;
+    }
+
+    ul.legand li img {
+        max-width: 21px;
+    }
+
+    tr:first-child > td > .fc-day-grid-event {
+        margin-top: -4px;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-widget-content {
+        padding: 0px !important;
+    }
+
+    .fc-time {
+        display: none;
+    }
+
+    .fc-event {
+        width: 24px !important;
+        text-align: center !important;
+    }
+
+    .legand {
+        margin: 0;
+        padding: 0;
+        float: right;
+        list-style: none;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 18px;
+        padding: 0px 15px;
+    }
+</style>

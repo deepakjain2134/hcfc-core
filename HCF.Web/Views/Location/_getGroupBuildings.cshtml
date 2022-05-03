@@ -1,0 +1,7 @@
+﻿@model HCF.Web.ViewModels.Location.LocationGroupViewModel
+@foreach (var building in Model.buildings.Where(x => x.IsActive).OrderBy(x => x.BuildingName))
+{
+    <div class="non-select-groupname round-groupname" buildingId="@building.BuildingId" ishavingfiredrill="@building.IsHavingFiredrill">
+        <p class="buildingGroupBy">@building.BuildingName</p>
+    </div>
+}

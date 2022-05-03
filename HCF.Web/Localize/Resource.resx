@@ -1,0 +1,591 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="ActivityDashboard" xml:space="preserve">
+    <value>Activity Dashboard</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="AddBuilding" xml:space="preserve">
+    <value>Add Building</value>
+  </data>
+  <data name="AddFloor" xml:space="preserve">
+    <value>Add Floor</value>
+  </data>
+  <data name="AddProperty" xml:space="preserve">
+    <value>New Property</value>
+  </data>
+  <data name="AddWing" xml:space="preserve">
+    <value>Add Wing</value>
+  </data>
+  <data name="Asset" xml:space="preserve">
+    <value>Asset</value>
+  </data>
+  <data name="AssetCode" xml:space="preserve">
+    <value>Asset Code</value>
+  </data>
+  <data name="AssetSubType" xml:space="preserve">
+    <value>Asset Sub Type</value>
+  </data>
+  <data name="AssetType" xml:space="preserve">
+    <value>Asset Type</value>
+  </data>
+  <data name="AssignGoal" xml:space="preserve">
+    <value>Assign Goal</value>
+  </data>
+  <data name="BuildingName" xml:space="preserve">
+    <value>Building Name</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="DocRequired" xml:space="preserve">
+    <value>Doc Required</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="EP" xml:space="preserve">
+    <value>EP</value>
+  </data>
+  <data name="FloorAssets" xml:space="preserve">
+    <value>Floor Assets</value>
+  </data>
+  <data name="FloorName" xml:space="preserve">
+    <value>Floor Name</value>
+  </data>
+  <data name="FloorPlan" xml:space="preserve">
+    <value>Floor Plan</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Frequency</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="LastInspectionDate" xml:space="preserve">
+    <value>Last Inspection</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="NewStandard" xml:space="preserve">
+    <value>Add Standard</value>
+  </data>
+  <data name="NoOfFloor" xml:space="preserve">
+    <value>#Floor</value>
+  </data>
+  <data name="NoOfWings" xml:space="preserve">
+    <value>#Wing</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Property" xml:space="preserve">
+    <value>Property</value>
+  </data>
+  <data name="PropertyType" xml:space="preserve">
+    <value>PropertyType</value>
+  </data>
+  <data name="Recover" xml:space="preserve">
+    <value>Recover</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Score" xml:space="preserve">
+    <value>Risk</value>
+  </data>
+  <data name="ServicesRequest" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="Standard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="TitleAddEP" xml:space="preserve">
+    <value>Add EP</value>
+  </data>
+  <data name="TitleAddGoalDetails" xml:space="preserve">
+    <value>Add Task</value>
+  </data>
+  <data name="TitleAssets" xml:space="preserve">
+    <value>Add Assets</value>
+  </data>
+  <data name="TitleAssetsType" xml:space="preserve">
+    <value>Add AssetsType</value>
+  </data>
+  <data name="TitleBuilding" xml:space="preserve">
+    <value>Buildings</value>
+  </data>
+  <data name="TitleCreateUser" xml:space="preserve">
+    <value>Add User</value>
+  </data>
+  <data name="TitleCreateVendor" xml:space="preserve">
+    <value>Add Vendor</value>
+  </data>
+  <data name="TitleFloors" xml:space="preserve">
+    <value>Floors</value>
+  </data>
+  <data name="TitleForgotPassword" xml:space="preserve">
+    <value>Forgot Password</value>
+  </data>
+  <data name="TitleHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="TitleManageEP" xml:space="preserve">
+    <value>Manage EP</value>
+  </data>
+  <data name="TitleMyProfile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="TitleProperty" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="TitleRecoverPassword" xml:space="preserve">
+    <value>Recover Password</value>
+  </data>
+  <data name="TitleSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="TitleUpdatePassword" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
+  <data name="TitleUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="TitleUserGroup" xml:space="preserve">
+    <value>User Group</value>
+  </data>
+  <data name="TitleVendor" xml:space="preserve">
+    <value>Vendors</value>
+  </data>
+  <data name="TitleWing" xml:space="preserve">
+    <value>Wings</value>
+  </data>
+  <data name="TitleWorkOrder" xml:space="preserve">
+    <value>Work Orders</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="UpdateAsset" xml:space="preserve">
+    <value>Update Asset</value>
+  </data>
+  <data name="UpdateAssetType" xml:space="preserve">
+    <value>Update Asset Type</value>
+  </data>
+  <data name="UpdateBuilding" xml:space="preserve">
+    <value>Update Building</value>
+  </data>
+  <data name="UpdateEditProfile" xml:space="preserve">
+    <value>Edit Profile</value>
+  </data>
+  <data name="UpdateEditStandard" xml:space="preserve">
+    <value>Edit Standard</value>
+  </data>
+  <data name="UpdateFloors" xml:space="preserve">
+    <value>Update Floor</value>
+  </data>
+  <data name="UpdateProperty" xml:space="preserve">
+    <value>Update Property</value>
+  </data>
+  <data name="UpdateWing" xml:space="preserve">
+    <value>Update Wing</value>
+  </data>
+  <data name="Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="UserPermission" xml:space="preserve">
+    <value>User Permission</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Wing" xml:space="preserve">
+    <value>Wing</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="RoundDrills" xml:space="preserve">
+    <value>Rounds &amp; Drills</value>
+  </data>
+  <data name="Binder" xml:space="preserve">
+    <value>Binder</value>
+  </data>
+  <data name="NextInspectionDate" xml:space="preserve">
+    <value>Next Inspection Date</value>
+  </data>
+  <data name="AssetNo" xml:space="preserve">
+    <value>Asset #</value>
+  </data>
+  <data name="CreateWorkOrder" xml:space="preserve">
+    <value>Create new work order</value>
+  </data>
+  <data name="StandardEP" xml:space="preserve">
+    <value>Standard,EP</value>
+  </data>
+  <data name="AssetName" xml:space="preserve">
+    <value>Asset Name</value>
+  </data>
+  <data name="Assets" xml:space="preserve">
+    <value>Assets</value>
+  </data>
+  <data name="AssetEpsTitle" xml:space="preserve">
+    <value>Inspection Summary</value>
+  </data>
+  <data name="AssetHistory" xml:space="preserve">
+    <value>Asset History</value>
+  </data>
+  <data name="ActivityDashboard_Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="InspectorName" xml:space="preserve">
+    <value>Inspector Name</value>
+  </data>
+  <data name="InspectionDate" xml:space="preserve">
+    <value>Inspection Date</value>
+  </data>
+  <data name="CompliantText" xml:space="preserve">
+    <value>Compliant</value>
+  </data>
+  <data name="NonCompliantText" xml:space="preserve">
+    <value>Non-Compliant</value>
+  </data>
+  <data name="NextDueDate" xml:space="preserve">
+    <value>Due</value>
+  </data>
+  <data name="WorkOrder" xml:space="preserve">
+    <value>Work Order</value>
+  </data>
+  <data name="WorkOrderNo" xml:space="preserve">
+    <value>Work Order #</value>
+  </data>
+  <data name="CheckPoints" xml:space="preserve">
+    <value>Check Points</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Problem" xml:space="preserve">
+    <value>Problem</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="TitleDeficiencies" xml:space="preserve">
+    <value>Deficiencies</value>
+  </data>
+  <data name="IncidentNo" xml:space="preserve">
+    <value>Incident #</value>
+  </data>
+  <data name="Responsible" xml:space="preserve">
+    <value>Responsible</value>
+  </data>
+  <data name="StopName" xml:space="preserve">
+    <value>Stop Name</value>
+  </data>
+  <data name="Requester" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="Risk" xml:space="preserve">
+    <value>Risk</value>
+  </data>
+  <data name="MarkedDeficiency" xml:space="preserve">
+    <value>Marked Deficiency</value>
+  </data>
+  <data name="TimeToResolveit" xml:space="preserve">
+    <value>Time To Resolve it</value>
+  </data>
+  <data name="NearBy" xml:space="preserve">
+    <value>Nearby</value>
+  </data>
+  <data name="ILSMDate" xml:space="preserve">
+    <value>ILSM Date</value>
+  </data>
+  <data name="PrintGeneratedByTitle" xml:space="preserve">
+    <value>Generated by</value>
+  </data>
+  <data name="PrintGeneratedFromText" xml:space="preserve">
+    <value>CRx</value>
+  </data>
+  <data name="PrintGeneratedFromTitle" xml:space="preserve">
+    <value>Generated from</value>
+  </data>
+  <data name="PrintGeneratedDateTitle" xml:space="preserve">
+    <value>Generated Date</value>
+  </data>
+  <data name="ProjectTitle" xml:space="preserve">
+    <value>CRx</value>
+  </data>
+  <data name="IsActive" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="CompletedDate" xml:space="preserve">
+    <value>Completed Date</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Created Date</value>
+  </data>
+  <data name="TitleNews" xml:space="preserve">
+    <value>News</value>
+  </data>
+  <data name="CRxInboxTitle" xml:space="preserve">
+    <value>CRx Inbox</value>
+  </data>
+  <data name="DocumentType" xml:space="preserve">
+    <value>Document Type</value>
+  </data>
+  <data name="Documents" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="InspectionDateTime" xml:space="preserve">
+    <value>Inspection Date/Time</value>
+  </data>
+  <data name="Building" xml:space="preserve">
+    <value>Building</value>
+  </data>
+  <data name="Floor" xml:space="preserve">
+    <value>Floor</value>
+  </data>
+  <data name="StopCode" xml:space="preserve">
+    <value>Stop Code</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="TitleSite" xml:space="preserve">
+    <value>Site</value>
+  </data>
+  <data name="AddSite" xml:space="preserve">
+    <value>Add Site</value>
+  </data>
+  <data name="AddPCRA" xml:space="preserve">
+    <value>Add PCRA</value>
+  </data>
+  <data name="TitleQuestionPCRA" xml:space="preserve">
+    <value>Question PCRA</value>
+  </data>
+  <data name="TitleAddQuestionPCRA" xml:space="preserve">
+    <value>Add Question PCRA</value>
+  </data>
+  <data name="TitleQuestionDetailsPCRA" xml:space="preserve">
+    <value>QuestionDetails PCRA</value>
+  </data>
+  <data name="TitleGetTPCRA" xml:space="preserve">
+    <value>PCRA</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Inspector" xml:space="preserve">
+    <value>Inspector</value>
+  </data>
+  <data name="AddHotWorkPermit" xml:space="preserve">
+    <value>Add Hot Work Permit</value>
+  </data>
+  <data name="TitleGetTHWP" xml:space="preserve">
+    <value>Hot Work Permit</value>
+  </data>
+  <data name="TitleLifeSafetyDeviceList" xml:space="preserve">
+    <value>Life Safety Device</value>
+  </data>
+  <data name="AddMethodofProcedure" xml:space="preserve">
+    <value>Add Method of Procedure</value>
+  </data>
+  <data name="TitleGetMOP" xml:space="preserve">
+    <value>Method Of Procedure</value>
+  </data>
+  <data name="AddUserGroup" xml:space="preserve">
+    <value>Add User Group</value>
+  </data>
+  <data name="UpdateUserGroup" xml:space="preserve">
+    <value>Update User Group</value>
+  </data>
+  <data name="AddFacilitiesMaintenanceOccurrence" xml:space="preserve">
+    <value>Add Facilities Maintenance Occurrence</value>
+  </data>
+  <data name="TitleGetFacilitiesMaintenanceOccurrence" xml:space="preserve">
+    <value>FacilitiesMaintenanceOccurrence</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="PermitNumber" xml:space="preserve">
+    <value>Not Yet Assigned</value>
+  </data>
+  <data name="AddCRA" xml:space="preserve">
+    <value>Add CRA</value>
+  </data>
+  <data name="TitleGetTCRA" xml:space="preserve">
+    <value>CRA</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Created By</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>In Progress</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Assignement" xml:space="preserve">
+    <value>View Assignment(s)</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Go Back</value>
+  </data>
+</root>

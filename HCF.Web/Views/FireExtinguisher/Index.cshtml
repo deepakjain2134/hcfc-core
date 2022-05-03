@@ -1,0 +1,313 @@
+﻿@{
+    ViewBag.Title = "Route Based Inspection";
+    var floor = new HCF.BDO.Floor();
+   
+    if (ViewBag.Floor != null)
+    {
+        floor = (HCF.BDO.Floor)ViewBag.Floor;
+    }
+
+    var asset = (HCF.BDO.Assets)ViewBag.Asset;
+    var eps = (List<HCF.BDO.EPDetails>)(ViewBag.AssetEPs);
+   
+
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Route Based Inspection
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <input type="hidden" id="_alleps" value="@System.Text.Json.JsonSerializer.Serialize(new { data = eps })" />
+                <input type="hidden" name="sfloorId" id="sfloorId" value="@floor.FloorId" />
+                <input type="hidden" name="sbuildingId" id="sbuildingId" value="@floor.BuildingId" />
+                <input type="hidden" name="sinspType" id="sinspType" value="@ViewBag.inspType" />
+                <input type="hidden" name="sassetId" id="sassetId" value="@ViewBag.AssetId" />
+                <input type="hidden" name="smode" id="smode" value="@ViewBag.Mode" />
+                <input type="hidden" name="selectpopup" id="sdnpopup" value=" " />
+
+                <div class="row tablelist-topform">
+                    <div class="col-md-3 form-group">
+                        <div class="form-inline12">
+                            @if (floor.FloorId > 0)
+                            {
+                                <label>
+                                    Location :
+                                </label>
+                                <div>
+                                    @($"{(floor.Building != null ? floor.Building.BuildingName : "")},{floor.FloorName}") ;
+                                </div>
+                            }
+                            <label>Route :</label>
+                            <select id="route" class="form-control dropdownList">
+                                <option value=""> Select </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-9 form-group">
+                        <label>Insp.Type :</label>
+                        <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                            <div class="exitSigns-radio">
+                                @await Html.PartialAsync("_AssetsEps", eps)
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                            <div class="exitSigns-radio">
+                               <input type="button" class="comm-button" value="Change" onclick="return LoadPopUp()"/> 
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="assetsBoardTable">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="comman_checkbox1 Signcheckbox1" style="margin-bottom: 8px;">
+                                <input type="hidden" name="inspType" id="inspType" value="@ViewBag.InspType" />
+                                <input type="checkbox" id="hidememptystop" class="comman_checkbox" checked="checked" /><span>
+                                </span>Hide Empty Stops &nbsp;&nbsp;
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div id="fireextinguisherView">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<input type="hidden" value="@ViewBag.routeId" name="srouteid" id="srouteid" />
+
+<div class="modal fade" id="addNewAssets" role="dialog">
+    <div class="modal-dialog">
+        <div id="loadpartialAddNew">
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="AllAssetsEpOnRoute" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:60%;margin: 0px auto;">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLongTitle">Select RBI Asset </h4>
+                
+            </div>
+            <div class="modal-body exitSigns-radio" id="loadpartialAllAssetsEpOnRoute">
+                
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn comm-button" onclick="return Getdata()">Confirm</button>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src='@Url.Content($"~/dist/Scripts/page_scripts/Route/routes.js?v={DateTime.Now.Ticks}")' type="text/javascript"></script>
+<script>
+
+    $(document).ready(function () {
+
+        $('#AllAssetsEpOnRoute').modal({ backdrop: 'static', keyboard: false })
+        LoadPopUp();
+
+
+    });
+
+    $('body').on('click', '.addnew', function () {
+        var assetId = '@ViewBag.AssetId';
+        openNewAsset(0, assetId, '');
+    });
+
+    //$("input[name=drpInspTypes]:radio").change(function () {
+    //    LoadPopUp();
+    //});
+
+    var loadData = function (type) {
+        debugger;
+        var mode = $("#smode").val();
+        var floorId = $("#sfloorId").val();
+        var drpInspTypes = $('input[name=drpInspTypes]:checked').val();
+        var routeId = $("#route").val();
+        var sAssetId = $("#sassetId").val();
+        if (mode == 1) {
+            var floorAssetId = '@ViewBag.FloorAssetId';
+            var locationId = '@ViewBag.LocationId';
+            $("#smode").val(0);
+        }
+        var url = CRxUrls.fireExtinguisher_GetExtinguisherAssets;
+        $.get(url + "?floorId=" + floorId + "&inspType=" + drpInspTypes + "&routeId=" + routeId + "&assetId=" + sAssetId + "&floorAssetId=" + floorAssetId + "&locationId=" + locationId, function (data) {
+
+            if (type != undefined) {
+                localStorage.setItem("rTtype", type);
+            } else {
+                localStorage.setItem("rTtype", -1);
+            }
+            $('#fireextinguisherView').empty();
+            $('#fireextinguisherView').html(data);
+            $('#fireextinguisherView').fadeIn('fast');
+            $('.modal-backdrop').remove();
+            $("#hidememptystop").trigger("change");
+        });
+    }
+
+    $("#route").change(function () {
+        loadSelectedData();
+    });
+
+    var getRoutesbyfloor = function () {
+        if ($("#sassetId").val() != "") {
+            $("#route").empty();
+            var routeOptions = {};
+            routeOptions.url = CRxUrls.fireExtinguisher_GetRouteByAssetId; //CRxUrls.Location_GetRouteByFloor;
+            routeOptions.type = "POST";
+            routeOptions.data = { assetId: $("#sassetId").val() };
+            routeOptions.datatype = "json";
+            /*routeOptions.contentType = "application/json";*/
+            routeOptions.success = function (routeList) {
+                if (routeList.length > 0) {
+                    for (var i = 0; i < routeList.length; i++) {
+                        $("#route").append($('<option></option>').val(routeList[i].RouteId).html(routeList[i].RouteNo + " (" + routeList[i].AssetCounts + ")"));
+
+                    }
+                    //$("#route").append($('<option></option>').val(-2).html("Inventory Assets"));
+
+                } else {
+                    $("#route").append($('<option></option>').val(0).html("Route 0"));
+                    $("#route").append($('<option></option>').val(-2).html("Inventory Assets"));
+                }
+
+                var routeId = parseInt($("#srouteid").val());
+                //alert(routeId);
+                if (routeId > 0) {
+                    $("#route").val(routeId);
+                } else if (routeId == -2) {
+                    $("#route").val(-2);
+                } else {
+                    $("#route").append($('<option></option>').val(-1).html("See All"));
+                    $("#route").val(-1);
+                }
+                @*if (@OpenPopup== 1) {
+                    loadSelectedData();
+                } else {
+                    loadData();
+                }*@
+                loadSelectedData();
+             
+
+            };
+            routeOptions.error = function () { AlertWarningMsg("Error in Getting Routes!!"); };
+            $.ajax(routeOptions);
+        }
+        else {
+            $("#route").empty();
+            $("#route").append(
+                $('<option></option>').val("").html("Select"));
+        }
+    }
+    var LoadPopUp = function () {
+var Models = JSON.parse($("#_alleps").val()).data;
+        var url = '@Url.Action("AllAssetsEpOnRoute", "FireExtinguisher")';
+        debugger
+        $.ajax({
+            url: url,
+            type: "POST",
+            contentType: 'application/x-www-form-urlencoded',
+            data: {
+                Models: Models
+            },
+           // dataType: 'json',
+            success: function (data) {
+                debugger
+                console.log(data);
+                $('#AllAssetsEpOnRoute').modal('show');
+                 $('#loadpartialAllAssetsEpOnRoute').html(data);
+                $('#loadpartialAllAssetsEpOnRoute').fadeIn('fast');
+
+            },
+            error: function (jqXHR, exception) {
+                console.log(jqXHR);
+                console.log(exception);
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+                alert(msg);
+            }
+            });
+    };
+    var Getdata = function () {
+        debugger;
+        $("#sassetId").val($('input[name=drpAssetInspTypes]:checked').data("assetid"));
+        var epid = $('input[name=drpAssetInspTypes]:checked').data("epid");
+        $('input:radio[epid=' + epid + ']').prop('checked', true)
+        $("#AllAssetsEpOnRoute").modal('toggle');
+        getRoutesbyfloor();
+
+    };
+    var loadSelectedData= function (type){
+             debugger;
+        var mode = $("#smode").val();
+        var floorId = $("#sfloorId").val();
+        var drpInspTypes = $('input[name=drpAssetInspTypes]:checked').val();
+        var routeId = $("#route").val();
+        var sAssetId = $("#sassetId").val();
+        if (mode == 1) {
+            var floorAssetId = '@ViewBag.FloorAssetId';
+            var locationId = '@ViewBag.LocationId';
+            $("#smode").val(0);
+        }
+        var url = CRxUrls.fireExtinguisher_GetExtinguisherAssets;
+        $.get(url + "?floorId=" + floorId + "&inspType=" + drpInspTypes + "&routeId=" + routeId + "&assetId=" + sAssetId + "&floorAssetId=" + floorAssetId + "&locationId=" + locationId, function (data) {
+
+            if (type != undefined) {
+                localStorage.setItem("rTtype", type);
+            } else {
+                localStorage.setItem("rTtype", -1);
+            }
+            $('#fireextinguisherView').empty();
+            $('#fireextinguisherView').html(data);
+            $('#fireextinguisherView').fadeIn('fast');
+            $('.modal-backdrop').remove();
+            $("#hidememptystop").trigger("change");
+            $('input[assetid=' + sAssetId + ']').prop('checked', true);
+            $(".assetRouteChk").trigger("change");
+
+        });
+    };
+
+</script>
+<style>
+    ul.route_ep_assets_frequency {
+        border: none;
+        background-color: #f3f3f3;
+    }
+</style>

@@ -1,0 +1,110 @@
+﻿<div class="modal-header">
+    <button type="button" class="close" id="crosspopup" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Email EP Assignment Report</h4>
+</div>
+<div class="modal-body epemail-assign">
+    <form>
+        <div class="form-group">
+            <label for="subject"><span class="note">*</span>Subject:</label>
+            <input type="text" class="form-control" id="subject" value="EP Assignment">
+        </div>
+        <div class="form-group">
+            <label for="toemail"><span class="note">*</span>To Email: <span class="note">Note: seprate multiple email by <b>comma(,)</b></span></label>
+            <input type="email" class="form-control" id="toemail" value="@HCF.Web.Base.UserSession.CurrentUser.Email">
+        </div>
+        <div class="form-group">
+            <label for="ccemail">CC Email: <span class="note">Note: seprate multiple email by <b>comma(,)</b></span></label>
+            <input type="email" class="form-control" id="ccemail">
+        </div>
+        <button type="button" id="btnSendEmailReport" class="comm-button">Send</button>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="comm-Cancelbutton" id="closepopup" data-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $('#btnSendEmailReport').click(() => {
+        debugger;
+        var userId = $('#userList').val()
+        var categories = ["All","EC","LS","EM"]
+        var catId = categories.indexOf($('#EPTypeList').val())
+        var toemail = $('#toemail').val()
+        var subject = $('#subject').val()
+        var ccemail = $('#ccemail').val()
+        var selectedUserId = $('#userList').val();
+        var selectedUserText = $('#userList option:selected').text()
+        var date = ('' + new Date()).split(' ')
+        var datestring = date[1] + date[2] + "_" + date[4];
+
+        if (toemail == '' || subject == '')
+        {
+            swalalert('ERROR', 'Please fill required details.', 'error')
+            return false;
+        }
+
+        $.ajax({
+            url: "@Url.Content("~/Pdf/SendEPReport")" + `?userId=${userId}&catId=${catId}&to=${toemail}&cc=${ccemail}&subject=${subject}&user=${selectedUserText}&date=${datestring}&selecteduser=${selectedUserId}`,
+            method: 'GET',
+            success: function (data) {
+                if (data.Success) {
+                    swalalert('Success', 'Report sent to email successfully.', 'success')
+                }
+                else {
+                    swalalert('ERROR', 'Report not sent to email.', 'error')
+                }
+                $('.modal').modal('hide')
+            }
+        })
+
+    })
+
+    $('#closepopup').on('click', function () {
+        //debugger
+        removeGrayOut();
+    });
+
+
+    $('#crosspopup').on('click', function () {
+        //debugger
+        removeGrayOut();
+    });
+
+    function removeGrayOut() {
+        if ($('#modal-container').hasClass('in')) {
+            debugger;
+            $('#modal-container').removeClass('in');
+            $('.modal-backdrop').removeClass('in');
+            $('#modal-container1').removeClass('in');
+        }
+    }
+
+    $(document).ready(function () {
+        $(document).on({
+            'show.bs.modal': function () {
+                var zIndex = 1040 + (10 * $('.modal:visible').length);
+                $(this).css('z-index', zIndex);
+                setTimeout(function () {
+                    $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+                }, 0);
+            },
+            'hidden.bs.modal': function () {
+                if ($('.modal:visible').length > 0) {
+                    // restore the modal-open class to the body element, so that scrolling works
+                    // properly after de-stacking a modal.
+                    setTimeout(function () {
+                        $(document.body).removeClass('modal-open');
+                    }, 0);
+                }
+            }
+        }, '.modal');
+    });
+
+
+</script>
+<style>
+    span.note {
+        color: red;
+        font-size: 12px;
+    }
+</style>

@@ -1,0 +1,56 @@
+﻿@model List<HCF.BDO.StopMaster>
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">
+        Stops
+        </h4>
+    </div>
+    <div class="modal-body">
+        <table id="stopTable" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Building &amp; Floor</th>
+                    <th>
+                        Stop Name
+                    </th>
+                    <th>Stop Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loc in Model.Where(x => x.FloorId != null))
+                {
+                    <tr locationid="@loc.StopId">
+                        <td>
+                            @string.Format("{0}, {1}", loc.Floor.FloorName, loc.Floor.Building.BuildingName)
+                        </td>
+                        <td>
+                            @loc.StopName
+                        </td>
+                        <td>
+                            @loc.StopCode
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var assettable = $('#stopTable').DataTable({
+            "searching": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "bPaginate": $('#stopTable tbody tr').length > 10,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            dom: "<'row'<'col-sm-12 tableactions' <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+        });
+    });
+
+</script>

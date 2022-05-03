@@ -1,0 +1,306 @@
+﻿@model HCF.BDO.TInspectionReport
+@{
+    Layout = null;
+    List<HCF.BDO.Inspection> Inspections = new List<HCF.BDO.Inspection>();
+    if (TempData["Inspectionlist"] != null)
+    {
+        Inspections = (List<HCF.BDO.Inspection>)TempData["Inspectionlist"];
+    }
+}
+<div class="modal-header">
+    
+    <h4 class="modal-title">Preview Reports
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </h4>
+</div>
+<script>
+    function OnSuccess(result) {
+       // debugger;
+        var ids = [];
+        var activityIds = $("#activity_ID").val();
+        ids.push(activityIds.split(','))
+        if (result.Result != null) {
+            for (var i = 0; i < result.Result.length; i++) {
+                var trId = result.Result[i].ActivityId;
+                //console.log(trId);
+                $("#" + trId).remove();
+            }
+            for (var item of ids[0]) {
+                $("#" + item).remove();
+            }
+            
+        }
+
+        if ($('#floorAssetsforReports tr').length == 2) {
+            $("#btnsignSubmit").hide();
+            $('#selectAll').attr('checked', false);
+            $(".nodataFound").show();
+        } else { $(".nodataFound").hide() };
+
+        $('#previewReports').modal('hide');
+        infoAlert("Report is available in binder section", "Message");
+        // infoAlert(JSON.parse(data.Result).Message, "Message");swal('Report is available in binder section');
+
+    }
+</script>
+<div class="modal-body">
+    <div class="preview-popup-reports">
+        @*@using (Ajax.BeginForm("CreateReports", "Reports", new AjaxOptions { OnSuccess = "OnSuccess" }))
+        {*@
+
+
+        <form asp-controller="Reports" asp-action="CreateReports"
+              data-ajax-success="OnSuccess"
+              data-ajax="true" data-ajax-method="POST">
+            @Html.AntiForgeryToken()
+            <div id="hdn_div">
+                <input type="hidden" name="SignImageName" id="SignImageName" />
+                <input type="hidden" name="SignContent" id="SignContent" />
+                <input type="hidden" name="SignPath" id="SignPath" />
+                <input type="hidden" name="htmlcontent" id="htmlcontent" />
+
+            </div>
+
+            <div id='dvhtml'>
+                <div>
+                    <img src='@commonModelFactory.CommonFilePath(HCF.Web.Base.UserSession.CurrentOrg.LogoPath)' style="height:48px;width:80px" controlname="addCloseTag" />
+                </div>
+
+                <div style="text-align: center">
+                    <div><b><span style="font-size: 16px;">@session.ClientDbName</span> </b></div>
+                    <div style="text-align: center;font-size:12px;">@HCF.Web.Base.UserSession.CurrentOrg.Address</div>
+                    <div style="margin: 2px 0 10px 0px;text-align: center"><b><span>Inspection Report</span> </b></div>
+                </div>
+
+                <div>
+                    @string.Format("Report Date : {0}", DateTime.UtcNow.ToFormatDate())
+                </div>
+                @foreach (var item in Inspections)
+                {
+                    if (item.TInspectionActivity.Count > 0)
+                    {
+                        <div style='padding: 0 0 16px 0px;'>
+                            @string.Format("{0} : {1}", item.EPDetails.Standard.TJCStandard, item.EPDetails.Standard.TJCDescription)
+                        </div>
+                        <div style='padding: 0 0 16px 0px;'>
+                            @string.Format("{0} : {1}", item.EPDetails.EPNumber, item.EPDetails.Description)
+                        </div><br />
+                        var tinspectionctivity = (from p in item.TInspectionActivity.Where(x => x.IsSubmit == false)
+                                                  select new
+                                                  {
+                                                      floorAssetId = p.TFloorAssets.FloorAssetsId,
+                                                      deviceNo = p.TFloorAssets.DeviceNo,
+                                                      assetNo = p.TFloorAssets.AssetNo,
+                                                      date = p.DueDate,
+                                                      name = p.TFloorAssets.Name,
+                                                      activityId = p.ActivityId,
+                                                      inspectionId = p.InspectionId,
+                                                      ePDetailId = item.EPDetailId,
+                                                      comment = p.Comment,
+                                                      status = p.Status,
+                                                      location = commonModelFactory.GetFloorAssetLocation(p.TFloorAssets),
+                                                      activityDate = p.ActivityInspectionDate,
+                                                      issubmit = p.IsSubmit,
+                                                      isStepsOnReport = p.TFloorAssets.Assets.IsStepsOnReport,
+                                                      tinspectionDetails = p.TInspectionDetail,
+                                                  }).ToList().OrderBy(x => x.activityDate);
+
+                        var consolidatedChildren = from c in tinspectionctivity
+                                                   group c by new
+                                                   {
+                                                       c.location
+                                                   }
+                                                       into gcs
+                                                   select new
+                                                   {
+                                                       location = gcs.Key.location,
+                                                       activity = gcs.ToList()
+                                                   };
+                        int j = 0;
+                        foreach (var loc in consolidatedChildren.OrderByDescending(x => x.location))
+                        {
+                            if (!string.IsNullOrEmpty(loc.location))
+                            {
+                                <h5>
+                                    @loc.location
+                                </h5>
+                            }
+                            else
+                            {
+                                <h5>
+                                    Assets without location
+                                </h5>
+
+                            }
+                            <table cellspacing='0' cellpadding='0' border='1' width='100%' style="border:#ccc solid 1px; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>Asset</th>
+                                        <th width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>@Localizer["AssetNo"]</th>
+                                        @*
+                                        <th style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>Location</th>*@
+                                        <th width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>Status</th>
+                                        <th width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>Comment</th>
+                                        <th width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>Inspection Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var details in loc.activity.Where(x => x.issubmit == false))
+                                    {
+                                        <tr>
+                                            <td width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>
+                                                @details.name
+                                                <input type="hidden" name="TInsReportDetails[@j].ActivityId" value="@details.activityId" controlname="addCloseTag" />
+                                                <input type="hidden" name="TInsReportDetails[@j].InspectionId" value="@details.inspectionId" controlname="addCloseTag" />
+                                                <input type="hidden" name="TInsReportDetails[@j].EpDetailId" value="@details.ePDetailId" controlname="addCloseTag" />
+                                                <input type="hidden" name="TInsReportDetails[@j].FloorAssetId" value="@details.floorAssetId" controlname="addCloseTag" />
+                                                <input type="hidden" name="TInsReportDetails[@j].Comment" value="@details.comment" controlname="addCloseTag" />
+                                                <input type="hidden" name="TInsReportDetails[@j].Status" value="@details.status" controlname="addCloseTag" />
+                                            </td>
+                                            <td width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>@details.assetNo</td>
+                                            @*
+                                            <td style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>@details.location</td>*@
+                                            <td width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>
+                                                @if (details.status == 1)
+                                                {
+                                                    <span>Compliant</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Non Compliant</span>
+                                                }
+                                            </td>
+                                            <td width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>@details.comment</td>
+                                            <td width="20px" style='border: #000 solid 1px; padding: 5px; height: 20px; font-family: Arial; font-size: 12px; '>@details.activityDate.Value.ToClientTime().ToFormatDateTime()</td>
+                                        </tr>
+                                        if (details.isStepsOnReport)
+                                        {
+                                            <tr>
+                                                <td colspan="5">
+                                                    <div>
+                                                        @foreach (var inspdetails in details.tinspectionDetails)
+                                                        {
+                                                            <table cellspacing='0' cellpadding='0' border='1' width='100%' style="border:#ccc solid 1px; border-collapse:collapse;">
+                                                                <tr>
+                                                                    <td colspan="2"><strong>@inspdetails.MainGoal.Goal</strong></td>
+                                                                </tr>
+                                                                @foreach (var steps in inspdetails.InspectionSteps.ToList())
+                                                                {
+                                                                    <tr>
+                                                                        <td width="80%">@steps.Steps.Step</td>
+                                                                        @if (steps.Steps.StepType == 1)
+                                                                        {
+                                                                            <td width="20%">
+                                                                                @if (steps.Status == 1)
+                                                                                {
+                                                                                    <span class="complaint">@Localizer["CompliantText"]</span>
+                                                                                }
+                                                                                else if (steps.Status == 0)
+                                                                                {
+                                                                                    <span class="noncomplaint">@Localizer["NonCompliantText"]</span>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <span class="complaint">Pending</span>
+                                                                                }
+                                                                            </td>
+                                                                        }
+                                                                        else if (steps.Steps.StepType == 2)
+                                                                        {
+                                                                            <td width="20%">@steps.InputValue</td>
+                                                                        }
+                                                                    </tr>
+                                                                }
+                                                            </table>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                        j++;
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    }
+                }
+                <table cellspacing='0' cellpadding='0' border='0' width='100%'>
+                    <tr>
+                        <td style='height:70px; padding: 5px; font-family: Arial; font-size: 12px; text-align: left; '>
+                            <div>
+                                <div style="vertical-align: top; padding-top: 5px;">
+                                    <strong>Prepared By:</strong>
+                                    @if (HCF.Web.Base.UserSession.CurrentUser.IsVendorUser)
+                                    {
+                                        @HCF.Web.Base.UserSession.CurrentUser.Vendor.Name
+                                    }
+                                    else
+                                    {
+                                        @HCF.Web.Base.UserSession.CurrentUser.Name
+                                    }
+                                </div>
+                                <div class="signedBy-reports">
+
+
+                                    <strong style="vertical-align: top; padding-top: 5px; display: inline-block;">Signed By:</strong>
+                                    <div style="padding-top:5px; display:inline-block;">
+                                        <img src=""
+                                             id="new_image"
+                                             tempname="SignImageName"
+                                             filecontent="SignContent"
+                                             style="height:48px;width:auto"
+                                             controlname="addCloseTag" />
+                                        <p class="signaturebyName"></p>
+                                        <p class="signaturelocaltime"></p>
+
+                                    </div>
+                                </div>
+                                <div class="reportdate">@DateTime.UtcNow.ToFormatDate()</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="button_Div" style="clear:both;">
+                <input type="submit" value="Generate" class="comm-button" id="btnSubmit" />
+                <input type="button" name="submitButton" value="Cancel" data-dismiss="modal" class="comm-Cancelbutton" />
+            </div>
+            </form>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/0.9.0rc1/jspdf.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(() => {
+        debugger
+        $('.loadingModal').hide();
+    });
+    $("#btnSubmit").click(function () {
+        debugger
+        var signImage = $('#SignImageName').val()
+        if (signImage != "") {
+            var htmlContent = $("#dvhtml").html();
+            $("#htmlcontent").val(htmlContent);
+            $("#signSubmitform").submit();
+        } else {
+            AlertWarningMsg("Please first upload the signature!");
+           
+        }
+    });
+
+</script>
+<style>
+    .pageReview {
+        vertical-align: top;
+        padding-top: 5px;
+        display: inline-block;
+    }
+    .signedBy-reports {
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+    }
+   
+
+   
+</style>

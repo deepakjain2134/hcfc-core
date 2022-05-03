@@ -1,0 +1,85 @@
+﻿<link href="~/dist/css/font-awesome.min.css" rel="stylesheet" />
+@{
+    var pageText = "<h1 style='text-align:CENTER;'>Coming soon...</h1>";
+    var screenName = $"{ViewContext.RouteData.Values["Controller"].ToString().ToLower()}_{ViewContext.RouteData.Values["Action"].ToString().ToLower()}";
+    var pageHelp = HCF.Web.Base.UserSession.PageHelp.Where(x => x.RouteUrl.ToLower() == screenName && x.TipType == HCF.BDO.Enums.TipTypes.HelpPageText && x.IsActive && x.IsApproved == 1).ToList();
+    if (pageHelp != null && pageHelp.Any())
+    {
+        pageText = string.Empty;
+        foreach (var item in pageHelp)
+        {
+            if (!string.IsNullOrEmpty(item.Title))
+            {
+                pageText = pageText + "</br>" + item.Description;
+            }
+        }
+    }
+}
+
+<button class="chatbox-open">
+    <img src="@Url.Content("~/dist/Images/Icons/help.png")" title="Help" alt="" />
+    <i class="fa fa-help fa-2x" aria-hidden="true"></i>
+</button>
+<button class="chatbox-close">
+    <i class="fa fa-close fa-2x" aria-hidden="true"></i>
+</button>
+<section class="chatbox-popup">
+    <header class="chatbox-popup__header">
+        <aside class="chatBox-titlewithicon">
+            <i class="fa fa-user-circle fa-4x chatbox-popup__avatar" aria-hidden="true"></i>
+            <h1>Help</h1>
+        </aside>
+        <aside style="flex:8"></aside>
+        <aside style="flex:1">
+            <button class="chatbox-popup-close"><i class="fa fa-close" aria-hidden="true"></i></button>
+        </aside>
+    </header>
+    <main class="chatbox-popup__main crx-scrollBar">
+        <span class="chatbox-popup-content-main">
+            @Html.Raw(pageText)
+
+            @if (HCF.Web.Base.UserSession.CurrentUser.IsSystemUser)
+            {
+                <p class="text-center">
+                    <a href='@(Url.Action("AddOrEditTips", "Tips",new { routeUrl=screenName }))' 
+                       style="cursor:pointer"> Manage Help Text</a>
+                </p>
+            }
+        </span>
+        <div class="chatbox-popup-content-data">
+            <div id="firstDiv">
+                <p>
+                    Share your knowledge with the CRx team and users across our platform. We are always open to ideas to enhance our system and appreciate your feedback!
+                </p>
+                <div class="tips-suggestionbtnBox">
+                    <button class="form-control comm-bluebutton" id="btn_user">Tip for Users</button>
+                    <button class="form-control comm-bluebutton" id="btn_ImprovementSuggestion">CR<span class="crx-x">x</span> Improvement Suggestion</button>
+                </div>
+            </div>
+
+            <div class="btn_user">
+                <h3>Tip for Users</h3>
+                <textarea id="user_tips" class="tips-message"></textarea>
+                <input type="button" id="tipsubmitButton" name="btnSubmit" value="Save" class="comm-button float-right" />
+            </div>
+
+            <div class="btn_ImprovementSuggestion">
+                <h3>CRx Improvement </h3>
+                <p>
+                    Your candid suggestions on the help text or on the improving page or adding/enhancing features are highly appreciated and routed to CRx product managers and HCFCompliance management.
+                </p>
+                <textarea id="user_suggestions" class="suggestions-message"></textarea>
+                <input type="button" id="Improvement_btn" name="btnSubmit" value="Save" class="comm-button float-right" />
+            </div>
+        </div>
+
+
+    </main>
+    <footer class="chatbox-popup__footer">
+        <aside> <a class="more-link">Suggest a Tip for users or CRx improvement.</a> </aside>
+    </footer>
+</section>
+
+
+<input type="hidden" value="@ViewContext.RouteData.Values["Action"].ToString().ToLower()" id="helpPageActionName" />
+<input type="hidden" value="@ViewContext.RouteData.Values["Controller"].ToString().ToLower()" id="helpPageControllerName" />

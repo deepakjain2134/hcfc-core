@@ -1,0 +1,221 @@
+﻿@model List<HCF.BDO.TRounds>
+@{
+
+    int seq = 0;
+    string TRoundId = string.Empty;
+    Layout = null;
+
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-left">
+            <div class="box box-primary asset_list_view">
+                <div id="loadpartialround">
+                    @await Html.PartialAsync("_RoundDetails", Model.FirstOrDefault())
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-9">
+            <div class="box box-primary" id="floor_round_categories">
+                @foreach (var round in Model)
+                {
+                    {
+                        seq = seq + 1;
+                        if (round.TRoundId > 0)
+                        {
+                            TRoundId = TRoundId + round.TRoundId + ",";
+                        }
+                    }
+                    if (Model.Count == 1)
+                    {
+                    }
+                    else if (Model.Count == seq)
+                    {
+                        seq = -1;
+                    }
+                                  
+
+                    <div class="roundInspectionView" id="@string.Format("floor_round_questions_{0}",seq)">
+                        @await Component.InvokeAsync("GroupRoundsQuestonaries", new
+                    {
+                    floorId = ViewBag.FloorId != null ? ViewBag.FloorId : round.DefaultFloorId,
+                    rId = round.TRoundId,
+                    seq = seq.ToString(), troundId=round.TRoundId
+                    })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnRoundId" value="@TRoundId.TrimEnd(',')" />
+<input type="hidden" id="hdnRoundType" value="@Model.FirstOrDefault().RoundType" />
+
+<script>
+
+
+        var troundId = $("#hdnRoundId").val();
+        var userId = '@HCF.Web.Base.UserSession.CurrentUser.UserId';
+        var floorId = $("#hdn_floorId").val();
+
+        $("#insp_round_locations .floor").click(function () {
+        var floorId = $(this).attr("floorid");
+        openRoundQuestons(floorId);
+        });
+
+
+        $("#addWo").click(function () {
+        window.location.href = "floor/" + troundId+"/wo";
+        });
+
+
+        var openRoundQuestons = function (floorId) {
+                loadData(floorId);
+        }
+
+
+        $(document).ready(function () {
+           // debugger;
+            $("#TRoundId").val($("#hdnRoundId").val());
+            $("#apdfdownload").attr("href", "/PDF/RoundInspectionPdf?floorid=" + '@ViewBag.FloorId' + "&roundid=" + $("#hdnRoundId").val() +"&groupround=1");
+        var InspectionStatus = '@Model.FirstOrDefault().Status';
+        var floorLength = $('.floor').length;
+        if (floorLength == 1) {
+        $(".nextFloor").hide();
+        }
+        if (InspectionStatus == 1) {
+        $('.floorRoundtbl').addClass('disabled');
+            }
+           if ('@(ViewBag.CanEdit)' != 'True') {
+                $('button').addClass("disabled");
+                $('.floorRoundtbl').addClass("disabled");
+                $('.plusicon1').addClass("disabled");
+
+            }
+        });
+
+
+     var openRoundQuestons = function (floorId) {
+       var viewControl=$('.roundInspectionView');
+       $.get(CRxUrls.Round_RoundsQuestonaries + '?floorId=' + floorId + "&rId=" + troundId + "&userId=" + userId, function (data) {
+                viewControl.empty();
+                viewControl.html(data);
+                viewControl.fadeIn('fast');
+                var floorLength = $('.floor').length;
+                if (floorLength == 1) {
+                    $(".nextFloor").hide();
+                }
+            });
+    }
+
+
+
+
+    function tristate1(control) {
+        if (canUpdate())
+            tristate(control, '0', '1');
+    }
+
+    function tristate(control, value1, value2) {
+        switch (control.value) {
+            case value1:
+                control.value = value2;
+                break;
+            case value2:
+                control.value = value1;
+                break;
+
+        }
+        SetCheckValue(control);
+        saveData(control);
+    }
+
+    function SetCheckValue(control) {
+        //debugger;
+        var controlId = $(control).attr("tempName");
+        $("input[name='" + controlId + "'][type=hidden]").val(control.value);
+
+    }
+
+    //$(document).off("change", ".stepComment").on("change", ".stepComment", function () {
+    //    var control = this;
+    //    saveData(control);
+    //});
+
+    //$(document).off("change", ".comment").on("change", ".comment", function () {
+    //    //debugger;
+    //    var questionnaires = [];
+    //    var comment=$(this).val();
+    //    saveInspection(questionnaires, true, null, $(this).attr("troundid"),comment);
+    //});
+
+    //var saveData = function (control) {
+    //    console.log(control);
+    //    console.log($(control).attr("id"));
+    //   // debugger;
+    //    var TRoundId = "";
+    //    if (canUpdate()) {
+    //        var overAllComment=$(control).closest("table").find("comment").val();
+    //        var RouQuesId = $(control).closest("tr").attr("id").split("_")[1];
+    //        var comment = $(control).closest("tr").find(".stepComment").val();
+    //        var status = $(control).closest("tr").find(".ins_check3_btn").attr("value");//control.value;
+    //        TRoundId = $(control).closest("tr").find("#TRoundId").attr("value");
+    //        var fileName = $(control).closest("tr").find(".fileName").val();
+    //        var fileContent = $(control).closest("tr").find(".fileContent").val();
+    //        var filePath = $(control).closest("tr").find(".filePath").val();
+    //        var questionnair = {
+    //            RouQuesId: RouQuesId,
+    //            Status: status,
+    //            Comment: comment,
+    //            TRoundId: TRoundId,
+    //            FileName: fileName,
+    //            FileContent: fileContent,
+    //            filePath: filePath
+    //        };
+    //        var questionnaires = [];
+    //        questionnaires.push(questionnair);
+    //        saveInspection(questionnaires, true, status, TRoundId,overAllComment);
+    //    }
+    //}
+
+    var getInspectionStatus = function () {
+        var totalSteps = $("input[class='ins_check3_btn']").length;
+        var passCount = $("input[class='ins_check3_btn'][value='1']").length;
+        var failCount = $("input[class='ins_check3_btn'][value='0']").length;
+        if (failCount > 0)
+            return 0;
+        else
+            return 1;
+    }
+
+
+
+
+    function getNextFloor() {
+        var floorId = 0;
+        var myArray = [];
+        $('.floor').each(function () {
+            myArray.push($(this).attr("floorid"))
+        });
+        var val = $("#hdn_floorId").val();
+        var index = myArray.indexOf(val);
+        if (index >= 0 && index < myArray.length - 1) {
+            floorId = myArray[index + 1];
+
+        } else {
+            floorId = myArray[0];
+        }
+        return floorId;
+    }
+
+    $(document).off("click", ".nextFloor").on("click", ".nextFloor", function () {
+        var floorId = getNextFloor();
+        openRoundQuestons(floorId);
+    });
+
+    function ShowCombinedInspection(floorid) {
+        var url = '@Url.Action("ShowCombinedInspection", "Round")';
+        window.location.href = url + '?floorid=' + floorid + '&roundid=' + $("#hdnRoundId").val();
+    }
+</script>

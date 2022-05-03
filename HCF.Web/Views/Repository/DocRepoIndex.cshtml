@@ -1,0 +1,100 @@
+﻿@model IEnumerable<HCF.BDO.Binders>
+@{
+    ViewBag.Title = "DocRepoIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Binders
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="box-body doc_repository">
+                        <div class="binder-mailBox">
+                            <ul class="top-mailBox">
+                                <li>
+                                    <a href="@Url.Action("GetEpDocByBinder", "Repository", new { id = 0 })">                                      
+                                        <common-image src="~/dist/Images/services/see_all.png" title="See All Binders" class="dashimg"></common-image>
+                                        <span>See All</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("Inbox")">
+                                        <common-image src="~/dist/Images/services/inbox.png" title="inbox" class="dashimg"></common-image>                                      
+                                        <span>Inbox</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="@Url.RouteUrl("policies-list")">
+                                        <common-image src="~/dist/Images/services/policy_binders_icon.png" title="Policy Binders" class="dashimg"></common-image>                                       
+                                        <span>Policy Binders</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="virtual_binderBox">
+                            <h4>Virtual Binders</h4>
+                            <ul class="virtual_binderList">
+                                @foreach (var item in Model.Where(x => x.IsActive).OrderBy(x => x.BinderName))
+                                {
+                                    <li>
+                                        <a binderId="@item.BinderId"
+                                           class="binderName"
+                                           title="Assigned EPs"
+                                           data-content="@string.Join("%", item.StandardEps.OrderBy(x=>x.StandardEP).ToList().Select(x=>x.StandardEP))"
+                                           data-toggle="popover"
+                                           href="@Url.RouteUrl("getepdocbybinder", new { id = item.BinderId })">                                          
+                                            <image src="@item.FilePath" title="@item.BinderName" class="img_binder"></image>
+                                            <span>@Html.DisplayFor(modelItem => item.BinderName)</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function makeTableHTML(myArray) {     
+        var result = "<div><ul class='binders-tooltop'>";
+        for (var i = 0; i < myArray.length; i++) {
+            result += "<li>" + myArray[i] + "</li>";
+        }
+        result += "</ul></div>";
+
+        return result;
+    }
+
+    $('.img_binder').hover(function () {
+        var array = [];
+        var binderId = $(this).parent("a").attr("binderId");
+        var content = $(this).parent("a").attr("data-content");
+        //console.log(content);
+        array = content.split('%');
+        // console.log(array);
+        if (content) {
+            content = makeTableHTML(array);
+        } else {
+            content = 'No EP Assigned';
+        }
+        if ($('.popover').hasClass('in')) {
+            $(this).popover('hide');
+        }
+        else {
+            $(this).attr('data-content', content);
+            $(this).popover({ html: true, width: '200px', placement: 'auto', container: 'body' });
+            $(this).popover('show');
+        }
+    });
+
+</script>

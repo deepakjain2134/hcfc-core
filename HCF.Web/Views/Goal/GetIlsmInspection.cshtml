@@ -1,0 +1,893 @@
+﻿@model HCF.BDO.TIlsm
+@{
+    ViewBag.Title = " ILSM Documentation";
+
+    if (Model != null && Model.MainGoal != null)
+    {
+        Model.MainGoal = Model.MainGoal.OrderBy(x => x.Goal).ToList();
+    }
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            ILSM Documentation
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div id="loadpartial">
+                @await Html.PartialAsync("_ilsmInspection", Model)
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="box box-primary">
+                <div class="row">
+                    @{
+                        var tinspectionActivity = Model.SourceInspection.TInspectionActivity;
+                        if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                        {
+                            tinspectionActivity = Model.SourceInspection.TInspectionActivity.Where(x => x.SubStatus != "NA").ToList();
+                        }
+                    }
+                    <div class="col-md-12" style="position: relative; float: left;">
+                        <div class="epsSteps">
+                            @*@using (Ajax.BeginForm("IlsmInspection", "Goal", new AjaxOptions { OnSuccess = "OnSuccess" }))
+                                {*@
+
+                            <form asp-controller="Goal" asp-action="IlsmInspection"
+                                  data-ajax-success="OnSuccess"
+                                  data-ajax="true" data-ajax-method="POST">
+                                @Html.AntiForgeryToken()
+                                @Html.HiddenFor(m => m.TinspectionActivity[0].ActivityId)
+                                <input type="hidden" value="@Model.TIlsmId" id="tilsmId" name="tilsmId" />
+                                <input type="hidden" value="@ViewBag.IsRoundView" id="isRoundView" />
+
+                                <table class="table" width="100%">
+                                    <tr>
+                                        <td>
+                                            @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                                            {
+                                                <div>
+                                                    <label>These deficiencies require ILSM.  Please document here, all Interim Life Safety Measures that are taken</label>
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <div class="topfileUplod">
+                                                        <img src="@Url.Content("~/dist/img/message_icon.png")"
+                                                             alt="" data-toggle="modal" data-target="#commentModal"
+                                                             stepid="0" tcommentId="0"
+                                                             class="commentIcon" />
+                                                    </div>
+                                                    <div class="@($"{"img_file_upload"}_{'C'}")">
+                                                        <input name="file_Uploader" type="file" onclick="this.value=null;"
+                                                               onchange="InsUploadAndSavefile(this, 'C',0)" />
+                                                    </div>
+                                                    <div class="@($"{"img_file_upload"}_{'D'}")">
+                                                        <input name="file_Uploader" type="file" onclick="this.value=null;"
+                                                               onchange="InsUploadAndSavefile(this, 'D',0)" />
+                                                    </div>
+                                                </div>
+                                            }
+                                            <input type="hidden" value="@Model.Status" id="ilsmStatus" />
+                                            <br />
+                                            <div>
+                                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                                {
+                                                    <span>
+                                                        <label> Reason for this ILSM Creation: </label> @Model.Notes
+                                                    </span>
+                                                }
+                                            </div>
+
+                                            <div class="deficiencies_itemBox ">
+                                                @if (Model.Deficiencies != null && Model.Deficiencies.Count > 0)
+                                                {
+                                                    <label>Deficiencies</label> <span class="deficiencies_header">(click here to hide)</span>
+
+                                                    <div class="deficiencies_content">
+                                                        <ul class="activity_history stylish">
+                                                            @foreach (var item in Model.Deficiencies)
+                                                            {
+                                                                foreach (var step in item.Steps)
+                                                                {
+                                                                    <li class="editor-field">@step.Step</li>
+                                                                }
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div>
+                                                @if (Model.Status == HCF.BDO.Enums.ILSMStatus.Closed)
+                                                {
+                                                    if (!string.IsNullOrEmpty(Model.CompletionComment))
+                                                    {
+                                                        <span>
+                                                            <label> Closed Comment: </label> @Model.CompletionComment
+                                                        </span>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+
+
+                                <div class="row" id="demo_0">
+                                    <div class="col-lg-12">
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (HCF.BDO.TComment item in Model.IlsmComments.OrderByDescending(x => x.AddedDate))
+                                            {
+                                                @await Html.PartialAsync("_ILSMComment", item)
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div style="float: right; color: gray; font-size: 13px;"><p>Max 3 pictures allowed per ILSM point</p></div>
+                                <div style="min-height:inherit;">
+                                    @Html.HiddenFor(m => m.InspectionId)
+                                    @Html.HiddenFor(m => m.TIlsmId)
+                                    @Html.HiddenFor(m => m.Status)
+                                    <input type="hidden" id="hdnsubmitButton" name="btnSubmit" value="Save & Done" />
+                                    <h4>@(Model.MainGoal.Count > 0 ? "Action Items":"")</h4>
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        @{
+
+                                            var epsID = new List<int>();
+                                        }
+                                        @for (var i = 0; i < Model.MainGoal.Count; i++)
+                                        {
+                                            <tr class='@($"trEp{Model.MainGoal[i].EPDetailId}")'>
+                                                <td></td>
+                                            </tr>
+
+                                            @Html.HiddenFor(m => Model.MainGoal[i].MainGoalId)
+                                            <tr class='@($"editor-field {Model.MainGoal[i].EPDetailId}")'>
+                                                <td colspan="3">
+                                                    <strong>@Html.DisplayFor(m => Model.MainGoal[i].Goal)</strong>
+                                                </td>
+                                            </tr>
+                                            for (int j = 0; j < Model.MainGoal[i].Steps.Count(); j++)
+                                            {
+
+                                                <tr class='@($"editor-field {Model.MainGoal[i].EPDetailId}")'>
+                                                    <td width="12%" class="td_btn_complaint">
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].MainGoalId)
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].StepsId)
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].Status)
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].IsRA)
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].StepType)
+                                                        @Html.HiddenFor(m => Model.MainGoal[i].Steps[j].RAScore)
+                                                        @if (Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                                                        {
+                                                            <input id="InsStatus"
+                                                                   type="button"
+                                                                   class="ins_check_btn"
+                                                                   onclick="showstepsOptions('@Model.MainGoal[i].Steps[j].StepsId')"
+                                                                   value="@Model.MainGoal[i].Steps[j].Status"
+                                                                   tempname='MainGoal[@i].Steps[@j].Status' />
+
+                                                            <div id="insp_steps_@Model.MainGoal[i].Steps[j].StepsId" class="dropdown-content ddlilsm" tempname='MainGoal[@i].Steps[@j].Status'>
+                                                                <a href="#" val="-1" data-toggle="modal" data-target="#commentModal">Pending</a>
+                                                                <a href="#" val="1" data-toggle="modal" data-target="#commentModal">Done</a>
+                                                                <a href="#" val="0" data-toggle="modal" data-target="#commentModal">Not Done</a>
+                                                                <a href="#" val="-3" data-toggle="modal" data-target="#commentModal">Not Applicable</a>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input id="InsStatus"
+                                                                   type="button"
+                                                                   class="ins_check_btn disable"
+                                                                   value="@Model.MainGoal[i].Steps[j].Status"
+                                                                   tempname='MainGoal[@i].Steps[@j].Status' />
+                                                        }
+                                                    </td>
+                                                    <td width="74%">
+                                                        @Html.DisplayFor(m => Model.MainGoal[i].Steps[j].Step)
+                                                    </td>
+                                                    <td width="14%">
+                                                        <img src="@Url.Content("~/dist/img/message_icon.png")" alt=""
+                                                             data-toggle="modal"
+                                                             stepid="@Model.MainGoal[i].Steps[j].StepsId"
+                                                             tcommentId="0"
+                                                             data-target="#commentModal"
+                                                             class="@(Model.Status != HCF.BDO.Enums.ILSMStatus.Closed ? "commentIcon" : "commentIcon disable")" />
+
+                                                        <div class="@(Model.Status != HCF.BDO.Enums.ILSMStatus.Closed ? (Model.MainGoal[i].Steps[j].TInspectionFiles.Count <=2 ? "img_file_upload" : "img_file_upload disable" ) : "img_file_upload disable")" id="divfiles_@Model.MainGoal[i].Steps[j].StepsId">
+                                                            <input name="file_Uploader"
+                                                                   type="file"
+                                                                   onclick="this.value=null;"
+                                                                   onchange="InsUploadAndSavefile(this,'C', @Model.MainGoal[i].Steps[j].StepsId)" />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        <div class="demofilesListItems" id="demofiles_@Model.MainGoal[i].Steps[j].StepsId">
+                                                            <ul class="list-group list-group-flush ulilsmfiles">
+                                                                @if (Model.MainGoal[i].Steps[j].TInspectionFiles != null && Model.MainGoal[i].Steps[j].TInspectionFiles.Count > 0)
+                                                                {
+                                                                    foreach (HCF.BDO.TInspectionFiles item in Model.MainGoal[i].Steps[j].TInspectionFiles.Where(x => x.IsDeleted == false).OrderByDescending(x => x.TInsFileId))
+                                                                    {
+                                                                        @await Html.PartialAsync("_ILSMFiles", item)
+                                                                    }
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3">
+                                                        <div class="ilsmGrouprow" id="demo_@Model.MainGoal[i].Steps[j].StepsId">
+                                                            <ul class="list-group list-group-flush">
+                                                                @foreach (HCF.BDO.TComment item in Model.MainGoal[i].Steps[j].StepsComments.Where(x => x.IsDeleted == false).OrderByDescending(x => x.AddedDate))
+                                                                {
+                                                                    @await Html.PartialAsync("_ILSMComment", item)
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </table>
+
+                                    <div class="text-right button_Div">
+                                        <a href="@Url.RouteUrl("ilsmView")" class="comm-bluebutton @(Model.Status == HCF.BDO.Enums.ILSMStatus.Closed ? "hide" :"")">Save</a>
+                                        <input type="button" name="btnBack" value="Back" class="comm-button" id="btnBack" />
+                                        @if (Model.MainGoal.Any() && Model.Status != HCF.BDO.Enums.ILSMStatus.Closed)
+                                        {
+                                            <input type="button" id="closeILSMButton" name="btnSubmit" value="Close ILSM" class="comm-button" />
+                                        }
+                                        <input type="button" name="btnNext" value="Next" class="comm-button" id="btnNext" />
+                                        <a href="@Url.RouteUrl("ilsmView")" class="comm-Cancelbutton @(Model.Status == HCF.BDO.Enums.ILSMStatus.Closed ? "clCancel button2" :"opCancel popupCommon-btn")">Back To ILSM</a>
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="loadAssetsSteps">
+
+                        </div>
+                        <span class="text-left button_Div">
+                            @using (Html.BeginForm("CreateTilsmReports", "Pdf", FormMethod.Post, new { id = "ilsmReport" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="tilsmId" value="@Model.TIlsmId" />
+                                if (Model.MainGoal.Any())
+                                {
+                                    <button type="submit" class="@(Model.Status ==HCF.BDO.Enums.ILSMStatus.Closed ? "clgenerateReport comm-button" :"opgenerateReport comm-button")" data-dismiss="modal" id="Generate-ilsm-report">Generate ILSM Report</button>
+                                }
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="popUpModal" role="dialog"></div>
+</div>
+
+
+<div class="modal fade" id="commentModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content" style="max-width: 50%; margin: 0px auto;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Comment</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6 col-sm-6">
+                        <div class="form-group">
+                            <label>Added by :</label>
+                            <userdropdownlist name="addedby" selectedvalue="0" firstvalue="-- Not Assigned --"
+                                              class="form-control"></userdropdownlist>
+                            @*@Html.UserDropDownList("addedby", 0, "-- Not Assigned --", new { @class = "form-control" })*@
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6">
+
+                        <div class="form-group">
+                            <label>Added Date :</label>
+                            <input type="text" class="form-control datepicker" autocomplete="off" readonly name="addeddate" id="addeddate" />
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" value="" id="stepsId" />
+                <input type="hidden" value="" id="tcommentId" />
+
+                <textarea name="text" cols="40" rows="5" class="form-control" id="Commenttxt"></textarea>
+            </div>
+            <div class="text-right modal-footer">
+                <button type="button" class="comm-button" data-dismiss="modal" id="saveComment">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script language="javascript">
+
+    var currentILSMid = '@Model.TIlsmId';
+        $(document).on('click', '.openWOPopUp', function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            loadWOPopUp();
+        });
+
+        var loadWOPopUp = function () {
+            var url = CRxUrls.WorkOrder_WorkOrderSeachPopUp;
+            $.ajax({
+                url: url + "?type=ILSM&id=" + currentILSMid,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+        $(document).on('click', '.openICRAPopUp', function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            loadICRAPopUp();
+        });
+
+        var loadICRAPopUp = function () {
+            $.ajax({
+                url: CRxUrls.ICRA_ICRALists + "?type=ILSM&id=" + currentILSMid,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+        $(document).on('click', '.openFireWatchPopUp', function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            loadFireWatchPopUp();
+        });
+
+        var loadFireWatchPopUp = function () {
+            $.ajax({
+                url: CRxUrls.ICRA_ICRALists + "?type=ILSM&id=" + currentILSMid,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+        $(document).on('click', '.openObservationReportPopUp', function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            loadObservationReportPopUp();
+        });
+
+        var loadObservationReportPopUp = function () {
+            $.ajax({
+                url: CRxUrls.ICRA_ObservationReportSeachPopUp + "?type=ILSM&id=" + currentILSMid,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+        $(document).on('click', '#closeILSMButton', function () {
+            loadCloseILSMPopUp();
+        });
+
+        var loadCloseILSMPopUp = function () {
+            $('#popUpModal').empty();
+            $('#popUpModal').modal('show');
+            var view = $('#isRoundView').val();
+            var url = CRxUrls.ILSM_CloseILSM;
+            $.ajax({
+                url: url + "?tilsmId=" + currentILSMid + "&view=" + view,
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    $('#popUpModal').append(data);
+                    $('#popUpModal').fadeIn('fast');
+                }
+            });
+        }
+
+
+        $('.datepicker').datepicker({
+            showOn: "both",
+            buttonImage: '@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)',
+            buttonImageOnly: true,
+            maxDate: 0,
+            beforeShow: changeYearButtons,
+            onChangeMonthYear: changeYearButtons
+        }).datepicker('setDate', 'today');
+
+        $('.ui-datepicker-trigger').on('dragstart', function (event) { event.preventDefault(); });
+
+        var epLevelStepsStatus = '@Model.EpStepsComplete';
+        var pageSteps = [];
+
+        $(document).ready(function () {
+
+
+            $(".deficiencies_header").click(function () {
+                $header = $(this);
+                //getting the next element
+                $content = $header.next();
+                //open up the content needed - toggle the slide- if visible, slide up, if not slide down.
+                $content.slideToggle(500, function () {
+                    //execute this after slideToggle is done
+                    //change text of header based on visibility of content div
+                    $header.text(function () {
+                        //change text based on condition
+                        return $content.is(":visible") ? "(click here to hide)" : "(click here to show)";
+                    });
+                });
+
+            });
+
+            var ilsmStatus = $("#ilsmStatus").val();
+            //alert(ilsmStatus);
+            $("#btnBack").hide();
+            var totalPageCount = '@tinspectionActivity.Where(x=>x.SubStatus!="NA").Count()';
+            var pageNumber = 0;
+            pageSteps.push(0);
+
+        @foreach (var item in tinspectionActivity.Where(x => x.SubStatus != "NA"))
+        {
+		    @:pageSteps.push(@item.FloorAssetId);
+
+        }
+            debugger;
+            @if(Model.Status == HCF.BDO.Enums.ILSMStatus.Closed)
+            {
+                @: $(".deleteComment").addClass('disable');
+                @: $(".delete").addClass('disable');
+                @: $(".commentIcon").addClass('disable');
+            }
+
+
+
+            var tilsmObject = {
+                "tilsmId":@Model.TIlsmId,
+                "totalFailAssets":@tinspectionActivity.Where(x => x.SubStatus != "NA").Count(),
+                "pageView": "epView",
+                pageSteps: pageSteps,
+                AssetId: 0
+
+            };
+
+            function getParameterByName(name, url) {
+                if (!url) url = window.location.href;
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
+
+            function ShowAssetsInspection() {
+                var isNext = getParameterByName('isNext');
+                //  console.log(isNext);
+
+                if (isNext != null) {
+                    $("#btnBack").show();
+                    pageNumber = 1;
+                    var floorAssetId = pageSteps[1];
+                    loadNextData(floorAssetId);
+                }
+            }
+
+            $("#btnCancel").hide();
+
+            if (ilsmStatus == 2) {
+                if (pageSteps.length > 1) {
+                    ShowAssetsInspection();
+                } else {
+                    pageNumber = 0;
+                    $(".epsSteps").show();
+                }
+            } else if (ilsmStatus == 0) {
+                //$("#btnNext").addClass("disable");
+            } else if (ilsmStatus == 1) {
+                $("#btnCancel").show();
+                $("#btnNext").hide();
+                $(".commentIcon").addClass("disable");
+            }
+
+            function loadNextData(floorAssetId) {
+               // debugger;
+               // console.log(floorAssetId);
+                $("#Generate-ilsm-report").hide();
+                $(".assetLi").removeClass("active");
+                var inspectionId = '@Model.SourceInspection.InspectionId';
+                var epId = '@Model.SourceInspection.EPDetailId';
+
+                $(".epsSteps").hide();
+                var tilsmId = $("#tilsmId").val();
+
+                if (floorAssetId) {
+
+                    $.ajax({
+                        url: CRxUrls.goal_failstepsupdate + '?epId=' + epId + '&inspectionId=' + inspectionId + '&floorAssetId=' + floorAssetId + "&TilsmId=" + tilsmId,
+                        type: "GET",
+                        dataType: "HTML",
+                        global: false,
+                        success: function (data) {
+                            $('.loadAssetsSteps').html(data);
+                            $('.loadAssetsSteps').fadeIn('fast');
+                            var toalAssets = $('ul li.assetLi').length;
+                            $("li#asset" + floorAssetId).addClass("active");
+                            if (toalAssets == 1) {
+                                $("#btnNext").hide();
+                            }
+                        }
+                    });
+
+
+                } else {
+                    $("#Generate-ilsm-report").show();
+                    pageNumber = 0;
+                    $(".epsSteps").show();
+                }
+            }
+
+            $("#btnBack").click(function () {
+                pageNumber = pageNumber - 1;
+                var floorAssetId = pageSteps[pageNumber];
+                if (pageNumber > 0) {
+                    loadNextData(floorAssetId);
+                }
+                $("#btnNext").show();
+                $(".assetLi").removeClass("active");
+                $("#asset" + floorAssetId).addClass("active");
+                if (pageNumber == 0) {
+                    $(this).hide();
+                    $("#btnNext").show();
+                    $(".epsSteps").show();
+                    $(".loadAssetsSteps").empty();
+                    $("#Generate-ilsm-report").show();
+                }
+            });
+
+            $("#btnNext").click(function () {
+                debugger;
+                var floorAssetId = pageSteps[pageNumber + 1];
+                pageNumber = pageNumber + 1;
+                $("#btnBack").show();
+                if (totalPageCount == pageNumber)
+                    $("#btnNext").hide();
+                loadNextData(floorAssetId);
+            });
+
+            var pageMode = '@Model.Status';
+
+
+            if (pageMode == '@HCF.BDO.Enums.ILSMStatus.Closed') {
+                $("#saveComment").remove();
+                $("#Commenttxt").attr("disabled", "disabled");
+            }
+
+            $(document).on("click", ".commentIcon", function () {
+                openCommentpopup($(this));
+            });
+
+            $(document).on("click", "#saveComment", function () {
+                var stepId = $("#stepsId").val();
+                var tcommentId = $("#tcommentId").val();
+                var text = $("#Commenttxt").val();
+                var addeddate = $("#addeddate").val();
+                var addedby = $("#addedby").val();
+                var tcomment = {
+                    TCommentId: tcommentId,
+                    TIlsmId: $("#tilsmId").val(),
+                    StepId: stepId,
+                    Comment: text,
+                    AddedBy: addedby,
+                    AddedDate: addeddate,
+                    IsDeleted: false
+                };
+                if (tcomment.Comment.length > 0 && tcomment.AddedDate.length > 0)
+                    $.ajax({
+                        url: CRxUrls.Goal_SaveTIlsmComment,
+                        type: "POST",
+                        data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), tComment: tcomment },
+                        dataType: 'html',
+                        success: function (data) {
+                            console.log(data);
+                            if (tcommentId > 0) {
+                                $("#li_" + tcommentId).remove();
+                            }
+                            $("#demo_" + stepId).children("ul").append(data);
+                        }
+                    });
+            });
+
+
+
+
+            $(".epList").click(function () {
+                var epId = $(this).attr("epId");
+                $("." + epId).toggle();
+                $(this).toggleClass("active");
+
+                var total = $('ul li.epList.active').length;
+                if (total === 0) {
+                    $("#submitButton").hide();
+                } else {
+                    $("#submitButton").show();
+                }
+            });
+
+            if (pageSteps.length == 1) {
+                $("#btnNext").hide();
+                $("#btnBack").hide();
+            }
+
+        });
+
+        var OnSuccess = function (result) {
+            if (result.Result == true) {
+                if (result.msg == "ILSM is now closed") {
+                    swalalert(result.msg);
+                    $.ajax({
+                        url: '@Url.Action("SaveTilsmReport", "Goal")',
+                        type: "POST",
+                        data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), tilsmId: $("#tilsmId").val() }, //data,
+                        dataType: 'json',
+                        success: function (data) {
+                            //var urlAction = '@Url.Action("ilsmview", "Goal")';
+                            window.location.href = CRxUrls.Goal_ilsmview;
+                            return false;
+                        }
+                    });
+                } else {
+                    location.reload();
+                    $("#ilsmStatus").val("2");
+                    $("#btnNext").removeClass("disable");
+                }
+            }
+        }
+
+        function tristate1(control) {
+            tristate(control, '-1', '1', '0', '-3');
+        }
+
+        function tristate(control, value1, value2, value3, value4) {
+            /// debugger;
+            var comentcntrl = control.parentElement.parentElement.children[2].children[0]
+            var jelm = $(comentcntrl);
+            switch (control.value) {
+                case value1:
+                    control.value = value2;
+                    openCommentpopup(jelm);
+                    break;
+                case value2:
+                    control.value = value3;
+                    break;
+                case value3:
+                    control.value = value4;
+                    break;
+                case value4:
+                    control.value = value1;
+                    break;
+            }
+            var controlId = $(control).attr("tempName");
+        }
+
+        $('#submitButton').click(function () {
+            debugger;
+            if (pageSteps.length == 1) {
+                $("#form0").submit();
+
+
+            }
+            else {
+                $("#form0").submit();
+            }
+        });
+
+        function openCommentpopup(commentcntrl) {
+
+            var stepid = $(commentcntrl).attr("stepid");
+            var tcommentId = $(commentcntrl).attr("tcommentId");
+
+            $("#tcommentId").val(tcommentId);
+            $("#stepsId").val(stepid);
+            if (tcommentId > 0) {
+                var comment = $(commentcntrl).attr("commenttxt");
+                var addedby = $(commentcntrl).attr("addedby");
+                var addeddate = $(commentcntrl).attr("addeddate");
+                $("#Commenttxt").val(comment);
+                $("#addedby").val(addedby);
+                $("#addeddate").val(addeddate);
+            } else {
+                $("#Commenttxt").val('');
+                $("#addedby").val(@HCF.Web.Base.UserSession.CurrentUser.UserId);
+                $("#stepsId").val(stepid);
+            }
+        }
+
+        function loadilsmdetailpartial() {
+            var tilsmId = $("#tilsmId").val();
+            var url = CRxUrls.Goal_GetIlsmDetails;
+            $.get(url + "?tilsmId=" + tilsmId, function (data) {
+                $("#loadpartial").html('');
+                $('#loadpartial').html(data);
+                $('#loadpartial').fadeIn('fast');
+            });
+        }
+
+        function showstepsOptions(stepsId) {
+            debugger;
+            document.getElementById("insp_steps_" + stepsId).classList.toggle("show");
+        }
+
+
+    // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.ins_check_btn')) {
+                debugger;
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+
+                for (i = 0; i < dropdowns.length; i++) {
+
+                    var openDropdown = dropdowns[i];
+                    
+
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        $(".dropdown-content a").click(function () {
+            var cntrl = $(this);
+            var statusVal = cntrl.attr("val");
+            var controlId = cntrl.parent("div").attr("tempname");
+            $("input[name='" + controlId + "'][type=hidden]").val(statusVal);
+            $("input[tempname='" + controlId + "']").val(statusVal);
+            debugger;
+            var comentcntrl = cntrl.closest("tr").find("img.commentIcon");   //$(this).closest("tr").find("commentIcon");
+            //var comentcntrl = $(this).parentElement.parentElement.parentElement.children[2].children[0]
+            var jelm = $(comentcntrl);
+            openCommentpopup(jelm);
+            SaveInspection(cntrl);
+        });
+
+        function SaveInspection(tblrow) {
+            var objtilsm = [];
+            var ObjTinspectionActivity = [];
+            var activity = {};
+            var ObjMainGoal = [];
+            var MainGoal = {};
+            var objSteps = [];
+            var Steps = {};
+            Steps = {
+                StepsId: tblrow.closest("tr").find("input[id$='StepsId']").val(),
+                StepType: 1,
+                Status: tblrow.attr("val"),
+                IsMarkDefeciencies: true,
+            };
+            objSteps.push(Steps);
+            MainGoal = {
+                MainGoalId: tblrow.closest("tr").find("input[id$='MainGoalId']").val(),
+                Steps: objSteps
+            };
+            activity = { ActivityId: $("#TinspectionActivity_0__ActivityId").val() };
+            ObjMainGoal.push(MainGoal);
+            ObjTinspectionActivity.push(activity);
+            objtilsm = {
+                TIlsmId: $("#tilsmId").val(),
+                InspectionId: $("#InspectionId").val(),
+                TinspectionActivity: ObjTinspectionActivity,
+                MainGoal: ObjMainGoal
+            };
+            debugger;
+            $.ajax({
+                url: CRxUrls.Goal_IlsmInspection + "?tilsmId=" + $("#tilsmId").val(),
+                type: "POST",
+                data: { viewModel: objtilsm, __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+                dataType: "JSON",
+                global: false,
+                success: function (data) {
+                }
+            });
+        }
+
+        $(document).on('click', 'a.delete', function (e) {
+            e.preventDefault();
+            var TInsFileId = $(this).data("id");
+            var stepId = $(this).data('stepid');
+            swal({
+                title: "Are you sure?",
+                text: "You will not be able to recover this File!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                closeOnConfirm: false
+            },
+                function () {
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Goal_DeleteTInspectionFiles + "?tinsFileId=" + TInsFileId,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            loadilsmdetailpartial();
+                            $("#lidv_" + TInsFileId).remove();
+                            var filelength = $('#demofiles_' + stepId + ' ul li').length;
+                            debugger;
+                            if (filelength >= 3) {
+                                $("#divfiles_" + stepId).addClass('disable');
+                            } else { $("#divfiles_" + stepId).removeClass('disable'); }
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                });
+        });
+
+        $(document).on("click", ".deleteComment", function () {
+            var cntrl = $(this);
+            swal({
+                title: "Are you sure?",
+                text: "You will not be able to recover this Comment!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",
+                closeOnConfirm: true
+            },
+                function () {
+                    //var stepId = $(cntrl).attr("stepid");
+                    var tcommentId = $(cntrl).attr("tcommentId");
+                    var text = $(cntrl).attr("commenttxt");
+                    //var addeddate = $(cntrl).attr("addeddate");
+                    //var addedby = $(cntrl).attr("addedby");
+                    $("#li_" + tcommentId).remove();
+                    var tcomment = {
+                        TCommentId: tcommentId,
+                        TIlsmId: $("#tilsmId").val(),
+                        //StepId: stepId,
+                        //Comment: text,
+                        //AddedBy: addedby,
+                        //AddedDate: addeddate,
+                        IsDeleted: true
+                    };
+                    $.ajax({
+                        url: CRxUrls.Goal_SaveTIlsmComment,
+                        type: "POST",
+                        data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), tComment: tcomment },
+                        dataType: 'html',
+                        success: function (data) {
+                            //console.log(data);
+                            //if (tcommentId > 0) {
+                            //    $("#li_" + tcommentId).remove();
+                            //}
+                        }
+                    });
+                });
+        });
+    </script>
+
+}

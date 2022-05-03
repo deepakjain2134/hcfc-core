@@ -1,0 +1,62 @@
+﻿@model HCF.BDO.Tips
+
+@using (Html.BeginForm("AddNewTips", "Tips", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div id="tipAddModel" class="modal fade" role="dialog">
+        <div class="modal-dialog" style="background:white">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add New Tips</h4>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label>Enter Title</label>
+                        @Html.TextBoxFor(x => x.Title, new { @class="form-control", placeholder = "Enter title for tip" })
+                    </div>
+                    <div class="form-group">
+                        <label>Enter Description</label>
+                        @Html.TextAreaFor(x => x.Description, new { @class = "form-control", placeholder = "Enter description for tip" })
+                    </div>
+                    <div class="form-group">
+                        <label>Enter Source</label>
+                        @Html.TextBoxFor(x => x.Source, new { @class = "form-control", placeholder = "Enter source of tip" })
+                    </div>
+                    <div class="form-group">
+                        <label>Enter RouteUrl</label>
+                        @Html.TextBoxFor(x => x.RouteUrl, new { @class = "form-control", placeholder = "Tip route url" })
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer button_Div">
+                <input type="submit" value="Save" class="comm-button" id="btn_submit" />
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script src="@Url.Content("~/dist/Scripts/ckeditor/ckeditor.js")" type="text/javascript"></script>
+<script>
+    $(document).ready(function () {
+        $('#RouteUrl').val(location.pathname.replace('/', ''))
+        CKEDITOR.replace('Description', {
+            height: 150,
+            toolbar: [
+              { name: 'document', groups: ['mode', 'document', 'doctools'], items: ['-', 'Save', 'NewPage', 'Preview', '-', 'Templates'] },
+              '/',
+              { name: 'basicstyles', groups: ['basicstyles', 'cleanup'], items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+              { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi'], items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'] },
+              { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+              { name: 'insert', items: ['HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'] },
+              { name: 'basicstyles', items: ['Font', 'FontSize'] },
+              { name: 'colors', items: ['TextColor', 'BGColor'] },
+              { name: 'others', items: ['-'] }
+            ],
+            contentsCss: [CKEDITOR.basePath + 'contents.css', 'https://sdk.ckeditor.com/samples/assets/css/widgetstyles.css']
+        });
+
+    })
+</script>

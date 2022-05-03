@@ -1,0 +1,41 @@
+﻿@model HCF.BDO.TIcraProject
+
+<div>
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+</div>
+<input type="hidden" id="ParentProjectId" name="ParentProjectId" value="@Model.ParentProjectId" />
+<div class="col-md-6">
+    <label>Project # :</label>
+    @Html.TextBoxFor(m => m.ProjectNumber, null, new { @class = "form-control disabled", @disabled = "disabled", required = "required" })
+</div>
+<div class="col-md-6">
+    <label>Project Location:</label>
+    @Html.TextBoxFor(m => m.ProjectLocation, null, new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Architect :</label>
+    @Html.TextBoxFor(m => m.Architect, null, new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Project Manager :</label>
+    @Html.TextBoxFor(m => m.ProjectManager, null, new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Project Start Date: </label>
+    @Html.TextBoxFor(m => m.ProjectStartDate, $"{Model.ProjectStartDate:MMM d, yyyy}", new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Project End Date: </label>
+    @Html.TextBoxFor(m => m.ProjectEndDate, $"{Model.ProjectEndDate:MMM d, yyyy}", new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Contractor: </label>
+    @Html.TextBoxFor(m => m.ProjectContractor, null, new { @class = "form-control", @disabled = "disabled" })
+</div>
+<div class="col-md-6">
+    <label>Project Description :</label>
+    @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @disabled = "disabled", maxlength = 150 })
+</div>
+
+

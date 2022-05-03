@@ -1,0 +1,79 @@
+﻿@model HCF.BDO.RoundsQuestionnaires
+@using (Html.BeginForm("AddRoundsCommQuestonaries", "Round", FormMethod.Post, new { id = "addroundcommonquestonariesform" }))
+{
+    <div class="modal-header">
+        <h4 class="modal-title">
+            @((Model.RouQuesId > 0) ? "Update " : "Add ") Round Questionnaire
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="col-md-12" style="margin-top: 25px;">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <input type="hidden" id="IsCommonRoundQues" name="IsCommonRoundQues" value="1" />
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label>Round Category</label><em class="required-field"> *</em>
+                    @*@Html.RoundCommonCategoryDropDown("RoundCatId", 0, "--Select--", new { @class = "form-control ddlbox", required = "required" })*@
+                    @Html.DropDownListFor(m => m.RoundCatId, new SelectList(ViewBag.RoundCategory, "RoundCatId", "CategoryName", Model.RoundCatId),
+                                                 "Select Category",
+                                               new { @class = "form-control ddlbox", required = "required" })
+                    @Html.ValidationMessageFor(model => model.RoundCatId)
+                </div>
+
+                <div class="form-group">
+                    <label>Risk Type</label><em class="required-field"> *</em>
+                    <riskrypedropdown required="required" name="RiskType" selectedvalue="@Model.RiskType"
+                                      class="form-control ddlbox"></riskrypedropdown>
+                    @*@Html.RiskTypeDropDown("RiskType", (int)Model.RiskType, "", new { @class = "form-control ddlbox", required = "required" })*@
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label><em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.ShortDescription, new { @class = "form-control", required = "required", @maxlength = "25" })
+                    @Html.ValidationMessageFor(model => model.RiskStepCode)
+                </div>
+                <div class="form-group">
+                    <label>Round Step</label>
+                    @Html.HiddenFor(model => model.RouQuesId)<em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.RoundStep, null, new { @class = "form-control", required = "required", oninput = "validate(this)" })
+                    @Html.ValidationMessageFor(model => model.RoundStep)
+                </div>
+                <div class="form-group">
+                    <label>Risk Step Code</label><em class="required-field"> *</em>
+                    @Html.TextBoxFor(model => model.RiskStepCode, new { @class = "form-control", required = "required", @maxlength = "6" })
+                    @Html.ValidationMessageFor(model => model.RiskStepCode)
+                </div>
+                <div class="form-group comman_checkbox">
+
+                    @Html.CheckBoxFor(model => model.IsActive)
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                    <label>Active</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="col-md-12">
+            <div class="button_Div">
+                <button type="submit" class="comm-button" title="Save" id="btn_submit">
+                    Save
+                </button>
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+    <script>
+        $(document).ready(function () {
+            var CatId = '@ViewBag.CatId'
+            if (CatId != '') {
+                $('#RoundCatId').val(CatId);
+            }
+
+          
+        })
+
+    </script>

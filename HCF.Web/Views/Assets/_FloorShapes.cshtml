@@ -1,0 +1,11 @@
+﻿@model List<HCF.BDO.FloorShapes>
+<ul class="floor_shapes">
+
+    @foreach (var floorShapes in Model.Where(x => x.IsDeleted == false))
+    {
+        <li id="@floorShapes.Id">
+            @floorShapes.Name
+        </li>
+
+    }
+</ul>

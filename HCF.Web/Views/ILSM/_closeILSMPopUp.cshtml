@@ -1,0 +1,76 @@
+﻿@model HCF.BDO.TIlsm
+
+<div class="modal-dialog" style="max-width: 50%;">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Close ILSM</h4>
+    </div>
+
+    <div class="modal-body">
+        @if (Model != null && Model.CanClose)
+        {
+            <label>Close Comment</label>
+            <input type="hidden" name="ilsmId" id="ilsmId" value="@Model.TIlsmId" />
+            <input type="hidden" value="@ViewBag.IsRoundView" id="isRoundView" />
+            if (Model.TRoundId != null)
+            {
+                @Html.HiddenFor(m => m.TRoundId)
+            }
+            @Html.TextAreaFor(m => m.CompletionComment, new { @class = "form-control" })
+
+        }
+        else
+        {
+            <span>
+                First close all open work order or resolve the issue of assets.
+            </span>
+        }
+    </div>
+    <div class="modal-footer">
+        @if (Model != null && Model.CanClose)
+        {
+            <input name="btnCloseILSM" id="btnCloseILSM" type="button" class="comm-button" value="Close ILSM" />
+        }
+        <input name="cancelButton" type="button" class="comm-Cancelbutton" value="Cancel" data-dismiss="modal" />
+    </div>
+</div>
+<script>
+
+   
+
+    $("#btnCloseILSM").click(function () {
+        debugger
+        var tilsmId = $("#ilsmId").val();    
+        var CompletionComment = $('textarea#CompletionComment').val(); 
+        var isRoundView = $('#isRoundView').val();
+        var TRoundId = '@Model.TRoundId';
+        closeILSM(tilsmId, CompletionComment, isRoundView,TRoundId);
+    });
+
+
+    var closeILSM = function (tilsmId, completionComment, isRoundView,troundId) {
+        debugger;
+        var tilsm = {
+            TIlsmId: tilsmId,
+            Status: 1,
+            TRoundId: troundId,
+            ClosedBy:'@HCF.Web.Base.UserSession.CurrentUser.UserId',
+            CompletionComment: completionComment
+        };
+        $.ajax({
+            url: CRxUrls.ILSM_ReopenILSM,
+            type: "POST",
+            dataType: "JSON",
+            data: { tilsm: tilsm, view: isRoundView},
+            success: function (resuslt) {
+                if (Math.floor(resuslt) == resuslt && $.isNumeric(resuslt) ) {
+                    window.location.href = "@Url.Action("RoundInspection", "Round")" + '?rid=' + resuslt;
+                } else {
+                    window.location.href = CRxUrls.Goal_ilsmview;
+                }
+                
+            }
+        });
+    }
+</script>

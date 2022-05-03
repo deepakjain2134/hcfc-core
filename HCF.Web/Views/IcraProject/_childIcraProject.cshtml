@@ -1,0 +1,162 @@
+﻿@model IEnumerable<HCF.BDO.TIcraProject>
+@{
+    Layout = null;
+    var Treelevel = ViewBag.TreeLevel;
+    Treelevel++;
+}
+@if (Model.Any())
+{
+    <div class="" style="margin:10px">
+        <table data-parentid="@ViewBag.ParentId" data-treelevel="@Treelevel" class="childIcraProject child-table table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @*@if (Treelevel < 2)
+        {
+            <th>
+
+            </th>
+        }*@
+
+                    <th>
+                        Sub Project #
+                    </th>
+                    <th>
+                        Sub Project Name
+                    </th>
+                    <th>
+                        Location
+                    </th>
+                    <th>
+                        Description
+                    </th>
+                    <th>
+                        Manager
+                    </th>
+                    <th style="width: 56px;">
+                        Status
+                    </th>
+                    <th style="width: 56px;">Action</th>
+                    <th class="no-sorting" title="Attachments" width="3%">
+                        <img src="@Url.Content("~/dist/Images/Icons/attachment_icon_new.png")" alt="Attachments" title="Drawing Attachments" />
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                <tr>
+                    
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProjectNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProjectName)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProjectLocation)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProjectManager)
+                    </td>
+                    @*<td>
+            @Html.DisplayFor(modelItem => item.Architect)
+        </td>*@
+                    <td class="comman_checkbox1">
+                        @Html.CheckBoxFor(modelItem => item.Status, new { disabled = "disabled" })<span></span>
+                    </td>
+                    <td>
+                        <img onclick="location.href ='@Url.Action("AddOrEdit", "IcraProject", new { Id = item.ProjectId })'"
+                             src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)"
+                             title="Edit"
+                             class="projectedit" />
+                        @*@if (Treelevel < 2)
+            {
+                <img class="projectedit"
+                     onclick="location.href ='@Url.Action("AddOrEdit", "IcraProject", new { Id = 0 , ParentProjectId = item.ProjectId })'"
+                     src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add New Sub Project" alt="3d_add_button" />
+
+            }*@
+                    </td>
+                    <td><img onclick="location.href ='@Url.Action("AddOrEdit", "IcraProject", new { Id = item.ProjectId ,ParentProjectId = item.ParentProjectId })'" src="@Url.Content("~/dist/Images/Icons/attachment_icon_new.png")" style="@(item.DrawingAttachments.Count>0 || item.Attachments.Count>0?"display:block;":"display:none;")" alt="Attachments" title="This sub-project contains some files or drawing attachments" /></td>
+                    <td>
+                        <div class="dropdown icratable-drop">
+                            <button class="btn dropdown-toggle dot-icons" type="button" data-toggle="dropdown">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </button>
+                            @await Html.PartialAsync("~/Views/Shared/_projectPermitoptions.cshtml", item)
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="col-lg-12">
+        <div style="text-align:center">
+            No Data Found.
+        </div>
+    </div>
+
+}
+
+<script>
+    $(document).ready(function () {
+        if ('@Treelevel' < 2) {
+            debugger;
+        //$(".childIcraProject").dataTable().fnDestroy();
+        var dataTablechildIcraProject = $('.childIcraProject').DataTable({
+            "lengthChange": false,
+            "aaSorting": [],
+            "pageLength": 10,
+            "bPaginate": $('.childIcraProject tbody tr').length > 10,
+            "bInfo": false,
+            "order": [[1, "desc"]],
+            "oSearch": { "bSmart": false },
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            },
+            dom: "<'row'<'col-sm-3'l><'col-sm-3'><'col-sm-6'p>>" +
+                "<'row'<'col-sm-12'<'inner-responsive'tr>>>" +
+                "<'row'<'col-sm-5'i>>"
+        });
+
+       
+        $(document).off('click', '.childIcraProject tbody td.details-control').on('click', '.childIcraProject tbody td.details-control', function() {
+
+                var tr = $(this).closest('tr');
+                var row = dataTablechildIcraProject.row(tr);
+         
+                debugger
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown')
+                    $('div.slider', row.child()).slideUp(function() {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                    });
+                }
+                else {
+                    var ProjectId = $(this).data("projectid");
+                    var url = '@Url.Content("~/child_icra_project")' + "?ProjectId=" + ProjectId + "&TreeLevel=@Treelevel";
+                    console.log(url)
+                    $.get(url, function(childProject) {
+                        row.child(childProject, 'no-padding').show();
+                        tr.addClass('shown');
+                    });
+                $('div.slider', row.child()).slideDown();
+                }
+            });
+        }
+        //dataTablechildIcraProject.destroy();//due to this PDF icon was being remove from Permit Project Index page
+    });
+</script>

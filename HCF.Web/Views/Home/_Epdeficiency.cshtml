@@ -1,0 +1,155 @@
+﻿@model List<HCF.BDO.EPDetails>
+<table id="epTable" class="table table-bordered table-striped dataTable no-footer" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th style="display:none">SubStatus</th>
+            <th>
+            </th>
+            <th style="display:none"></th>
+            <th>
+                @Localizer["StandardEP"]
+            </th>
+            <th>
+            </th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ep in Model)
+        {
+            foreach (var inspection in ep.Inspections.Where(x => x.IsCurrent == true).ToList())
+            {
+                foreach (var item in inspection.TInspectionActivity.Where(x => x.ActivityType == 1).ToList())
+                {
+                    <tr>
+                        <td style="display:none">
+                            @item.SubStatus
+                        </td>
+                        <td class="details-control" rel='@item.ActivityId'></td>
+                        <td style="display:none">
+                            @ep.EPDetailId
+                        </td>
+                        <td>
+                            @ep.StandardEp
+                        </td>
+                        <td>
+
+                            @{ foreach (HCF.BDO.TInspectionDetail detils in item.TInspectionDetail)
+                             {
+                                 int count = detils.InspectionSteps.Where(x => x.Status == 0 && !x.IssueId.HasValue).Count();
+                                 if (count > 0)
+                                 {
+                                    <a href="@Url.Action("WorkOrderFailSteps", "WorkOrder", new { activityId = item.ActivityId })">
+                                        <span>Create Work Order</span>
+                                    </a>
+                                     break;
+                                 }
+                             }
+                            }
+                        </td>
+
+                    </tr>
+                }
+            }
+        }
+
+    </tbody>
+</table>
+
+<div>
+    <input type="submit" name="button" class="btn_Deficient" id="btn_deficient" value="Deficient" />
+    <input type="submit" name="button" class="riskAssessment" id="btn_riskAssessment" value="Risk Assessment " />
+    <input type="submit" name="button" class="showall" id="btn_showall" value="Show All " />
+
+</div>
+<script>
+
+
+    $(document).ready(function () {
+        var assettable = $('#epTable').DataTable({
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#epTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+
+        });
+
+        $(document).ready(function () {
+
+            @if (Convert.ToString(ViewContext.RouteData.Values["mode"]) == "ra")
+            {
+                @:$('#btn_riskAssessment').click();
+                                                                                                            }
+            else if (Convert.ToString(ViewContext.RouteData.Values["mode"]) == "de")
+            {
+                 @:$('#btn_deficient').click();
+                                                                                                            }
+            else
+            {
+                    @:$('#btn_showall').click();
+                                                                                                            }
+
+
+        });
+
+        // filters DE/RA/ShowAll
+        $('#btn_deficient').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(0).search("DE").draw();
+            var unique = assettable.column(2).data().unique();
+            $("#lblTotalEPs").html(unique.context.length)
+            //alert(unique.context.length);
+        });
+
+        $('#btn_riskAssessment').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(0).search("RA").draw();
+            var unique = assettable.column(2).data().unique();
+            $("#lblTotalEPs").html(unique.context.length)
+            //alert(unique.context.length);
+        });
+
+        $('#btn_showall').on('click', function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+            assettable.columns(0).search("").draw();
+            var unique = assettable.column(2).data().unique();
+            $("#lblTotalEPs").html(unique.context.length)
+            //alert(unique.context.length);
+        });
+        // filters DE/RA/ShowAll
+
+        // Add event listener for opening and closing details
+        $('#epTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = assettable.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                // Open this row
+                //row.child(format(row.data()), 'no-padding').show();
+                // tr.addClass('shown');
+                var activityId = $(this).attr("rel");
+                var Url = '@Url.Action("FailSteps", "Home")';
+                $.get(Url + "?activityId=" + activityId, function (employees) {
+                    row.child(employees, 'no-padding').show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    });
+
+</script>

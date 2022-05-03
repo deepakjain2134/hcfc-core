@@ -1,0 +1,54 @@
+﻿@model List<HCF.BDO.ActivityData>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                <div class="rightcol-setting">
+                       
+                            <table id="mylogTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 250px">Recent Changes</th>
+                                        <th style="width: 50px">Modified Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td style="width: 250px">
+                                                @Html.DisplayFor(modelItem => item.DataLine)
+                                            </td>
+                                            <td style="width: 50px">
+                                                @item.CreatedDate.ToFormatDate()
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                       
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        debugger
+        var mylogTable = $('#mylogTable').DataTable({
+            searching: false,
+            pageLength: 5,
+            lengthChange: false,
+            bPaginate: $('#mylogTable tbody tr').length > 5,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            }
+        });
+    })
+</script>
+

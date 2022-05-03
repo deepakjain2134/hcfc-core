@@ -1,0 +1,87 @@
+﻿@model IEnumerable<HCF.BDO.Binders>
+
+<ul class="binder-leftHead">
+    <li><a href="@Url.RouteUrl("docrecentfiles")">Recent Files</a></li>
+    <li><a href="@Url.Action("GetEpDocByBinder", "Repository", new { id = 0 ,Year=DateTime.Now.Year})">All Documents</a></li>
+    <li><a href="@Url.RouteUrl("policies-list")">Policy Binders</a></li>
+    <li><a class="otherDocs" IsSurveyPrepBinder="false">AHJ Documents</a></li>
+    <li><a class="otherDocs" IsSurveyPrepBinder="true">TJC Survey Prep Binders</a></li>
+    <li><a href="@Url.RouteUrl("Inbox")">CRx Inbox</a></li>
+    <li><a href="@Url.Action("UserCertificates", "User", new {UserId = "" , view="BinderView"})">Licenses and Certificates</a></li>
+    <li><a class="binderMenu" url="@Url.RouteUrl("ilsmbinder")">ILSM Binder</a></li>
+    <li><a class="binderMenu" url="@Url.RouteUrl("firedrillreport")" id="firedrillreport">Fire Drill Report</a></li>
+    <li><a class="binderMenu" url="@Url.RouteUrl("deficienciesBinder")">Deficiencies Binder</a></li>
+    <li><a class="binderMenu" url="@Url.RouteUrl("roundreportBinder")">Round Report</a></li>
+    @*<li><a href="@Url.Action("GetReqEpDocWithoutBinder", "Documents", new { id = -1 ,Year=DateTime.Now.Year,DocTypeId=-1})">Req Documents</a></li>*@
+</ul>
+<ul id="nav-tabs-wrapper" class="nav nav-tabs nav-pills">
+    @foreach (var item in Model.Where(x => x.IsActive).OrderBy(x => x.BinderName))
+    {
+        if (item.StandardEps != null && item.StandardEps.Any())
+        {
+            <li>
+                <a binderId="@item.BinderId"
+                   class="binderName"
+                   title="Assigned EPs"
+                   onclick="openview(@item.BinderId,this);">
+                    <span>@Html.DisplayFor(modelItem => item.BinderName)</span>
+                    <i class="fa fa-angle-right float-right" aria-hidden="true"></i>
+                </a>
+                <ul id="standardEP_@item.BinderId" class="standardep_all">
+                    @foreach (var standard in item.StandardEps.GroupBy(x => x.StDescID).Select(x => x.FirstOrDefault()).ToList().OrderBy(x => x.StandardEP))
+                    {
+
+                        <li id="@string.Format("eps_{0}", standard.EPDetailId)" listepid="@standard.EPDetailId" class="listEp">
+                            @standard.TJCStandard
+                        </li>
+
+                    }
+                </ul>
+            </li>
+        }
+    }
+
+    <li><a href="@Url.Action("GetMiscEpDocByBinder", "Documents", new { id = 0 ,Year=DateTime.Now.Year,DocTypeId=108})">Other Document</a></li>
+</ul>
+@*<ul class="epbinder-legand">
+        <li><span class="gray"></span> Not Done</li>
+        <li><span><img src="/dist/Images/Icons/past_due_status_icon.png" /></span> Deficiency</li>
+        <li><span class="yellow"></span> Due</li>
+        <li><span><img src="/dist/Images/Icons/inprogress_icon.png" /></span> @Localizer["InProgress"] </li>
+        <li><span><img src="/dist/Images/Icons/CompletedEp.png" /></span> Completed</li>
+    </ul>*@
+
+<div class="trackingAssets-lenged">
+    <ul class="legand">
+        <li><span class="processType-Sprite notdone-btn"></span>Not Done</li>
+        <li><span class="processType-Sprite deficiency-btn"></span>Deficiency</li>
+        <li><span class="processType-Sprite due-btn"></span>Due</li>
+        <li><span class="processType-Sprite inProgress-btn"></span>@Localizer["InProgress"] </li>
+        <li><span class="processType-Sprite completed-btn"></span> Completed</li>
+    </ul>
+</div>
+<script>
+    $(document).ready(function () {
+        var pagename = getParameterByName('pagename');
+        //alert(pagename);
+        if (pagename == "firedrillreport") {
+            $("#firedrillreport").trigger("click");
+        }
+    });
+
+
+</script>
+
+<style>
+    .trackingAssets-lenged ul {
+        flex-wrap: wrap;
+        justify-content: left;
+        margin-right: 15px;
+        margin-top: 10px;
+        margin-left: 4px;
+    }
+
+        .trackingAssets-lenged ul li {
+            margin-bottom: 6px;
+        }
+</style>

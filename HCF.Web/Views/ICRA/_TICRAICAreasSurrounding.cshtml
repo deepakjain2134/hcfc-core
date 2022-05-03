@@ -1,0 +1,45 @@
+﻿@model HCF.BDO.TIcraLog
+    @{
+        List<HCF.BDO.ConstructionRisk> lstConstRisk = (List<HCF.BDO.ConstructionRisk>)ViewBag.ConstructionRisk;
+    }
+<span>
+    Identify the areas surrounding the project area, assessing potential impact # <label id="lblpermit">
+        @Model.ProjectNo
+    </label>
+</span>
+
+<div class="row cratable-Box tablelist-topform">
+        @for (int i = 0; i < Model.AreasSurroundings.Count; i++)
+        {
+            @Html.HiddenFor(model => model.AreasSurroundings[i].AreasSurroundingId, new { @class = "form-control areasurrounding" })
+            HCF.BDO.Enums.AreasSurrounding areasSurrounding = (HCF.BDO.Enums.AreasSurrounding)Model.AreasSurroundings[i].AreasSurroundingId;
+            string name = Enum.GetName(typeof(HCF.BDO.Enums.AreasSurrounding), areasSurrounding);
+            if (i % 3 == 0)
+            {
+                @: <div class="col-md-6">
+                }
+                <div class="area-surrounding">
+                    <div style="display:none;" class="divLabel">
+                        @(!string.IsNullOrEmpty(name) ? name.Replace("_", " ").Replace("2", "").Trim() : "Select")
+                    </div>
+                    <div class="unitBelowRow">
+                        @{
+                            @await Component.InvokeAsync("ICRAMultiSelectDropDown", new { controlId = "AreasSurroundings_" + i + "__RiskAreaIds" })
+                            //Html.RenderAction("MultiSelectDropDown", "ICRA", new { controlId = "AreasSurroundings_" + i + "__RiskAreaIds" });
+                        }
+                        <div class="risk-craBOx">
+                            <span>Risk Group:</span> @Html.DropDownListFor(m => Model.AreasSurroundings[i].ConstructionRiskId, new SelectList(ViewBag.ConstructionRisk, "ConstructionRiskId", "RiskName", Model.AreasSurroundings[i].ConstructionRiskId), "None", new { @class = "riskGroupddl disabled" })
+                        </div>
+                    </div>
+                    <div class="selectedareavalue"></div>
+                    @Html.HiddenFor(model => model.AreasSurroundings[i].RiskAreaIds, new { @class = "riskids" })
+                    <div class="autocra-notes">
+                        @Html.TextAreaFor(m => m.AreasSurroundings[i].Comment, new { @id = "Comment", @class = "form-control", @placeholder = "Notes" })
+                    </div>
+                </div>
+                if (i % 3 == 2)
+                {
+                @:</div>
+            }
+        }
+</div>

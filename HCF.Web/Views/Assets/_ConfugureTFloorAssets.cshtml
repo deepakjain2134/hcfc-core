@@ -1,0 +1,98 @@
+﻿@model IEnumerable<HCF.BDO.TFloorAssets>
+<table id="myTable2" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th class="sorting_desc_disabled" style="width:15px;">
+            </th>
+            <th>
+                Asset Type
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AssetNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                Location
+            </th>
+            <th> @Localizer["NearBy"] </th>
+            <th>
+                Status
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreatedDate))
+        {
+            <tr>
+                <td class="details-control" rel='@item.FloorAssetsId' assetid="@item.AssetId"></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Assets.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AssetNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @if (item.Floor != null)
+                    {
+                        <span>
+                            @commonModelFactory.GetFloorAssetLocation(item)
+                        </span>
+                    }
+                </td>
+                <td>
+                    @item.NearBy.CastToNA()
+                </td>
+                <td>
+                    @item.StatusCode
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+<script>
+    jQuery(document).ready(function ($) {
+        assettable = $('#myTable2').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#myTable2 tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [],
+            "language": {
+                "emptyTable": "No data available in table",
+                "search": "_INPUT_",
+                "searchPlaceholder": "Search.."
+            }, dom: "<'row'<'col-sm-3'l><'col-sm-9'><'col-sm-12'p f>>" +
+                "<'row'<'col-sm-12'<'table-res'tr>>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        });
+
+        $('#myTable2 tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var floorassetId = $(this).attr("rel");
+            var row = assettable.row(tr);
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var floorassetId = $(this).attr("rel");
+                var assetId = $(this).attr("assetid");
+                var url = CRxUrls.Assets_GetTFloorAssetSteps;
+                $.get(url + "?floorAssetId=" + floorassetId + "&assetId=" + assetId, function (steps) {
+                    row.child(steps, 'no-padding-' + floorassetId).show();
+                    tr.addClass('shown');
+                });
+                $('div.slider', row.child()).slideDown();
+            }
+        });
+    });
+</script>

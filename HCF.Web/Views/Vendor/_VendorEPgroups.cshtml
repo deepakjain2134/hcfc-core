@@ -1,0 +1,56 @@
+﻿@model List<HCF.BDO.EPGroups>
+
+
+<h4>Assign EP Groups</h4>
+<div class="assets_view venConView">
+    <ul>
+        @foreach (var item in Model.Where(x => x.IsActive == true && x.StandardEps.Count > 0).OrderBy(x => x.EPGroupName))
+        {
+            <li>
+
+                <input type="checkbox"
+                       value='@item.EPGroupId'
+                       name="assets"
+                       checked="@commonModelFactory.IsCheckedEPGroups(item, (List<HCF.BDO.EPGroups>)ViewBag.VendorsEPgroups)" /><span></span>
+
+                <a onclick="return OpenPopup(@item.EPGroupId);" class="pull-right-container">
+                    <img src="@Url.Content("~/dist/Images/Icons/count_icon.png")" title="EP Details" id="showepdetails_@item.EPGroupId" />
+                </a>
+
+                @item.EPGroupName  (@item.StandardEps.Count)
+
+            </li>
+        }
+    </ul>
+</div>
+<div class="modal fade" id="epdetailsPopUp" role="dialog">
+    <div class="modal-dialog model_big">
+        <div id="loadEPpartial">
+        </div>
+    </div>
+</div>
+
+<script>
+    $("[type=checkbox]").on('change', function () {
+        debugger;
+        var IsActive = $(this).is(':checked');
+        var epGroupId = $(this).val();
+        var vendorId = $("#drpEpgroups").val();
+        $.get(CRxUrls.Vendor_UpdateVendorEPGroup + '?groupId=' + epGroupId + '&vendorId=' + vendorId + '&IsActive=' + IsActive, function (data) {
+        });
+    });
+
+    function OpenPopup(epgroupid) {
+        // debugger;
+        var Url = CRxUrls.EPGroups_GetEPGroups;
+        $.get(Url + "?epgroupId=" + epgroupid + "&mode=1" + "&checkboxmode=1", function (data) {
+            //  debugger;
+            if (data != null) {
+                // debugger;
+                $('#epdetailsPopUp').modal('show');
+                $('#loadEPpartial').html(data);
+                $('#loadEPpartial').fadeIn('fast');
+            }
+        });
+    }
+</script>

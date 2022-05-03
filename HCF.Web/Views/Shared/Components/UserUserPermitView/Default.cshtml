@@ -1,0 +1,43 @@
+﻿@model HCF.Web.ViewModels.Users.UserPermitViewModel
+@{
+    var isExits = false;
+    if (!Model.UserId.HasValue || Model.UserId.Value == 0)
+    {
+        isExits = true;
+    }
+    if (Model.VendorId.HasValue)
+    {
+        isExits = false;
+    }
+}
+<div class="table-responsive userlist-table" style="margin:6px;">
+    <table class="table table-bordered">
+        <tr>
+            @foreach (var item in Model.PermitTypes)
+            {
+                <th>
+                    @item.Text
+                </th>
+            }
+        </tr>
+        <tr>
+            @foreach (var item in Model.PermitTypes)
+            {
+
+                if (Model.SelectedPermitTypes != null && Model.SelectedPermitTypes.Count() > 0)
+                {
+                    isExits = Model.SelectedPermitTypes.Contains(long.Parse(item.Value));
+                }
+                <td>
+                    <span style="position:relative;">
+                        <input type="checkbox"
+                               @(isExits == true ? "checked='checked'" : string.Empty)
+                               class="permitTypeChk" value="@item.Value" /><span></span>
+                    </span>
+                </td>
+            }
+        </tr>
+    </table>
+
+    <input type="hidden" name="permitIds" id="permitIds" />
+</div>

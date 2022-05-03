@@ -1,0 +1,219 @@
+﻿@{
+    ViewBag.Title = "Reports";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Reports
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="col-lg-12">
+                        <div class="col-lg-3">
+                            <div class="form-group row" style="display:none">
+                                <div class="col-lg-3">
+                                    <label>Asset Types<em class="required-field"> *</em></label>
+                                </div>
+                                <div class="col-lg-9">
+                                    @Html.DropDownList("assetsTypes", (SelectList)ViewBag.AssetsTypes, new { @class = "form-control", @required = "required" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Asset <em class="required-field"> *</em></label>
+                                </div>
+                                <div class="col-lg-9">
+                                    <select id="AssetId" class="form-control" required="required" name="AssetId"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Buildings<em class="required-field"> *</em></label>
+                                </div>
+                                <div class="col-lg-9">
+                                    @Html.DropDownList("drpBuildings", (SelectList)ViewBag.Buildings, "Select", new { required = "required", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Floors</label>
+                                </div>
+                                <div class="col-lg-9">
+                                    <select id="FloorId" name="FloorId" class="form-control"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group row">
+                                <div class="col-lg-3">
+                                    <label>Inspection Type</label>
+                                </div>
+                                <div class="col-lg-9">
+                                    <select id="inspType" name="inspType" class="form-control"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <button type="button" id="submitButton" class="button1" name="submitButton" style="margin:6px;">Generate Report</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div id="fireextinguisherView">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function () {
+        $("#inspType").empty();
+        $("#FloorId").empty();
+        $("#FloorId").append(
+            $('<option></option>').val("").html("Select"));
+        $("#AssetId").empty();
+        $("#AssetId").append(
+            $('<option></option>').val("").html("Select"));
+        getAssetsbyType();
+    });
+
+    $("#drpBuildings").change(function () {
+        getFloorsByBuildingId();
+        ClearData();
+    });
+
+    $("#AssetId").change(function () {
+        ClearData();
+        getAssetFrequency();
+    });
+
+    $("#FloorId").change(function () {
+        ClearData();
+    });
+
+    function getFloorsByBuildingId() {
+        if ($("#drpBuildings").val() != "") {
+            //localStorage.setItem("fliterbuildingId", $("#addAssetsdrpBuildings").val());
+            $("#FloorId").empty();
+            $("#FloorId").append(
+                $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetFloorByBuilding", "Organization", new { area = "" })';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ buildingId: $("#drpBuildings").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (floorList) {
+                console.log(floorList);
+                for (var i = 0; i < floorList.length; i++) {
+                    $("#FloorId").append(
+                        $('<option></option>').val(floorList[i].FloorId).html(floorList[i].FloorName));
+                }
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting Floors!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#FloorId").empty();
+            $("#FloorId").append(
+                $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    function getAssetFrequency() {
+        if ($("#AssetId").val() != "") {
+            $("#inspType").empty();
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("getAssetFrequency", "Building")',
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ assetId: $("#AssetId").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (freqList) {
+                //console.log(freqList);
+                for (var i = 0; i < freqList.length; i++) {
+                    $("#inspType").append(
+                        $('<option></option>').val(freqList[i].FrequencyId).html(freqList[i].DisplayName));
+                }
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting Frequency!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#inspType").empty();
+        }
+    }
+
+
+    function getAssetsbyType() {
+        if ($("#assetsTypes").val() != "") {
+            $("#AssetId").empty();
+            $("#AssetId").append(
+                $('<option></option>').val("").html("Select"));
+            var floorOptions = {};
+            floorOptions.url = '@Url.Action("GetAssets", "Assets", new { area=""})';//"/Organization/GetFloorByBuilding";
+            floorOptions.type = "POST";
+            floorOptions.data = JSON.stringify({ assetTypeId: $("#assetsTypes").val() });
+            floorOptions.datatype = "json";
+            floorOptions.contentType = "application/json";
+            floorOptions.success = function (lists) {
+                for (var i = 0; i < lists.length; i++) {
+                    $("#AssetId").append(
+                        $('<option></option>').val(lists[i].AssetId).html(lists[i].Name));
+                }
+            };
+            floorOptions.error = function () { AlertWarningMsg("Error in Getting States!!"); };
+            $.ajax(floorOptions);
+        }
+        else {
+            $("#AssetId").empty();
+            $("#AssetId").append(
+                $('<option></option>').val("").html("Select"));
+        }
+    }
+
+    $("#submitButton").click(function() {
+        if ($("#AssetId").val() != "") {
+            loadReportData();
+            //if ($("#drpBuildings").val() != "") {
+            //    loadReportData();
+            //} else {
+            //    swal("Please select the building!!");
+            //}
+        } else {
+            swal("Please select the asset first!!");
+        }
+
+    });
+
+
+    function loadReportData() {
+       // debugger;
+        var buildingId = $("#drpBuildings").val();
+        var floorId = $("#FloorId").val();
+       var assetId = $("#AssetId").val();
+        var insptype = $("#inspType").val();
+        var url = '@Url.Action("GetReports", "FireExtinguisher")';
+        $.get(url + "?assetId=" + assetId + "&buildingId=" + buildingId + "&floorId=" + floorId + "&InspType=" + insptype , function (data){
+            $('#fireextinguisherView').html(data);
+            $('#fireextinguisherView').fadeIn('fast');
+        });
+    }
+
+    function ClearData() {
+        $('#fireextinguisherView').empty();
+    }
+
+
+</script>

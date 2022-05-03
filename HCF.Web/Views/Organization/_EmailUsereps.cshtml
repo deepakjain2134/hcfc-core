@@ -1,0 +1,53 @@
+﻿<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Email User EP</h4>
+</div>
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <input type="hidden" id="userid" value="@ViewBag.UserID" />
+            <label for="subject"><span class="note">*</span>Subject:</label>
+            <input type="text" class="form-control" id="subject">
+        </div>
+        <div class="form-group">
+            <label for="toemail"><span class="note">*</span>To Email: <span class="note">Note: seprate multiple email by <b>comma(,)</b></span></label>
+            <input type="email" class="form-control" id="toemail">
+        </div>
+        <div class="form-group">
+            <label for="ccemail">CC Email: <span class="note">Note: seprate multiple email by <b>comma(,)</b></span></label>
+            <input type="email" class="form-control" id="ccemail">
+        </div>
+        <button type="button" id="btnSendEmail" class="btn comm-button">Send</button>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Close</button>
+</div>
+
+<script>
+    $('#btnSendEmail').click(function () {
+        var userId = $('#userid').val();
+        var toemail = $('#toemail').val();
+        var subject = $('#subject').val();
+        var ccemail = $('#ccemail').val();
+
+        if (toemail == '' || subject == '') {
+            swalalert('ERROR', 'Please fill required details.', 'error')
+            return false;
+        }
+
+         $.ajax({
+            url: "@Url.Content("~/Pdf/SendUserEP")" + `?userId=${userId}&to=${toemail}&cc=${ccemail}&subject=${subject}`,
+            method: 'GET',
+            success: function (data) {
+                if (data.Success) {
+                    swalalert('Success', 'Report sent to email successfully.', 'success')
+                }
+                else {
+                    swalalert('ERROR', 'Report not sent to email.', 'error')
+                }
+                $('.modal').modal('hide')
+            }
+        })
+    });
+</script>

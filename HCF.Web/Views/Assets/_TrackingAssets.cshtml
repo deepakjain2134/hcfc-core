@@ -1,0 +1,252 @@
+﻿@model HCF.BDO.TFloorAssets
+<div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">
+
+            @{
+                if (Model != null)
+                {
+                    if (Model.AssetId != null)
+                    {
+                        <b>Edit Asset</b>
+                    }
+                    else
+                    {
+                        <b>Add Asset</b>
+                    }
+                }
+
+            }
+            <button type="button" class="close" id="closePopup" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <form asp-controller="Assets" asp-action="CreateTrackingFloorAssets" data-ajax-success="OnSuccess" data-ajax="true" data-ajax-method="POST">
+
+            @Html.AntiForgeryToken()
+
+            <div class="row">
+
+                <input type="hidden" id="FloorAssetsId" name="FloorAssetsId" value=@Model.FloorAssetsId />
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Asset Type"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.DropDownList("AssetTypeId", (SelectList)ViewBag.assettypesbyassetid, new { @class = "form-control ddlassetype", @title = "All Asset", @data_size = "8" })
+                        @*@Html.AssetTypeDownList("AssetTypeId", (Model.Assets != null ? Model.Assets.AssetTypeId : 0), "Select Asset Type", new { @class = "form-control", required = "required" })*@
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Asset"):
+                    </div>
+                    <div class="forward-9">
+                        @*<select id="AssetId" name="AssetId" class="form-control floor_tab required" required="required">
+                                <option value="">Select Asset</option>
+                            </select>*@
+                        @Html.DropDownList("AssetId", (SelectList)ViewBag.allAssets, new { @class = "form-control ddlasset", @title = "All Asset", @data_size = "8" })
+                    </div>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Name"):<em class="required-field"> *</em>
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.Name, new { @class = "form-control", required = "required" })
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Barcode #"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.SerialNo, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Asset #"):<em class="required-field"> *</em>
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.DeviceNo, new { @class = "form-control", required = "required" })
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Description"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.Description, new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Rating"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.Rating, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Nearby"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.NearBy, new { @class = "form-control" })
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Model"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(modelItem => Model.Model, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="col-md-4 form-groupp">
+                    <div class="forward-3">
+                        <label>Building:</label>
+                    </div>
+                    <div class="forward-9">
+                        @Html.DropDownList("BuildingID", (SelectList)ViewBag.buildingbbyId, new { @class = "form-control ddlbuilding", @title = "All building", @data_size = "8" })
+                        @*@Html.BuildingDropDownList("BuildingID", 0, "Select Building", new { @class = "form-control" })*@
+
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        <label>Floor:<em class="required-field"> *</em></label>
+                    </div>
+                    <div class="forward-9">
+                        @Html.DropDownList("FloorId", (SelectList)ViewBag.floorbybuildingId, "---Select Floor---", new { @class = "form-control ddlfloor", @title = "All Floor", @data_size = "8", @required = true })
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        <label>Stop:</label>
+                    </div>
+                    <div class="forward-9">
+                        <select id="StopId" name="StopId" class="form-control">
+                            <option value="0">Select</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3"><label>Status:<em class="required-field"> *</em></label></div>
+                    <div class="forward-9">
+                        <assetstatusdropDown firsttext="Select Status"
+                                             required="required"
+                                             class="form-control"
+                                             selectedvalue=""
+                                             name="StatusCode">
+                        </assetstatusdropDown>
+                        @*@Html.AssetStatusDropDown("StatusCode", "", "Select Status", new { @class = "form-control", required = "required" })*@
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Make"):
+                    </div>
+                    <div class="forward-9">
+                        <manufacturerdropdown firsttext="Select Make"
+                                              class="form-control"
+                                              selectedvalue="@Model.ManufactureId"
+                                              name="ManufactureId">
+                        </manufacturerdropdown>
+                        @*@Html.ManufacturerDropDown("ManufactureId", Model.ManufactureId, "Select Make", new { @class = "form-control" })*@
+                    </div>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Wall Rating"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(model => model.WallRating, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.WallRating)
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Door Rating"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(model => model.DoorRating, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.DoorRating)
+                    </div>
+                </div>
+                <div class="col-md-4 form-group">
+                    <div class="forward-3">
+                        @Html.Label("Frame Rating"):
+                    </div>
+                    <div class="forward-9">
+                        @Html.TextBoxFor(model => model.FrameRating, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.FrameRating)
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <input type="submit" name="submitButton" value="Save" class="comm-button" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var assetddl = $("#AssetId");
+    //var buildingdddlCtr = $("#BuildingID");
+    var floorsddlCtr = $("#FloorId");
+    var stopddlCtr = $("#StopId");
+    //var ascId = $("#AscId");
+    //var FETypeId = $("#FETypeId");
+
+    var mngfloorAsset = {
+        FloorId: '@Model.FloorId',
+        AssetId: '@Model.AssetId',
+        StopId: '@Model.StopId',
+        //AscId: '@Model.AscId',
+        //FETypeId: '@Model.FETypeId',
+        //FloorAssetsId: '@Model.FloorAssetsId',
+        StatusCode: '@Model.StatusCode',
+        AssetTypeId:@((Model.Assets !=null)? Model.Assets.AssetTypeId : 0),
+        //BuildingId: @((Model.Floor != null)?Model.Floor.BuildingId: 0),
+    };
+
+
+    floorsddlCtr.change(function () {
+        stopddlCtr.empty();
+        var selectedStopId = parseInt(mngfloorAsset.StopId);
+        var assetval = $("#AssetId").val();
+        if (assetval == 123) {
+            BindStopNotInFE(stopddlCtr, assetval, $(this).val());
+        }
+        else {
+            bindStopddl(stopddlCtr, $(this).val(), selectedStopId, "", 'Select Stop');
+        }
+    });
+
+
+    //$('#closePopup').on('click', function () {
+    //    debugger
+    //    $('#loadpartial').hide();
+    //    if ($('#AddAssetsPopup').hasClass('fade in')) {
+    //        $('#AddAssetsPopup').removeClass('fade in')
+    //        $('#AddAssetsPopup').addClass('fade out')
+    //    }
+    //});
+
+    function OnSuccess() {
+        //alert("Called");
+        loadData();
+
+    }
+
+</script>

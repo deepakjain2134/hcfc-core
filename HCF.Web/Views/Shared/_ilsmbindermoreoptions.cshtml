@@ -1,0 +1,28 @@
+﻿@model HCF.BDO.TIlsm
+<ul class="dropdown-menu">
+    <li>
+        <a href="@Url.Action("CreateTilsmReports", "Pdf", new { tilsmId = Model.TIlsmId })">
+            PDF Report
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.TIlsmId })" class="@(Model.WoCount > 0 ? "" : "disable")">
+            <span>Work Orders (@Model.WoCount)</span>
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.TIlsmId })" class="@(Model.ICRAsCount > 0 ? "" : "disable")">
+            <span>ICRAs (@Model.ICRAsCount)</span>
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.TIlsmId })" class="@(Model.DocumentCount > 0 ? "" : "disable")">
+            <span>Attachments (@Model.DocumentCount)</span>
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("GetIlsmInspection", "Goal", new { tilsmId = Model.TIlsmId })" class="@(Model.ObservationReportCount > 0 ? "" : "disable")">
+            <span>Observation Report (@Model.ObservationReportCount)</span>
+        </a>
+    </li>
+</ul>

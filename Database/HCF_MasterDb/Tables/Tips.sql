@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[Tips] (
+    [TipId]                   INT            IDENTITY (1, 1) NOT NULL,
+    [Title]                   NVARCHAR (150) NULL,
+    [Description]             NVARCHAR (MAX) NULL,
+    [Source]                  NVARCHAR (150) NULL,
+    [RouteUrl]                NVARCHAR (255) NULL,
+    [CreatedBy]               INT            NULL,
+    [CreatedDate]             DATETIME       CONSTRAINT [DF_Table_1_AddedOn] DEFAULT (getutcdate()) NULL,
+    [ClientNo]                INT            NULL,
+    [ContributorName]         NVARCHAR (150) NULL,
+    [ContributorOrg]          NVARCHAR (150) NULL,
+    [ContributorPosition]     NVARCHAR (150) NULL,
+    [IsApproved]              INT            CONSTRAINT [DF__Tips__IsApproved__2101D846] DEFAULT ((0)) NOT NULL,
+    [ShowContributorName]     BIT            CONSTRAINT [DF__Tips__ShowContri__21F5FC7F] DEFAULT ((0)) NOT NULL,
+    [ShowContributorOrg]      BIT            CONSTRAINT [DF__Tips__ShowContri__22EA20B8] DEFAULT ((0)) NOT NULL,
+    [ShowContributorPosition] BIT            CONSTRAINT [DF__Tips__ShowContri__23DE44F1] DEFAULT ((0)) NOT NULL,
+    [TipType]                 INT            CONSTRAINT [DF__Tips__TipType__24D2692A] DEFAULT ((1)) NOT NULL,
+    [IsActive]                BIT            CONSTRAINT [DF__Tips__IsActive__19EAC663] DEFAULT ((1)) NOT NULL,
+    [IsCurrent]               BIT            CONSTRAINT [DF__Tips__IsCurrent__1ADEEA9C] DEFAULT ((1)) NULL,
+    [ParentTipId]             INT            NULL,
+    [UpdatedBy]               INT            NULL,
+    [UpdatedDate]             DATETIME       NULL,
+    [RouteName]               NVARCHAR (500) NULL,
+    CONSTRAINT [PK_Tips] PRIMARY KEY CLUSTERED ([TipId] ASC)
+);
+

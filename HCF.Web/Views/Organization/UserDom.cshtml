@@ -1,0 +1,254 @@
+﻿@model HCF.BDO.Organization
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">User Domains</h4>
+</div>
+<form asp-action="UserDom" data-ajax-success="OnSuccess" asp-controller="Organization"
+      data-ajax-method="POST" id="saveForm">
+
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+
+
+                <div class="form-group">
+                    @*<label>UserDomain <em class="required-field"></em></label>*@
+
+                    <div class="titleplusbox">
+                        <label class="customLook">Add UserDomain:</label>
+                        <button type="button" id="btn1">+</button>
+                    </div>
+                    <div class="draftemail-control actionTaken">
+                        <input class='customLook' id="UserDomain" name="UserDomain" value='@Model.UserDomain' />
+                        <button type="button" class="getInfo hidden">Get Tagged Info</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn comm-button" id="saveButton">Save</button>
+        <button type="button" class="btn comm-Cancelbutton" data-dismiss="modal">Cancel</button>
+
+    </div>
+  
+</form>
+<script>
+    function OnSuccess(data) {
+        debugger;
+        console.log(data);
+        $("#btn_status_" + data.ModuleSessionId).html(status);
+        $("#modal-container .close").click();     
+    }
+
+    $(document).ready(function () {
+
+    });
+
+    var input = document.querySelector('#UserDomain');
+    debugger;
+    tagify = new Tagify(input, {
+      
+        pattern: /^[a-zA-Z]+\.[a-zA-Z]+$/,
+
+        callbacks: {
+            "invalid": onInvalidTag
+        },
+        dropdown: {
+            position: 'text',
+            enabled: 1
+        }
+    });
+    var button = document.querySelector('#btn1');
+
+    function onInvalidTag(e) {
+        console.log("invalid", e.detail)
+    }
+
+    button.addEventListener("click", onAddButtonClick);
+    function onAddButtonClick() {
+        tagify.addEmptyTag()
+    }
+
+    $("#saveButton").click(function () {
+    
+                takenmails = [];
+                debugger;
+                for (let i = 0; i < tagify.value.length; i++) {
+                    takenmails.push(tagify.value[i].value);
+                    console.log(tagify.value[i].value);
+                }
+
+                var mails = (takenmails.join(','));
+                $("#UserDomain").val(mails);
+                $("#saveForm").submit();
+            
+    });
+</script>
+<style>
+
+
+    .ui-widget.ui-widget-content {
+        z-index: 99999 !important;
+    }
+
+    .modal-dialog {
+        max-width: 60%;
+    }
+
+    .customLook {
+        --tag-bg: #0052BF;
+        --tag-hover: #CE0078;
+        --tag-text-color: #FFF;
+        --tags-border-color: silver;
+        --tag-text-color--edit: #111;
+        --tag-remove-bg: var(--tag-hover);
+        --tag-pad: .6em 1em;
+        --tag-inset-shadow-size: 1.3em;
+        --tag-remove-btn-bg--hover: black;
+        display: inline-block;
+        min-width: 0;
+        border: none;
+    }
+
+        .customLook .tagify__tag {
+            margin-top: 0;
+        }
+
+            .customLook .tagify__tag > div {
+                border-radius: 25px;
+            }
+
+            /* Do not show the "remove tag" (x) button when only a single tag remains */
+            .customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
+                /*display: none;*/
+            }
+
+        .customLook .tagify__tag__removeBtn {
+            opacity: 0;
+            transform: translateX(-6px) scale(.5);
+            margin-left: -3ch;
+            transition: .12s;
+        }
+
+        .customLook .tagify__tag:hover .tagify__tag__removeBtn {
+            transform: translateX(-6px) scale(.5);
+            opacity: 1;
+            margin-left: -1ch;
+        }
+
+        .customLook + button {
+            color: #0052BF;
+            font: bold 1.4em/1.65 Arial;
+            border: 0;
+            background: none;
+            box-shadow: 0 0 0 2px inset currentColor;
+            border-radius: 50%;
+            width: 1.65em;
+            height: 1.65em;
+            cursor: pointer;
+            outline: none;
+            transition: .1s ease-out;
+            margin: 0 0 0 5px;
+            vertical-align: top;
+        }
+
+            .customLook + button:hover {
+                box-shadow: 0 0 0 5px inset currentColor;
+            }
+
+        .customLook .tagify__input {
+            display: none;
+        }
+
+    .titleplusbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .tagify {
+        --tag-bg: #0052BF !important;
+        --tag-text-color: white !important;
+        --tag-pad: 0.5em 0.9em !important;
+        --tag-hover: #438bea !important;
+        padding: 6px 2px !important;
+        --tag-inset-shadow-size: 3.1em !important;
+        --tag-remove-bg: rgb(0 82 191) !important;
+    }
+
+    .customLook .tagify__tag {
+        margin-top: 0 !important;
+        padding: 2px !important;
+    }
+
+    .tagify__tag {
+        margin: 0 4px !important;
+    }
+
+    .tagify__tag__removeBtn {
+        order: 5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 54px;
+        cursor: pointer;
+        font: 29px/1 Arial;
+        background: var(--tag-remove-btn-bg,none);
+        color: var(--tag-remove-btn-color,#000);
+        width: 40px;
+        height: 40px;
+        margin-right: 7.66667px;
+        overflow: hidden;
+    }
+
+    .draftemail-control .selectBoxs {
+        padding: 0 0 9px 0;
+    }
+
+    .draftemail-control .bootstrap-tagsinput {
+        width: 100%;
+        border-radius: 0px;
+    }
+
+
+    .ullistitem {
+        z-index: 99;
+        position: static;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+
+    .selectBoxsfornotify .ullistitemfornotify li {
+        display: inline-block;
+        float: left;
+        width: 33.33%;
+        padding: 4px 10px;
+        position: relative;
+    }
+
+    .ullistitemfornotify {
+        z-index: 99;
+        position: static;
+        background: rgb(245, 245, 245);
+        left: 0px;
+        right: 0px;
+        border-top: none;
+        top: 32px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 317px;
+        overflow: auto;
+    }
+</style>

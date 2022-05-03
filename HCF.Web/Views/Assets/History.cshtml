@@ -1,0 +1,40 @@
+﻿@model HCF.BDO.TFloorAssets
+@{
+    ViewBag.Title = Localizer["AssetHistory"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                @Localizer["AssetHistory"].Value
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-xs-3 col-left">
+                <div class="box box-primary assetsInspection">
+                    @*@Html.Action("AssetsInspection", "Goal", new { mode = 2 })*@
+                    @await Component.InvokeAsync("GoalAssetsInspection", new { mode = 2 }) 
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    @await Html.PartialAsync("_assetsHistory", Model)
+                    
+                    
+                    <div class="text-right button_Div modal-footer">
+                        <a href='@HCF.Web.Base.UISession.GetBackPage("assets_History")' class="comm-Cancelbutton">Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        $(".assetAttachIcon").remove();
+    });
+</script>

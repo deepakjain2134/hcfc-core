@@ -1,0 +1,152 @@
+﻿@model IEnumerable<HCF.BDO.InspectionEPDocs>
+
+<div class="modal fade epDocListModal" id="epDocListModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="epDocListModal">Document List</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (Model.Where(x => x.DocTypeId != 108 && x.IsDeleted == false || (x.CreatedBy == 0)).Count() > 0)
+                {
+                <div class="ep-tableBox requireddoc">
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                @*<th>Required Documents</th>*@
+                                <th>File Name</th>
+                                <th style="width:150px;">Doc Review Date</th>
+                                <th style="width:200px;">Uploaded By</th>
+                                <th style="width:100px; text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var epdocs in Model.Where(x => x.IsRequiredDoc && x.IsDeleted == false || (x.CreatedBy == 0)).OrderByDescending(x => x.CreatedDate))
+                            {
+                                var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                                <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                                    @*<td>@($"{(epdocs.DocumentType != null ? epdocs.DocumentType.Name : "N/A")}")</td>*@
+                                    <td><span style="display: flex;align-items:self-start;"><img src="@commonModelFactory.UploadDocTypeImagePath(epdocs.UploadDocTypeId,epdocs.DocTypeId)" alt="" /><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></span></td>
+                                    <td>@epdocs.DtEffectiveDate.ToFormatDate()</td>
+                                    <td>
+                                        @*@($"{epdocs.UserProfile.FullName} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                                        @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="ep-actionbox">
+                                            @if (!string.IsNullOrEmpty(filePath))
+                                            {
+                                                
+                                                <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="delete"><img src="/dist/Images/Icons/delete-red.png" /></a>
+                                                @*<a title="Email">
+                                        <img src="/dist/Images/Icons/epmail.png" alt=""/></a>*@
+                                            }
+                                           
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+                }
+                @if (Model.Where(x => x.DocTypeId == 108 && x.IsDeleted == false && (x.CreatedBy > 0)).Count() > 0)
+                {
+                <div class="ep-tableBox miscdoc">
+
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Misc. Documents</th>
+                                @*<th>Doc Review Date</th>*@
+                                <th style="width:200px;">Uploaded By</th>
+                                <th style="width:100px;text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var epdocs in Model.Where(x => x.IsRequiredDoc == false && x.IsDeleted == false && (x.CreatedBy > 0)).OrderByDescending(x => x.CreatedDate))
+                            {
+                                var filePath = (epdocs.IsDeleted) ? string.Empty : epdocs.Path;
+                                <tr class="@((epdocs.IsDeleted) ? "deleted" : "")">
+                                    <td><span style="display: flex;align-items:self-start;"><img src="@commonModelFactory.UploadDocTypeImagePath(epdocs.UploadDocTypeId,epdocs.DocTypeId)" alt="" /><p class="epdocName-elipsNo" title="@epdocs.DocumentName">@epdocs.DocumentName</p></span></td>
+                                    @*<td>NA</td>*@
+                                    <td>
+                                        @($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")
+                                        @*@($"{commonModelFactory.setUserName(epdocs.UserProfile)} {"on"} {epdocs.CreatedDate.ToFormatDate()}")*@
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="ep-actionbox">
+                                            @if (!string.IsNullOrEmpty(filePath))
+                                            {
+                                              
+                                                <a href="#" activityId='@epdocs.ActivityId' title="Delete" class="delete"><img src="/dist/Images/Icons/delete.png" /></a>
+                                            }
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+                }
+
+            </div>
+            @*<div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $(".delete").click(function () {
+
+    var ctrName = $(this);
+    var activityId = ctrName.attr("activityId");
+
+    swal({
+    html: true,
+    title: "Delete Document",
+    text: 'You are about to delete this document from this EP review. Are you sure you want to permanently delete?',
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#DD6B55",
+    confirmButtonText: "Yes",
+    cancelButtonText: "Cancel",
+    closeOnConfirm: true,
+    closeOnCancel: true
+    },
+    function (isConfirm) {
+    if (isConfirm) {
+    $.ajax({
+    // url: '/Goal/RemoveEpDoc' + "?activityId=" + activityId,
+    url: '@Url.Action("RemoveEpDoc", "Goal")' ,
+    type: "POST",
+    dataType: "JSON",
+    data: { activityId: activityId,  __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val() },
+    success: function (data) {
+    ctrName.closest("tr").remove();
+    $('li[activityid="' + activityId + '"]').remove();
+    swalalert("File has been successfully deleted.");
+    location.reload();
+
+    }
+    });
+    }
+    });
+    });
+
+    });
+</script>

@@ -1,0 +1,63 @@
+﻿@model HCF.BDO.TFloorAssets
+@{
+    Layout = null;
+}
+<div class="modal-dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Assets Information</h4>
+    </div>
+    <div class="modal-body">
+        <div class="">
+            <div class="tble_shadow">
+                @if (Model != null && Model.FloorAssetsId > 0)
+                {
+                    <table width="100%" cellspacing="0" cellpadding="0" class="table table-bordered table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Tag #</th>
+                                <th>Asset</th>
+                                <th>Name</th>
+                                <th> @Localizer["StopName"] </th>
+                                <th>Nearby</th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td>@Model.SerialNo</td>
+                                <td>@((Model.Assets != null) ? Model.Assets.Name : "")</td>
+                                <td>@Model.Name.CastToNA()</td>
+                                <td>@string.Format("{0}({1})", Model.Stop.StopName.CastToNA(), Model.Stop.StopCode.CastToNA())</td>
+                                <td>@Model.NearBy.CastToNA()</td>
+                                <td>
+                                    @{
+                                        var routeId = -2;
+                                        if (Model.Routes.Count > 0)
+                                        {
+                                            routeId = Model.Routes.FirstOrDefault().RouteId;
+                                        }
+                                        var inspType = 7;
+                                        if (Model.Assets != null && Model.Assets.AssetFrequency.Any())
+                                        {
+                                            inspType = Model.Assets.AssetFrequency.FirstOrDefault().FrequencyId;
+                                        }
+                                    }
+                                    <img style="cursor:pointer"
+                                         onclick="GoToInspectionPage(0 ,'@routeId' ,'@Model.AssetId',@Model.FloorAssetsId,'@Model.StopId', @inspType)" src="@Url.Content("~/dist/Images/Icons/inspect_icon.png")"
+                                         title="Route Based Inspection" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <text>
+                        <span>
+                            No results found
+                        </span>
+                    </text>
+                }
+            </div>
+        </div>
+    </div>
+</div>

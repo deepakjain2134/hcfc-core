@@ -1,0 +1,29 @@
+﻿@model IEnumerable<HCF.BDO.DocumentType>
+
+@{
+    ViewBag.Title = "Inbox";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+        <section class="content-header">
+            <h1>
+                Inbox
+            </h1>
+        </section>
+    }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="">
+                        @await Component.InvokeAsync("CommonGetDocuments")
+                        @*@Html.Action("GetDocuments", "Common")*@
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="~/dist/Scripts/ckeditor/ckeditor.js"></script>

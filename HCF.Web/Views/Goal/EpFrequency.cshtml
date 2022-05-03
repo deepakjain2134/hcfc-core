@@ -1,0 +1,491 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+    ViewBag.Title = " EP Frequency";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader {
+    <section class="content-header">
+        <h1>
+            EP Frequency
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="row tablelist-topform">
+                            <div class="col-md-12">
+                                <p class="epFreq-alert">Select an initial date to determine future inspection dates of an EP. While you may perform an inspection of an EP on another date, you will continue to receive EP due date reminders based on the initial date selected on this page.</p>
+                            </div>
+                            <div class="col-xs-4">
+                                <div class="form-inline">
+                                    <label>Select Custom Freq: </label>
+                                    <frequencypdownlist name="frequencypDownList" firsttext="All" class="form-control"></frequencypdownlist>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xs-8 text-right">
+                                <a asp-controller="Goal" asp-action="EpFrequencyPopUp" class="btn button1" onclick="" data-toggle="modal"
+                                   data-target="#modal-container"
+                                   id="btnCustomFrequency">Set Custom Frequency</a>
+
+                                <a asp-controller="Goal" asp-action="EpFrequencyScheduleDatePopUp" class="btn button1" onclick="" data-toggle="modal"
+                                   data-target="#modal-container"
+                                   id="btnScheduleDateAssignment">Schedule Date Assignment</a>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                @await Component.InvokeAsync("GoalEpFrequency", new { pagemode = "Page"})
+                                @*<table class="table table-bordered table-striped" id="frequencyTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none">TjcFreqId</th>
+                                            <th>
+                                                Standard,EP
+                                            </th>
+                                            <th style="width: 250px;">
+                                                @Html.DisplayNameFor(model => model.Description)
+                                            </th>
+                                            <th style="display:none">
+                                                @Html.DisplayNameFor(model => model.Description)
+                                            </th>
+                                            <th>Document</th>
+                                            <th>
+                                                Asset
+                                            </th>
+                                            <th>
+                                                TJC Freq
+                                            </th>
+                                            <th>
+                                                Custom Freq
+                                            </th>
+                                            <th style="width: 96px;">
+                                                Scheduled Date
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{int i = 0; }
+                                        @foreach (var item in Model.Where(x => x.IsUpComingEp == false))
+                                        {
+                                            <tr id="@item.EPDetailId">
+                                                <td style="display:none">
+                                                    @item.EPFrequency.FirstOrDefault().FrequencyId
+                                                </td>
+                                                <td>
+                                                    @commonModelFactory.GetEpStandard(item)
+                                                </td>
+                                                <td class="">
+                                                    @await Component.InvokeAsync("EpDescription",
+                                                   new { epDetailId = item.EPDetailId, maxLength = 90, epdetails = item })
+                                                </td>
+                                                <td style="display:none">
+                                                    @Html.DisplayFor(modelItem => item.Description)
+                                                </td>
+                                                <td>
+                                                    @if (item.IsDocRequired)
+                                                    {
+                                                        <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="Document Required" />
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @string.Join(" , ", item.Assets.Where(x => x.Name != "").Select(x => x.Name))
+                                                </td>
+                                                <td>
+                                                    @foreach (var epFrequency in item.EPFrequency.Where(x => x.IsActive))
+                                                    {
+                                                        <span>@epFrequency.TjcFrequency.DisplayName</span>
+                                                    }
+                                                </td>
+                                                <td class="text-left">
+                                                    @foreach (var epFrequency in item.EPFrequency.Where(x => x.IsActive))
+                                                    {
+                                                        <button type="button"
+                                                                class="open-AddDialog table-button"
+                                                                id='@($"ep_{item.EPDetailId}")'
+                                                                data-epdetailid='@item.EPDetailId'
+                                                                data-epfrequencyid='@epFrequency.EpFrequencyId'
+                                                                data-frequencyid='@epFrequency.Frequency.FrequencyId'
+                                                                data-days="@epFrequency.TjcFrequency.Days"
+                                                                data-toggle="modal" data-target="#myModal">
+                                                            @Html.DisplayFor(modelItem => epFrequency.Frequency.DisplayName)
+                                                        </button>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(m => item.InspectionDate, $"{item.InspectionDate:MM/dd/yyyy}",
+                                                   new
+                                                        {
+                                                           @class = "form-control datepicker epSceduleDate",
+                                                           id = "InspectionDate_" + i,
+                                                           @autocomplete = "off"
+                                                        })
+                                                </td>
+                                            </tr>
+                                            i++;
+                                        }
+                                    </tbody>
+                                </table>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="epFrqDays" id="epFrqDays" />
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><span class="popupTitle">EP</span> </h4>
+            </div>
+            <div class="modal-body">
+                <ul class="crxradio">
+                    @foreach (var item in (List<HCF.BDO.FrequencyMaster>)TempData["freqecny"])
+                    {
+                        if (item.Days >= 0 && item.IsActive == true)
+                        {
+                            <li>
+                                <div class="crxradio-success">
+                                    <input type="radio"
+                                           id="@($"rbl{item.FrequencyId}")"
+                                           data-frequencyid='@item.FrequencyId'
+                                           data-days='@item.Days'
+                                           name="frequency"
+                                           value='@item.DisplayName' />
+                                    <label for="@($"rbl{item.FrequencyId}")">@item.DisplayName</label>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="comm-button" data-dismiss="modal" id="saveEP">Save</button>
+                <button type="button" class="comm-Cancelbutton" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+@*<div class="modal fade" id="BulkScheduleDateAssignment" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 50%; margin: 0px auto;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Schedule Date Assignment</h4>
+            </div>
+            <div class="modal-body">
+                <div style="height:400px;overflow-y:scroll">
+                    @{
+                        var standards = Model.Select(x => x.Standard).Distinct();
+                    }
+                    <div id="standardep_tree">
+                        <ul>
+                            @foreach (var std in standards.GroupBy(x => new { x.StDescID, x.TJCStandard }).ToList())
+                            {
+                                <li>
+                                    @std.Key.TJCStandard
+                                    <ul>
+                                        @foreach (var ep in Model.Where(x => x.StDescID == std.Key.StDescID).ToList().OrderBy(x => x.EPNumber))
+                                        {
+                                            <li epid="@ep.EPDetailId" frequencyid="@ep.EPFrequency.FirstOrDefault().FrequencyId">
+                                                @ep.EPNumber
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <br />
+                <div class="form-inline">
+                    <input type="checkbox" name="chkSelectAllEps" id="chkSelectAllEps"><span></span><br />Select All EPs
+                    <label>Select a date</label> <input type="text" name="scheduleDate" id="scheduleDate" class="form-control datepicker" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="popupCommon-btn comm-button" id="saveScheduleDates">Apply changes</button>
+                <button type="button" class="popupCommon-btn comm-Cancelbutton" data-dismiss="modal" id="CancelUserAccountMethod">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@section scripts{
+
+    <script src="@Url.Content("~/dist/js/jstree/jstree.min.js")"></script>
+    <link href="@Url.Content("~/dist/css/jstree/jstree.style.min.css")" rel="stylesheet" />
+
+    <script>
+
+   
+
+        $(document).ready(function () {
+            $('body').on('#modal-container hidden.bs.modal', '#modal-container', function () {
+                $("#modal-container .modal-content").empty();
+            });
+       $("#scheduleDate").datepicker({ dateFormat: 'mm/dd/yy' });
+
+       $(".descriptions").popover({ trigger: "manual", html: true, animation: false })
+                .on("mouseenter", function () {
+                    var _this = this;
+                    $(this).popover("show");
+                    $(".popover").on("mouseleave", function () {
+                        $(_this).popover('hide');
+                    });
+                }).on("mouseleave", function () {
+                    var _this = this;
+                    setTimeout(function () {
+                        if (!$(".popover:hover").length) {
+                            $(_this).popover("hide");
+                        }
+                    }, 50);
+          });
+
+            @*$('.epSceduleDate').datepicker({
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons,
+                dateFormat: 'mm/dd/yy',
+                onSelect: function (e) {
+                   
+                    $.ajax({
+                        url: '@Url.Action("UpdateEpInspStartDate", "Goal")',
+                        type: "POST",
+                        contentType: 'application/x-www-form-urlencoded',
+                        data: {
+                            epdetailId: $(this).parent().parent()[0].id,
+                            frequencyId: $(this).closest("tr").find(".table-button ").data("frequencyid"),
+                            inspectiondate: $(this).val()
+                        },
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Result) {
+                                AlertSuccessMsg("Inspection date added successfully!")
+                                //$("#" + result.EPDetailId).addClass("disabled");
+                            }
+                            //alert("Call");
+                        }
+                    });
+                    //alert('Datepicker Closed' + $(this).val());
+                }
+            });*@
+
+            var datatable = $('#frequencyTable').DataTable({
+                "lengthChange": false,
+                "pageLength": 20,
+                "bPaginate": $('#frequencyTable tbody tr').length > 20,
+                "bInfo": false,
+                "aaSorting": [],
+                "searching": true,
+                "language": {
+                    "emptyTable": "No data available in table"
+                },
+                //dom: "<'row'<'col-sm-6'l>>" +
+                //    //"<'row'<'col-sm-12'tr>>" +
+                //    "<'row'<'col-sm-12'<'table-responsive'tr>>>" +
+                //    "<'row'<'col-sm-5'i><'col-sm-7'p>>Blfrtip",
+
+                dom: "<'row'<'col-sm-2'B><'col-sm-2'l><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+                buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    orientation: 'portrait',
+                    title: 'EP Frequency Report',
+                    exportOptions: {
+                        columns: [1, 3, 4, 5, 6, 7]
+                    },
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        var now = new Date();
+                        var jsDate = setDateFormat(now);
+                        var logo = localStorage.getItem("logoimgbase64");//getBase64FromImageUrl();
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 7;
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 40 },
+
+
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: 'EP Frequency Report',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Generated from CRx on ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'center',
+                                        text: ['Page ', { text: page.toString() }, ' of ', { text: pages.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return .5; };
+                        objLayout['vLineWidth'] = function (i) { return .5; };
+                        objLayout['hLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['vLineColor'] = function (i) { return '#aaa'; };
+                        objLayout['paddingLeft'] = function (i) { return 4; };
+                        objLayout['paddingRight'] = function (i) { return 4; };
+                        doc.content[0].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'EP Frequency Report',
+                    messageBottom: function () {
+                        return $("#dvgeneratedby").text();
+                    },
+                    exportOptions: {
+                        columns: [1, 3, 4, 5, 6, 7],
+                        orthogonal: 'export'
+                    }
+                }
+            ]
+            });
+
+            $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+            $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+            $('#frequencypDownList').on('change', function () {
+                var val = $(this).val();
+                console.log(val);//.search("^" + $(this).val() + "$", true, false, true)
+                if (val > 0) {
+                    datatable.columns(0).search("^" + val + "$", true, false, true).draw();
+                } else {
+                    datatable.columns(0).search("").draw();
+                }
+                //datatable.columns(0).search(val).draw();
+            });
+        });
+
+   $(document).on("click", ".open-AddDialog", function () {
+            $("li").removeClass("disabled");
+
+            $(':checkbox').prop('checked', false);
+            var frequencyid = $(this).data('frequencyid');
+            var epFrequencyId = $(this).data('epfrequencyid');
+            var epdetailid = $(this).data('epdetailid');
+
+            var epNumber = $("tr#" + epdetailid).find("td:eq(1)").text();
+
+            var days = $(this).data('days');
+
+            console.log(days);
+            $("#epFrqDays").val(days);
+            $(".popupTitle").text(epNumber);
+            $("#saveEP").attr('epdetailid', epdetailid);
+            $("#saveEP").attr('epFrequencyId', epFrequencyId);
+            $('input[data-frequencyid="' + frequencyid + '"]').prop('checked', true);
+
+            $("input:radio").each(function () {
+                daysCustom = parseInt($(this).data('days'));
+                if (daysCustom > days && days > 0) {
+                    $(this).closest("li").addClass("disabled");
+                    //$(this).closest("li").addClass("Enabled");
+                }
+            });
+        });
+
+   $('input[type="checkbox"]').on('change', function () {
+            $('input[name="' + this.name + '"]').not(this).prop('checked', false);
+        });
+
+   $(document).on("click", "#saveEP", function () {
+            var epdetailid = $(this).attr('epdetailid');
+            var tjcDays = $("#epFrqDays").val();
+            console.log(tjcDays)
+            if (tjcDays) {
+                var frequencyid = 0;
+                var daysCustom = 0;
+                var EpFrequencyId = $(this).attr('epFrequencyId');
+                var txt = "";
+                $("input:radio:checked").each(function () {
+                    frequencyid = $(this).data('frequencyid');
+                    daysCustom = parseInt($(this).data('days'));
+                    txt = $(this).val();
+                });
+                console.log(daysCustom, tjcDays);
+
+                if (daysCustom > tjcDays && tjcDays > 0) {
+                    AlertWarningMsg("The frequency must be less than TJC Frequency.");
+                    return;
+                }
+
+                if (frequencyid > 0) {
+                    $.ajax({
+                        url: CRxUrls.Goal_UpdateEpFrequency,
+                        type: "POST",
+                        data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(), epdetailId: epdetailid, frequencyId: frequencyid, epFrequencyId: EpFrequencyId },
+                        dataType: 'json',
+                        success: function (result) {
+                            debugger;
+                            swalalert(result.Messgae);
+                            if (result.value > 0) {
+                                var control = $("#ep_" + epdetailid);
+                                control.text(txt);
+                                control.data('epfrequencyid', result.value);
+                                control.data('frequencyid', frequencyid);
+                             //   control.attr("id", "#ep_" + epdetailid);
+                            }
+                        }
+                    });
+                }
+            }
+
+    });
+
+   $('li :checkbox').on('click', function () {
+        var $chk = $(this), $li = $chk.closest('li'), $ul, $parent;
+        if ($li.has('ul')) {
+            $li.find(':checkbox').not(this).prop('checked', this.checked)
+        }
+        do {
+            $ul = $li.parent();
+            $parent = $ul.siblings(':checkbox');
+            if ($chk.is(':checked')) {
+                $parent.prop('checked', $ul.has(':checkbox:not(:checked)').length == 0)
+            } else {
+                $parent.prop('checked', false)
+            }
+            $chk = $parent;
+            $li = $chk.closest('li');
+        } while ($ul.is(':not(.someclass)'));
+    });
+
+    </script>
+
+}

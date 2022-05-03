@@ -1,0 +1,306 @@
+﻿@{
+    ViewBag.Title = " Fire Watch Log History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Fire Watch History
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                   
+                       
+                            
+                    <div class="row tablelist-topform">
+                        <div class="" id="dvreportCntrl" style="display: none; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 10px; overflow: auto;">
+                            <div class="col-md-8 form-inline">
+                                <div class="form-group">
+                                    <label>From</label>
+                                    <input type="text" id="fromdate" class="form-control datepicker" readonly="readonly" />
+                                </div>
+                                <div class="form-group">
+                                    <label>To</label>
+                                    <input type="text" id="todate" class="form-control datepicker" readonly="readonly" />
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-right">
+                                @using (Html.BeginForm("FireWatchReports", "Pdf", FormMethod.Post, new { id = "fireWatchReports" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="sFromdate" id="sFromdate" />
+                                    <input type="hidden" name="sTodate" id="sTodate" />
+                                    <button type="button" class="comm-button" id="Generate-firewatch-report">Generate FireWatch Report</button>
+                                }
+                                @*<input type="submit" name="button" class="comm-button" value="Generate Report" />*@
+                            </div>
+                        </div>
+                        <div class="col-md-12 text-right">
+                            <button class="comm-button" id="btnreport">Show Report Filter</button>
+                            @*<input type="submit" name="button" class="comm-button" value="Show Report Filter" id="btnreport" />*@
+                            <input type="submit" name="button" class="comm-button" value="My FireWatch Schedule " onclick="location.href = '@Url.Action("FireWatch", "FireWatch")'" />
+                        </div>
+                    </div>
+                       
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id='calendar' class="calender"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="historyTab">
+                                @await Component.InvokeAsync("FireWatchFireWatchHistoryDetails") 
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.1/fullcalendar.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.16.0/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.1/fullcalendar.min.js"></script>
+
+<script type="text/javascript">
+
+    $('#calendar').fullCalendar({
+        header: {
+            left: '',
+            center: 'prevYear,prev,title,next,nextYear',
+            right: 'today'
+        },
+        selectable: true,
+        selectConstraint: {
+            start: $.fullCalendar.moment().subtract(1, 'days'),
+            end: $.fullCalendar.moment().startOf('month').add(1, 'month')
+        },
+       
+        firstDay: 0,
+        slotMinutes: 0,
+        events: '@Url.RouteUrl(new { action = "GetEvents", controller = "FireWatch" })',
+        dayClick: function (date, jsEvent, view) {
+            openHistoryPage(date);
+            $("td").removeClass("activeDate");
+            $(this).addClass("activeDate");
+        },
+        eventClick: function (calEvent, jsEvent, view) {
+            var dt = calEvent.start;
+
+            $("td").removeClass("activeDate");
+            //openHistoryPage(dt);
+            $('.fc-day[data-date="' + getEventDate(dt) + '"]').addClass("activeDate");
+        }
+    });
+
+    $("td.fc-today").addClass("activeDate");
+
+
+    function getEventDate(timestamp) {
+        var dateobj = new Date(timestamp);
+        var month = Number(dateobj.getMonth() + 1);
+        var newmonth = month < 10 ? '0' + month : '' + month;
+        date = dateobj.getFullYear() + '-' + newmonth + '-' + dateobj.getDate();
+        return date;
+    }
+
+    function openHistoryPage(timeSpan) {
+        var url = '@Url.Action("FireWatchHistoryDetails", "FireWatch")';
+        $.ajax({
+            url: url + "?timeSpan=" + timeSpan,
+            cache: false,
+            type: "GET",
+            success: function (data) {
+                $('.fc-day[data-date="' + getEventDate(timeSpan) + '"]').addClass("activeDate");
+                console.log($('.fc-day[data-date="' + getEventDate(timeSpan) + '"]').addClass("activeDate"));
+                $('#historyTab').empty();
+                $('#historyTab').html(data);
+                $('#historyTab').fadeIn('fast');
+            }
+        });
+    }
+
+    $(".fc-today-button").click(function () {
+        $("td.fc-today").addClass("activeDate");
+        openHistoryPage("");
+    });
+
+        $(function () {
+        var currentTime = new Date();
+        debugger;
+            var startDate = new Date(currentTime.setMonth(currentTime.getMonth() - 1)); //new Date(currentTime.getFullYear(), currentTime.getMonth() - 1, 1);
+        var dateFormat = "mm/dd/yy",
+            from = $("#fromdate")
+                .datepicker({
+                    //defaultDate: "+1w",
+                    changeMonth: true,
+                    changeYear: true,
+                    maxDate: new Date(),
+                    minDate:new Date(2018,0,1),
+                    numberOfMonths: 1,
+                    buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+                    buttonImageOnly: true
+                }).datepicker('setDate', startDate)
+                .on("change", function () {
+                    to.datepicker("option", "minDate", getDate(this));
+                }),
+            to = $("#todate").datepicker({
+                //defaultDate: "+1w",
+                changeMonth: true,
+                changeYear: true,
+                maxDate: new Date(),
+                minDate: new Date(2018, 0, 1),
+                numberOfMonths: 1,
+                buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+                buttonImageOnly: true
+            }).datepicker('setDate', 'today')
+                .on("change", function () {
+                    from.datepicker("option", "maxDate", getDate(this));
+                });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                date = null;
+            }
+
+            return date;
+        }
+        //loadData();
+    });
+
+
+    $("#btnreport").click(function () {
+        debugger;
+        $(this).text($(this).text() == 'Show Report Filter' ? 'Hide Report Filter' : 'Show Report Filter');
+        $("#dvreportCntrl").toggle();
+    });
+
+
+    $("#Generate-firewatch-report").click(function () {
+        var form = document.getElementById("fireWatchReports");
+        debugger;
+        var _fromdate = $("#fromdate").val();
+        var _todate = $("#todate").val();
+        $("#sFromdate").val(_fromdate);
+        $("#sTodate").val(_todate);
+        form.submit();
+    })
+
+</script>
+<style>
+    .calender {
+        border: #ddd solid 1px;
+        width: 100%;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0 !important;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-scroller.fc-day-grid-container {
+        height: auto !important;
+    }
+
+    .fc .fc-toolbar > * > :first-child {
+        display: flex;
+    }
+
+    .fc-widget-header:last-of-type, .fc-widget-content:last-of-type {
+        border: 1px solid #ddd;
+    }
+
+    .fc .fc-toolbar > * > :first-child {
+        line-height: 20px;
+    }
+
+   
+
+    .fc-toolbar .fc-center {
+        font-size: 10px;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 20px;
+        display: inline-block;
+        margin: 0 12px;
+        vertical-align: middle;
+    }
+
+    .fc-today-button {
+        height: 23px !important;
+        font-size: 12px !important;
+    }
+
+    .fc td, .fc th {
+        font-size: 15px;
+    }
+
+    .fc-basic-view .fc-day-number, .fc-basic-view .fc-week-number {
+        padding: 8px !important;
+        font-weight: 500;
+    }
+
+    .fc-day-number {
+        font-size: 15px;
+    }
+
+    .fc th {
+        padding: 5px 0 !important;
+        font-size: 14px;
+    }
+
+    .fc-today {
+        border: none !important;
+        border-top: 1px solid #ddd !important;
+        font-weight: bold;
+    }
+
+    tr:first-child > td > .fc-day-grid-event {
+        margin-top: -4px;
+    }
+
+    .fc-toolbar {
+        margin-bottom: 0;
+        padding: 5px;
+        background: #f5f5f5;
+    }
+
+    .fc-widget-content {
+        padding: 0px !important;
+    }
+
+    .fc-time {
+        display: none;
+    }
+
+    .fc-event {
+        width: 24px !important;
+        text-align: center !important;
+    }
+
+
+
+    .fc-day-header span {
+        color: #171717;
+    }
+
+    .fc-scroller {
+        overflow-x: visible !Important;
+    }
+</style>

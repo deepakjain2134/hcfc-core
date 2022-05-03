@@ -1,0 +1,58 @@
+﻿@model List<HCF.BDO.TFiles>
+
+@if (Model != null && Model.Count > 0)
+{
+    foreach (var item in Model)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    <strong>Name:&nbsp;&nbsp;</strong>
+                    <span id="lbldocName">@item.FileName</span>
+                </p>
+            </div>
+        </div>
+        <iframe name="document" id="docframe" style="width: 100%; height: 800px; border: #ccc solid 1px;"
+                src=""></iframe>
+    }
+
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-6 col-sm-6">
+            <strong>Name:&nbsp;&nbsp;</strong>
+            <label id="lbldocName"></label>
+        </div>
+    </div>
+    <iframe name="document" id="docframe" style="width: 100%; height: 800px; border: #ccc solid 1px;"></iframe>
+}
+
+<script>
+
+    @if (Model != null && Model.Count>0)
+    {
+        @: var fileName = '@Model.FirstOrDefault().FileName'; SetFileName(fileName, '@((int)Model.FirstOrDefault().FileType)', '@Model.FirstOrDefault().FilePath', '@Model.FirstOrDefault().TFileId', '@commonModelFactory.FilePath(Model.FirstOrDefault().FilePath)');
+    }
+
+    function SetFileName(fileName, fileType, filePath, fileId, fileSrc) {
+        debugger;
+        if (fileName != undefined) {
+        var newfileName=getFileName(fileName);
+        var fileExtenstion =getFileExtenstion(fileName);
+
+           //$("#fileName").val(newfileName);
+             $("#fileext").val(fileExtenstion);
+
+            $("#txtfileName").val(newfileName);
+            $("#lblfileext").html(fileExtenstion);
+
+
+            $("#filePaths").val(filePath);
+            $("#fileId").val(fileId);
+           // $("#uploaddocTypeId").val(fileType);
+            
+            document.getElementById("docframe").setAttribute("src", getfileUrl(fileSrc.replace(/&amp;/g, '&')));
+        }
+    }    
+</script>

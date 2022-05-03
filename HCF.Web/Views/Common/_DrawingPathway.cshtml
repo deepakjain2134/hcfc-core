@@ -1,0 +1,153 @@
+﻿@model IEnumerable<HCF.BDO.FloorTypes>
+@{
+
+    ViewBag.Title = "Drawing Pathway";
+    Layout = null;
+    var floorTypes = Model.ToList();
+}
+
+<!-- Modal -->
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Attach Drawings</h4>
+        </div>
+       
+        <div class="modal-body row">
+            <div class="row">
+                <div class="col-md-3 asset_list_view col-left">
+                    <div class="finalizeleft_view">
+                        <input type="hidden" value="@ViewBag.FloorTypeId" id="floorTypeId" />
+                        <ul class="list drawings-list" id="floorTypeUl">
+                            @foreach (var item in floorTypes.OrderBy(x => x.FloorTypeId))
+                            {
+                                if (floorTypes.OrderBy(x => x.FloorTypeId).First() == item)
+                                {
+                                    <li id="@item.FloorTypeId" class="floorTypeli">
+                                        <a>
+                                            <label>
+                                                <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" />&nbsp;&nbsp;
+                                                <span for="@($"cb1{item.FloorType}")" id="lbl">
+                                                    @item.FloorType
+                                                </span>
+                                            </label>
+                                        </a>
+                                        <span class="drawings-checkicon">
+                                            <img src="/dist/img/Artboard 2.png">
+                                        </span>
+                                    </li>
+                                }
+                            }
+                            @foreach (var item in floorTypes.OrderBy(x => x.FloorType))
+                            {
+                                if (ViewBag.FloorTypeId != item.FloorTypeId)
+                                {
+                                    <li id="@item.FloorTypeId" class="floorTypeli">
+                                        <a>
+                                            <label>
+                                                <img src="@commonModelFactory.CommonFilePath(item.IconPath)" height="25" width="25" />&nbsp;&nbsp;
+                                                <span for="@($"cb1{item.FloorType}")" id="lbl">
+                                                    @item.FloorType
+                                                </span>
+                                            </label>
+                                        </a>
+                                        <span class="drawings-checkicon">
+                                            <img src="/dist/img/Artboard 2.png">
+                                        </span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="box-header vender_page">
+                        @*@{
+                    var addFloorUrl = Url.RouteUrl("addfloor");
+                    if (!string.IsNullOrEmpty(ViewBag.floorTypID.ToString()))
+                    {
+                        addFloorUrl = Url.RouteUrl("addfloor") + "?redirectPage=/Repository/FloorPlans/" + ViewBag.floorTypID.ToString();
+                    }
+                }
+                <a href='@addFloorUrl' class="pull-right">
+                    <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add Floor" alt="3d_add_button" />
+                </a>*@
+                    </div>
+                    <div class="" id="partialContentss">
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        loadDrwaings();
+        $(document).off("click", ".paginate_button").on("click", ".paginate_button", function () {
+            debugger;
+            console.log("test");
+            for (i = 0; i < arrchecked.length; i++) {
+                $("#chkdraw_" + arrchecked[i]).attr("checked", true);
+            }
+        });
+    });
+
+    $(".floorTypeli").click(function () {
+        var floorTypeId = $(this).attr("id");
+        $("#floorTypeId").val(floorTypeId);
+        loadDrwaings()
+    });
+
+    var arrchecked = [];
+    var firstload = 1;
+    function loadDrwaings() {
+        var floorTypeId = $("#floorTypeId").val();
+        if (floorTypeId > 0) {
+            $("#partialContentss").html('');
+            $(".floorTypeli").removeClass('active');
+            var url = CRxUrls.Common_DrawingpathwayFloorPlans;
+            $.get(url + "?floorTypeId=" + floorTypeId, function (data) {
+                debugger;
+                $('#partialContentss').html(data);
+                $('#partialContentss').fadeIn('fast');
+                $('#floorTypeUl li[id=' + floorTypeId + ']').addClass('active');
+                var str = $("#attachdrawingFiles").val();
+                var str_array = str.split(',');
+                debugger;
+                if (arrchecked.length > 0) {
+                    for (var i = 0; i < arrchecked.length; i++) {
+                        debugger;
+                        if (arrchecked[i] != "") {
+                            $("#chkdraw_" + arrchecked[i]).attr("checked", true);
+                            if (firstload == 1) {
+                                arrchecked.push(str_array[i]);
+                            }
+                        }
+                    }
+                }
+                else {
+                    for (var i = 0; i < str_array.length; i++) {
+                        debugger;
+                        if (str_array[i] != "") {
+                            $("#chkdraw_" + str_array[i]).attr("checked", true);
+                            if (firstload == 1) {
+                                arrchecked.push(str_array[i]);
+                            }
+
+                        }
+
+                    }
+                }
+
+                firstload = 0;
+            });
+            //var ids = $("#attachdrawingFiles").val();
+
+        }
+    }
+</script>

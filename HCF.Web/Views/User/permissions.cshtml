@@ -1,0 +1,103 @@
+﻿@model IEnumerable<HCF.BDO.RolesInGroups>
+
+@{
+    ViewBag.Title = "permissions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Roles Master
+        </h1>
+    </section>
+}
+<!-- Main content -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary" id="Setting_Content">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive permissions-scroll">
+                                    <table id="dataTable" class="table table-fixed table-bordered table-custom-striped no-footer permission comman_checkbox">
+                                        <thead>
+                                            <tr>
+                                                <th>Activity/Roles</th>
+                                                @foreach (var role in Model.GroupBy(p => new { p.GroupId }).Select(g => g.First()).ToList())
+                                                {
+                                                    <th>
+                                                        @string.Format("{0}", @role.UserGroup.Name)
+                                                    </th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody class="comman_checkbox1">
+                                            @foreach (var foo in Model.Where(x => x.Roles != null && x.Roles.ParentId == 0).ToList().OrderBy(x => x.Roles.DisplayText).GroupBy(p => new { p.RoleId }).Select(g => g.First()).ToList())
+                                            {
+                                                var dataList = Model.Select(x => x.Roles).ToList();
+
+                                                var levelNo = HCF.Web.Controllers.UserController.FindAllParents(dataList, foo.Roles).Count();
+
+                                                <tr class="@string.Format("class{0}", levelNo)">
+                                                    <td>
+                                                        <span class="@(levelNo == 0 ? "bold" : "n")" style='padding-left:@(levelNo * 10)px'>
+                                                            @foo.Roles.DisplayText
+                                                        </span>
+                                                    </td>
+
+                                                    @foreach (var role in Model.Where(x => x.RoleId == foo.RoleId).ToList())
+                                                    {
+                                                        <td align="center">
+                                                            @if (foo.Roles.IsChild)
+                                                            {
+                                                                @Html.CheckBoxFor(modelItem => role.Status, new { @roleId = role.RoleId, @groupId = role.GroupId, @class = "FlagT" })<span></span>
+                                                            }
+                                                        </td>
+                                                    }
+                                                </tr>
+
+                                                if (Model.Where(x => x.Roles.ParentId == foo.RoleId).Any())
+                                                {
+                                                    @await Html.PartialAsync("_PermissionTr", Model.Where(x => x.Roles.ParentId == foo.RoleId).ToList())
+
+                                                }
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+                    @if (HCF.Web.Base.UserSession.CurrentUser.IsSystemUser && HCF.Web.Base.UserSession.CurrentUser.Email=="anoop@hcfcompliance.com")
+                    {
+                              @: $(document).ready(function () {
+
+                              @: $(".FlagT").change(function() {
+                              @: $.ajax({
+                              @: url: '@Url.Action("UpdatePermissions", "User")',
+                              @: type: "POST",
+                              @: data: { __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),newValue: $(this).is (':checked'), roleId: $(this).attr('roleId'),groupId: $(this).attr('groupId') },
+                              @: dataType: 'json',
+                              @: success: function(result) {}        });               })        })
+                        }
+                    else
+                    {
+                        @: $(".FlagT").addClass("disabled");
+                    }
+    </script>
+}
+

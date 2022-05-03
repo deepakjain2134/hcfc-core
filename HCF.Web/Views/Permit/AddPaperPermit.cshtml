@@ -1,0 +1,378 @@
+﻿@model HCF.BDO.PaperPermit
+@{
+    ViewBag.Title = "Paper Permit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    //int itemcount = 1;
+    var contractorname = HCF.Web.Base.UserSession.CurrentOrg.Name;
+
+}
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Add Paper Permit
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+
+                @using (Html.BeginForm("AddPaperPermit", "Permit", FormMethod.Post, new { enctype = "multipart/form-data", id = "paperpermitform", autocomplete = "off" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="row">
+
+                        @Html.HiddenFor(m => m.PermitId)
+                        @Html.HiddenFor(m => m.TFileIds)
+
+                        <input type="hidden" name="AttachFiles" value="" id="attachFiles" />
+                        <input type="hidden" id="hdnsubmitButton" name="submit" />
+
+                        <div class="col-md-12 form-group">
+                            <label> Permit Type:<em class="required-field">*</em>   </label>
+                            <permit-drop-down-list required="required"
+                                                   class="form-control"
+                                                   selectedvalue="0"
+                                                   firsttext="Select Permit Type"
+                                                   name="PermitType"></permit-drop-down-list>
+                        </div>
+
+
+
+
+
+                        <input type="hidden" name="ProjectId" id="ProjectId" required />
+                        <div class="col-md-6 form-group">
+                            <label>Permit #: <em class="required-field">*</em></label>
+                            @Html.TextBoxFor(m => m.PermitNo, new { @class = "form-control", required = "required" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Project Name :<em class="required-field"> *</em></label>
+                            <input type="hidden" name="ProjectId" id="ProjectId" />
+                            @*@Html.Action("ProjectCustomDDL", "Common", new { type = "SINGLE", ProjectId = Model.ProjectId })*@
+                            @await Component.InvokeAsync("CommonProjectCustomDDL", new { type = "SINGLE", ProjectId = Model.ProjectId.ToString() })
+                            <input type="text" id="txtprojectName" name="txtprojectName" class="ddlproject" required />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Project #: <em class="required-field">*</em></label>
+                            <input type="text" name="ProjectNumber" id="ProjectNumber" class="form-control" disabled="disabled" required="required" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Contractor:</label>
+                            @Html.TextBoxFor(m => m.Contractor, new { @class = "form-control" })
+                            <input type="hidden" id="contactorname" value="@contractorname" />
+                        </div>
+
+
+                        <div class="col-md-12 form-group">
+                            <label class="attachedfile-lable">
+                                Permits:
+                                <em class="required-field">*</em>
+                            </label>
+                            <img src="@Url.Content(HCF.Web.Models.ImagePathModel.UploadIcon)" id="btnuploadfile" data-toggle="modal" data-target="#modal-container" />
+                            <sup id="attchFileCount" style="display:none;"></sup>
+                            <div id="file-upload-list">
+                                @if (Model.Attachments != null)
+                                {
+                                    <div id="file-lists">
+                                        <input type="hidden" id="noofattachedpermit" value="@Model.Attachments.Count" />
+                                        <ul class="col-lg-12 attachfileitems">
+                                            @foreach (var item in Model.Attachments)
+                                            {
+                                                <li class="list-group-item files" id="lidv_@item.TFileId">
+                                                    @if (!string.IsNullOrEmpty(item.FileName))
+                                                    {
+                                                        <a href="@Url.Action("ImagePreview", "Common", new { imgSrc = item.FilePath, title = "Preview" })" class="modal-link allowclick">
+                                                            @item.FileName
+                                                            @*<img src="@Url.Content("~/dist/Images/Icons/document_blue-icon.png")" title="@item.FileName" />*@
+                                                        </a>
+                                                        <a data-id="@item.TFileId" class="deletefile allowclick">
+                                                            <img id="deleteimg" alt="Delete" title="Delete file" src="~/dist/Images/Icons/red_cross.png" />
+                                                        </a>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12 text-right button_Div">
+                            <input name="submit" type="submit" id="savepaperpermit" value='@Localizer["Submit"]' class="comm-button" />
+                            @*<input name="submit" type="button" id="savemop" value=' @Resources.Resource.Submit ' class="comm-button" />*@
+                            @*<button name="submit" type="button" class="comm-button" id="savemop" value=' @Resources.Resource.Submit ' />*@
+                            @*<button name="submit" formnovalidate="formnovalidate" type="button" class="@( (Model.PermitId > 0) ? "comm-button hide" : "comm-button")" id="btnIncomplete" value="Save Incomplete">Save Incomplete</button>*@
+                            @*@Html.ActionLink("Cancel ", "paperpermit", "Permit", new { @class = "comm-button" })*@
+                            @Html.ActionLink("Cancel", "paperpermit", new { controller = "Permit" }, new { @class = "comm-Cancelbutton" })
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="signAndSave" role="dialog">
+</div>
+
+<style>
+    .ddlproject {
+        position: absolute;
+        right: 21px;
+        bottom: 5px;
+    }
+
+   
+
+    .common-procedure {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .asset_list_affected ul li {
+        width: 100%;
+    }
+
+    .selectList {
+        width: 100% !important;
+    }
+
+    .col-lg-12.common-oredit, .col-lg-12.common-procedure {
+        padding: 0 10px;
+    }
+
+    #divApprove,
+    #divReject {
+        clear: both;
+        padding-top: 12px;
+    }
+
+    .sweet-alert input {
+        display: initial;
+        width: auto;
+        height: auto;
+        margin: auto;
+    }
+
+    .sweet-alert fieldset input[type="text"] {
+        display: none;
+    }
+</style>
+<script src="@Url.Content("~/dist/Scripts/jquery-clockpicker.js")"></script>
+<link rel="stylesheet" href="@Url.Content("~/dist/css/clock-picker/jquery-clockpicker.min.css")" />
+<script>
+
+    $('#savepaperpermit').on('click', function () {
+        debugger;
+        var id = $("#attchFileCount").text();
+        var permitno = $('#PermitNo').val()
+        var attachmentsCount = $('#noofattachedpermit').val();
+        var IsValid = true;
+
+
+        if ($('#paperpermitform')[0].checkValidity() && id == "" && (attachmentsCount == undefined || attachmentsCount == "0")) {
+            IsValid = false;
+            swalalert('Please Attach Permit First!');
+            return false;
+        }
+
+        if ($('#paperpermitform')[0].checkValidity()) {
+            if (IsValid) {
+                $("#paperpermitform").submit();
+            }
+            else {
+                return false;
+            }
+        }
+    });
+
+
+
+
+      $('#PermitNo').on('change', function () {
+        debugger;
+        var value = $(this).val();
+        $.get('@Url.Action("CheckPermitNo", "Permit")' + "?value=" + value, function (data) {
+            debugger;
+            if (data != "null") {
+                swalalert(data);
+                $('#PermitNo').val("");
+            }
+        });
+    });
+
+
+    $(".readonly").on('keydown paste', function (e) {
+        e.preventDefault();
+    });
+    var statusddl = $("#PermitType");
+    var ApproveBy = $("#ApproveBy");
+    $(document).ready(function () {
+        debugger;
+        var projectid = parseInt('@ViewBag.ProjectId');
+        var status = parseInt('@Model.PermitType');
+        if (!isNaN(status)) {
+            statusddl.val(status);
+
+        }
+        var name = $('#contactorname').val();
+        $('#Contractor').val(name);
+
+        if (projectid != "" && projectid != undefined && projectid > 0) {
+            $('.chkSigleSelect input[type="checkbox"][value="' + projectid + '"]').prop('checked', true).trigger('change');
+        }
+
+        $(".chkSigleSelect input[type='checkbox']").change(function () {
+            debugger;
+            var projectid = $(this).attr("data-text");
+
+            var string1 = projectid;
+            string1 = string1.split('(')[1];
+            if (string1.length > 0) {
+                var string2 = string1.split(')')[0];
+                if (string2.length > 0) {
+                    $("#ProjectNumber").val(string2);
+                }
+            }
+
+            if ($(".chkSigleSelect input[type='checkbox']:checked").length == 0) {
+                $("#txtprojectName").val("");
+            }
+        });
+
+        if (projectid > 0) {
+
+            var string1 = $("input:checked").attr("data-text");
+            string1 = string1.split('(')[1];
+            if (string1.length > 0) {
+                var string2 = string1.split(')')[0];
+                if (string2.length > 0) {
+                    $("#ProjectNumber").val(string2);
+                }
+            }
+
+        }
+
+
+
+    });
+
+    $("#btnuploadfile").click(function () {
+        $('#addFiles').modal('show');
+    });
+
+    $("#btnIncomplete").click(function () {
+
+
+
+    });
+
+
+
+    function loadSubProject() {
+
+        let projectid = $('#drpProject').val();
+        $('#ProjectId').val(projectid);
+        projectid = projectid != null ? parseInt(projectid) : 0;
+        let url = CRxUrls.Permit_GetSubProjectByProjectId;
+        let htmlData = '<option value="">Select Sub Project</option>';
+        $.get(url + "?projectId=" + projectid, function (data) {
+            for (var item of data) {
+                htmlData += '<option value="' + item.ProjectId + '">' + item.ProjectName+'('+item.ProjectNumber+')' + '</option>';
+            }
+            $('#drpSubProject').html(htmlData);
+        });
+
+        let projectname = $('#drpProject option:selected').text();
+        var string1 = projectname
+        string1 = string1.split('(')[1];
+        if (string1.length > 0) {
+            var string2 = string1.split(')')[0];
+            if (string2.length > 0) {
+                $("#ProjectNumber").val(string2);
+            }
+        }
+    }
+
+    function SetProjectId() {
+        let hfProject = $('input[type="hidden"][name="ProjectId"]');
+        let ProjectId = $('#drpSubProject').val();
+        hfProject.val(ProjectId);
+        $('#ProjectId').val(ProjectId);
+        let projectname = $('#drpSubProject option:selected').text();
+        var string1 = projectname
+        string1 = string1.split('(')[1];
+        if (string1.length > 0) {
+            var string2 = string1.split(')')[0];
+            if (string2.length > 0) {
+                $("#ProjectNumber").val(string2);
+            }
+        }
+    }
+
+
+    $(document).on('click', '#btnuploadfile', function () {
+        LoadRecentFiles();
+        $('#modal-container').modal('show');
+    });
+
+    // delete upload documents from permits updated by avinash on 27-04-2020
+    var TFileIds = $("#TFileIds");
+    $(document).on('click', 'a.deletefile', function (e) {
+        e.preventDefault();
+        var TFileId = $(this).data("id");
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this File!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            closeOnConfirm: true
+        },
+            function () {
+                if (TFileIds.val() != undefined && TFileIds.val() != "") {
+                    var newfileIds = removeCommaSeperatedValue(TFileIds.val(), TFileId, ",");
+                    TFileIds.val(newfileIds);
+                    $.ajax({
+                        type: "GET",
+                        url: CRxUrls.Delete_TPaperPermitFiles + "?permitid=" + '@Model.PermitId' + "&fileIds=" + newfileIds,
+                        success: function (data) {
+                            swal("Deleted!", "Your file has been deleted.", "success");
+                            $("#lidv_" + TFileId).remove();
+                            deleteattachfile(TFileId);
+                        },
+                        dataType: "json",
+                        traditional: true
+                    });
+                    getattachedupdate(@Model.PermitId)
+                }
+                else {
+                    deleteattachfile(TFileId);
+                    swal("Deleted!", "Your file has been deleted.", "success");
+                }
+            });
+    });
+
+
+    function getattachedupdate(id) {
+        debugger;
+        if (id > 0) {
+            $.get('@Url.Action("UpdatedPermit", "Permit")' + '?id=' + id, function (data) {
+                debugger
+                if (data.PaperPermit.Attachments != null) {
+                    $('#noofattachedpermit').val(data.PaperPermit.Attachments.length);
+                } else {
+                    $('#noofattachedpermit').val(0);
+                }
+            });
+        }
+    }
+</script>
+
+<script type="text/javascript" src="@Url.Content("~/dist/scripts/page_scripts/fileupload.js")"></script>

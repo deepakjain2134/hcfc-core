@@ -1,0 +1,208 @@
+﻿@model IEnumerable<HCF.BDO.Certificates>
+@{
+    ViewBag.Title = "Licenses and Certificates";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Licenses and Certificates
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="certificates-col12">
+                    <div class="certificates-sortingBox">
+                        <input type="hidden" id="UserID" />
+                        <input type="hidden" id="VendorID" />
+                        <input type="hidden" id="selectedradiobtn" />
+
+                        @if (ViewBag.View != "UserView")
+                        {
+                            <div class="row tablelist-topform">
+                                <div class="select_view col-lg-12">
+                                    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                        <label class="btn active">
+                                            @Html.RadioButton("BinderCertificateTypes", "all", true)@Html.Label("All")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn">
+                                            @Html.RadioButton("BinderCertificateTypes", "3", new { @selradio = "3" })@Html.Label("General")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn">
+                                            @Html.RadioButton("BinderCertificateTypes", "1", new { @selradio = "1" })@Html.Label("Internal")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                        <label class="btn">
+                                            @Html.RadioButton("BinderCertificateTypes", "2", new { @selradio = "2" })@Html.Label("Vendor")<i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                                <div class="col-lg-6 interVendorBox">
+                                    <div class="BinderInternal_View" id="BinderInternal_View">
+                                        <userdropdownlist name="drpBinderUser"
+                                                          class="form-control"
+                                                          selectedvalue="0"
+                                                          firsttext="Select All">
+                                        </userdropdownlist>
+                                    </div>
+                                    <div class="BinderVendor_view" id="BinderVendor_view">
+                                        <vendordropdownlist name="drpBinderVendor"
+                                                            selectedvalue="0"
+                                                            firsttext="Select All"
+                                                            class="form-control">
+                                        </vendordropdownlist>
+                                    </div>
+                                </div>
+                            
+                        }
+                        @*<div class="add_button_comman">
+                            <a href='@(Url.Action("AddOrEditCertificates", "User", new {Id = "", userId=@ViewBag.UserID , vendorid=@ViewBag.VendorID, view=ViewBag.View}))' class="pull-right">
+                                <img src="@Url.Content("~/dist/Images/Icons/3d_add_button.png")" title="Add Certificates" alt="3d_add_button" />
+                            </a>
+                        </div>*@
+                    </div>
+
+                    <div class="cretificate-container" id="all_certificates">
+                        @await Html.PartialAsync("_Certificates", Model)
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#BinderInternal_View").hide();
+        $("#BinderVendor_view").hide();
+        var selectedradiobtn = localStorage.getItem("selectedradiobtn");
+        HideTableSorting();
+
+        var myCertiTable = $('#certification_myTable').DataTable({
+            searching: true,
+            pageLength: 10,
+            lengthChange: false,
+            bPaginate: $('#certification_myTable tbody tr').length > 10,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            /* dom: "Blftip",*/
+            
+
+             initComplete: function () {
+                 $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("AddOrEditCertificates", "User"))" class= "pull-right" ><img src="/dist/Images/Icons/3d_add_button.png" title="Add Certificates" alt="3d_add_button"></a></div >');
+            },
+            dom: "<'row'<'col-sm-12 tableactions'fl <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> >>" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+
+            buttons: [
+
+            ]
+        });
+
+        if (selectedradiobtn != "") {
+            $("#BinderInternal_View").hide();
+            $("#BinderVendor_view").hide();
+            if (selectedradiobtn == "1") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $('#drpBinderVendor').val("");
+                $('#drpBinderUser').val("");
+                $("#BinderInternal_View").show();
+                $("#BinderVendor_view").hide();
+                $("[selradio=1]").prop("checked", true)
+                myCertiTable.column(0).search("^" + selectedradiobtn + "$", true, true, false).draw();
+            } else if (selectedradiobtn == "2") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $('#drpBinderVendor').val("");
+                $('#drpBinderUser').val("");
+                $("#BinderInternal_View").hide();
+                $("#BinderVendor_view").show();
+                $("[selradio=2]").prop("checked", true)
+                myCertiTable.column(0).search("^" + selectedradiobtn + "$", true, true, false).draw();
+            } else if (selectedradiobtn == "3") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $("#BinderInternal_View").hide();
+                $("#BinderVendor_view").hide();
+                $("[selradio=3]").prop("checked", true)
+                myCertiTable.column(0).search("^" + selectedradiobtn + "$", true, true, false).draw();
+            } else {
+                $("[selradio=all]").prop("checked", true)
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+            }
+            localStorage.clear();
+        }
+
+
+
+        $("[name=BinderCertificateTypes]").on('change', function () {
+            var view = $(this).val();
+            $("#BinderInternal_View").hide();
+            $("#BinderVendor_view").hide();
+            $('#drpBinderVendor').val("");
+            $('#drpBinderUser').val("");
+            if (view == "1") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $("#BinderInternal_View").show();
+                $("#BinderVendor_view").hide();
+                myCertiTable.column(0).search("^" + view + "$", true, true, false).draw();
+            } else if (view == "2") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $("#BinderInternal_View").hide();
+                $("#BinderVendor_view").show();
+                myCertiTable.column(0).search("^" + view + "$", true, true, false).draw();
+            } else if (view == "3") {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+                $("#BinderInternal_View").hide();
+                $("#BinderVendor_view").hide();
+                myCertiTable.column(0).search("^" + view + "$", true, true, false).draw();
+            } else {
+                myCertiTable.columns(1).search("").columns(2).search("").columns(0).search("").draw();
+            }
+            localStorage.setItem("selectedradiobtn", view);
+        });
+
+
+        $('#drpBinderUser').change(function () {
+            debugger;
+            var selectedID = $(this).val();
+            if (selectedID != "") {
+                myCertiTable.column(1).search("^" + selectedID + "$", true, true, false).draw();
+            } else {
+                myCertiTable.columns(1).search("").draw();
+            }
+        });
+
+        $('#drpBinderVendor').change(function () {
+            var selectedID = $(this).val();
+            if (selectedID != "") {
+                myCertiTable.column(2).search("^" + selectedID + "$", true, true, false).draw();
+            } else {
+                myCertiTable.columns(2).search("").draw();
+            }
+        });
+    });
+
+    function HideTableSorting() {
+        const el = $('#RiskAreaTable th[aria-label]')[12];
+        $(el).removeClass("sorting");
+    }
+</script>

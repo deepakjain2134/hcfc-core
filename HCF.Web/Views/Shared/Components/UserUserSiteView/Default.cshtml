@@ -1,0 +1,136 @@
+﻿@model HCF.Web.ViewModels.UserSiteViewModel
+@{
+    int step = 0;
+    var siteMapping = Model.SiteMapping ?? new List<HCF.BDO.UserSiteMapping>();
+    var sites = Model.Sites;
+    if (Model.UserId == 0)
+    {
+        if (!Model.UserId.HasValue || Model.UserId.Value == 0)
+        {
+            step = 1;
+        }
+    }
+
+    if (Model.VendorId == 0)
+    {
+        if (!Model.VendorId.HasValue || Model.VendorId.Value == 0)
+        {
+            step = 1;
+        }
+    }
+}
+
+<div class="table-responsive userlist-table" style="margin: 6px;">
+    <table class="table table-bordered">
+        <tr>
+            @foreach (var item in sites)
+            {
+                <th>
+                    @item.Name
+                </th>
+            }
+        </tr>
+        <tr>
+            @foreach (var item in sites)
+            {
+
+                if (Model.UserId == 0 || Model.VendorId==0)
+                {
+                    step = 1;
+                }
+                else
+                {
+                    var type = siteMapping.Where(x => x.SiteId == item.SiteId).FirstOrDefault();
+                    step = (type != null) ? type.AssignedType : 0;
+                }
+                <td>
+                    <span class="@string.Format("checkbox step{0}",step)" siteId="@item.SiteId">
+                    </span>
+                    <span class="label"></span>
+                </td>
+            }
+        </tr>
+    </table>
+</div>
+<input type="hidden" name="siteAssigneeType" id="siteAssigneeType" />
+<link href="~/dist/css/userStyle.css" rel="stylesheet" />
+
+
+<script>
+
+    var lists = [];
+
+    $('.checkbox').click(function () {
+        //debugger;
+        var ctr = $(this);
+        loadData(ctr);
+
+    });
+
+    $(document).ready(function () {
+        //debugger;
+        $(".checkbox").each(function (index) {
+            debugger;
+            var ctr = $(this);
+            var siteId = ctr.attr("siteId");
+            var accessType = 0;
+            lists = $.grep(lists, function (e) {
+                return e.SiteId != siteId;
+            });
+            var ctr = $(this);
+            if (ctr.hasClass('step1')) {
+                accessType = 1;
+            } else if (ctr.hasClass('step2')) {
+                accessType = 2;
+
+            }
+            else if (ctr.hasClass('step0')) {
+                accessType = 0;
+            }
+            else {
+                accessType = 1;
+            }
+            let list = {
+                SiteId: siteId,
+                AssignedType: accessType
+            };
+            lists.push(list);
+            $("#siteAssigneeType").val(JSON.stringify(lists));
+        });
+    });
+
+    function loadData(ctr) {
+       // debugger;
+        var siteId = ctr.attr("siteId");
+        var accessType = 0;
+        lists = $.grep(lists, function (e) {
+            return e.SiteId != siteId;
+        });
+
+        if (ctr.hasClass('step1')) {
+            ctr.removeClass('step1');
+            ctr.addClass('step2');
+            accessType = 2;
+        } else if (ctr.hasClass('step2')) {
+            ctr.removeClass('step2');
+          //  ctr.html('');
+            ctr.addClass('step0');
+          
+            accessType = 0;
+        } else {
+            ctr.addClass('step1');
+            ctr.addClass('step0');
+            accessType = 1;
+        }
+
+
+        let list = {
+            SiteId: siteId,
+            AssignedType: accessType
+        };
+        lists.push(list);
+        $("#siteAssigneeType").val(JSON.stringify(lists));
+
+    }
+
+</script>

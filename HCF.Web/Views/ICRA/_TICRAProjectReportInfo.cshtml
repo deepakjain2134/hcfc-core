@@ -1,0 +1,22 @@
+﻿@model HCF.BDO.TICRAReports
+
+@{
+    ViewBag.Title = "_TICRAReportInfo";
+}
+<div class=" row form-inline">
+    <div class="col-md-4 form-group">
+        <label>Project Name:</label> 
+        <label id="lblProjectNames">@string.Join(", ", Model.Projects.Select(x => x.ProjectName))</label>
+    </div>
+    <div class="col-md-4 form-group">
+        <label>Contractor: </label>
+    @*@Model.Contractor*@
+    </div>
+    <div class="col-md-4 form-group">
+        <label>Project Location: </label>
+        @*@Model.Location*@
+    </div>
+    <div class="col-md-4 form-group">
+        <select style="width:100%;" id="ticraobsReports" class="form-control" name="ticraobsReports"></select>
+    </div>
+</div>

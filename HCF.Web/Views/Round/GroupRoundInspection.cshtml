@@ -1,0 +1,111 @@
+﻿@model List<HCF.BDO.TRounds>
+@{
+    ViewBag.Title = "Readiness Round Inspection";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string TRoundId = string.Empty;
+}
+@section pageHeader{
+<section class="content-header">
+    <h1>
+        Round Inspection
+    </h1>
+</section>
+}
+<div id="partialContents">
+    @await Html.PartialAsync("_GroupRoundInspection", Model)
+</div>
+
+<input type="hidden" id="tem_hnd_roundId" value="@ViewBag.tRoundId" />
+@*<input type="hidden" id="hdnGroupRoundId" value="@ViewBag.troundGroupId" />
+    <input type="hidden" id="hdnusers" value="@ViewBag.users" />
+    <input type="hidden" id="hdndate" value="@(ViewBag.rounddate!=null?ViewBag.rounddate:string.Empty)" />*@
+<div id="myModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    File Preview
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </h5>
+
+            </div>
+            <div class="modal-body">
+                <img id="previewImage" style="width:100%; height:100%;" />
+                <div class="zoomBtn">
+                    <button id="z_in"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+                    <button id="z_out"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .pass {
+        background-color: #54a77b;
+        color: #fff !important;
+    }
+
+    .fail {
+        background-color: #cc6164;
+        color: #fff !important;
+    }
+
+    .inprogress {
+        background-color: blue;
+        color: #fff !important;
+    }
+
+    /*image popup zoom in out*/
+    .modal-dialog,
+    .modal-body {
+        height: 88%;
+    }
+
+    .modal-body {
+        overflow: auto;
+    }
+
+    .modal-content,
+    .iframe-preview {
+        height: 100%;
+    }
+</style>
+
+@section scripts{
+
+<script type="text/javascript" src="@Url.Content("~/dist/Scripts/page_scripts/Rounds/round_save_update.js")"></script>
+
+<script type="text/javascript">
+    //var troundId=$("#tem_hnd_roundId").val();
+    //$(function () {
+    //    loadData();
+    //});
+    //function loadData(floorId) {
+    //    if (floorId == 'undefined') {
+    //        floorId = null;
+    //    }
+    //    $.ajax({
+    //        url: CRxUrls.Round_GroupRoundInspectionPartial + "?troundId="+troundId,
+    //        cache: false,
+    //        type: "GET",
+    //        success: function (data) {
+    //            $('#partialContents').html(data);
+    //            $('#partialContents').fadeIn('fast');
+    //        }
+    //    });
+    //}
+    // image popup zoom in out
+    $('#z_in').click(function () {
+        $('#previewImage').css({ "width": "+=100px", "height": "+=100px" });
+    });
+
+    $('#z_out').click(function () {
+        $('#previewImage').css({ "width": "-=100px", "height": "-=100px" });
+    });
+
+</script>
+
+}

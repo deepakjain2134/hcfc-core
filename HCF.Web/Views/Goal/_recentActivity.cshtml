@@ -1,0 +1,185 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+
+    <table id="recentActivityTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="display:none">Status</th>
+                <th style="display:none">CategoryId</th>
+                <th width="20"></th>
+                <th width="116">
+                    Standard, EP
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    EP Review Date
+                </th>
+                <th>
+                    Document Date
+                </th>
+                <th>
+                    Document
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                if (item.TInspectionActivity.Count > 0)
+                {
+                    <tr id="EPID_@item.EPDetailId">
+                        <td style="display:none">
+                            @Html.DisplayFor(modelItem => item.Inspection.Status)
+                        </td>
+                        <td style="display:none">
+                            @Html.DisplayFor(modelItem => item.Standard.CategoryId)
+                        </td>
+
+                        @if (item.TInspectionActivity.Any(x => x.ActivityType != 1))
+                        {
+                            <td class="details-control"></td>
+                        }
+                        else
+                        {
+                            <td class="details-control disable"></td>
+                        }
+                        <td>
+                            @item.StandardEp
+                        </td>
+                        <td style="text-align:left;">
+                            @await Html.PartialAsync("_EpDescription", item.Description,
+                                new ViewDataDictionary(
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                                new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                                {{ "minLength", "100" }, { "standardEp", @item.StandardEp }}
+                               )
+
+                            @*@await Html.PartialAsync("_EpDescription", item.Description, new ViewDataDictionary { { "minLength", "100" }, { "standardEp", @item.StandardEp } })*@
+                        </td>
+                        <td>
+                            @item.TInspectionActivity.OrderByDescending(x => x.CreatedDate).FirstOrDefault().CreatedDate.Value.ToClientTime().ToFormatDateTime()
+                        </td>
+
+                        <td>
+                            @*@if (item.Inspection.InspectionDocs.Count > 0)
+                                {
+                                    <span>@item.Inspection.InspectionDocs[0].DocumentName</span>
+                                }*@
+                        </td>
+
+                        <td></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+<script>
+    $(document).ready(function () {
+        //localStorage.clear();
+
+        $('.descriptions').popover({
+            trigger: 'focus'
+        });
+
+        var dataTables = $('#recentActivityTable').DataTable({
+            searching: true,
+            pageLength: 20,
+            lengthChange: false,
+            bPaginate: $('#recentActivityTable tbody tr').length > 20,
+            bInfo: false,
+            aaSorting: [],
+            language: {
+                emptyTable: "No data available in table",
+                search: "_INPUT_", //To remove Search Label
+                searchPlaceholder: "Search..."
+            },
+
+            aoColumnDefs: [
+                {
+                    orderSequence: ["desc", "asc"],
+                    aTargets: ['_all']
+                }
+            ],
+            dom: "Blftip",
+            buttons: [
+
+            ]
+        });
+
+        $('#recentActivityTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = dataTables.row(tr);
+            var detid = $(tr).attr('id').split('_')[1]
+            console.log(detid)
+            var htmldata = '';
+
+            if (row.child.isShown()) {
+                $('div.slider', row.child()).slideUp(function () {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                });
+            }
+            else {
+                var url = '@Url.Action("RecentActivityChild", "Goal")';
+                $.ajax({
+                    url: url + '?EpDetailID=' + detid,
+                    method: 'GET',
+                    success: function (data) {
+                        //console.log(data);
+                        row.child(data, 'no-padding').show();
+                        //htmldata = data
+                        //row.child($(htmldata)).show();
+                        tr.addClass('shown');
+                    }
+                });
+            }
+        });
+
+        $(".button1").click(function () {
+            $(".button1").removeClass("active");
+            $(this).addClass("active");
+        });
+
+        //$('#btn_Inprogress').on('click', function () {
+        //    localStorage.setItem("btnValue", 2);
+        //    Searching();
+        //});
+
+        $('#btn_compliance').on('click', function () {
+            localStorage.setItem("btnValue", 1);
+            Searching();
+        });
+        $('#btn_noncompliance').on('click', function () {
+            localStorage.setItem("btnValue", 0);
+            Searching();
+        });
+
+        $('#btn_all').on('click', function () {
+            localStorage.setItem("btnValue", "");
+            Searching();
+        });
+
+        $("input[name=EPCat]:radio").change(function () {
+            var catId = $("input[name='EPCat']:checked").val();
+            localStorage.setItem("EPCatId", catId);
+            Searching();
+        });
+
+        function Searching() {
+            var catId = localStorage.getItem("EPCatId");
+            var status = localStorage.getItem("btnValue");
+            if (catId == null || catId == 0) {
+                catId = "";
+                if (status == null) {
+                    status = "";
+                }
+            } else if (status === null) {
+                status = "";
+            }
+            dataTables.columns(0).search(status).columns(1).search(catId).draw();
+        }
+            
+    });
+</script>

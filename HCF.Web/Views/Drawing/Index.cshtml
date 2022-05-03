@@ -1,0 +1,42 @@
+﻿@model HCF.BDO.DrawingViewer
+@{
+    ViewBag.Title = "Drawings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Manage Drawings
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header">
+                </div>
+               
+                    @*@await Component.InvokeAsync("DrawingManageDrawings",
+                        new
+                             {
+                            mode = Convert.ToString(Model.ViewerMode),
+                            floorPlanId = Model.FloorPlanId,
+                            permitId = ViewBag.permitId,
+                            ispopup = ViewBag.ispopup
+                        })*@
+                    @await Component.InvokeAsync("CadViewer", new
+               {
+                   sourceFilePath = commonModelFactory.FilePath(Model.FloorPlan.ImagePath).Replace("https://", "https://s3.amazonaws.com/"),
+                   mode = Convert.ToString(Model.ViewerMode),
+                   floorPlanId = Model.FloorPlanId,
+                   permitId = ViewBag.permitId,
+                   ispopup = ViewBag.ispopup
+               })
+               
+            </div>
+        </div>
+    </div>
+</div>
+

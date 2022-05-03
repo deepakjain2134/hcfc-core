@@ -1,0 +1,383 @@
+﻿@model HCF.BDO.EPSteps
+@{
+    ViewBag.Title = "Map assets to inspection report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            Map assets to inspection report
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-xs-3 col-left">
+                <div class="box box-primary assetsInspection">
+                    @*@Html.Action("AssetsInspection", "Goal")*@
+                    @await Component.InvokeAsync("GoalAssetsInspection")
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-primary">
+                    <div id="fileSection">
+                        <input type="hidden" id="d_fileName" value="" />
+                        <input type="hidden" id="d_fileId" value="0" />
+                    </div>
+                    <div>
+                        <strong>
+                            Report Date:
+                        </strong>
+                        <input type="text" name="inspectiondate" class="datepicker" id="inspectiondate" style="border-radius:0;width:140px;border: 1px solid #ddd;" readonly="readonly" />
+                        <div class="float-right">
+                            <a class="button1" id="btnAddDoc">Add Document</a>
+                            <button id="dragSaveInspection" class="button1">Upload Report</button>
+                        </div>
+                        <p>
+                            "Tip: select and drag the assets from right side to drop box to attach report."
+                        </p>
+                    </div>
+                    <div id="dropfileList">
+                        <ul class="fileList"></ul>
+                    </div>
+
+                    <div style="height:210px;border:1px solid;overflow:auto" ondragover="dragOver(event);" ondrop="drop(event);" id="assetList" class="drop_data">
+                        <ul class="dropAssetList"></ul>
+                    </div>
+
+                    <div class="box col-lg-12 hide">                       
+                        <input type="hidden" id="floorAssetId" value="0" />
+                        <input type="hidden" id="inspectiongroupId" value="0" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@section scripts{
+<script>
+        $(".assetAttachIcon").remove();
+        var dropFloorAssets = [];
+        var dropFiles = [];
+
+        var btnAddDoc = $("#btnAddDoc");
+
+        btnAddDoc.click(function () {
+            $("#dropfileList").hide();
+            LoadRecentFiles();
+        });
+
+    function fileUploadSuccess(tFiles, selectedFiles) {
+        if (tFiles != undefined && tFiles.length > 0) {
+                if (tFiles.length > 1) {
+                    swalalert("Select only one report to attach.");
+                    return false;
+                }
+                bindFileToList(tFiles);
+            }
+        }
+
+        function bindFileToList(selectedFiles) {
+            $("#dropfileList ul").empty();
+            $("#dropfileList").show();
+
+            console.log(selectedFiles);
+            dropFiles = [];
+            $.each(selectedFiles, function (index, item) {
+                dropFiles.push(item);
+                // console.log(item);
+                    $("#dropfileList ul").append('<li id="fileli' +
+                        item.TFileId +
+                        '"><div class="dropfileName"><span>File Name: </span>' +
+                        item.FileName +
+                        ' </div>' +
+                        '<a id="filePath" href="' +
+                        item.FilePath +
+                        '" target="_blank"><img src="@Url.Content(HCF.Web.Models.ImagePathModel.DetailIcon)">' +
+                        '<div class="removedropfiles"><a class="removedropfile" id=' +
+                        item.TFileId +
+                        '>Remove</a></div></li>');
+                });
+            // console.log(dropFiles);
+        }
+
+        $(document).ready(function() {
+            $('.datepicker').datepicker({
+                showOn: "both",
+                buttonImage: "@Url.Content(HCF.Web.Models.ImagePathModel.CalendarDatePicketIcon)",
+                buttonImageOnly: true,
+                minDate: '-1Y',
+                dateFormat: $.CRx_DateFormat,
+                maxDate: 0,
+                beforeShow: changeYearButtons,
+                onChangeMonthYear: changeYearButtons
+            }).datepicker('setDate', 'today');
+            $("#dropfileList").hide();
+            showFrequencyUpdatePopUp();
+        });
+
+
+        var showFrequencyUpdatePopUp = function() {
+            const canInspectEp = '@Model.EPDetails.CanInspect()';
+            console.log(canInspectEp);
+            if (canInspectEp.toLowerCase() === "false") {
+                var cancelRedirectUrl = CRxUrls.Goal_EpInspections + "?epId=" + @Model.EPDetailId;
+                ShowConfirmMsg("Asset Review",
+                    "info",
+                    $.Constants.EP_Inspection_Ongoing_Assets,
+                    "Back to EP Review",
+                    cancelRedirectUrl);
+                $("#dragSaveInspection").remove();
+            }
+        }
+
+
+        function drop(e) {
+            debugger;
+            e.stopPropagation();
+            e.preventDefault();
+            var sourceData = JSON.parse(e.dataTransfer.getData("text"));
+            //console.log("sourceData" + sourceData);
+            var type = sourceData.dtype;
+            var data = sourceData.id;
+            // var filePath = sourceData.filePath;
+            var inspectionGroupId = sourceData.inspectiongroupid;
+            var nodeCopy = document.getElementById(data).cloneNode(true);
+            // var assetsType = nodeCopy.getElementsByClassName("AssetNo");
+            if (type == "asset") {
+                $("#floorAssetId").val(nodeCopy.id);
+                $("#inspectiongroupId").val(inspectionGroupId);
+            } else {
+                $("#d_fileId").val(nodeCopy.id);
+            }
+
+            var floorAssetId = $("#floorAssetId").val();
+            
+
+
+            if (floorAssetId > 0 && type == "asset") {
+                //var epID = getParameterByName('epId');
+                // var inspectionId = getParameterByName('inspectionId');
+                debugger;
+                //multiple drag and drop Assets start
+                var result = $.grep(dropFloorAssets,
+                    function(n) {
+                        return n.FloorAssetsId == floorAssetId;
+                    });
+                var result1 = $.grep(dropFloorAssets,
+                    function(n) {
+                        return n.InspectionGroupId == inspectionGroupId;
+                    });
+                if (dropFloorAssets.length > 0) {
+                    if (result1.length > 0) {
+                        if (result.length == 0) {
+                            AddfloorAssetsIns(floorAssetId);
+                        } else {
+                            swal("Asset is already in inspection list.");
+                        }
+                    } else {
+                        swal("Asset should be same group");
+                    }
+                } else {
+                    AddfloorAssetsIns(floorAssetId);
+                }
+            }
+        }
+
+        function AddfloorAssetsIns(floorAssetId) {
+            $.get(CRxUrls.Assets_GetFloorAsset + '?floorAssetId=' + floorAssetId,
+                function(response) {
+                    dropFloorAssets.push(response.result);
+                    var assetName = response.result.Name;
+                    var AssetNo = response.result.AssetNo;
+                    $("div#" + response.result.FloorAssetsId).addClass("disableMove");
+                    $("#assetList ul").append('<li id="li' +
+                        response.result.FloorAssetsId +
+                        '"><div class="assetName"><span>Asset: </span>' +
+                        assetName +
+                        ' </div> <div class="assetNumber"><span>Asset #: </span>' +
+                        AssetNo +
+                        '</div><div class="removedropAssets"><a class="removedropAsset" id=' +
+                        response.result.FloorAssetsId +
+                        '>Remove</a></div></li>');
+                });
+        }
+
+        $('body').on('click',
+            'a.removedropAsset',
+            function() {
+                var floorAssetId = $(this).attr("id");
+                $("div#" + floorAssetId).removeClass("disableMove");
+                $("#li" + floorAssetId).remove();
+                dropFloorAssets = $.grep(dropFloorAssets,
+                    function(n) {
+                        return n.FloorAssetsId != floorAssetId;
+                    });
+            });
+
+        $('body').on('click',
+            'a.removedropfile',
+            function() {
+                var fileId = $(this).attr("id");
+                console.log(fileId);
+                $("#" + fileId).removeAttr("style");
+                //$("#file182").show()
+                $("#fileli" + fileId).remove();
+                $("#" + fileId).show();
+                $("#d_fileId").val(0);
+                $("#d_fileName").val("");
+
+                dropFiles = $.grep(dropFiles,
+                    function(n) {
+                        return n.fileid != fileId;
+                    });
+            });
+
+        $("#dragSaveInspection").click(function() {
+            var count = dropFloorAssets.length;
+            if (count == 0) {
+                swal("Drop at least one asset for to attach report.");
+                return;
+            }
+            var fileCount = dropFiles.length;
+            if (fileCount == 0) {
+                swal("Drop at least one report for inspection.");
+                return;
+            }
+            if (count > 0 && fileCount > 0) {
+                $('.assetsInspection').html("loading....");
+                SaveInspectionReports();
+            } else {
+                swal('Missing assets or documents');
+            }
+        });
+
+    function SaveInspectionReports() {
+          debugger;
+            var inspectiongroupId = $("#inspectiongroupId").val();
+            var epId = getParameterByName('epId');
+            var inspectionId = getParameterByName('inspectionId');
+            debugger;
+            var inspectionDate = $("#inspectiondate").val();
+            var fileId = dropFiles[0].TFileId; //$("#d_fileId").val();
+            var fileName = dropFiles[0].FileName; //$("#d_fileName").val();
+            if (dropFloorAssets.length > 0 && fileId > 0) {
+                var urlAction = CRxUrls.Goal_InspectionReportUpdate;
+                $.ajax({
+                    type: 'POST',
+                    url: urlAction +
+                        '?fileId=' +
+                        fileId +
+                        '&epId=' +
+                        epId +
+                        '&fileName=' +
+                        fileName +
+                        '&InspectionDate=' +
+                        inspectionDate,
+                    data: {
+                        __RequestVerificationToken: $('input[name=' + $.Constants.RequestVerificationToken + ']').val(),
+                        floorAssets: dropFloorAssets
+                    },
+                    dataType: "json",
+                    success: function(resultData) {
+                        debugger;
+                        if (resultData.IsInspReady) {
+                            swal({
+                                    title: "Inspection",
+                                    text: $.Constants
+                                        .Alert_Msg_After_InsGrop_Completed, //"This inspection is not complete untill inspection is completed",
+                                    type: "info",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#DD6B55",
+                                    confirmButtonText: "GO TO EP",
+                                    cancelButtonText: "Cancel",
+                                    closeOnConfirm: true,
+                                    closeOnCancel: true
+                                },
+                                function(isConfirm) {
+                                    if (isConfirm) {
+                                        window.location.href =
+                                            CRxUrls.Goal_EPstate +
+                                            "?epId=" +
+                                            epId +
+                                            "&inspectionGroupId=" +
+                                            inspectiongroupId;
+                                    } else {
+                                        RedirectToPage(inspectionId, epId);
+                                    }
+                                });
+                        } else {
+                            RedirectToPage(inspectionId, epId);
+                        }
+                    }
+                });
+            }
+        }
+
+        function RedirectToPage(inspectionId, epId) {
+            dropFloorAssets = [];
+            dropFiles = [];
+            $("#assetList ul").empty();
+            $("#dropfileList ul").empty();
+            $.get(CRxUrls.Goal_AssetsInspection + '?epId=' + epId + '&inspectionId=' + inspectionId,
+                function(data) {
+                    $('.assetsInspection').html(data);
+                    $(".asset_list").attr("draggable", true);
+                    $("#d_fileId").val(0);
+                    swal("inspection report updated successfully.")
+                });
+        }
+
+        function dragStart(e, type) {
+            // debugger;
+            console.log(e.target);
+            e.dataTransfer.effectAllowed = "move";
+            var dtype = "";
+            if (type == 2) {
+                dtype = "asset";
+            } else {
+                dtype = "file";
+            }
+            var json = {
+                id: e.target.getAttribute("id"),
+                dtype: dtype,
+                inspectiongroupid: e.target.getAttribute("inspectiongroupid")
+            };
+            e.dataTransfer.setData("text", JSON.stringify(json));
+        }
+
+        function fileDragStart(e) {
+            e.dataTransfer.effectAllowed = "move";
+            var json = {
+                id: e.target.getAttribute("id"),
+                fileName: e.target.getAttribute("alt"),
+                filePath: e.target.getAttribute("filepath"),
+                dtype: "file"
+            };
+            console.log(json);
+            e.dataTransfer.setData("text", JSON.stringify(json));
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        $(".asset_list").attr("draggable", true);
+        $(".fileList").attr("draggable", true);
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+</script>
+
+}

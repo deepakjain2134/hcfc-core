@@ -1,0 +1,107 @@
+﻿@model IEnumerable<HCF.BDO.StateMaster>
+@{
+    ViewBag.Title = "States";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    @section pageHeader{
+    <section class="content-header">
+        <h1>
+            States
+        </h1>
+    </section>
+        }
+    <div class="container-fluid">
+        <div class="row">
+            <div class="settingnewBox">
+                @await Html.PartialAsync("_MoreConfig")
+                <div class="rightcol-setting">
+                    <div class="box box-primary">
+                        <div class="add_button_comman">
+                            <a href='@(Url.RouteUrl("State"))' class="pull-right">
+                            </a>
+                            @*<div>
+                                    <title>@ViewBag.Title</title>
+                                    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+                                    <a href="#" data-toggle="modal" data-target="#myModal" onclick="AddStateName('0')"><img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Add State" alt="3d_add_button" /></a>
+                                </div>*@
+                        </div>
+                     
+                            <table id="questtbl" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th> Name </th>
+                                        <th> Code </th>
+                                        <th> Active </th>
+                                        @*<th> </th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.StateName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.StateCode)<span></span>
+                                            </td>
+                                            <td>
+                                                <div class="comman_checkbox1 text-center">
+                                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                                </div>
+                                            </td>
+                                            @*<td>
+                                                    <a href="javascript:void(0)" data-toggle="modal" onclick="AddStateName()">
+                                                        <img src="@Url.Content(HCF.Web.Models.ImagePathModel.AddIcon)" title="Edit State Name" alt="3d_add_button" />
+                                                    </a>
+                                                </td>*@
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add State</span>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="loadpartial">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $('#questtbl').dataTable({
+        searching: false,
+        pageLength: 20,
+        lengthChange: false,
+        bPaginate: $('#questtbl tbody tr').length > 24,
+        bInfo: false,
+        aaSorting: [],
+        language: {
+            emptyTable: "No data available in table",
+            search: "_INPUT_",
+            searchPlaceholder: "Filter records:..."
+        },
+        aoColumnDefs: [
+            {
+                orderSequence: ["desc", "asc"],
+                aTargets: ['_all']
+            }
+        ]
+    });
+    
+</script>

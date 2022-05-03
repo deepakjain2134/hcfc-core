@@ -1,0 +1,124 @@
+﻿@model IEnumerable<HCF.BDO.Vendors>
+
+@{
+    ViewBag.Title = "Vendor Dashboard";
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Vendor Dashboard
+        </h1>
+    </section>
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 settingnewBox">
+            @await Html.PartialAsync("_MoreConfig")
+            <div class="rightcol-setting">
+                <div class="box box-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            @using (Html.BeginForm())
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true)
+                                <table id="updatecontaildetailstable" class="display table table-bordered table-striped comman_checkbox1">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Vendor Name
+                                            </th>
+                                            <th>
+                                                Contacts
+                                            </th>
+                                            <th>
+                                                Message
+                                            </th>
+
+                                            <th>
+                                                Status
+                                            </th>
+
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var item in Model)
+                                        {
+
+                                            string html = item.ContactDetails;
+
+                                            System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+                                            html = rx.Replace(html, "");
+                                            System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", String.Empty);
+
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Name)
+                                                </td>
+
+                                                <td>@Html.Raw(html)</td>
+
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.MessageToContractor)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.IsActive)<span></span>
+                                                    <span style="display:none">@item.IsActive</span>
+                                                </td>
+                                                <td title="Edit">
+                                                    <img onclick="location.href ='@Url.Action("UpdateContactDetails", "Vendor", new { userId = item.CreatedBy, vendorId = item.VendorId })'"
+                                                         src="@Url.Content(HCF.Web.Models.ImagePathModel.EditIcon)" title="Edit" alt="Edit" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imagepreview" role="dialog">
+</div>
+
+
+@section Scripts{
+    <script>
+    $('#updatecontaildetailstable').dataTable({
+    searching: false,
+    pageLength: 10,
+    lengthChange: false,
+    bPaginate: $('#updatecontaildetailstable tbody tr').length > 10,
+    bInfo: false,
+    aaSorting: [],
+    language: {
+    emptyTable: "No data available in table",
+    search: "_INPUT_", //To remove Search Label
+    searchPlaceholder: "Search..."        },
+    aoColumnDefs: [
+    {
+    orderSequence: ["desc", "asc"],
+    aTargets: ['_all']
+    }
+    ],
+    initComplete: function () {
+    $("div.toolbar").html('<div class="add-commanBtn"><a href="@(Url.Action("UpdateContactDetails"))" class="pull-right"><img src="/dist/Images/Icons/3d_add_button.png" title="Add Vendor Resource" alt="3d_add_button"></a></div>');
+    },
+    dom: "<'row'<'col-sm-2'><'col-sm-2'><'col-sm-8 tableactions'flp <'toolbar'>>>" + "<'row'<'col-md-12'<'table-responsive'tr> > >" + "<'row'<'col-sm-12 text-right'p>>",
+
+
+    });
+
+    </script>
+}

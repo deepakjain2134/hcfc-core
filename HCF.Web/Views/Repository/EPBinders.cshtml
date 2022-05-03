@@ -1,0 +1,515 @@
+﻿@model IEnumerable<HCF.BDO.Binders>
+@{ 
+    ViewBag.Title = "EP Binders";
+    Layout = "~/Views/Shared/_Layout.cshtml";   
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Binders
+        </h1>
+    </section>
+}
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="row tablelist-topform">
+                    <div class="col-md-12">
+                        <div class="binderSearch-col12">
+                            <div class="hidesearch">
+                                <div class="bindersSearch">
+                                    <input type="text" class="search-query form-control" id="inputSuccess1" placeholder="Search..." />
+                                    <div class="binderloader" style="display:none"></div>
+                                    <i class="closesearch" id="close_search">X</i>
+                                </div>
+                                <div class="suggestion-Box" style="display:none">
+                                    <div id="recordnotfound" style="display:none">
+                                        <span><b> No record found!  </b></span>
+                                    </div>
+                                    <div class="EpsDetails">
+                                        <h4>EPs</h4>
+                                        <div id="EpsDetails"> </div>
+                                    </div>
+                                    <div class="DocumentsDetails">
+                                        <h4>Documents</h4>
+                                        <div id="DocumentsDetails"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="binder-tabBox">
+                            <div class="col-md-2 col-sm-3 binder-3">
+                                @await Component.InvokeAsync("BinderMenus")                                
+                            </div>
+                            <div class="col-md-10 col-sm-9 binder-9">
+                                <div id="ep_view">
+                                    <div id="para">
+                                        <p class="binder-review"><img src="~/dist/Images/binder-tooltip.png" />To review a binder, select from the left menu</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+
+    <script>
+
+        $(document).ready(function () {
+            //
+            $('#epid').click(function () {
+                $('li').addClass("active");
+                $(this).removeClass("active");
+            });
+
+
+            $(document).on('click', '.binder-leftHead li', function () {
+                $('.binder-leftHead li').removeClass('active');
+                $(this).addClass('active');
+            });
+
+
+        });
+
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        $('#inputSuccess1').keyup(delay(function (e) {
+            var searchString = $(this).val();
+            $('.suggestion-Box').show();
+            if (searchString != "") { filterData(searchString.toLowerCase()); } else { $('.suggestion-Box').hide(); }
+        }, 1000));
+
+        function filterData(searchString) {
+            $('.loadingModal').hide();
+            //debugger
+            $('.binderloader').show();
+            $('#recordnotfound').hide();
+            var seen = {};
+            var seenDocument = {};
+            let EpDetails = '';
+            let DocumentDetails = '';
+            var docstr = "e.p"
+            var regExp = /[a-zA-Z]/g;
+
+            var numberonly = /[0-9]/g;
+            var substr = searchString.slice(0, 5);
+
+            if (numberonly.test(substr)) {
+                searchString = searchString.replaceAll(" ", "")
+                if (searchString.indexOf(docstr) != -1) {
+                    searchString = searchString.replaceAll(".", "")
+                } else {
+
+                    searchString = searchString.replaceAll(".", "")
+
+                    var replacecomma = ",";
+                    var replacestr = "ep";
+                    if (searchString.indexOf(replacestr) != -1) {
+                        searchString = searchString.replaceAll(replacestr, "")
+                    }
+                    if (searchString.indexOf(replacecomma) != -1) {
+                        searchString = searchString.replaceAll(",", "")
+                    }
+                }
+            } else {
+                if (regExp.test(searchString) && regExp.test(substr)) {
+                    searchString = searchString.replaceAll(".", "")
+                }
+            }
+            var epcount = 0
+            var docCount = 0
+            let url = '@Url.Action("GetBinderSearch", "Repository")';
+            $.get(url + '?searchString=' + searchString, function (data) {
+                //debugger
+                if (data.length > 0) {
+                    $('#EpsDetails').html('');
+                    $('#DocumentsDetails').html('');
+                    $('.DocumentsDetails').show();
+                    $('.suggestion-Box').show();
+                    $('.EpsDetails').show();
+
+                    $('.binderloader').hide();
+
+                    for (var item of data) {
+                        // debugger
+                        if (item.EP != null && item.BinderName != "") {
+                            if (epcount != 5 && data[0].type != 2) {
+                                //debugger
+                                var txt = item.EP + '\n' + '<span>' + item.BinderName + ' Binder' + '</span>';
+                                var epdetailstr = item.EP;
+                                if (seen[txt])
+                                    $(this).remove();
+                                else {
+                                    seen[txt] = true;
+                                    EpDetails += "<p onclick='LoadBinderDetails(" + item.EPDetailId + " ," + item.BinderId + " ," + "\"" + item.EP + "\"" + ")'>" + txt + "</p>"; //'<p onclick="LoadBinderDetails(' + item.EPDetailId + ',' + item.BinderId + ',' + 'epdetailstr' + ')">' + txt + '</p>';
+                                    epcount = parseInt(epcount) + 1;
+                                    $('#EpsDetails').html(EpDetails);
+                                }
+
+                            }
+                        }
+                    }
+
+                    for (var item of data) {
+                        debugger
+                        if (docCount != 5 && data[0].type != 2) {
+                            if (item.DocumentName != "") {
+                                var txt = item.DocumentName + ' \n ' + '<span>' + item.Name + '>' + item.EP + '</span>';
+                                var epdetailstr = item.DocumentName;
+                                if (seenDocument[txt])
+                                    $(this).remove();
+                                else {
+                                    seenDocument[txt] = true;
+                                    DocumentDetails += "<p onclick='LoadBinderDetails(" + item.EPDetailId + " ," + item.BinderId + " ," + "\"" + item.DocumentName + "\"" + ")'>" + txt + "</p>"; //'<p onclick="LoadBinderDetails(' + item.EPDetailId + ',' + item.BinderId + ',' + "\"" + item.DocumentName + "\"" + ')">' + txt + '</p>';
+                                    docCount = parseInt(docCount) + 1;
+                                    $('#DocumentsDetails').html(DocumentDetails);
+                                }
+                            }
+                        }
+                    }
+                    for (var item of data) {
+                        debugger
+                        if (data[0].type == 2) {
+                            if (item.DocumentName != "") {
+                                var txt = item.DocumentName + ' \n ' + '<span>' + item.Name + '>' + item.EP + '</span>';
+                                var epdetailstr = item.DocumentName;
+                                if (seenDocument[txt])
+                                    $(this).remove();
+                                else {
+                                    url = '@Url.Action("DocRecentFiles", "Repository")?epnumber=' + item.EP
+                                    seenDocument[txt] = true;
+                                    DocumentDetails += "<p><a href='" + url + "'>" + txt + "</a></p>"; //'<p onclick="LoadBinderDetails(' + item.EPDetailId + ',' + item.BinderId + ',' + "\"" + item.DocumentName + "\"" + ')">' + txt + '</p>';
+                                    docCount = parseInt(docCount) + 1;
+                                    $('#DocumentsDetails').html(DocumentDetails);
+                                }
+                            }
+                        }
+                    }
+                    if (DocumentDetails == '') {
+                        $('.DocumentsDetails').hide();
+                        $('.binderloader').hide();
+                    } else {
+                        debugger;
+                        localStorage.setItem("GetYearfilter", "All");
+                        $('.binderloader').hide();
+                    }
+                } else {
+                    debugger
+                    $('.suggestion-Box').show();
+                    $('.EpsDetails').hide();
+                    $('.DocumentsDetails').hide();
+                    $('#recordnotfound').show();
+                    $('.binderloader').hide();
+                }
+
+            });
+        }
+
+        function LoadBinderDetails(epdetailid, binderid, epdetailstr) {
+
+            $('#inputSuccess1').val(epdetailstr);
+            $('.suggestion-Box').hide();
+            $.get("@Url.Action("GetEP", "Repository")" + '?id=' + binderid + '&epdetailId=' + epdetailid, function (data) {
+
+                $('#para').hide();
+                $('#ep_view').html(data);
+            })
+        }
+
+        $(document).on('click', '.listEp', function () {
+            var listEpId = $(this).attr("listepid");
+            getListEPs(listEpId);
+        });
+
+        var getListEPs = function (listEpId) {
+            $.ajax({
+                url: CRxUrls.Repository_GetEpDocs + "?epId=" + listEpId + "&id=" + 0,
+                cache: false,
+                type: "GET",
+                dataType: "HTML",
+                success: function (data) {
+                    $("#epDocs").show();
+                    $("#epBinders").hide();
+                    $("#backToList").removeClass('hide');
+                    $('#epDocs').html(data);
+                    $('#epDocs').fadeIn('fast');
+                    $("#binderEpBox").removeClass("hide");
+                }
+            });
+        }
+
+        var openview = function (id, ctr) {
+            $('.binderName').not(ctr).removeClass('active');
+            $(ctr).toggleClass('active');
+            $(".standardep_all").hide();
+            if ($(ctr).hasClass('active')) {
+                $(ctr).parent("li").find("ul").show();
+            }
+            $.ajax({
+                url: CRxUrls.Repository_GetEP + "?id=" + id,
+                cache: false,
+                type: "GET",
+                dataType: "HTML",
+                success: function (data) {
+                    $('#para').hide();
+                    $('#ep_view').empty();
+                    $('#ep_view').html(data);
+                }
+            });
+        }
+
+        $(document).on('click', ".otherDocs", function () {
+            var isSurveyPrepBinder = $(this).attr("IsSurveyPrepBinder");
+            var url = CRxUrls.Documents_BinderFolders + "?isSurveyPrepBinder="+isSurveyPrepBinder
+            bindLeftSide(url);
+        });
+
+        $(document).on('click', ".binderMenu", function () {
+            var url = $(this).attr("url");
+            bindLeftSide(url);
+        });
+
+        function bindLeftSide(url) {
+            console.log(url);
+            $.ajax({
+                url: url,
+                cache: false,
+                type: "GET",
+                dataType: "HTML",
+                success: function (data) {
+                    $('#para').hide();
+                    $('#ep_view').html(data);
+                    $('#ep_view').fadeIn('fast');
+                    $('.standardep_all').hide();
+                }
+            });
+        }
+
+        $("#close_search").off().on('click', function () {
+
+            $("#inputSuccess1").val('');
+            $('.suggestion-Box').hide();
+        })
+
+        $(document).click(function () {
+            $(".suggestion-Box").hide();
+        });
+
+        $(document).on('click', '.binderEp', function () {
+            var binderId = $(this).attr("binderId")
+            var epId = $(this).attr("epid");
+            var docTypeName = $(this).closest("tr").find(".docTypeName").html();
+            if (docTypeName) {
+                $("#binderEpDocTitle").html(docTypeName);
+            }
+            getEpDocs(epId, binderId);
+        });
+
+        function getEpDocs(epId, id) {
+
+            //debugger;
+            $('.standardep_all').hide();
+            $('#standardEP' + '_' + id).show();
+            $('#epDocs').empty();
+            $('.epNumberList').removeClass("active");
+            $.ajax({
+                url: CRxUrls.Repository_GetEpDocs + "?epId=" + epId + "&id=" + id,
+                type: "GET",
+                dataType: "HTML",
+                success: function (data) {
+
+                    $("#epDocs").empty();
+                    $("#epDocs").show();
+                    $("#epBinders").hide();
+                    $("#backToList").removeClass('hide');
+                    $('#epDocs').html(data);
+                    $('#epDocs').fadeIn('fast');
+                    $("#binderEpBox").removeClass("hide");
+                }
+            });
+    }
+
+    </script>
+
+    <style>
+        .loading {
+            overflow: scroll;
+        }
+
+
+        .para_text {
+            text-align: left;
+            padding-top: 30px;
+        }
+
+        div#docsTable_filter {
+            display: none;
+        }
+
+        div#docsTable_wrapper {
+            padding-top: 28px;
+        }
+
+        /*#YearFilter {
+            position: absolute;
+            right: 0;
+            top: 0px;
+        }
+*/
+
+        .otherDocs {
+            cursor: pointer;
+        }
+
+        div#epDocs {
+            position: relative;
+        }
+
+
+        .search-searchicon .closesearch {
+            position: absolute;
+            right: 18px;
+            z-index: 99;
+            font-style: normal;
+            top: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .search-searchicon .search-query {
+            height: 39px;
+            background: #FFFFFF;
+            border: 1px solid #707070;
+            border-radius: 5px !important;
+            opacity: 1;
+        }
+
+        .hidesearch {
+            position: relative;
+            width: 460px;
+        }
+
+        .suggestion-Box {
+            min-height: 40px;
+            border: 1px solid #d2d6de;
+            position: absolute;
+            z-index: 999;
+            background-color: #fff;
+            left: 0;
+            right: 0;
+            top: 38px;
+            padding: 4px;
+            border-radius: 0 0 4px 4px;
+            max-height: 330px;
+            overflow-x: auto;
+            word-break: break-word;
+        }
+
+        .bindersSearch .form-control {
+            padding-right: 36px;
+            height: 42px;
+            border-radius: 4px;
+        }
+
+            .bindersSearch .form-control:focus {
+                border-color: #d2d6de !important;
+            }
+
+        .bindersSearch {
+            position: relative;
+        }
+
+        .closesearch {
+            position: absolute;
+            top: 3px;
+            right: 0px;
+            font-size: 11px;
+            font-weight: bolder;
+            cursor: pointer;
+            padding: 10px 15px;
+            color: #8c8c8c;
+        }
+
+        .binderSearch-col12 {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .suggestion-Box ul {
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        #EpsDetails p,
+        #EpsDetails li,
+        #DocumentsDetails li {
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            padding: 4px 0;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+            #EpsDetails p span {
+                display: block;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+        #DocumentsDetails p {
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            padding: 4px 0;
+            margin-left: 15px;
+        }
+
+        #EpsDetails p:last-child {
+            border-bottom: none;
+        }
+
+        #DocumentsDetails p span {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .binderloader {
+            border: 2px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 2px solid #3498db;
+            width: 15px;
+            height: 15px;
+            -webkit-animation: spin 2s linear infinite; /* Safari */
+            animation: spin 2s linear infinite;
+            z-index: 99;
+            position: absolute;
+            top: 12px;
+            right: 40px;
+        }
+    </style>
+}

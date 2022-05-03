@@ -1,0 +1,318 @@
+﻿@model IEnumerable<HCF.BDO.EPDetails>
+@{
+    //var filterUsers = Users.GetUsers().Where(x => x.IsActive && !string.IsNullOrEmpty(x.Email) && x.IsCRxUser == false).OrderBy(x => x.FullName).ToList();
+
+}
+<div class="report_epassignment">
+    <table id="c_myTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th style="display:none;">
+                    CategoryName
+                </th>
+                <th style="min-width:154px;">
+                    Standard, EP
+                </th>
+                <th style="min-width:154px;">Status</th>
+                <th style="min-width:450px;">
+                    Description
+                </th>
+                <th>
+                    Document Type
+                </th>
+                <th style="min-width:154px;">
+                    Asset
+                </th>
+                <th style="min-width:154px;">
+                    Users
+                </th>
+                <th style="display:none">
+
+                </th>
+                <th class="desc" style="display:none">
+                    Description
+                </th>
+                <th style="display:none;">
+                    CategoryID
+                </th>
+                <th style="display:none;">
+                    Users
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var users = commonModelFactory.RemoveCRxUsers(item.EPUsers.Distinct().ToList());
+                <tr>
+                    <td style="display:none">@item.Standard.TJCStandard.Substring(0, 2)</td>
+
+                    <td>@Html.DisplayFor(modelItem => item.Standard.TJCStandard), @Html.DisplayFor(modelItem => item.EPNumber)</td>
+                    <td>
+                        @if (item.EPStatus == 1)
+                        {<p style="color:green;">Compliant</p>}
+                        else if (item.EPStatus == 0)
+                        { <p style="color:red;">Non-Compliant</p>}
+                        else if (item.EPStatus == 2)
+                        {<p style="color:blue;">In-Progress</p> }
+                        else if (item.EPStatus == -1)
+                        { <p>Review Pending</p>}
+                    </td>
+                    <td>
+                        @item.Description.Substring(0, Math.Min(item.Description.Length, 60))
+                        <a href="javascript:void(0);" tabindex="0" data-trigger="focus" class="descriptions" rel='popover' data-placement='right' data-original-title='@commonModelFactory.GetEpStandard(item)' data-content='@item.Description'>@($"{"...See More"}")</a>
+                    </td>
+                    <td>
+                        @if (item.DocumentType != null && item.DocumentType.Count > 0)
+                        {
+                            <img src="@Url.Content("~/dist/Images/Icons/doc_required.png")" title="Document Required" />
+                            <span>
+                                @item.DocumentType[0].Name
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var asset in item.Assets)
+                        {
+                            @asset.Name
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("EpUserView", "Common", new { epDetailId = item.EPDetailId, standardEP = item.StandardEp })"
+                           class="modal-link">
+                            @{
+                                //var users = item.EPUsers.Where(x => x.IsCRxUser == false).ToList();
+
+                                var showCounts = 3;
+                                var totalCount = users.Count;
+                                var usersText = string.Join(",", users.Take(showCounts).Select(x => x.FullName));
+                                if (totalCount > showCounts)
+                                {
+                                    <span>@($"{usersText} +  {totalCount - showCounts}")</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @usersText
+                                    </span>
+                                }
+                            }
+                        </a>
+                    </td>
+                    <td style="display:none">
+                        @if (item.EPUsers.Count > 0)
+                        {
+                            <text> @string.Join(",", item.EPUsers.Where(x => x.IsActive).Select(x => x.UserId))</text>
+                        }
+                        else
+                        {
+                            <text>0</text>
+                        }
+                    </td>
+                    <td style="display:none">
+                        @item.Description
+                    </td>
+                    <td style="display:none">@item.Standard.CategoryId</td>
+                    <td style="display:none">
+                        @{
+                            <text>  @string.Join(", ", users.Select(x => x.FullName))</text>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.3.1/js/buttons.html5.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+
+        function getExporteDExcelTitle() {
+            var selectedUserId = $('#userList').val()
+            var selectedUserText = $('#userList option:selected').text()
+            var date = ('' + new Date()).split(' ')
+            var datestring = date[1] + date[2] + "_" + date[4]
+            //(''+new Date()).split(' ')[1]+(''+new Date()).split(' ')[2]+"_"+(''+new Date()).split(' ')[4]
+            var title = "EP Assignments Report";
+
+            return title;
+        }
+
+        var dTable = $('#c_myTable').DataTable({
+            "searching": true,
+            "lengthChange": false,
+            "pageLength": 20,
+            "bPaginate": $('#c_myTable tbody tr').length > 20,
+            "bInfo": false,
+            "aaSorting": [[1, "asc"]],
+            "language": {
+                "emptyTable": "No data available in table"
+            },
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: 'Export as excel',
+                    filename: function () { return getExporteDExcelTitle(); },
+                    title: function () { return getExporteDExcelTitle(); },
+                    exportOptions: {
+                        columns: [1, 2, 8, 4, 5, 10]
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: 'Export as pdf',
+                    filename: function () { return getExporteDExcelTitle(); },
+                    title: function () { return getExporteDExcelTitle(); },
+                    exportOptions: {
+                        columns: [1, 2, 8, 4, 5, 10]
+                    },
+                    customize: function (doc) {
+                        doc.content[1].table.widths = ['15%', '15%', '26%', '12%', '12%', '20%'];
+                        var logo = localStorage.getItem("logoimgbase64");
+                        doc.pageMargins = [20, 60, 20, 30];
+                        doc.defaultStyle.fontSize = 8;
+                        var jsDate = setDateFormat(new Date());
+                        doc['header'] = (function () {
+                            return {
+                                columns: [
+                                    { image: logo, width: 70 },
+                                   {
+                                        alignment: 'left',
+                                        italics: true,
+                                        text: '',
+                                        fontSize: 20,
+                                        margin: [0, 6, 0, 0],
+                                        width: 200,
+                                    },
+                                    {
+                                        alignment: 'middle',
+                                        fontSize: 14,
+                                        text: getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') +'\n @HCF.Web.Base.UserSession.CurrentOrg.Address',
+                                        margin: [0, 6, 0, 0]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    {
+                                        alignment: 'left',
+                                        text: ['Created on: ', { text: jsDate.toString() }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated from: ', { text:  getOrgName('@HCF.Web.Base.UserSession.CurrentOrg.Name') }]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: ['Generated by: ', { text: '@HCF.Web.Base.UserSession.CurrentUser.Name'} ]
+                                    },
+                                    {
+                                        alignment: 'right',
+                                        text: [{ text: page.toString()},' of ',{ text: pages.toString()}]
+                                    }
+                                ],
+                                margin: 20
+                            }
+                        });
+                    }
+                }
+            ],
+            drawCallback: function () {
+                var hasRows = this.api().rows({ filter: 'applied' }).data().length > 0;
+                //$('.buttons-pdf')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+                //$('.buttons-excel')[0].style.visibility = hasRows ? 'visible' : 'hidden'
+                $('[rel="popover"]').popover({ trigger: "hover" });
+            }
+        });
+
+        $('.dt-button.buttons-pdf.buttons-html5').attr('title', 'Download PDF');
+        $('.dt-button.buttons-excel.buttons-html5').attr('title', 'Download Excel');
+
+
+
+        $("input[name=EPCat]:radio").off('change').change(function () {
+            var EPId = $(this).val();
+            if (EPId > 0) {
+                dTable.columns(9).search("^" + EPId + "$", true, false, true).draw();
+            } else {
+                dTable.columns(9).search("").draw();
+            }
+        });
+
+        $('#EPTypeList').on('change', function () {
+            if ($(this).val() == "All") {
+                dTable.columns(0).search("").draw();
+            }
+            else {
+                dTable.columns(0).search($(this).val()).draw();
+            }
+        });
+
+        $('#userList').on('change', function () {
+            dTable.draw();
+        });
+
+
+        $.fn.dataTable.ext.search.push(
+            function (settings, data, dataIndex) {
+                var userIds = data[7];
+                var userId = $('#userList').val();
+                if (userId === "-1") {
+                    return true;
+                }
+                else if (userId > -1) {
+                    if (userIds) {
+                        var userIdsArray = userIds.split(',');
+                        debugger;
+                        if (userIdsArray.indexOf(userId) > -1) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        );
+
+        $('#shareReportToMail').click(function () {
+            $.ajax({
+                url: "@Url.Content("~/Reports/EmailEpAssignmentReport")",
+                method: 'GET',
+                success: function (data) {
+                    $('#common-modal').html(data)
+                    $('.modal').modal('show')
+                    //if()
+                }
+            })
+        })
+    });
+</script>
+
+<style>
+    #modelContent .asset_list_view ul li {
+        padding: 6px 6px;
+        border-bottom: 1px solid #efefef;
+    }
+
+    #modelContent .asset_list_view {
+        max-height: 500px;
+        overflow: auto;
+    }
+
+   
+    .bootstrap-select > .dropdown-toggle {
+        position: absolute;
+    }
+
+    .dropdown-menu {
+        margin-top: 9px;
+    }
+</style>

@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Deficiencies Binder";
+    Layout = null;
+}
+
+@section pageHeader{
+    <section class="content-header">
+        <h1>
+            Deficiencies Binder
+        </h1>
+    </section>
+}
+
+<h3 class="roundDefiHeading">Deficiencies Binder</h3>
+
+<div class="row">
+    <div class="col-md-12">
+        <table id="defTable" class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <a class="binderMenu" url="@Url.RouteUrl("rounddeficienciesbinder")">
+                            <img src="@Url.Content("~/dist/Images/Icons/folder_icon_colour.png")" alt="folder" title="folder" />
+                            <span>Round Deficiencies</span>
+                        </a>
+
+                    </td>
+                </tr>
+                <tr>
+
+                    <td>
+                        <a class="binderMenu" url="@Url.RouteUrl("observationreportbinder")">
+                            <img src="@Url.Content("~/dist/Images/Icons/folder_icon_colour.png")" alt="folder" title="folder" />
+                            <span>Observation Deficiencies</span>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var datatable = $('#defTable').dataTable({
+        "searching": true,
+        "lengthChange": false,
+        "bPaginate": $('#defTable tbody tr').length > 10,
+        "bInfo": false,
+        "aaSorting": [],
+        "language": {
+            emptyTable: "No data available in table",
+            search: "_INPUT_", 
+            searchPlaceholder: "Search"
+        }        
+    });
+</script>
+<style>
+    .dataTables_filter label {
+        float: right;
+        margin-top: 24px;
+    }
+    
+</style>
